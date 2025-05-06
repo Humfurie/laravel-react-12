@@ -3,66 +3,83 @@ import { FaLaravel, FaDocker } from "react-icons/fa";
 import { IoLogoJavascript } from "react-icons/io5";
 import {SiAdonisjs, SiNextdotjs, SiPhp, SiTailwindcss, SiJquery, SiAxios, SiVuedotjs, SiNginx, SiXampp, SiPostman } from "react-icons/si";
 import {Filament} from "@/components/Filament_Laravel";
-export const svgs: { name: string, icon: JSX.Element }[] = [
+
+export const CATEGORIES = {
+    BACKEND: 'Backend',
+    FRONTEND: 'Frontend',
+    TOOLS: 'Tools & DevOps',
+    FRAMEWORKS: 'Frameworks & Libraries',
+};
+export const svgs = [
     {
-        name: "laravel",
-        icon: <FaLaravel className="text-[100px] sm:text-[150px] fill-orange-600"/>
+        name: "Laravel",
+        icon: <FaLaravel className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        category: CATEGORIES.BACKEND
     },
     {
-        name: "php",
-        icon: <SiPhp  className="text-[100px] sm:text-[150px] fill-orange-600" />
+        name: "PHP",
+        icon: <SiPhp className="text-[60px] sm:text-[80px] fill-orange-600" />,
+        category: CATEGORIES.BACKEND
     },
     {
-        name: "javascript",
-        icon: <IoLogoJavascript className="text-[100px] sm:text-[150px] fill-orange-600" />
+        name: "JavaScript",
+        icon: <IoLogoJavascript className="text-[60px] sm:text-[80px] fill-orange-600" />,
+        category: CATEGORIES.FRONTEND
     },
     {
-        name: "docker",
-        icon: <FaDocker className="text-[100px] sm:text-[150px] fill-orange-600" />
+        name: "Docker",
+        icon: <FaDocker className="text-[60px] sm:text-[80px] fill-orange-600" />,
+        category: CATEGORIES.TOOLS
     },
     {
-        name: "next js",
-        icon: <SiNextdotjs className="text-[100px] sm:text-[150px] fill-orange-600" />
+        name: "Next.js",
+        icon: <SiNextdotjs className="text-[60px] sm:text-[80px] fill-orange-600" />,
+        category: CATEGORIES.FRAMEWORKS
     },
     {
-        name: "filament",
-        icon: <Filament className="text-[100px] sm:text-[150px] fill-orange-600" />
+        name: "Filament",
+        icon: <Filament className="text-[60px] sm:text-[80px] fill-orange-600" />,
+        category: CATEGORIES.FRAMEWORKS
     },
     {
-        name: "adonis js",
-        icon: <SiAdonisjs className="text-[100px] sm:text-[150px] fill-orange-600"/>
+        name: "AdonisJS",
+        icon: <SiAdonisjs className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        category: CATEGORIES.FRAMEWORKS
     },
     {
-        name: "tailwind css",
-        icon: <SiTailwindcss  className="text-[100px] sm:text-[150px] fill-orange-600"/>
+        name: "Tailwind CSS",
+        icon: <SiTailwindcss className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        category: CATEGORIES.FRONTEND
     },
     {
-        name: "JQuery",
-        icon: <SiJquery  className="text-[100px] sm:text-[150px] fill-orange-600"/>
+        name: "jQuery",
+        icon: <SiJquery className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        category: CATEGORIES.FRONTEND
     },
     {
         name: "APIs",
-        icon: <h1 className="text-5xl font-bold text-orange-600">API</h1>
+        icon: <h1 className="text-4xl sm:text-5xl font-bold text-orange-600">API</h1>,
+        category: CATEGORIES.BACKEND
     },
     {
         name: "Axios",
-        icon: <SiAxios  className="text-[100px] sm:text-[150px] fill-orange-600"/>
+        icon: <SiAxios className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        category: CATEGORIES.FRONTEND
     },
     {
         name: "Nginx",
-        icon: <SiNginx  className="text-[100px] sm:text-[150px] fill-orange-600"/>
+        icon: <SiNginx className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        category: CATEGORIES.TOOLS
     },
     {
         name: "Xampp",
-        icon: <SiXampp  className="text-[100px] sm:text-[150px] fill-orange-600"/>
+        icon: <SiXampp className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        category: CATEGORIES.TOOLS
     },
     {
         name: "Postman",
-        icon: <SiPostman className="text-[100px] sm:text-[150px] fill-orange-600"/>
+        icon: <SiPostman className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        category: CATEGORIES.TOOLS
     },
-
-    // {
-    //     name: "Vue",
-    //     icon: <SiVuedotjs  className="tech"/>
-    // },
 ];
+
