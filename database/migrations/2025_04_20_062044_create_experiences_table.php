@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('experiences', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignIdFor(\App\Models\User::class)->constrained()->cascadeOnDelete();
             $table->string('title');
             $table->text('description');
             $table->string('company');
             $table->string('location');
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

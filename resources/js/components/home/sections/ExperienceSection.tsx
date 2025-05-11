@@ -116,8 +116,18 @@ export const ExperienceSection = () => {
     const [activeIndex, setActiveIndex] = useState(0);
 
     return (
-        <section id="experience" className="py-20 bg-gray-900">
-            <div className="container mx-auto px-4">
+        <section id="experience" className="py-20 bg-gray-900 relative">
+
+            {/* Top gradient - custom CSS with explicit values */}
+            <div
+                className="absolute top-0 left-0 right-0 h-[4.4rem] pointer-events-none"
+                style={{
+                    background: 'linear-gradient(to bottom, rgba(255, 255, 255) 0%, rgba(17, 24, 39, 1) 100%)'
+                }}
+            ></div>
+
+
+            <div className="container mx-auto px-4 py-10">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Experience</h2>
                     <p className="text-gray-400 max-w-2xl mx-auto mb-8">
@@ -215,7 +225,15 @@ export const ExperienceSection = () => {
                     ))}
                 </div>
             </div>
-        </section>
 
+            {/* Bottom gradient - custom CSS with explicit values */}
+            <div
+                className="absolute bottom-0 left-0 right-0 h-[4.4rem] pointer-events-none"
+                style={{
+                    background: 'linear-gradient(to top, rgba(255, 255, 255) 0%, rgba(17, 24, 39, 1) 100%)'
+                }}
+            ></div>
+
+        </section>
     );
 };
