@@ -4,6 +4,7 @@ import Main from "@/components/home/main";
 import {SkillSection} from "@/components/home/sections/SkillSection";
 import {ExperienceSection} from "@/components/home/sections/ExperienceSection";
 import Header from "@/components/home/header";
+import Footer from '@/components/home/footer';
 
 interface HomeProps {
     banner: {},
@@ -21,6 +22,7 @@ export default function Home({banner, skills, experience, footer}: HomeProps) {
             <Main/>
             <SkillSection/>
             <ExperienceSection/>
+            <Footer />
         </>
     )
 }

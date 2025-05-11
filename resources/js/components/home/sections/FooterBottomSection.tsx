@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@inertiajs/react";
 import {FaLinkedin} from "react-icons/fa";
 import {AccountLinks} from "@/components/home/lib/AccountLinks";
 
