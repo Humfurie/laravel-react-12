@@ -1,15 +1,23 @@
 @import 'tailwindcss';
-
 @plugin 'tailwindcss-animate';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-    --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+
+    --color-brand-orange: #fc6141;
+    --color-brand-gold: #fc6141;
+    --color-brand-black: #1f1f1f;
+    --color-brand-white: #ffffff;
+
+    --color-muted-white: #f7f3f1;
+    --color-muted-yellow: #eee7cb;
+    --color-muted-black: #4c4c4c;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -77,6 +85,30 @@
     }
 }
 
+@font-face {
+    font-display: swap;
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/fonts/montserrat-v29-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+    font-display: swap;
+    font-family: 'Montserrat';
+    font-style: italic;
+    font-weight: 400;
+    src: url('/fonts/montserrat-v29-latin-italic.woff2') format('woff2');
+}
+
+@font-face {
+    font-display: swap;
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 700;
+    src: url('/fonts/montserrat-v29-latin-700.woff2') format('woff2');
+}
+
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
@@ -113,7 +145,7 @@
     --sidebar-ring: oklch(0.87 0 0);
 }
 
-.dark {
+/* .dark {
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.145 0 0);
@@ -146,7 +178,7 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
-}
+} */
 
 @layer base {
     * {
@@ -154,6 +186,22 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-muted-yellow text-foreground;
     }
+}
+
+body {
+        @apply bg-muted-yellow text-foreground;
+    }
+
+/* ======= GLOBALS ======= */
+
+.primary-container {
+    @apply mx-auto w-full max-w-[1400px] max-2xl:px-[16px];
+}
+
+/* ====== GUEST HOMEPAGE ====== */
+
+h1 span {
+    @apply text-brand-orange;
 }
