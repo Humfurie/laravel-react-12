@@ -1,5 +1,7 @@
+import Facebook from '@/svgs/Facebook';
+import Github from '@/svgs/Github';
+import LinkedIn from '@/svgs/LinkedIn';
 import React from 'react';
-import { FaFacebookSquare, FaGithubSquare, FaLinkedin } from 'react-icons/fa';
 
 interface SocialsProps {
     className?: string;
@@ -14,21 +16,21 @@ interface SocialAtt {
 
 const socialsData: SocialAtt[] = [
     {
-        icon: <FaFacebookSquare />,
+        icon: <Facebook />,
         name: "Facebook",
-        url: "https://www.linkedin.com/in/humphrey-singculan-09a459153/",
+        url: "https://www.facebook.com/humphrey123",
         className: "text-blue-600 hover:text-blue-500"
     },
     {
-        icon: <FaLinkedin />,
+        icon: <LinkedIn />,
         name: "LinkedIn",
         url: "https://www.linkedin.com/in/humphrey-singculan-09a459153/",
         className: "text-blue-700 hover:text-blue-600"
     },
     {
-        icon: <FaGithubSquare />,
+        icon: <Github />,
         name: "GitHub",
-        url: "https://www.linkedin.com/in/humphrey-singculan-09a459153/",
+        url: "https://github.com/Humfurie",
         className: "text-brand-black hover:text-muted-black"
     }
 ];
@@ -42,11 +44,7 @@ const Socials: React.FC<SocialsProps> = ({ className }) => {
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`${social.className} 
-                        hs-bg-white
-                        text-[24px] md:text-[28px]
-                        transition-transform transition-colors duration-200
-                        hover:scale-110
+                    className={`${social.className} hs-bg-white text-[24px] md:text-[28px] lg:text-[28px] transition-transform transition-colors duration-200 hover:scale-110 hover:shadow-lg
                     `}
                     aria-label={social.name}
                 >
