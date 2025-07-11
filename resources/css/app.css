@@ -4,14 +4,13 @@
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
-
 @custom-variant dark (&:is(.dark *));
 
 @theme {
     --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
 
     --color-brand-orange: #fc6141;
-    --color-brand-gold: #fc6141;
+    --color-brand-gold: #f9a940;
     --color-brand-black: #1f1f1f;
     --color-brand-white: #ffffff;
 
@@ -191,13 +190,29 @@
 }
 
 body {
-        @apply bg-muted-yellow text-foreground;
-    }
+    @apply bg-muted-yellow text-foreground;
+}
 
 /* ======= GLOBALS ======= */
 
 .primary-container {
     @apply mx-auto w-full max-w-[1400px] max-2xl:px-[16px];
+}
+
+.hs-btn {
+    @apply text-[16px] md:text-[18px] w-full cursor-pointer rounded-full px-[15px] py-[5px] transition-colors transition-transform duration-200 hover:scale-105;
+}
+
+.btn-orange {
+    @apply bg-brand-orange text-brand-white hover:bg-brand-orange/80;
+}
+
+.btn-white {
+    @apply bg-brand-white text-brand-black hover:bg-white/80;
+}
+
+.hs-bg-white {
+    @apply rounded-full bg-white/50 p-2 backdrop-blur-[1px];
 }
 
 /* ====== GUEST HOMEPAGE ====== */
