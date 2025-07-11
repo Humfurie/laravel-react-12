@@ -17,7 +17,7 @@ const ButtonOne: React.FC<ButtonOneProps> = ({
 }) => {
     return (
         <button
-            className={`hs-btn flex items-center align-center gap-2 ${className}`}
+            className={`hs-btn  text-center gap-2 ${className} ${icon ? "flex items-center align-center" : ""}`}
             type={type}
             onClick={onClick}
         >

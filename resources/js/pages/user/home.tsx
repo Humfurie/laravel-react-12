@@ -1,5 +1,6 @@
 import Footer from '@/components/global/footer';
 import { ExperienceSection } from "@/components/home/sections/ExperienceSection";
+import HomeAboutMe from '@/components/home/sections/HomeAboutMe';
 import HomeBanner from '@/components/home/sections/HomeBanner';
 import { SkillSection } from "@/components/home/sections/SkillSection";
 import { type SharedData } from '@/types';
@@ -19,6 +20,7 @@ export default function Home({ banner, skills, experience, footer }: HomeProps) 
         <>
             {/* <Header auth={auth} /> */}
             <HomeBanner />
+            <HomeAboutMe />
             {/* <Main /> */}
             <SkillSection />
             <ExperienceSection />
