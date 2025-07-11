@@ -38,7 +38,7 @@ const HomeBanner = () => {
 
             {/* Text Content */}
             <div className="primary-container absolute inset-0 z-20 w-full h-full flex flex-col justify-center items-center text-center">
-                <h1 dangerouslySetInnerHTML={{ __html: bannerData.title }} className="text-brand-white font-[700] text-[50px] sm:text-[60px] md:text-[70px] lg:text-[80px]" />
+                <h1 dangerouslySetInnerHTML={{ __html: bannerData.title }} className="text-brand-white font-[700] text-[50px] sm:text-[60px] md:text-[70px] lg:text-[80px] xl:text-[100px] md:tracking-[16px]" />
                 <p className="text-white text-[20px] sm:text-[24px] md:text-[28px] lg:text-[32px]">{bannerData.subTitle}</p>
                 <Socials className="py-[16px] mb-[16px]" />
 
