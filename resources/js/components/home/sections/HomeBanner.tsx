@@ -15,10 +15,10 @@ const HomeBanner = () => {
     const [loaded, setLoaded] = useState(false);
 
     return (
-        <section className="home-banner min-h-screen relative bg-gradient-to-t from-green-600 to-white">
+        <section className="home-banner min-h-screen relative bg-gradient-to-t from-green-300 to-white">
             {/* Loading Overlay */}
             {!loaded && (
-                <div className="absolute inset-0 bg-gradient-to-t from-green-400 to-white animate-pulse z-10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-green-300 to-white animate-pulse z-10" />
             )}
 
             {/* Responsive Banner Image */}
@@ -40,7 +40,7 @@ const HomeBanner = () => {
             <div className="primary-container absolute inset-0 z-20 w-full h-full flex flex-col justify-center items-center text-center">
                 <h1 dangerouslySetInnerHTML={{ __html: bannerData.title }} className="text-brand-white font-[700] text-[50px] sm:text-[60px] md:text-[70px] lg:text-[80px]" />
                 <p className="text-white text-[20px] sm:text-[24px] md:text-[28px] lg:text-[32px]">{bannerData.subTitle}</p>
-                <Socials className="py-[16px] mb-[16px]"/>
+                <Socials className="py-[16px] mb-[16px]" />
 
                 <div className="absolute bottom-[70px] flex justify-center align-center gap-6 hs-bg-white">
                     <ButtonOne
