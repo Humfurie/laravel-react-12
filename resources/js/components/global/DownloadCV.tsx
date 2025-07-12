@@ -1,5 +1,3 @@
-"use client";
-
 import ButtonOne from "./ButtonOne";
 
 export default function DownloadCV() {
