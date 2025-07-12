@@ -52,7 +52,7 @@ const HomeAboutMe: React.FC = () => {
                 </div>
 
                 <div className="excerpt w-full md:w-[50%]">
-                    <h2 className="font-bold mb-4 w-full text-center sm:text-start">{aboutData.title}</h2>
+                    <h4 className="font-bold mb-4 w-full text-center sm:text-start">{aboutData.title}</h4>
                     <p className="md:text-[18px] text-gray-600 mb-8 text-justify">{aboutData.excerpt}</p>
                     <div className="w-full flex flex-col justify-center items-center sm:items-start">
                         <ButtonOne

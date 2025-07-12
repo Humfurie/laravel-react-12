@@ -195,7 +195,11 @@ body {
 
 /* ======= GLOBALS ======= */
 
-h2 {
+h3 {
+    @apply text-brand-black max-h-[75px] min-h-[75px] text-[18px] font-bold;
+}
+
+h4 {
     @apply text-brand-orange text-[28px] sm:text-[32px] md:text-[38px];
 }
 
@@ -204,22 +208,20 @@ h2 {
 }
 
 .hs-btn {
-    @apply w-full cursor-pointer rounded-full px-[15px] py-[5px] text-[16px] transition-colors transition-transform duration-200 hover:scale-105 md:text-[18px];
+    @apply w-full cursor-pointer rounded-full px-[15px] py-[5px] text-[16px] transition-colors transition-transform duration-200 group-hover:scale-105 hover:scale-105 md:text-[18px];
 }
 
 .btn-orange {
-    @apply bg-brand-orange text-brand-white hover:bg-brand-orange/80;
+    @apply bg-brand-orange text-brand-white group-hover:bg-brand-orange/80 hover:bg-brand-orange/80;
 }
 
 .btn-white {
-    @apply bg-brand-white text-brand-black hover:bg-white/80;
+    @apply bg-brand-white text-brand-black group-hover:bg-white/80 hover:bg-white/80;
 }
 
 .hs-bg-white {
     @apply rounded-full bg-white/50 p-2 backdrop-blur-[1px];
 }
-
-/* ====== GUEST HOMEPAGE ====== */
 
 h1 span {
     @apply text-brand-orange;
