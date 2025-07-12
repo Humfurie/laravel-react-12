@@ -16,10 +16,6 @@ const HomeBanner = () => {
 
     return (
         <section className="home-banner min-h-screen relative bg-gradient-to-t from-green-300 to-white">
-            {/* Loading Overlay */}
-            {!loaded && (
-                <div className="absolute inset-0 bg-gradient-to-t from-green-300 to-white animate-pulse z-10" />
-            )}
 
             {/* Responsive Banner Image */}
             <picture>
@@ -33,7 +29,6 @@ const HomeBanner = () => {
                 />
             </picture>
 
-            {/* Optional: Additional Gradient Overlay on Top of the Image */}
             <div className="absolute inset-0 bg-muted-black/70 z-10 backdrop-blur-[1.5px]" />
 
             {/* Text Content */}

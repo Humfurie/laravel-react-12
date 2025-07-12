@@ -207,6 +207,10 @@ h4 {
     @apply mx-auto w-full max-w-[1115px] max-2xl:px-[16px];
 }
 
+.hs-shadow {
+    @apply shadow-[0_2px_8px_rgba(0,0,0,0.2)]
+}
+
 .hs-btn {
     @apply w-full cursor-pointer rounded-full px-[15px] py-[5px] text-[16px] transition-colors transition-transform duration-200 group-hover:scale-105 hover:scale-105 md:text-[18px];
 }

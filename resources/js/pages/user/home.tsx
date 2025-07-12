@@ -2,8 +2,8 @@ import Footer from '@/components/global/footer';
 import { ExperienceSection } from "@/components/home/sections/ExperienceSection";
 import HomeAboutMe from '@/components/home/sections/HomeAboutMe';
 import HomeBanner from '@/components/home/sections/HomeBanner';
+import HomeExpertise from '@/components/home/sections/HomeExpertise';
 import HomeProjects from '@/components/home/sections/HomeProjects';
-import { SkillSection } from "@/components/home/sections/SkillSection";
 import { type SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 
@@ -23,8 +23,9 @@ export default function Home({ banner, skills, experience, footer }: HomeProps) 
             <HomeBanner />
             <HomeAboutMe />
             <HomeProjects />
+            <HomeExpertise />
             {/* <Main /> */}
-            <SkillSection />
+            {/* <SkillSection /> */}
             <ExperienceSection />
             <Footer />
         </>
