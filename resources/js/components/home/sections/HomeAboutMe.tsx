@@ -27,38 +27,47 @@ const aboutData: AboutData = {
     ]
 };
 
+// Staggered parent
+const containerVariants = {
+    hidden: {},
+    visible: {
+        transition: {
+            staggerChildren: 0.2
+        }
+    }
+};
+
+// Child pop-in animation
+const popIn = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        transition: { duration: 0.4, ease: "easeOut" as const }
+    }
+};
+
 const HomeAboutMe: React.FC = () => {
-
-    const fadeInLeft = {
-        hidden: { opacity: 0, x: -100 },
-        visible: { opacity: 1, x: 0 },
-    };
-
-    const fadeInRight = {
-        hidden: { opacity: 0, x: 100 },
-        visible: { opacity: 1, x: 0 },
-    };
-
-
-    const { ref: leftRef, inView: leftInView } = useInView({ triggerOnce: false });
-    const { ref: rightRef, inView: rightInView } = useInView({ triggerOnce: false });
-
-    useInView({ triggerOnce: false, threshold: 0.3 })
-
+    const { ref, inView } = useInView({ triggerOnce: true });
 
     return (
         <section className="about-me py-[40px] md:py-[80px] bg-brand-white">
             <div className="primary-container flex flex-col items-center sm:flex-row gap-[32px] lg:gap-[48px]">
 
+                {/* Left side: Pop-in cards with stagger */}
                 <motion.div
-                    ref={leftRef}
-                    variants={fadeInLeft}
+                    ref={ref}
+                    variants={containerVariants}
                     initial="hidden"
-                    animate={leftInView ? "visible" : "hidden"}
-                    transition={{ duration: 0.6 }}
-                    className="w-full md:w-[50%] grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-[28px]">
+                    animate={inView ? "visible" : "hidden"}
+                    className="w-full md:w-[50%] grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-[28px]"
+                >
                     {aboutData.items.map((item, index) => (
-                        <div key={index} className="min-w-full max-w-full min-h-[150px] max-h-[150px] md:min-h-[200px] md:max-h-[200px] flex flex-col items-center justify-center p-2 bg-muted-yellow rounded-[28px] text-center">
+                        <motion.div
+                            key={index}
+                            variants={popIn}
+                            className="min-w-full max-w-full min-h-[150px] max-h-[150px] md:min-h-[200px] md:max-h-[200px] flex flex-col items-center justify-center p-2 bg-muted-yellow rounded-[28px] text-center"
+                        >
                             {item.imgUrl ? (
                                 <img
                                     src={item.imgUrl}
@@ -73,17 +82,12 @@ const HomeAboutMe: React.FC = () => {
                                     <span className="text-muted-black">{item.label}</span>
                                 </>
                             )}
-                        </div>
+                        </motion.div>
                     ))}
                 </motion.div>
 
-                <motion.div
-                    ref={rightRef}
-                    variants={fadeInRight}
-                    initial="hidden"
-                    animate={rightInView ? "visible" : "hidden"}
-                    transition={{ duration: 0.6 }}
-                    className="excerpt w-full md:w-[50%]">
+                {/* Right side: Just static content */}
+                <div className="excerpt w-full md:w-[50%]">
                     <h4 className="font-bold mb-4 w-full text-center sm:text-start">{aboutData.title}</h4>
                     <p className="md:text-[18px] text-gray-600 mb-8 text-justify">{aboutData.excerpt}</p>
                     <div className="w-full flex flex-col justify-center items-center sm:items-start">
@@ -93,7 +97,7 @@ const HomeAboutMe: React.FC = () => {
                             className="btn-orange text-center max-w-fit"
                         />
                     </div>
-                </motion.div>
+                </div>
             </div>
         </section>
     );

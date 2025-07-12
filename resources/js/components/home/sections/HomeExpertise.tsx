@@ -1,6 +1,8 @@
 import CategoryDropdown from '@/components/global/CategoryDropdown';
 import SectionTitle from '@/components/global/SectionTitle';
+import { motion } from "framer-motion";
 import React, { useState } from 'react';
+
 
 interface CategoryData {
     name: string;
@@ -111,6 +113,28 @@ const expertiseData: ExpertiseData[] = [
     },
 ];
 
+const containerVariants = {
+    hidden: {},
+    show: {
+        transition: {
+            staggerChildren: 0.05,
+        },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    show: {
+        opacity: 1,
+        scale: 1,
+        transition: {
+            duration: 0.3,
+            ease: "easeOut" as const,
+        },
+    },
+};
+
+
 const HomeExpertise: React.FC = () => {
     const [activeCategory, setActiveCategory] = useState<string>('all');
 
@@ -139,20 +163,26 @@ const HomeExpertise: React.FC = () => {
                     />
                 </div>
 
-                <div className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-6 justify-center`}>
+                <motion.div className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-6 justify-center`}
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, amount: 0.3 }}
+                >
                     {filteredData.map((item, index) => (
-                        <div
+                        <motion.div
                             key={index}
                             className="flex flex-col items-center text-center"
+                            variants={itemVariants}
                         >
                             <img
                                 src={item.logo}
                                 alt={item.name}
                                 className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[100px] md:h-[100px] object-contain mb-2 p-2 bg-brand-white hs-shadow rounded-[18px]"
                             />
-                        </div>
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
             </div>
 
         </section>

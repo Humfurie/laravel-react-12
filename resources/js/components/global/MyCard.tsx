@@ -24,8 +24,11 @@ const MyCard: React.FC<Card> = (
                 />
             </div>
             <div className="p-[16px]">
-                <h3 className="py-2">{title}</h3>
-                <p className="text-muted-black line-clamp-2">{excerpt}</p>
+                <div className="flex items-center w-full max-h-[75px] min-h-[75px]">
+                    <h3 className="py-2 w-full">{title}</h3>
+
+                </div>
+                <p className="pt-2 text-muted-black line-clamp-2">{excerpt}</p>
                 <ButtonOne
                     text="Read More"
                     type="button"
