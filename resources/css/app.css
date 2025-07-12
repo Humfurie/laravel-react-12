@@ -196,7 +196,7 @@ body {
 /* ======= GLOBALS ======= */
 
 h3 {
-    @apply text-brand-black max-h-[75px] min-h-[75px] text-[18px] font-bold;
+    @apply text-brand-black text-[18px] font-bold;
 }
 
 h4 {
