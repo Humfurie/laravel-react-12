@@ -15,7 +15,7 @@ const MyCard: React.FC<Card> = (
     }
 ) => {
     return (
-        <div className="card-container group bg-brand-white rounded-[28px] shadow-md w-full max-w-[350px] transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+        <div className="card-container group bg-brand-white rounded-[28px] hs-shadow w-full max-w-[350px] transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
             <div className="overflow-hidden rounded-t-[28px]">
                 <img
                     src={imgUrl}

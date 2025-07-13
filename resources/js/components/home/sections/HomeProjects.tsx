@@ -2,7 +2,6 @@ import MyCard from "@/components/global/MyCard";
 import SectionTitle from "@/components/global/SectionTitle";
 import { motion, useAnimation } from "framer-motion";
 import { useEffect } from "react";
-import { RiArrowRightDoubleLine } from "react-icons/ri";
 import { useInView } from "react-intersection-observer";
 
 
@@ -73,7 +72,6 @@ const HomeProjects = () => {
             <div className="primary-container">
                 <SectionTitle
                     title="From the Projects"
-                    icon={<RiArrowRightDoubleLine />}
                     link="/projects"
                 />
 
