@@ -208,7 +208,7 @@ h4 {
 }
 
 .hs-shadow {
-    @apply shadow-[0_2px_8px_rgba(0,0,0,0.2)]
+    @apply shadow-[0_2px_8px_rgba(0,0,0,0.2)];
 }
 
 .hs-btn {
@@ -229,4 +229,21 @@ h4 {
 
 h1 span {
     @apply text-brand-orange;
+}
+.input-field {
+    @apply mt-1 w-full rounded-md border border-gray-400 px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none;
+}
+
+/* WebKit scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #ff5a1f; /* Tailwind's brand-orange hex */
+    border-radius: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background-color: #f5f5f5; /* Optional: light background */
 }

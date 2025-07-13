@@ -1,12 +1,12 @@
 import React from 'react';
+import { RiArrowRightDoubleLine } from 'react-icons/ri';
 
 interface SectionTitleProps {
     title: string;
-    icon?: React.ReactNode;
     link?: string;
 }
 
-const SectionTitle: React.FC<SectionTitleProps> = ({ title, icon, link }) => {
+const SectionTitle: React.FC<SectionTitleProps> = ({ title, link }) => {
     const firstLetter = title.charAt(0);
     const restOfTitle = title.slice(1);
 
@@ -16,7 +16,7 @@ const SectionTitle: React.FC<SectionTitleProps> = ({ title, icon, link }) => {
                 <span className="text-brand-orange">{firstLetter}</span>
                 {restOfTitle}
             </span>
-            {icon && icon}
+            {link && <RiArrowRightDoubleLine />}
         </span>
     );
 
