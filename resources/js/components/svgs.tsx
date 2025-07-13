@@ -13,72 +13,72 @@ export const CATEGORIES = {
 export const svgs = [
     {
         name: "Laravel",
-        icon: <FaLaravel className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        icon: <FaLaravel className="text-[60px] sm:text-[80px] fill-brand-orange"/>,
         category: CATEGORIES.BACKEND
     },
     {
         name: "PHP",
-        icon: <SiPhp className="text-[60px] sm:text-[80px] fill-orange-600" />,
+        icon: <SiPhp className="text-[60px] sm:text-[80px] fill-brand-teal" />,
         category: CATEGORIES.BACKEND
     },
     {
         name: "JavaScript",
-        icon: <IoLogoJavascript className="text-[60px] sm:text-[80px] fill-orange-600" />,
+        icon: <IoLogoJavascript className="text-[60px] sm:text-[80px] fill-brand-gold" />,
         category: CATEGORIES.FRONTEND
     },
     {
         name: "Docker",
-        icon: <FaDocker className="text-[60px] sm:text-[80px] fill-orange-600" />,
+        icon: <FaDocker className="text-[60px] sm:text-[80px] fill-blue-500" />,
         category: CATEGORIES.TOOLS
     },
     {
         name: "Next.js",
-        icon: <SiNextdotjs className="text-[60px] sm:text-[80px] fill-orange-600" />,
+        icon: <SiNextdotjs className="text-[60px] sm:text-[80px] fill-gray-800" />,
         category: CATEGORIES.FRAMEWORKS
     },
     {
         name: "Filament",
-        icon: <Filament className="text-[60px] sm:text-[80px] fill-orange-600" />,
+        icon: <Filament className="text-[60px] sm:text-[80px] fill-brand-purple" />,
         category: CATEGORIES.FRAMEWORKS
     },
     {
         name: "AdonisJS",
-        icon: <SiAdonisjs className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        icon: <SiAdonisjs className="text-[60px] sm:text-[80px] fill-brand-teal"/>,
         category: CATEGORIES.FRAMEWORKS
     },
     {
         name: "Tailwind CSS",
-        icon: <SiTailwindcss className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        icon: <SiTailwindcss className="text-[60px] sm:text-[80px] fill-brand-teal"/>,
         category: CATEGORIES.FRONTEND
     },
     {
         name: "jQuery",
-        icon: <SiJquery className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        icon: <SiJquery className="text-[60px] sm:text-[80px] fill-blue-400"/>,
         category: CATEGORIES.FRONTEND
     },
     {
         name: "APIs",
-        icon: <h1 className="text-4xl sm:text-5xl font-bold text-orange-600">API</h1>,
+        icon: <h1 className="text-4xl sm:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-orange to-brand-gold">API</h1>,
         category: CATEGORIES.BACKEND
     },
     {
         name: "Axios",
-        icon: <SiAxios className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        icon: <SiAxios className="text-[60px] sm:text-[80px] fill-brand-purple"/>,
         category: CATEGORIES.FRONTEND
     },
     {
         name: "Nginx",
-        icon: <SiNginx className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        icon: <SiNginx className="text-[60px] sm:text-[80px] fill-green-500"/>,
         category: CATEGORIES.TOOLS
     },
     {
         name: "Xampp",
-        icon: <SiXampp className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        icon: <SiXampp className="text-[60px] sm:text-[80px] fill-brand-orange"/>,
         category: CATEGORIES.TOOLS
     },
     {
         name: "Postman",
-        icon: <SiPostman className="text-[60px] sm:text-[80px] fill-orange-600"/>,
+        icon: <SiPostman className="text-[60px] sm:text-[80px] fill-brand-orange"/>,
         category: CATEGORIES.TOOLS
     },
 ];

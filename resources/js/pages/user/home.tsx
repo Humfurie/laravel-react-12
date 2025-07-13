@@ -6,6 +6,7 @@ import HomeExpertise from '@/components/home/sections/HomeExpertise';
 import HomeProjects from '@/components/home/sections/HomeProjects';
 import { type SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
+import Header from '@/components/global/NavBar';
 
 interface HomeProps {
     banner: {},
@@ -19,7 +20,7 @@ export default function Home({ banner, skills, experience, footer }: HomeProps) 
 
     return (
         <>
-            {/* <Header auth={auth} /> */}
+             <Header auth={auth} />
             <HomeBanner />
             <HomeAboutMe />
             <HomeProjects />

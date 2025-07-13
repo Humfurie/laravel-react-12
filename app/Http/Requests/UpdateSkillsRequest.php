@@ -22,7 +22,12 @@ class UpdateSkillsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['required'],
+            'slug' => ['required', 'unique:skills,slug'],
+            'description' => ['string', 'nullable'],
+            'category' => ['string', 'nullable'],
+            'proficiency' => ['integer', 'nullable'],
+            'is_featured' => ['boolean', 'nullable'],
         ];
     }
 }

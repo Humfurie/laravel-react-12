@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->string('slug');
             $table->json('svg_data')->nullable();
             $table->string('category')->nullable();
-            $table->foreignIdFor(\App\Models\Skills::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(\App\Models\Skill::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

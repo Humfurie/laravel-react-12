@@ -10,12 +10,16 @@
     --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
 
     --color-brand-orange: #fc6141;
-    --color-brand-gold: #f9a940;
+    --color-brand-gold: #ffb347;
+    --color-brand-teal: #38b2ac;
+    --color-brand-purple: #9f7aea;
     --color-brand-black: #1f1f1f;
     --color-brand-white: #ffffff;
 
     --color-muted-white: #f7f3f1;
     --color-muted-yellow: #eee7cb;
+    --color-muted-teal: #e6fffa;
+    --color-muted-purple: #f3e8ff;
     --color-muted-black: #4c4c4c;
 
     --radius-lg: var(--radius);

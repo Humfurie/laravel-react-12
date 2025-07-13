@@ -50,7 +50,7 @@ const HomeBanner = () => {
                         text='Resume'
                         type='button'
                         className="btn-white"
-                        icon={<TbDownload />}
+                        icon={<TbDownload className="text-[20px]" />}
                     />
                 </div>
             </div>

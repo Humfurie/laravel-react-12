@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
+            $table->string('category')->nullable();
+            $table->integer('proficiency')->nullable();
+            $table->boolean('is_featured')->default(false);
             $table->timestamps();
             $table->SoftDeletes();
         });

@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\StoreSkillsRequest;
-use App\Http\Requests\UpdateSkillsRequest;
-use App\Models\Skills;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreExperienceRequest;
+use App\Http\Requests\UpdateExperienceRequest;
+use App\Models\Experience;
 
-class SkillsController extends Controller
+class ExperienceController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +28,7 @@ class SkillsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreSkillsRequest $request)
+    public function store(StoreExperienceRequest $request)
     {
         //
     }
@@ -35,7 +36,7 @@ class SkillsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Skills $skills)
+    public function show(Experience $experience)
     {
         //
     }
@@ -43,7 +44,7 @@ class SkillsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Skills $skills)
+    public function edit(Experience $experience)
     {
         //
     }
@@ -51,7 +52,7 @@ class SkillsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateSkillsRequest $request, Skills $skills)
+    public function update(UpdateExperienceRequest $request, Experience $experience)
     {
         //
     }
@@ -59,7 +60,7 @@ class SkillsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Skills $skills)
+    public function destroy(Experience $experience)
     {
         //
     }

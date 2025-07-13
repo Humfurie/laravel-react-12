@@ -1,6 +1,6 @@
 import CategoryDropdown from '@/components/global/CategoryDropdown';
 import SectionTitle from '@/components/global/SectionTitle';
-import { motion } from "framer-motion";
+import { AnimatePresence, motion, Variants } from 'framer-motion';
 import React, { useState } from 'react';
 
 
@@ -122,28 +122,15 @@ const containerVariants = {
     },
 };
 
-const itemVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    show: {
-        opacity: 1,
-        scale: 1,
-        transition: {
-            duration: 0.3,
-            ease: "easeOut" as const,
-        },
-    },
-};
-
-
 const HomeExpertise: React.FC = () => {
     const [activeCategory, setActiveCategory] = useState<string>('all');
 
     const categories = ['all', ...categoriesData.map(cat => cat.slug)];
-
     const filteredData =
         activeCategory === 'all'
             ? expertiseData
             : expertiseData.filter(item => item.categorySlug === activeCategory);
+    console.log(activeCategory, expertiseData, filteredData)
 
     const getCategoryName = (slug: string) =>
         categoriesData.find(cat => cat.slug === slug)?.name ?? slug;
@@ -163,26 +150,31 @@ const HomeExpertise: React.FC = () => {
                     />
                 </div>
 
-                <motion.div className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-6 justify-center`}
-                    variants={containerVariants}
-                    initial="hidden"
-                    whileInView="show"
-                    viewport={{ once: true, amount: 0.3 }}
-                >
-                    {filteredData.map((item, index) => (
-                        <motion.div
-                            key={index}
-                            className="flex flex-col items-center text-center"
-                            variants={itemVariants}
-                        >
-                            <img
-                                src={item.logo}
-                                alt={item.name}
-                                className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[100px] md:h-[100px] object-contain mb-2 p-2 bg-brand-white hs-shadow rounded-[18px]"
-                            />
-                        </motion.div>
-                    ))}
-                </motion.div>
+                <div className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-6 justify-center`}>
+                    <AnimatePresence mode="popLayout">
+                        {filteredData.map((item) => (
+                            <motion.div
+                                key={`${item.name}-${item.categorySlug}`}
+                                className="flex flex-col items-center text-center"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                transition={{ duration: 0.3 }}
+                                layout
+                                whileHover={{
+                                    scale: 1.05,
+                                    filter: "drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04)) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1))"
+                                }}
+                            >
+                                <img
+                                    src={item.logo}
+                                    alt={item.name}
+                                    className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[100px] md:h-[100px] object-contain mb-2 p-2 bg-brand-white hs-shadow rounded-[18px]"
+                                />
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+                </div>
             </div>
 
         </section>
