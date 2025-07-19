@@ -1,0 +1,32 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: |
+          # Use your existing .env file or copy from .env.example if needed
+          if [ ! -f .env ]; then
+            cp .env.example .env
+          fi
+
+      - name: Build and run tests
+        run: |
+          docker-compose up -d
+          docker-compose exec -T app composer install
+          docker-compose exec -T app php artisan key:generate --ansi
+          docker-compose exec -T app php artisan migrate:fresh --seed
+          docker-compose exec -T app php artisan test
+
+      - name: Cleanup
+        run: docker-compose down -v
