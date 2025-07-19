@@ -22,11 +22,11 @@ jobs:
 
       - name: Build and run tests
         run: |
-          docker-compose up -d
-          docker-compose exec -T app composer install
-          docker-compose exec -T app php artisan key:generate --ansi
-          docker-compose exec -T app php artisan migrate:fresh --seed
-          docker-compose exec -T app php artisan test
+          docker compose up -d
+          docker compose exec -T app composer install
+          docker compose exec -T app php artisan key:generate --ansi
+          docker compose exec -T app php artisan migrate:fresh --seed
+          docker compose exec -T app php artisan test
 
       - name: Cleanup
         run: docker-compose down -v
