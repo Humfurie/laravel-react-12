@@ -15,7 +15,6 @@ jobs:
 
       - name: Setup environment
         run: |
-          # Create .env for testing
           cp .env.example .env
           echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
           echo "APP_ENV=testing" >> .env
@@ -24,12 +23,20 @@ jobs:
           echo "DB_USERNAME=root" >> .env
           echo "DB_PASSWORD=password" >> .env
 
-      - name: Build and run tests
+      - name: Build and start services
         run: |
           docker compose -f docker-compose.ci.yml up -d --build
           sleep 30
+
+      - name: Install dependencies and setup
+        run: |
+          docker compose -f docker-compose.ci.yml exec -T app composer install --no-dev --optimize-autoloader
           docker compose -f docker-compose.ci.yml exec -T app php artisan key:generate --ansi
+          docker compose -f docker-compose.ci.yml exec -T app php artisan config:cache
           docker compose -f docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed
+
+      - name: Run tests
+        run: |
           docker compose -f docker-compose.ci.yml exec -T app php artisan test
 
       - name: Cleanup
