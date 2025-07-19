@@ -15,18 +15,22 @@ jobs:
 
       - name: Setup environment
         run: |
-          # Use your existing .env file or copy from .env.example if needed
-          if [ ! -f .env ]; then
-            cp .env.example .env
-          fi
+          # Create .env for testing
+          cp .env.example .env
+          echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
+          echo "APP_ENV=testing" >> .env
+          echo "DB_HOST=mysql" >> .env
+          echo "DB_DATABASE=laravel_test" >> .env
+          echo "DB_USERNAME=root" >> .env
+          echo "DB_PASSWORD=password" >> .env
 
       - name: Build and run tests
         run: |
-          docker compose up -d
-          docker compose exec -T app composer install
-          docker compose exec -T app php artisan key:generate --ansi
-          docker compose exec -T app php artisan migrate:fresh --seed
-          docker compose exec -T app php artisan test
+          docker compose -f docker-compose.ci.yml up -d --build
+          sleep 30
+          docker compose -f docker-compose.ci.yml exec -T app php artisan key:generate --ansi
+          docker compose -f docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed
+          docker compose -f docker-compose.ci.yml exec -T app php artisan test
 
       - name: Cleanup
-        run: docker-compose -f docker-compose.ci.yml up -d --build
+        run: docker compose -f docker-compose.ci.yml down -v
