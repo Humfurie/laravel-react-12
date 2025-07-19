@@ -1,4 +1,3 @@
-import {NavDropdown} from "@/components/home/mobile/nav-dropdown";
 import {MotionLi} from "@/components/home/lib/motion-li";
 import { Link } from '@inertiajs/react';
 
@@ -7,7 +6,27 @@ const links = [
     {id: 2, url: "/about", title: "About", disabled: true},
     {id: 3, url: "/contact", title: "Contact", disabled: true}
 ]
-export default function Header({auth}: {auth: any}) {
+
+// Define the User type
+type User = {
+    id: number;
+    name: string;
+    email: string;
+    // Add other user properties as needed
+};
+
+
+type Auth = {
+    user: User | null;
+};
+
+// Define the props type
+type HeaderProps = {
+    auth: Auth;
+};
+
+
+export default function Header({auth}: HeaderProps) {
     return (
         <>
             <header className="absolute top-0 left-0 w-full z-10">
