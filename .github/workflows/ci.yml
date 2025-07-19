@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies and setup
         run: |
-          docker compose -f docker-compose.ci.yml exec -T app composer install --no-dev --optimize-autoloader
+          docker compose -f docker-compose.ci.yml exec -T app composer install --optimize-autoloader
           docker compose -f docker-compose.ci.yml exec -T app php artisan key:generate --ansi
           docker compose -f docker-compose.ci.yml exec -T app php artisan config:cache
           docker compose -f docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed
