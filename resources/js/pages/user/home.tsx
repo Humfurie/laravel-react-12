@@ -6,29 +6,26 @@ import HomeExpertise from '@/components/home/sections/HomeExpertise';
 import HomeProjects from '@/components/home/sections/HomeProjects';
 import { type SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
+import { JSX } from 'react';
 
 interface HomeProps {
-    banner: {},
-    skills: {},
-    experience: {},
-    footer: {},
+    banner: Record<string, unknown>;
+    skills: Record<string, unknown>;
+    experience: Record<string, unknown>;
+    footer: Record<string, unknown>;
 }
 
-export default function Home({ banner, skills, experience, footer }: HomeProps) {
+export default function Home({ banner, skills, experience, footer }: HomeProps): JSX.Element {
     const { auth } = usePage<SharedData>().props;
 
     return (
         <>
-            {/* <Header auth={auth} /> */}
             <HomeBanner />
             <HomeAboutMe />
             <HomeProjects />
             <HomeExpertise />
             <HomeCTA />
-            {/* <Main /> */}
-            {/* <SkillSection /> */}
-            {/* <ExperienceSection /> */}
             <Footer />
         </>
-    )
+    );
 }
