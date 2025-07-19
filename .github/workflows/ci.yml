@@ -29,4 +29,4 @@ jobs:
           docker compose exec -T app php artisan test
 
       - name: Cleanup
-        run: docker-compose down -v
+        run: docker-compose -f docker-compose.ci.yml up -d --build
