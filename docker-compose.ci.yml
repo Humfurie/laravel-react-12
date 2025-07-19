@@ -1,60 +1,51 @@
-version: '3.8'
-
 services:
-  app:
+  laravel.test:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: laravel-app
-    working_dir: /var/www/html
+    image: laravel-app
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '${APP_PORT:-80}:80'
+    environment:
+      WWWUSER: '${WWWUSER:-1000}'
+      LARAVEL_SAIL: 1
     volumes:
-      - .:/var/www/html
-      - ./storage/app/public:/var/www/html/public/storage
-    env_file:
-      - .env
+      - '.:/var/www/html'
+    networks:
+      - sail
     depends_on:
       - mysql
-      - redis
-    networks:
-      - laravel-network
 
   mysql:
-    image: mysql:8.0
-    container_name: laravel-mysql
+    image: 'mysql/mysql-server:8.0'
+    ports:
+      - '${FORWARD_DB_PORT:-3306}:3306'
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
-      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
-      MYSQL_USER: ${DB_USERNAME:-laravel}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
-    ports:
-      - "${DB_PORT:-3306}:3306"
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
     volumes:
-      - mysql_data:/var/lib/mysql
+      - 'sail-mysql:/var/lib/mysql'
     networks:
-      - laravel-network
-    command: --default-authentication-plugin=mysql_native_password
-
-  redis:
-    image: redis:7-alpine
-    container_name: laravel-redis
-    ports:
-      - "6379:6379"
-    networks:
-      - laravel-network
-
-  node:
-    image: node:18-alpine
-    container_name: laravel-node
-    working_dir: /var/www/html
-    volumes:
-      - .:/var/www/html
-    command: sh -c "npm install && npm run build"
-    networks:
-      - laravel-network
-
-volumes:
-  mysql_data:
+      - sail
+    healthcheck:
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - '-p${DB_PASSWORD}'
+      retries: 3
+      timeout: 5s
 
 networks:
-  laravel-network:
+  sail:
     driver: bridge
+
+volumes:
+  sail-mysql:
+    driver: local
