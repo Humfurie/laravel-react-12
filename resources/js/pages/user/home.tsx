@@ -1,28 +1,24 @@
-import {type SharedData} from '@/types';
-import {usePage} from '@inertiajs/react';
-import Main from "@/components/home/main";
-import {SkillSection} from "@/components/home/sections/SkillSection";
-import {ExperienceSection} from "@/components/home/sections/ExperienceSection";
-import Header from "@/components/home/header";
-import Footer from '@/components/home/footer';
+import Footer from '@/components/global/Footer';
+import HomeAboutMe from '@/components/home/sections/HomeAboutMe';
+import HomeBanner from '@/components/home/sections/HomeBanner';
+import HomeCTA from '@/components/home/sections/HomeCTA';
+import HomeExpertise from '@/components/home/sections/HomeExpertise';
+import HomeProjects from '@/components/home/sections/HomeProjects';
+import { JSX } from 'react';
 
-interface HomeProps {
-    banner: {},
-    skills: {},
-    experience: {},
-    footer: {},
-}
 
-export default function Home({banner, skills, experience, footer}: HomeProps) {
-    const {auth} = usePage<SharedData>().props;
+
+export default function Home(): JSX.Element {
+    // const { auth } = usePage<SharedData>().props;
 
     return (
         <>
-            <Header auth={auth}/>
-            <Main/>
-            <SkillSection/>
-            <ExperienceSection/>
+            <HomeBanner />
+            <HomeAboutMe />
+            <HomeProjects />
+            <HomeExpertise />
+            <HomeCTA />
             <Footer />
         </>
-    )
+    );
 }
