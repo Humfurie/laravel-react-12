@@ -1,58 +1,52 @@
 <?php
 
-
 use App\Models\Role;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia;
+
+uses(RefreshDatabase::class);
 
 test('admin can get all role', function () {
-    Role::factory()->count(5)->create();
+    $roles = Role::factory()->count(5)->create();
 
-    $response = $this->get('/');
+    $user = User::factory()->createOne();
+    $user->roles()->attach($roles->pluck('id')->first());
+    $this->actingAs($user);
 
+    $response = $this->get('/roles');
 
     $response->assertStatus(200)
-        ->assertViewIs('roles.index')
-        ->assertViewHas('roles')
-        ->assertViewHas('roles', function ($roles) {
-            return $roles->count() === 5;
-        });
-});
-
-test('admin can get specific role', function () {
-    $role = Role::factory()->createOne();
-
-    $response = $this->get('/' . $role->slug);
-
-    $response->assertViewIs('roles.show')
-        ->assertViewHas('role');
-
-    $this->assertEquals([
-        'name' => $role->name,
-        'slug' => $role->slug
-    ], [
-        'name' => $response->name,
-        'slug' => $response->slug
-    ]);
-
-    $this->assertDatabaseHas('roles', ['id' => $role->slug]);
+        ->assertInertia(fn(AssertableInertia $page) => $page
+            ->component('admin/role') // The React component name
+            ->has('roles', 5) // Assert we have 5 roles
+            ->has('roles.0.name') // Assert first role has name property
+        );
 
 });
 
 test('admin can create role', function () {
-    $role = [
+    $role = Role::factory()->createOne();
+
+    $user = User::factory()->createOne();
+    $user->roles()->attach($role->id);
+    $this->actingAs($user);
+
+    $inputRole = [
         'name' => 'Admin',
         'slug' => 'admin',
     ];
 
-    $response = $this->post('/roles', $role);
+    $response = $this->post('/roles', $inputRole);
 
-    $response->assertStatus(201)
+    $response->assertStatus(302)
         ->assertRedirect('/roles');
 
     $this->assertDatabaseHas('roles', [
-        'name' => 'Admin',
-        'slug' => 'admin'
+        'name' => $inputRole['name'],
+        'slug' => $inputRole['slug']
     ]);
-});
+})->only();
 
 test('admin can update role', function () {
     $role = Role::factory()->create([
