@@ -38,6 +38,18 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->id === 1;
+    }
+
     public function images(): MorphMany
     {
         return $this->morphMany(Image::class, 'imageable');
