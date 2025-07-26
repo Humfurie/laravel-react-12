@@ -15,11 +15,14 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface Permission {
     id: number;
     name: string;
+    resource: string;
+    actions: string[];
 }
 
 interface Role {
     id: number;
     name: string;
+    slug: string;
     users_count: number;
     permissions: string[];
     created_at: string;
@@ -33,7 +36,7 @@ interface RoleProps {
 export default function Role({ roles, permissions }: RoleProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRole, setEditingRole] = useState<Role | null>(null);
-
+    console.log(roles);
     const handleCreateRole = () => {
         setEditingRole(null);
         setIsModalOpen(true);
