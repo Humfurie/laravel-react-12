@@ -13,6 +13,21 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
+    {
+        title: 'User Management',
+        href: '/users',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Role Management',
+        href: '/roles',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Permission Management',
+        href: '/permissions',
+        icon: LayoutGrid,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
