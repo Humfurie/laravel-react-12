@@ -1,9 +1,10 @@
 import RoleFormModal from '@/components/role-form-modal';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-import { Edit, MoreHorizontal, Plus, Search, Settings, Shield, Trash2, Users } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { Edit, Plus, RotateCw, Search, Settings, Shield, Trash2, Users } from 'lucide-react';
 import { useState } from 'react';
+import RoleActions from '@/components/role-actions';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -15,14 +16,18 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface Permission {
     id: number;
     name: string;
+    resource: string;
+    actions: string[];
 }
 
 interface Role {
     id: number;
     name: string;
+    slug: string;
     users_count: number;
     permissions: string[];
     created_at: string;
+    deleted_at: string;
 }
 
 interface RoleProps {
@@ -171,7 +176,7 @@ export default function Role({ roles, permissions }: RoleProps) {
                                                     {role.permissions.slice(0, 2).map((permission) => (
                                                         <span
                                                             key={permission}
-                                                            className="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700"
+                                                            className="inline-flex items-center rounded-lg border border-orange-100 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-600"
                                                         >
                                                             {permission}
                                                         </span>
@@ -186,18 +191,31 @@ export default function Role({ roles, permissions }: RoleProps) {
                                             <td className="px-6 py-4 text-sm text-gray-500">{new Date(role.created_at).toLocaleDateString()}</td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-1">
-                                                    <button
-                                                        onClick={() => handleEditRole(role)}
-                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-orange-50 hover:text-orange-600"
-                                                    >
-                                                        <Edit className="h-4 w-4" />
-                                                    </button>
-                                                    <button className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600">
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </button>
-                                                    <button className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600">
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                    </button>
+                                                    {role.deleted_at ? (
+                                                        <button
+                                                            onClick={() => router.patch(route('roles.restore', { role: role.slug }))}
+                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-green-50 hover:text-green-600"
+                                                        >
+                                                            <RotateCw className="h-4 w-4" />
+                                                        </button>
+                                                    ) : (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleEditRole(role)}
+                                                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-orange-50 hover:text-orange-600"
+                                                            >
+                                                                <Edit className="h-4 w-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => router.delete(route('roles.destroy', { role: role.slug }))}
+                                                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </button>
+                                                        </>
+                                                    )}
+
+                                                    <RoleActions role={role} />
                                                 </div>
                                             </td>
                                         </tr>
