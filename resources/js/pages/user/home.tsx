@@ -3,10 +3,7 @@ import HomeAboutMe from '@/components/home/sections/HomeAboutMe';
 import HomeBanner from '@/components/home/sections/HomeBanner';
 import HomeCTA from '@/components/home/sections/HomeCTA';
 import HomeExpertise from '@/components/home/sections/HomeExpertise';
-import HomeProjects from '@/components/home/sections/HomeProjects';
 import { JSX } from 'react';
-
-
 
 export default function Home(): JSX.Element {
     // const { auth } = usePage<SharedData>().props;
@@ -15,7 +12,7 @@ export default function Home(): JSX.Element {
         <>
             <HomeBanner />
             <HomeAboutMe />
-            <HomeProjects />
+            {/*<HomeProjects />*/}
             <HomeExpertise />
             <HomeCTA />
             <Footer />
