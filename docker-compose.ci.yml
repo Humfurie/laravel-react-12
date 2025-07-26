@@ -5,18 +5,22 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.ci
-    volumes:
-      - .:/var/www/html
+    container_name: laravel-app-ci
+    working_dir: /var/www/html
     environment:
       - APP_ENV=testing
-    command: >
-      bash -c "
-        composer install
-        npm install
-        npm run build
-        php artisan key:generate
-        php artisan migrate
-        vendor/bin/pest
+      - APP_DEBUG=true
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=laravel_test
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - QUEUE_CONNECTION=database
+      - CACHE_DRIVER=array
+      - SESSION_DRIVER=array
+    volumes:
+      - .:/var/www/html
     depends_on:
       - mysql
     networks:
