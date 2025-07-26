@@ -8,8 +8,6 @@ import React, { useEffect } from 'react';
 interface Permission {
     id: number;
     name: string;
-    resource: string;
-    actions: string[];
 }
 
 interface Role {
@@ -17,8 +15,6 @@ interface Role {
     name: string;
     slug: string;
     permissions: string[];
-    users_count: number;
-    created_at: string;
 }
 
 interface RoleFormModalProps {
@@ -37,21 +33,19 @@ export default function RoleFormModal({ isOpen, onClose, role, permissions }: Ro
     });
 
     useEffect(() => {
-        if (isOpen) {
-            if (role) {
-                setData({
-                    name: role.name,
-                    permissions: role.permissions,
-                });
-            } else {
-                reset();
-            }
+        if (role) {
+            setData({
+                name: role.name,
+                permissions: role.permissions,
+            });
+        } else {
+            reset();
         }
     }, [role, isOpen, setData, reset]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
+        console.log(data);
         if (isEditing) {
             put(`/roles/${role.slug}`, {
                 onSuccess: () => {
@@ -69,13 +63,10 @@ export default function RoleFormModal({ isOpen, onClose, role, permissions }: Ro
         }
     };
 
-    const handlePermissionToggle = (resource: string, action: string) => {
-        const permissionString = `${resource}.${action}`;
+    const handlePermissionToggle = (permissionName: string) => {
         setData(
             'permissions',
-            data.permissions.includes(permissionString)
-                ? data.permissions.filter((p) => p !== permissionString)
-                : [...data.permissions, permissionString],
+            data.permissions.includes(permissionName) ? data.permissions.filter((p) => p !== permissionName) : [...data.permissions, permissionName],
         );
     };
 
@@ -83,15 +74,6 @@ export default function RoleFormModal({ isOpen, onClose, role, permissions }: Ro
         onClose();
         reset();
     };
-
-    // Group permissions by resource
-    const permissionsByResource = permissions.reduce(
-        (acc, permission) => {
-            acc[permission.resource] = permission.actions;
-            return acc;
-        },
-        {} as Record<string, string[],
-    );
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -115,33 +97,23 @@ export default function RoleFormModal({ isOpen, onClose, role, permissions }: Ro
                         {/* Permissions */}
                         <div className="space-y-3">
                             <Label>Permissions</Label>
-                            <div className="max-h-60 space-y-4 overflow-y-auto rounded-lg border border-gray-200 p-4">
-                                {Object.entries(permissionsByResource).map(([resource, actions]) => (
-                                    <div key={resource} className="space-y-2">
-                                        <h4 className="font-medium text-gray-800 capitalize">{resource}</h4>
-                                        <div className="ml-4 space-y-2">
-                                            {actions.map((action) => {
-                                                const permissionString = `${resource}.${action}`;
-                                                return (
-                                                    <div key={permissionString} className="flex items-start space-x-3">
-                                                        <input
-                                                            type="checkbox"
-                                                            id={`permission-${permissionString}`}
-                                                            checked={data.permissions.includes(permissionString)}
-                                                            onChange={() => handlePermissionToggle(resource, action)}
-                                                            className="mt-1 h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
-                                                        />
-                                                        <div className="flex-1">
-                                                            <label
-                                                                htmlFor={`permission-${permissionString}`}
-                                                                className="block cursor-pointer text-sm text-gray-700 capitalize"
-                                                            >
-                                                                {action}
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
+                            <div className="max-h-60 space-y-3 overflow-y-auto rounded-lg border border-gray-200 p-4">
+                                {permissions.map((permission) => (
+                                    <div key={permission.id} className="flex items-start space-x-3">
+                                        <input
+                                            type="checkbox"
+                                            id={`permission-${permission.id}`}
+                                            checked={data.permissions.includes(permission.name)}
+                                            onChange={() => handlePermissionToggle(permission.name)}
+                                            className="mt-1 h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                                        />
+                                        <div className="flex-1">
+                                            <label
+                                                htmlFor={`permission-${permission.id}`}
+                                                className="block cursor-pointer text-sm font-medium text-gray-900"
+                                            >
+                                                {permission.name}
+                                            </label>
                                         </div>
                                     </div>
                                 ))}
