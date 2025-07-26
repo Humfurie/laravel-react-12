@@ -12,14 +12,13 @@ uses(RefreshDatabase::class);
 test('admin can get all permissions', function () {
     $user = User::factory()
         ->has(Role::factory()
-            ->has(Permission::factory()->state([
-                'resource' => 'permission',
-            ]))
             ->state([
                 'name' => 'Admin',
-                'slug' => 'admin',
-            ])
-        )
+                'slug' => 'admin'
+            ])->hasAttached(Permission::factory()
+                ->state([
+                    'resource' => 'permission',
+                ]), ['actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)], 'permissions'))
         ->create();
 
     Permission::factory()->count(4)->create();
@@ -31,8 +30,9 @@ test('admin can get all permissions', function () {
     $response->assertStatus(200)
         ->assertInertia(fn(AssertableInertia $page) => $page
             ->component('admin/permission') // The React component name
-            ->has('permissions', 5) // Assert we have 5 roles
-            ->has('roles.0.resource') // Assert first role has name property
+            ->has('permissions', 5) // Assert we have 5 permissions
+            ->has('permissions.0.resource') // Assert first permission has resource property
+            ->has('permissions.0.actions') // Assert first permission has actions property
         );
 });
 
@@ -40,20 +40,19 @@ test('admin can create permissions', function () {
 
     $user = User::factory()
         ->has(Role::factory()
-            ->has(Permission::factory()->state([
-                'resource' => 'permission',
-            ]))
             ->state([
                 'name' => 'Admin',
-                'slug' => 'admin',
-            ])
-        )
+                'slug' => 'admin'
+            ])->hasAttached(Permission::factory()
+                ->state([
+                    'resource' => 'permission',
+                ]), ['actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)], 'permissions'))
         ->create();
 
     $this->actingAs($user);
 
     $inputPermission = [
-        'resource' => 'permission',
+        'resource' => 'user',
         'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'],
     ];
 
@@ -62,24 +61,27 @@ test('admin can create permissions', function () {
     $response->assertStatus(302)
         ->assertRedirect('/permissions');
 
-    $this->assertDatabaseHas('roles', [
-        'resource' => $inputPermission['resource'],
-        'actions' => $inputPermission['actions']
-    ]);
+    $permission = Permission::where('resource', $inputPermission['resource'])->first();
+
+    $this->assertNotNull($permission);
+    $this->assertEquals(
+        $inputPermission['actions'],
+        $permission->actions
+    );
+
 });
 
 test('admin can update permissions', function () {
 
     $user = User::factory()
         ->has(Role::factory()
-            ->has(Permission::factory()->state([
-                'resource' => 'permission',
-            ]))
             ->state([
                 'name' => 'Admin',
-                'slug' => 'admin',
-            ])
-        )
+                'slug' => 'admin'
+            ])->hasAttached(Permission::factory()
+                ->state([
+                    'resource' => 'permission',
+                ]), ['actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)], 'permissions'))
         ->create();
 
     //Create Permission
@@ -90,7 +92,8 @@ test('admin can update permissions', function () {
     $this->actingAs($user);
 
     $updatedData = [
-        'resource' => 'manager'
+        'resource' => 'manager',
+        'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
     ];
 
     $response = $this->put("/permissions/$permission->id", $updatedData);
@@ -98,13 +101,16 @@ test('admin can update permissions', function () {
     $response->assertStatus(302)
         ->assertRedirect('/permissions');
 
-    $this->assertDatabaseHas('roles', [
-        'id' => $permission->id,
-        'resource' => $permission['resource']
-    ]);
+    $permission = Permission::where('resource', $updatedData['resource'])->first();
+
+    $this->assertNotNull($permission);
+    $this->assertEquals(
+        $updatedData['actions'],
+        $permission->actions
+    );
 
     $record = DB::table('permissions')
-        ->where('resource', $permission?->name)
+        ->where('resource', $permission?->resource)
         ->first();
 
     $this->assertNotNull($record);
@@ -113,14 +119,13 @@ test('admin can update permissions', function () {
 test('admin can delete permissions', function () {
     $user = User::factory()
         ->has(Role::factory()
-            ->has(Permission::factory()->state([
-                'resource' => 'permission',
-            ]))
             ->state([
                 'name' => 'Admin',
-                'slug' => 'admin',
-            ])
-        )
+                'slug' => 'admin'
+            ])->hasAttached(Permission::factory()
+                ->state([
+                    'resource' => 'permission',
+                ]), ['actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)], 'permissions'))
         ->create();
 
     $this->actingAs($user);
@@ -140,14 +145,13 @@ test('admin can delete permissions', function () {
 test('admin can force delete permissions', function () {
     $user = User::factory()
         ->has(Role::factory()
-            ->has(Permission::factory()->state([
-                'resource' => 'permission',
-            ]))
             ->state([
                 'name' => 'Admin',
-                'slug' => 'admin',
-            ])
-        )
+                'slug' => 'admin'
+            ])->hasAttached(Permission::factory()
+                ->state([
+                    'resource' => 'permission',
+                ]), ['actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)], 'permissions'))
         ->create();
 
     $this->actingAs($user);
@@ -159,7 +163,7 @@ test('admin can force delete permissions', function () {
     $response->assertStatus(302)
         ->assertRedirect('/permissions');
 
-    $this->assertDatabaseMissing('permission', [
+    $this->assertDatabaseMissing('permissions', [
         'id' => $permission->id
     ]);
 });
@@ -187,11 +191,11 @@ test('admin can restore permissions', function () {
         ->assertRedirect('/permissions');
 
     // Assert that the role is no longer soft-deleted
-    $this->assertDatabaseHas('roles', [
+    $this->assertDatabaseHas('permissions', [
         'id' => $permission->id,
         'deleted_at' => null
     ]);
 
     // Or alternatively, use the model's methods
-    $this->assertFalse(Role::withTrashed()->find($permission->id)?->trashed());
+    $this->assertFalse(Permission::withTrashed()->find($permission->id)?->trashed());
 });
