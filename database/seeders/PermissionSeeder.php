@@ -12,7 +12,7 @@ class PermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        $permissions = [
+        $actions = [
             'viewAny',  // List/index - view all records
             'view',     // Show - view single record
             'create',   // Create new record
@@ -22,8 +22,14 @@ class PermissionSeeder extends Seeder
             'forceDelete', // Permanently delete record
         ];
 
-        foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
-        }
+        Permission::create([
+            'resource' => 'user',
+            'actions' => $actions
+        ]);
+
+        Permission::create([
+            'resource' => 'role',
+            'actions' => $actions
+        ]);
     }
 }
