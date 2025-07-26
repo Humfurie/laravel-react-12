@@ -29,14 +29,18 @@ return new class extends Migration {
 
         Schema::create('permissions', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('resource')->unique();
+            $table->json('actions');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('permission_role', function (Blueprint $table) {
             $table->id();
+            $table->json('actions')->nullable();
             $table->foreignIdFor(Role::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Permission::class)->constrained()->cascadeOnDelete();
+            $table->timestamps();
         });
     }
 
