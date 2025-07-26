@@ -27,6 +27,7 @@ class RoleController extends Controller
     {
         $roles = Role::with('users')
             ->withCount('users')
+            ->withTrashed()
             ->get()
             ->map(function ($role) {
                 return [
@@ -44,6 +45,7 @@ class RoleController extends Controller
                         return $role_permissions;
                     },
                     'created_at' => $role->created_at->toDateString(),
+                    'deleted_at' => $role->deleted_at ? $role->deleted_at->toDateString() : null,
                 ];
             });
 
