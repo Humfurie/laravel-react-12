@@ -31,7 +31,7 @@ php artisan view:cache
 
 # Run database migrations (uncomment if needed)
 # log "Running database migrations..."
-php artisan migrate
+#php artisan migrate
 
 log "Laravel application initialization completed!"
 
