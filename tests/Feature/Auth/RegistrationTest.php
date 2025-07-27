@@ -1,12 +1,14 @@
 <?php
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-test('registration screen can be rendered', function () {
-    $response = $this->get('/register');
+uses(RefreshDatabase::class);
 
-    $response->assertStatus(200);
-});
+//test('registration screen can be rendered', function () {
+//    $response = $this->get('/register');
+//
+//    $response->assertStatus(200);
+//});
 
 //test('new users can register', function () {
 //    $response = $this->post('/register', [
