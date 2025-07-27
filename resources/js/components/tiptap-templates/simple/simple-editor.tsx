@@ -152,11 +152,6 @@ export function SimpleEditor() {
     const [mobileView, setMobileView] = React.useState<'main' | 'highlighter' | 'link'>('main');
     const toolbarRef = React.useRef<HTMLDivElement>(null);
 
-    const [initialContent, setInitialContent] = React.useState({
-        type: 'doc',
-        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Default content' }] }],
-    });
-
     const editor = useEditor({
         immediatelyRender: false,
         shouldRerenderOnTransaction: false,
@@ -195,10 +190,13 @@ export function SimpleEditor() {
                 onError: (error) => console.error('Upload failed:', error),
             }),
         ],
-        content: initialContent,
+        content: {
+            type: 'doc',
+            content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Default content' }] }],
+        },
     });
 
-    const odyRect = useCursorVisibility({
+    const bodyRect = useCursorVisibility({
         editor,
         overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
     });
