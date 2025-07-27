@@ -11,11 +11,13 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $role = Role::where('slug', 'admin')->first();
-        User::factory()->create([
-            'name' => 'Humphrey',
-            'email' => 'humfurie@gmail.com',
+        $user = User::factory()->create([
+            'name' => config('app.user_account_name'),
+            'email' => config('app.user_account_email'),
             'email_verified_at' => now(),
-            'password' => bcrypt('password'),
+            'password' => config('app.user_account_password'),
         ]);
+
+        $user->roles()->attach($role);
     }
 }
