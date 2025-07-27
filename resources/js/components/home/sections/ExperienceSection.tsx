@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import SectionTitle from '@/components/global/SectionTitle';
 
 type Experience = {
     company: string;
@@ -7,84 +7,79 @@ type Experience = {
     location: string;
     description: string[];
     position: string;
-    startMonth: number;  // 0-11 (0 = January)
-    startYear: number;   // e.g., 2023
-    endMonth: number | null;  // null for current positions
-    endYear: number | null;   // null for current positions
-    isCurrentPosition: false
-
+    startMonth: number; // 0-11 (0 = January)
+    startYear: number; // e.g., 2023
+    endMonth: number | null; // null for current positions
+    endYear: number | null; // null for current positions
+    isCurrentPosition: boolean;
 };
-
 
 const experiences: Experience[] = [
     {
         company: 'Halcyon Digital Media Design | Halcyon Agile',
         image: '/halcyon.png',
         location: 'Cordova, Cebu, Philippines',
-        description: ['I\'ve been introduced to technologies such as React, NodeJS, JavaScript, Tailwind, as well as various frameworks and tools like Git, among others.',
-            'I have experience working with the AdonisJS Framework and Next.js, and I\'ve completed several minor projects using them.',
-            'I\'ve developed APIs and successfully completed our capstone project, which is an Automated Attendance System utilizing RFID Technology.'],
+        description: [
+            "I've been introduced to technologies such as React, NodeJS, JavaScript, Tailwind, as well as various frameworks and tools like Git, among others.",
+            "I have experience working with the AdonisJS Framework and Next.js, and I've completed several minor projects using them.",
+            "I've developed APIs and successfully completed our capstone project, which is an Automated Attendance System utilizing RFID Technology.",
+        ],
         position: 'Intern',
         startMonth: 8,
         startYear: 2022,
         endMonth: 1,
         endYear: 2023,
-        isCurrentPosition: false
-
+        isCurrentPosition: false,
     },
     {
         company: 'Halcyon Digital Media Design | Halcyon Agile',
         image: '/halcyon.png',
         location: 'Cordova, Cebu, Philippines',
-        description: ['Acquiring experience and familiarity with best development practices.',
+        description: [
+            'Acquiring experience and familiarity with best development practices.',
             'Trained in Laravel, PHP and Filament.',
             'Introduced to Domain-Driven Design principles.',
-            'Skills gained from training include PHP, Laravel, Filament, and JQuery.'],
+            'Skills gained from training include PHP, Laravel, Filament, and JQuery.',
+        ],
         position: 'Junior Laravel Trainee',
         startMonth: 3,
         startYear: 2023,
         endMonth: 6,
         endYear: 2023,
-        isCurrentPosition: false
+        isCurrentPosition: fal,
     },
     {
         company: 'Halcyon Digital Media Design | Halcyon Agile',
         image: '/halcyon.png',
         location: 'Cordova, Cebu, Philippines',
-        description: ['I\'ve effectively built a service management feature within a SaaS platform.',
+        description: [
+            "I've effectively built a service management feature within a SaaS platform.",
             'Ensured code readability by implementing best practices during development.',
             'Contributed to feature creation within ongoing maintenance projects.',
-            'Collaborated with various teams to troubleshoot and resolve issues.'],
+            'Collaborated with various teams to troubleshoot and resolve issues.',
+        ],
         position: 'Junior Laravel Developer | Junior Software Developer',
         startMonth: 6,
         startYear: 2023,
         endMonth: 0,
         endYear: 2024,
-        isCurrentPosition: false
-
-    }
+        isCurrentPosition: fal,
+    },
 ];
 
 export function formatMonthYear(month: number, year: number): string {
-    const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
     return `${months[month]} ${year}`;
 }
 
-/**
- * Calculate duration between two month-year pairs
- */
 export function calculateDuration(
     startMonth: number,
     startYear: number,
     endMonth: number | null = null,
     endYear: number | null = null,
-    isCurrentPosition: boolean = false
+    isCurrentPosition: boolean = false,
 ): string {
-    // If current position, use current date
     let eMonth = endMonth;
     let eYear = endYear;
 
@@ -96,10 +91,7 @@ export function calculateDuration(
         return 'Invalid date range';
     }
 
-    // Calculate total months
     const totalMonths = (eYear! - startYear) * 12 + (eMonth! - startMonth);
-
-    // Format the output
     const years = Math.floor(totalMonths / 12);
     const months = totalMonths % 12;
 
@@ -113,127 +105,75 @@ export function calculateDuration(
 }
 
 export const ExperienceSection = () => {
-    const [activeIndex, setActiveIndex] = useState(0);
-
     return (
-        <section id="experience" className="py-20 bg-gray-900 relative">
+        <section id="experience" className="relative overflow-hidden bg-white py-20">
+            <SectionTitle title={'Experience'} />
 
-            {/* Top gradient - custom CSS with explicit values */}
-            <div
-                className="absolute top-0 left-0 right-0 h-[4.4rem] pointer-events-none"
-                style={{
-                    background: 'linear-gradient(to bottom, rgba(255, 255, 255) 0%, rgba(17, 24, 39, 1) 100%)'
-                }}
-            ></div>
+            <div className="primary-container">
+                <div className="text-muted-black mb-12 w-full text-center">My professional journey in the tech industry.</div>
 
-
-            <div className="container mx-auto px-4 py-10">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Experience</h2>
-                    <p className="text-gray-400 max-w-2xl mx-auto mb-8">
-                        My professional journey in the tech industry.
-                    </p>
-
-                    {/* Dots navigation */}
-                    <div className="flex justify-center gap-3 mb-8">
-                        {experiences.map((_, index) => (
-                            <button
-                                key={`dot-${index}`}
-                                onClick={() => setActiveIndex(index)}
-                                className={`w-3 h-3 rounded-full transition-all ${
-                                    activeIndex === index ? 'bg-orange-600 scale-125' : 'bg-gray-400'
-                                }`}
-                                aria-label={`View experience ${index + 1}`}
-                            />
-                        ))}
-                    </div>
-                </div>
-
-                {/* Timeline visualization - Responsive version */}
-                <div className="relative max-w-4xl mx-auto mb-12">
-                    {/* Vertical line - Only visible on md screens and up */}
-                    <div className="hidden md:block absolute top-0 bottom-0 left-1/2 w-px bg-gray-700 transform -translate-x-1/2" />
+                <div className="relative mx-auto mt-12 mb-12 w-full lg:mt-[80px]">
+                    {/* Vertical line */}
+                    <div className="bg-brand-orange absolute top-0 bottom-0 left-1/2 hidden w-px -translate-x-1/2 transform lg:block" />
 
                     {experiences.map((experience, index) => (
                         <motion.div
                             key={`timeline-${index}`}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{
-                                opacity: activeIndex === index ? 1 : 0.3,
-                                y: 0,
-                                scale: activeIndex === index ? 1 : 0.95
-                            }}
-                            transition={{ duration: 0.5 }}
-                            className={`relative mb-12 p-6 rounded-lg
-                                ${index % 2 === 0
-                                ? 'md:ml-auto md:mr-8'
-                                : 'md:mr-auto md:ml-8'}
-                                w-full
-                                md:w-5/12
-                                mx-auto md:mx-0
-                                bg-gray-800 border border-gray-700`}
-                            onClick={() => setActiveIndex(index)}
+                            initial={{ opacity: 0, x: index % 2 === 0 ? 100 : -100 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.6, delay: index * 0.2 }}
+                            className={`hs-shadow relative mb-12 w-full cursor-pointer rounded-xl p-6 transition-all duration-300 ${
+                                index % 2 === 0 ? 'lg:mr-8 lg:ml-auto' : 'lg:mr-auto lg:ml-8'
+                            } mx-auto lg:mx-0 lg:w-5/12`}
                         >
-                            <div className="flex items-center mb-4">
-                                <div className="w-12 h-12 mr-3 rounded-full overflow-hidden flex-shrink-0 bg-gray-700">
-                                    <img src={experience.image} alt={experience.company}
-                                         className="w-full h-full object-cover" />
+                            <div className="mb-4 flex items-center">
+                                <div className="mr-4 h-16 w-16 flex-shrink-0 overflow-hidden rounded-full border-2 border-gray-200 bg-gray-100">
+                                    <img src={experience.image} alt={experience.company} className="h-full w-full object-cover" />
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-semibold text-white">{experience.position}</h3>
-                                    <p className="text-primary-orange">{experience.company}</p>
+                                <div className="flex-1">
+                                    <p className="text-brand-orange mb-1 text-[28px] leading-tight font-semibold">{experience.position}</p>
+                                    <p className="text-muted-black max-md:text-sm">{experience.company}</p>
                                 </div>
                             </div>
+                            <p className="text-muted-black mb-3 flex items-center">{experience.location}</p>
 
-                            <div className="flex flex-col sm:flex-row sm:justify-between text-sm text-gray-400 mb-4">
+                            <div className="text-muted-black mb-4 flex flex-col rounded-lg bg-gray-50 p-3 max-md:text-sm sm:flex-row sm:justify-between">
                                 <span className="mb-1 sm:mb-0">
-                                    {formatMonthYear(experience.startMonth, experience.startYear)} - {
-                                    experience.isCurrentPosition
-                                        ? 'Present'
-                                        : formatMonthYear(experience.endMonth!, experience.endYear!)
-                                }
+                                    {formatMonthYear(experience.startMonth, experience.startYear)} -{' '}
+                                    {experience.isCurrentPosition ? 'Present' : formatMonthYear(experience.endMonth!, experience.endYear!)}
                                 </span>
-                                <span>
+                                <span className="text-brand-orange">
                                     {calculateDuration(
                                         experience.startMonth,
                                         experience.startYear,
                                         experience.endMonth,
                                         experience.endYear,
-                                        experience.isCurrentPosition
+                                        experience.isCurrentPosition,
                                     )}
                                 </span>
                             </div>
 
-                            <div className="text-gray-300">
-                                <p className="text-sm italic mb-3">{experience.location}</p>
-                                <ul className="list-disc pl-5 space-y-2">
+                            <div className="text-muted-black">
+                                <ul className="space-y-2">
                                     {experience.description.map((point, i) => (
-                                        <li key={i}>{point}</li>
+                                        <li key={i} className="flex items-start leading-relaxed">
+                                            <span className="bg-brand-orange mt-2 mr-3 h-2 w-2 flex-shrink-0 rounded-full" />
+                                            {point}
+                                        </li>
                                     ))}
                                 </ul>
                             </div>
 
-                            {/* Timeline dot - Only visible on md screens and up */}
+                            {/* Timeline dot */}
                             <div
-                                className={`hidden md:block absolute top-6 w-4 h-4 rounded-full bg-primary-orange border-4 border-gray-900 ${
+                                className={`bg-brand-orange absolute top-[13%] hidden h-6 w-6 rounded-full border-4 border-white transition-all duration-300 md:block ${
                                     index % 2 === 0 ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'
-                                } transform`} />
-
-                            {/* Mobile timeline dot - Only visible on small screens */}
-                            <div className="md:hidden absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-primary-orange border-4 border-gray-900" />
+                                } `}
+                            />
                         </motion.div>
                     ))}
                 </div>
             </div>
-
-            {/* Bottom gradient - custom CSS with explicit values */}
-            <div
-                className="absolute bottom-0 left-0 right-0 h-[4.4rem] pointer-events-none"
-                style={{
-                    background: 'linear-gradient(to top, rgba(255, 255, 255) 0%, rgba(17, 24, 39, 1) 100%)'
-                }}
-            ></div>
-
         </section>
     );
 };
