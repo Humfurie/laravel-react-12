@@ -1,7 +1,5 @@
-import ButtonOne from '@/components/global/ButtonOne';
 import Socials from '@/components/global/Socials';
 import { useState } from 'react';
-import { RiArrowRightDoubleLine } from 'react-icons/ri';
 import { TbDownload } from 'react-icons/tb';
 
 const bannerData = {
@@ -38,11 +36,14 @@ const HomeBanner = () => {
                 />
                 <p className="text-[20px] text-white sm:text-[24px] md:text-[28px] lg:text-[32px]">{bannerData.subTitle}</p>
                 <Socials className="mb-[16px] py-[16px]" />
-
+                TEMPORARY WEBSITE | SELF-HOSTED IN LOCAL SERVER
                 <div className="align-center hs-bg-white absolute bottom-[70px] flex justify-center gap-6">
-                    <ButtonOne text="Projects" type="button" className="btn-orange" icon={<RiArrowRightDoubleLine className="text-[20px]" />} />
+                    {/*<ButtonOne text="Projects" type="button" className="btn-orange" icon={<RiArrowRightDoubleLine className="text-[20px]" />} />*/}
 
-                    <ButtonOne text="Resume" type="button" className="btn-white" icon={<TbDownload />} />
+                    <a href="resume.pdf" download="Humphrey_Resume.pdf" className="hs-btn align-center flex items-center gap-2 text-center">
+                        <TbDownload />
+                        Resume
+                    </a>
                 </div>
             </div>
         </section>

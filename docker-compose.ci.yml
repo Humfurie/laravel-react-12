@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.ci
+      dockerfile: ./docker/testing/Dockerfile
     container_name: laravel-app-ci
     working_dir: /var/www/html
     environment:
