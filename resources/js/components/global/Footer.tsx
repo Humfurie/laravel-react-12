@@ -22,18 +22,18 @@ const footerData: FooterData[] = [
                 label: 'Home',
                 url: '/',
             },
-            {
-                label: 'About Me',
-                url: '/about-me',
-            },
-            {
-                label: 'Projects',
-                url: '/projects',
-            },
-            {
-                label: 'Blogs',
-                url: '/blogs',
-            },
+            // {
+            //     label: 'About Me',
+            //     url: '/about-me',
+            // },
+            // {
+            //     label: 'Projects',
+            //     url: '/projects',
+            // },
+            // {
+            //     label: 'Blogs',
+            //     url: '/blogs',
+            // },
         ],
     },
     {
