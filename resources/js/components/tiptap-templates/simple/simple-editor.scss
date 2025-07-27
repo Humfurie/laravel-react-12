@@ -4,9 +4,9 @@ body {
     --tt-toolbar-height: 44px;
     --tt-theme-text: var(--tt-gray-light-900);
 
-    .dark & {
-        --tt-theme-text: var(--tt-gray-dark-900);
-    }
+    //.dark & {
+    //    --tt-theme-text: var(--tt-gray-dark-900);
+    //}
 }
 
 body {
