@@ -198,7 +198,7 @@ export function SimpleEditor() {
         content: initialContent,
     });
 
-    const odyRect = useCursorVisibility({
+    const bodyRect = useCursorVisibility({
         editor,
         overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
     });
