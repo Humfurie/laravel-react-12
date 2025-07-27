@@ -19,7 +19,7 @@ services:
       timeout: 5s
       retries: 3
     depends_on:
-      pgsql:
+      postgres:
         condition: service_healthy
 
   php-cli:
@@ -33,7 +33,7 @@ services:
     networks:
       - laravel-production
 
-  pgsql:
+  postgres:
     image: postgres:17
     restart: unless-stopped
     user: postgres
