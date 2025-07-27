@@ -4,6 +4,7 @@ import HomeBanner from '@/components/home/sections/HomeBanner';
 import HomeExpertise from '@/components/home/sections/HomeExpertise';
 
 import { JSX } from 'react';
+import { ExperienceSection } from '@/components/home/sections/ExperienceSection';
 
 // import { type SharedData } from '@/types';
 // import { usePage } from '@inertiajs/react';
@@ -16,6 +17,7 @@ export default function Home(): JSX.Element {
             <HomeAboutMe />
             {/*<HomeProjects />*/}
             <HomeExpertise />
+            <ExperienceSection />
             {/*<HomeCTA />*/}
             <Footer />
         </>
