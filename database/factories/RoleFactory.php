@@ -15,7 +15,7 @@ class RoleFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $name = $this->faker->name(),
+            'name' => $name = fake()->name(),
             'slug' => Str::slug($name),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
