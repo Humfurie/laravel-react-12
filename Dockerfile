@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 COPY resources/ resources/
-COPY vite.config.js postcss.config.js tailwind.config.js ./
+COPY vite.config.ts postcss.config.js tailwind.config.js ./
 RUN npm run build
 
 # Production PHP image
