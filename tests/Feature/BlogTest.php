@@ -185,6 +185,7 @@ test('home page shows primary and latest blogs with stats', function () {
         'view_count' => 100
     ]);
     $regularBlog = Blog::factory()->published()->create([
+        'isPrimary' => false,
         'view_count' => 50
     ]);
 
