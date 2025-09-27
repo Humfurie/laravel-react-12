@@ -3,13 +3,14 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, FileText } from 'lucide-react';
+import { BookOpen, LayoutGrid, FileText } from 'lucide-react';
 import AppLogo from './app-logo';
+import React from 'react';
 
 interface NavItem {
     title: string;
     href: string;
-    icon: any;
+    icon: React.ComponentType<{ className?: string }>;
 }
 
 const mainNavItems: NavItem[] = [

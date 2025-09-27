@@ -1,7 +1,7 @@
-import React, {JSX} from 'react';
+import React from 'react';
 import { FaLaravel, FaDocker } from "react-icons/fa";
 import { IoLogoJavascript } from "react-icons/io5";
-import {SiAdonisjs, SiNextdotjs, SiPhp, SiTailwindcss, SiJquery, SiAxios, SiVuedotjs, SiNginx, SiXampp, SiPostman } from "react-icons/si";
+import {SiAdonisjs, SiNextdotjs, SiPhp, SiTailwindcss, SiJquery, SiAxios, SiNginx, SiXampp, SiPostman } from "react-icons/si";
 import {Filament} from "@/components/Filament_Laravel";
 
 export const CATEGORIES = {

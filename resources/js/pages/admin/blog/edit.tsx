@@ -10,7 +10,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, ArrowLeft, Upload, X } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import AdminLayout from '@/layouts/AdminLayout';
 import { BlogEditor } from '@/components/blog-editor';
 import { cn } from '@/lib/utils';
