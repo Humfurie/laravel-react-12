@@ -128,7 +128,7 @@ test('authenticated user can restore deleted blog post', function () {
 });
 
 test('authenticated user can upload blog image', function () {
-    $file = UploadedFile::fake()->image('test-image.jpg');
+    $file = UploadedFile::fake()->image('test-image.jpg', 100, 100)->mimeType('image/jpeg');
 
     $response = $this->actingAs($this->user)
         ->post(route('blogs.upload-image'), [
