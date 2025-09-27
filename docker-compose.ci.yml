@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.ci
     container_name: laravel_app_ci
     volumes:
       - .:/var/www/html
