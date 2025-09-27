@@ -15,7 +15,7 @@ beforeEach(function () {
 test('get primary and latest returns correct structure', function () {
     // Create test data
     $primaryBlogs = Blog::factory()->published()->primary()->count(2)->create();
-    $regularBlogs = Blog::factory()->published()->count(4)->create();
+    $regularBlogs = Blog::factory()->published()->count(4)->create(['isPrimary' => false]);
 
     $controller = new \App\Http\Controllers\User\BlogController();
     $result = $controller->getPrimaryAndLatest();
@@ -95,7 +95,7 @@ test('blog creation does not set published at for drafts', function () {
 });
 
 test('blog update changes published at when status changes', function () {
-    $blog = Blog::factory()->draft()->create();
+    $blog = Blog::factory()->draft()->create(['isPrimary' => false]);
 
     $updateData = [
         'title' => $blog->title,
@@ -113,7 +113,7 @@ test('blog update changes published at when status changes', function () {
 });
 
 test('blog force destroy permanently deletes', function () {
-    $blog = Blog::factory()->create();
+    $blog = Blog::factory()->create(['isPrimary' => false]);
     $blog->delete(); // Soft delete first
 
     $this->actingAs($this->user)
@@ -124,7 +124,7 @@ test('blog force destroy permanently deletes', function () {
 });
 
 test('public blog routes work correctly', function () {
-    $publishedBlog = Blog::factory()->published()->create();
+    $publishedBlog = Blog::factory()->published()->create(['isPrimary' => false]);
 
     // Test blog listing
     $this->get(route('blog.index'))
@@ -139,7 +139,7 @@ test('public blog routes work correctly', function () {
 
 test('home page displays blog statistics', function () {
     $primaryBlogs = Blog::factory()->published()->primary()->count(2)->create(['view_count' => 100]);
-    $regularBlogs = Blog::factory()->published()->count(3)->create(['view_count' => 50]);
+    $regularBlogs = Blog::factory()->published()->count(3)->create(['view_count' => 50, 'isPrimary' => false]);
 
     $this->get('/')
         ->assertOk()
