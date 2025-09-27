@@ -12,6 +12,11 @@ class BlogSeeder extends Seeder
      */
     public function run(): void
     {
+        // Only run in local environment to avoid creating fake content in production
+        if (!app()->environment('local')) {
+            return;
+        }
+
         // Create 3 primary/featured blog posts
         \App\Models\Blog::factory()
             ->published()
