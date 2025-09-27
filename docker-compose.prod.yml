@@ -1,37 +1,105 @@
+version: '3.8'
+
 services:
-  php-fpm:
+  app:
     build:
       context: .
-      dockerfile: ./docker/php-fpm/Dockerfile
+      dockerfile: Dockerfile
       target: production
     restart: unless-stopped
+    working_dir: /var/www/html
     volumes:
-      - laravel-storage-production:/var/www/storage
+      - laravel-storage-production:/var/www/html/storage
+      - laravel-public-production:/var/www/html/public
     env_file:
       - .env
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
     networks:
       - laravel-production
-    ports:
-      - "${APP_PORT:-80}:80"  # Expose PHP-FPM port
-    healthcheck:
-      test: [ "CMD-SHELL", "php-fpm-healthcheck || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
 
-  php-cli:
-    build:
-      context: .
-      dockerfile: ./docker/php-cli/Dockerfile
-    tty: true
-    stdin_open: true
-    env_file:
-      - .env
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - laravel-public-production:/var/www/html/public:ro
+      - ./docker/nginx/production.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - laravel-production
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: ["php", "artisan", "schedule:work"]
+    volumes:
+      - laravel-storage-production:/var/www/html/storage
+    env_file:
+      - .env
+    environment:
+      - APP_ENV=production
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    networks:
+      - laravel-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: ["php", "artisan", "queue:work", "--verbose", "--tries=3", "--timeout=90"]
+    volumes:
+      - laravel-storage-production:/var/www/html/storage
+    env_file:
+      - .env
+    environment:
+      - APP_ENV=production
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    networks:
+      - laravel-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   postgres:
     image: postgres:17
@@ -70,3 +138,4 @@ networks:
 volumes:
   postgres-data-production:
   laravel-storage-production:
+  laravel-public-production:
