@@ -60,6 +60,33 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class, 'user_roles');
     }
 
+    public function hasPermission(string $resource, string $action): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        return $this->roles()->whereHas('permissions', function ($query) use ($resource, $action) {
+            $query->where(function ($subQuery) use ($resource, $action) {
+                // Check for exact match
+                $subQuery->where('resource', $resource)
+                         ->whereJsonContains('actions', $action);
+            })->orWhere(function ($subQuery) use ($resource, $action) {
+                // Check for wildcard permissions
+                $subQuery->where('resource', '*')
+                         ->whereJsonContains('actions', '*');
+            })->orWhere(function ($subQuery) use ($resource, $action) {
+                // Check for resource wildcard (e.g., blog.*)
+                $subQuery->where('resource', $resource)
+                         ->whereJsonContains('actions', '*');
+            })->orWhere(function ($subQuery) use ($resource, $action) {
+                // Check for action wildcard (e.g., *.viewAny)
+                $subQuery->where('resource', '*')
+                         ->whereJsonContains('actions', $action);
+            });
+        })->exists();
+    }
+
     /**
      * Get the attributes that should be cast.
      *
