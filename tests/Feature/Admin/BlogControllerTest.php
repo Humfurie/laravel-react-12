@@ -37,7 +37,7 @@ test('image upload validates file requirements', function () {
         ->assertSessionHasErrors(['image']);
 
     // Test with oversized file
-    $oversizedFile = UploadedFile::fake()->image('huge.jpg')->size(6000); // 6MB
+    $oversizedFile = UploadedFile::fake()->create('huge.png', 6000);
 
     $this->actingAs($this->user)
         ->post(route('blogs.upload-image'), ['image' => $oversizedFile])
@@ -45,7 +45,7 @@ test('image upload validates file requirements', function () {
 });
 
 test('image upload returns correct response format', function () {
-    $file = UploadedFile::fake()->image('test-image.jpg', 800, 600);
+    $file = UploadedFile::fake()->image('test-image.jpg', 100, 100)->mimeType('image/jpeg');
 
     $response = $this->actingAs($this->user)
         ->post(route('blogs.upload-image'), ['image' => $file])
@@ -108,8 +108,8 @@ test('blog update changes published at when status changes', function () {
         ->assertRedirect();
 
     $blog->refresh();
-    expect($blog->status)->toBe('published');
-    expect($blog->published_at)->not->toBeNull();
+    expect($blog->status)->toBe('published')
+        ->and($blog->published_at)->not->toBeNull();
 });
 
 test('blog force destroy permanently deletes', function () {
