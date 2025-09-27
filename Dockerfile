@@ -17,7 +17,6 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     supervisor \
-    nginx \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd zip opcache \
     && apt-get clean \
@@ -63,9 +62,6 @@ RUN chown -R www-data:www-data /var/www/html \
 RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views \
     && chown -R www-data:www-data storage \
     && chmod -R 775 storage
-
-# Configure Nginx
-COPY .docker/nginx.conf /etc/nginx/sites-available/default
 
 # Configure Supervisor
 COPY .docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
