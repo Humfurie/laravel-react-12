@@ -15,18 +15,31 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            PermissionSeeder::class,
-            RoleSeeder::class,
-            UserSeeder::class,
-        ]);
+        if (app()->environment('local')) {
+            $this->call([
+                PermissionSeeder::class,
+                RoleSeeder::class,
+                UserSeeder::class,
+            ]);
 
-        $adminRole = Role::where('slug', 'admin')->first();
-        $firstUser = User::first();
+            $adminRole = Role::where('slug', 'admin')->first();
+            $firstUser = User::first();
 
-        if ($adminRole && $firstUser) {
-            $firstUser->roles()->attach($adminRole->id);
+            if ($adminRole && $firstUser) {
+                $firstUser->roles()->attach($adminRole->id);
+            }
+        } else {
+            $adminRole = Role::where('slug', 'admin')->first();
+            $user = User::create([
+                'name' => config('app.user_account_name'),
+                'email' => config('app.user_account_email'),
+                'email_verified_at' => now(),
+                'password' => config('app.user_account_password'),
+            ]);
+
+            if ($adminRole && $user) {
+                $user->roles()->attach($adminRole->id);
+            }
         }
-
     }
 }
