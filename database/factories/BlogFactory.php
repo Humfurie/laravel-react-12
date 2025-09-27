@@ -20,7 +20,7 @@ class BlogFactory extends Factory
      */
     public function definition(): array
     {
-        $title = fake()->word();
+        $title = fake()->unique()->sentence(3);
 
         return [
             'title' => $title,

@@ -1,45 +1,30 @@
+version: '3.8'
+
 services:
   app:
     build:
       context: .
-      dockerfile: ./docker/testing/Dockerfile
-    container_name: laravel-app-ci
-    working_dir: /var/www/html
-    environment:
-      - APP_ENV=testing
-      - APP_DEBUG=true
-      - DB_CONNECTION=mysql
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_DATABASE=laravel_test
-      - DB_USERNAME=root
-      - DB_PASSWORD=password
-      - QUEUE_CONNECTION=database
-      - CACHE_DRIVER=array
-      - SESSION_DRIVER=array
+      dockerfile: Dockerfile.ci
+    container_name: laravel_app_ci
     volumes:
       - .:/var/www/html
+    environment:
+      - APP_ENV=testing
     depends_on:
-      - mysql
-    networks:
-      - ci-network
+      mysql:
+        condition: service_healthy
 
   mysql:
     image: mysql:8.0
-    container_name: mysql-ci
+    container_name: laravel_mysql_ci
     environment:
-      MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: laravel_test
-      MYSQL_USER: laravel
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
     ports:
       - "3306:3306"
-    networks:
-      - ci-network
-    command: --default-authentication-plugin=mysql_native_password
-    tmpfs:
-      - /var/lib/mysql:noexec,nosuid,size=1g
-
-networks:
-  ci-network:
-    driver: bridge
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
