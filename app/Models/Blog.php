@@ -1,0 +1,131 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
+
+/**
+ * @property mixed $isPrimary
+ * @property string $title
+ * @property string $slug
+ * @property string $content
+ * @property string|null $excerpt
+ * @property string $status
+ * @property string|null $featured_image
+ * @property array|null $meta_data
+ * @property int $sort_order
+ * @property Carbon|null $published_at
+ */
+class Blog extends Model
+{
+    /** @use HasFactory<\Database\Factories\BlogFactory> */
+    use HasFactory, SoftDeletes;
+
+    const STATUS_DRAFT = 'draft';
+    const STATUS_PUBLISHED = 'published';
+    const STATUS_PRIVATE = 'private';
+
+    protected $fillable = [
+        'title',
+        'slug',
+        'content',
+        'excerpt',
+        'status',
+        'featured_image',
+        'meta_data',
+        'isPrimary',
+        'sort_order',
+        'view_count',
+        'published_at',
+    ];
+
+    protected $casts = [
+        'meta_data' => 'array',
+        'isPrimary' => 'boolean',
+        'published_at' => 'datetime',
+    ];
+
+    protected $appends = [
+        'status_label',
+        'display_image',
+    ];
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    public function scopePublished($query)
+    {
+        return $query->where('status', self::STATUS_PUBLISHED)
+                    ->where('published_at', '<=', now());
+    }
+
+    public function scopeDraft($query)
+    {
+        return $query->where('status', self::STATUS_DRAFT);
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->status === self::STATUS_PUBLISHED &&
+               $this->published_at &&
+               $this->published_at->isPast();
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === self::STATUS_DRAFT;
+    }
+
+    public function getExcerptAttribute($value): string
+    {
+        if ($value) {
+            return $value;
+        }
+
+        // Generate excerpt from content if not provided
+        $plainText = strip_tags($this->content);
+        return str($plainText)->limit(160);
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match($this->status) {
+            self::STATUS_PUBLISHED => 'Published',
+            self::STATUS_DRAFT => 'Draft',
+            self::STATUS_PRIVATE => 'Private',
+            default => 'Unknown'
+        };
+    }
+
+    public function getDisplayImageAttribute(): string|null
+    {
+        // Return featured image if it exists
+        if ($this->featured_image) {
+            return $this->featured_image;
+        }
+
+        // Extract first image from content if no featured image
+        if ($this->content) {
+            // Try multiple regex patterns to handle various HTML formats
+            $patterns = [
+                '/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i',  // Standard format
+                '/<img[^>]+src=([^"\'\s>]+)[^>]*>/i',        // No quotes
+                '/<img[^>]*src=["\']?([^"\'\s>]+)/i'          // Malformed/incomplete
+            ];
+
+            foreach ($patterns as $pattern) {
+                if (preg_match($pattern, $this->content, $matches) && !empty($matches[1])) {
+                    return $matches[1];
+                }
+            }
+        }
+
+        // Return null if no image found
+        return null;
+    }
+}
