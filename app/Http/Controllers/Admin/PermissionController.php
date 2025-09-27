@@ -50,7 +50,10 @@ class PermissionController extends Controller
             $actions[] = $request->others;
         }
 
-        Permission::create($validated);
+        Permission::create([
+            'resource' => $validated['resource'],
+            'actions' => $actions
+        ]);
 
         return redirect()->route('permissions.index')
             ->with('success', 'Permission created successfully.');
