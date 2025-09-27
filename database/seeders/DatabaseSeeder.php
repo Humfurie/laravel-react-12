@@ -57,6 +57,8 @@ class DatabaseSeeder extends Seeder
                 'email' => config('app.user_account_email'),
                 'email_verified_at' => now(),
                 'password' => config('app.user_account_password'),
+                'mobile' => config('app.user_account_mobile', '09397535416'),
+                'telephone' => config('app.user_account_telephone', '0322669051'),
             ]);
 
             if ($adminRole && $user) {
