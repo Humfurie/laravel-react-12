@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, Search, Globe, Download, Image, FileText, ExternalLink } from 'lucide-react';
+import { Loader2, Search, Globe, Download, FileText, ExternalLink } from 'lucide-react';
 
 interface SearchResult {
     title: string;
@@ -44,6 +43,13 @@ interface WebScraperProps {
         excerpt: string;
         featured_image?: string;
     }) => void;
+}
+
+interface BlogData {
+    title: string;
+    content: string;
+    excerpt: string;
+    featured_image?: string; // Optional property
 }
 
 export default function WebScraper({ onContentGenerated }: WebScraperProps) {
@@ -167,7 +173,7 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
 
             if (data.success) {
                 // Generate blog content from scraped data
-                const blogData = {
+                const blogData: BlogData = {
                     title: data.suggested_title || searchTopic,
                     content: formatContentForBlog(data.summary, data.sources),
                     excerpt: data.summary.substring(0, 200) + '...',
@@ -176,9 +182,7 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                 // If images are available, set the first one as featured image
                 if (data.images && data.images.length > 0) {
                     const firstImage = data.images[0];
-                    // You could download and process the image here
-                    // For now, we'll just use the URL
-                    (blogData as any).featured_image = firstImage.url;
+                    blogData.featured_image = firstImage.url;
                 }
 
                 onContentGenerated(blogData);
@@ -220,12 +224,19 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
         }
     };
 
-    const formatContentForBlog = (summary: string, sources: any[]): string => {
+    const formatContentForBlog = (
+        summary: string,
+        sources: {
+            url: string;
+            title: string;
+            summary: string;
+        }[],
+    ): string => {
         let content = `<p>${summary}</p>`;
 
         if (sources && sources.length > 0) {
             content += `<h2>Sources and References</h2><ul>`;
-            sources.forEach(source => {
+            sources.forEach((source) => {
                 content += `<li><a href="${source.url}" target="_blank">${source.title}</a> - ${source.summary}</li>`;
             });
             content += `</ul>`;
@@ -250,7 +261,7 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
 
             if (data.success) {
                 // Generate blog content with formatted HTML
-                const blogData = {
+                const blogData: BlogData = {
                     title: data.title,
                     content: data.html_content || data.plain_content,
                     excerpt: data.excerpt,
@@ -258,7 +269,8 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
 
                 // If images are available, set the first one as featured image
                 if (data.images && data.images.length > 0) {
-                    (blogData as any).featured_image = data.images[0].url;
+                    const firstImage = data.images[0];
+                    blogData.featured_image = firstImage.url;
                 }
 
                 onContentGenerated(blogData);
@@ -286,15 +298,15 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
             .map(content => `<h3>${content.title}</h3><p>${content.summary || content.content.substring(0, 500)}...</p>`)
             .join('\n');
 
-        const blogData = {
+        const blogData: BlogData = {
             title: combinedTitle,
             content: fullContent,
             excerpt: combinedSummaries.substring(0, 300) + '...',
         };
 
-        // Use first processed image as featured image
+        // Now you can assign directly
         if (processedImages.length > 0) {
-            (blogData as any).featured_image = processedImages[0].public_url;
+            blogData.featured_image = processedImages[0].public_url;
         }
 
         onContentGenerated(blogData);
@@ -341,7 +353,7 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                                     <Checkbox
                                         id="include-images"
                                         checked={includeImages}
-                                        onCheckedChange={setIncludeImages}
+                                        onCheckedChange={(checked) => setIncludeImages(checked === true)}
                                     />
                                     <Label htmlFor="include-images">Include Images</Label>
                                 </div>
@@ -349,7 +361,7 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                                     <Checkbox
                                         id="auto-summarize"
                                         checked={autoSummarize}
-                                        onCheckedChange={setAutoSummarize}
+                                        onCheckedChange={(checked) => setAutoSummarize(checked === true)}
                                     />
                                     <Label htmlFor="auto-summarize">Auto Summarize</Label>
                                 </div>
