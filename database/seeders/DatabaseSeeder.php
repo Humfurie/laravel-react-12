@@ -16,21 +16,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-//        if (app()->environment('local')) {
-//            $this->call([
-//                PermissionSeeder::class,
-//                RoleSeeder::class,
-//                UserSeeder::class,
-//            ]);
-//
-//            $adminRole = Role::where('slug', 'admin')->first();
-//            $firstUser = User::first();
-//
-//            if ($adminRole && $firstUser) {
-//                $firstUser->roles()->attach($adminRole->id);
-//            }
-//        } else {
-            // Production environment - create minimal required data
+        if (app()->environment('local')) {
+            $this->call([
+                PermissionSeeder::class,
+                RoleSeeder::class,
+                UserSeeder::class,
+            ]);
+
+            $adminRole = Role::where('slug', 'admin')->first();
+            $firstUser = User::first();
+
+            if ($adminRole && $firstUser) {
+                $firstUser->roles()->attach($adminRole->id);
+            }
+        } else {
 
             $actions = [
                 'viewAny',  // List/index - view all records
@@ -42,52 +41,27 @@ class DatabaseSeeder extends Seeder
                 'forceDelete', // Permanently delete record
             ];
 
-            // Create permissions
-            Permission::firstOrCreate([
+            Permission::create([
                 'resource' => 'user',
-            ], [
                 'actions' => $actions
             ]);
 
-            Permission::firstOrCreate([
+            Permission::create([
                 'resource' => 'role',
-            ], [
                 'actions' => $actions
             ]);
 
-            Permission::firstOrCreate([
-                'resource' => 'permission',
-            ], [
-                'actions' => $actions
-            ]);
-
-            Permission::firstOrCreate([
-                'resource' => 'blog',
-            ], [
-                'actions' => $actions
-            ]);
-
-            // Create admin role
-            $adminRole = Role::firstOrCreate([
-                'slug' => 'admin'
-            ], [
-                'name' => 'Admin',
-                'description' => 'Administrator role with full access'
-            ]);
-
-            // Create admin user
-            $user = User::firstOrCreate([
-                'email' => config('app.user_account_email', 'admin@example.com')
-            ], [
-                'name' => config('app.user_account_name', 'Admin'),
+            $adminRole = Role::where('slug', 'admin')->first();
+            $user = User::create([
+                'name' => config('app.user_account_name'),
+                'email' => config('app.user_account_email'),
                 'email_verified_at' => now(),
-                'password' => bcrypt(config('app.user_account_password', 'password')),
+                'password' => config('app.user_account_password'),
             ]);
 
-            // Attach admin role to user
-            if ($adminRole && $user && !$user->roles()->where('role_id', $adminRole->id)->exists()) {
+            if ($adminRole && $user) {
                 $user->roles()->attach($adminRole->id);
             }
-//        }
+        }
     }
 }
