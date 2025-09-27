@@ -23,7 +23,7 @@ Route::prefix('permissions')->group(function () {
     Route::delete('/{permission}/force', [PermissionController::class, 'forceDestroy'])->name('permissions.force');
 });
 
-Route::prefix('/admin/about')->group(function () {
+Route::prefix('about')->group(function () {
     Route::get('/', [AboutController::class, 'index'])->name('about.index');
     Route::post('/', [AboutController::class, 'store'])->name('about.store');
     Route::get('/history', [AboutController::class, 'listHistory'])->name('about.history.list');
@@ -34,7 +34,7 @@ Route::prefix('/admin/about')->group(function () {
     Route::patch('/{about}', [AboutController::class, 'setPrimary'])->name('about.set.primary');
 });
 
-Route::prefix('admin/blogs')->group(function () {
+Route::prefix('blogs')->group(function () {
     Route::get('/', [BlogController::class, 'index'])->name('blogs.index');
     Route::get('/create', [BlogController::class, 'create'])->name('blogs.create');
     Route::post('/', [BlogController::class, 'store'])->name('blogs.store');
