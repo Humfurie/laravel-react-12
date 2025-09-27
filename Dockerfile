@@ -1,15 +1,4 @@
-# Multi-stage build for production optimization
-FROM node:18-alpine as node-build
-
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY resources/ resources/
-COPY vite.config.ts tailwind.config.js ./
-RUN npm run build
-
-# Production PHP image
-FROM php:8.4-fpm as production
+FROM php:8.4-fpm
 
 # Set working directory
 WORKDIR /var/www/html
@@ -24,8 +13,11 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libzip-dev \
+    libpq-dev \
     zip \
     unzip \
+    supervisor \
+    nginx \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd zip opcache \
     && apt-get clean \
@@ -33,6 +25,10 @@ RUN apt-get update && apt-get install -y \
 
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
+
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
 
 # Configure PHP for production
 RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
@@ -49,11 +45,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy application files
 COPY . /var/www/html
 
-# Copy built assets from node build stage
-COPY --from=node-build /app/public/build /var/www/html/public/build
-
-# Install PHP dependencies for production
+# Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interaction
+
+# Install Node.js dependencies and build assets
+RUN npm install && npm run build
 
 # Generate optimized class loader
 RUN composer dump-autoload --optimize --classmap-authoritative
@@ -68,8 +64,12 @@ RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions sto
     && chown -R www-data:www-data storage \
     && chmod -R 775 storage
 
-USER www-data
+# Configure Nginx
+COPY .docker/nginx.conf /etc/nginx/sites-available/default
 
-EXPOSE 9000
+# Configure Supervisor
+COPY .docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-CMD ["php-fpm"]
+EXPOSE 80
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
