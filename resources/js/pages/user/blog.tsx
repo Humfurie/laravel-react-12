@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
 import Footer from '@/components/global/Footer';
 import { router } from '@inertiajs/react';
-import { Eye, Calendar, TrendingUp, Star } from 'lucide-react';
+import { Eye, Calendar, Star } from 'lucide-react';
 
 interface Blog {
     id: number;
@@ -31,12 +31,12 @@ interface Blog {
 }
 
 interface Props {
-    primary: Blog[];
-    latest: Blog[];
-    stats: {
-        total_posts: number;
-        total_views: number;
-        featured_count: number;
+    blogs: {
+        data: Blog[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
     };
 }
 
@@ -152,18 +152,16 @@ function EnhancedBlogCard({ blog, size = 'normal', showStats = true }: {
     );
 }
 
-export default function Home({ primary = [], latest = [], stats }: Props) {
-    const trendingBlogs = [...latest].sort(() => Math.random() - 0.5).slice(0, 3);
-
+export default function BlogIndex({ blogs }: Props) {
     const tabs = [
-        { id: 'home', label: 'Home', icon: '🏠', route: '/', active: true },
+        { id: 'home', label: 'Home', icon: '🏠', route: '/' },
         { id: 'contact', label: 'Contact', icon: '📧', route: '/contact' },
-        { id: 'blog', label: 'Blog', icon: '📝', route: '/blog' }
+        { id: 'blog', label: 'Blog', icon: '📝', route: '/blog', active: true }
     ];
 
     return (
         <>
-            <Head title="Home" />
+            <Head title="Blog" />
 
             <div className="min-h-screen bg-muted-white">
                 {/* Navigation Tabs */}
@@ -204,153 +202,89 @@ export default function Home({ primary = [], latest = [], stats }: Props) {
                     </div>
                 </nav>
 
-                {/* Hero Banner */}
-                <section className="bg-gradient-to-br from-brand-orange via-brand-gold to-brand-orange py-24 text-white relative overflow-hidden">
+                {/* Header Section */}
+                <section className="bg-gradient-to-br from-brand-orange via-brand-gold to-brand-orange py-16 text-white relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent"></div>
                     <div className="relative z-10">
                         <div className="container mx-auto px-4">
-                            <div className="text-center space-y-6">
-                                <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-                                    Welcome to <span className="text-yellow-200">Humfurie</span>
+                            <div className="text-center space-y-4">
+                                <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+                                    All Blog Posts
                                 </h1>
-                                <p className="text-xl text-orange-100 max-w-2xl mx-auto leading-relaxed">
-                                    Discover our latest insights, featured content, and trending articles.
-                                    Stay updated with cutting-edge technology and best practices.
+                                <p className="text-lg text-orange-100 max-w-xl mx-auto">
+                                    Browse through all our articles, tutorials, and insights
                                 </p>
-                                <div className="flex justify-center space-x-6 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <TrendingUp className="w-4 h-4" />
-                                        <span>{stats?.total_posts || 0} Total Posts</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Star className="w-4 h-4" />
-                                        <span>{stats?.featured_count || 0} Featured</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Eye className="w-4 h-4" />
-                                        <span>{stats?.total_views?.toLocaleString() || 0} Views</span>
-                                    </div>
+                                <div className="text-sm text-orange-200">
+                                    {blogs.total} post{blogs.total !== 1 ? 's' : ''} found
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* Featured/Primary Posts Banner */}
-                {primary.length > 0 && (
-                    <section className="py-16 bg-white">
-                        <div className="container mx-auto px-4">
-                            <div className="text-center mb-12">
-                                <h2 className="text-4xl font-bold text-brand-black mb-4">
-                                    ⭐ Featured Posts
-                                </h2>
-                                <p className="text-gray-600 text-lg">
-                                    Our handpicked selection of must-read articles
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                {primary.map((blog, index) => (
-                                    <EnhancedBlogCard
-                                        key={blog.id}
-                                        blog={blog}
-                                        size={index === 0 ? 'large' : 'normal'}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-                )}
-
-                {/* Trending This Month */}
-                {latest.length > 0 && (
-                    <section className="py-16 bg-gradient-to-r from-gray-50 to-gray-100">
-                        <div className="container mx-auto px-4">
-                            <div className="text-center mb-12">
-                                <h2 className="text-4xl font-bold text-brand-black mb-4">
-                                    🔥 Trending This Month
-                                </h2>
-                                <p className="text-gray-600 text-lg">
-                                    Most viewed articles with highest engagement
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {trendingBlogs.map((blog, index) => (
-                                    <div key={blog.id} className="relative">
-                                        {index === 0 && (
-                                            <div className="absolute -top-2 -right-2 z-10">
-                                                <Badge className="bg-red-500 text-white animate-pulse rounded-full px-3 py-1">
-                                                    🏆 #1 Trending
-                                                </Badge>
-                                            </div>
-                                        )}
-                                        <EnhancedBlogCard blog={blog} />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-                )}
-
-                {/* Latest Posts Preview */}
+                {/* Blog Posts List */}
                 <section className="py-16 bg-white">
                     <div className="container mx-auto px-4">
-                        <div className="text-center mb-12">
-                            <h2 className="text-4xl font-bold text-brand-black mb-4">
-                                📰 Latest Posts
-                            </h2>
-                            <p className="text-gray-600 text-lg">
-                                Fresh content and recent updates
-                            </p>
-                        </div>
-
-                        {latest.length === 0 ? (
+                        {blogs.data.length === 0 ? (
                             <div className="text-center py-12">
                                 <h3 className="text-2xl font-semibold mb-4 text-brand-black">No posts found</h3>
                                 <p className="text-gray-600">
                                     We're working on some great content. Check back soon!
                                 </p>
+                                <div className="mt-6">
+                                    <Button
+                                        onClick={() => router.visit('/')}
+                                        className="bg-gradient-to-r from-brand-orange to-brand-gold text-white px-6 py-3 rounded-xl"
+                                    >
+                                        Back to Home
+                                    </Button>
+                                </div>
                             </div>
                         ) : (
                             <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                    {latest.slice(0, 6).map((blog) => (
-                                        <EnhancedBlogCard key={blog.id} blog={blog} />
+                                    {blogs.data.map((blog) => (
+                                        <EnhancedBlogCard key={blog.id} blog={blog} showStats={true} />
                                     ))}
                                 </div>
 
-                                {/* View All Button */}
-                                <div className="text-center mt-12">
-                                    <Button
-                                        onClick={() => router.visit('/blog')}
-                                        className="bg-gradient-to-r from-brand-orange to-brand-gold hover:from-brand-orange/90 hover:to-brand-gold/90 text-white px-8 py-4 text-lg rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-                                    >
-                                        View All Blog Posts
-                                    </Button>
-                                </div>
+                                {/* Pagination */}
+                                {blogs.last_page > 1 && (
+                                    <div className="mt-16 flex justify-center">
+                                        <div className="flex gap-2">
+                                            {Array.from({ length: blogs.last_page }, (_, i) => i + 1).map((page) => (
+                                                <button
+                                                    key={page}
+                                                    onClick={() => router.visit(`/blog?page=${page}`)}
+                                                    className={`
+                                                        px-4 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105
+                                                        ${page === blogs.current_page
+                                                            ? 'bg-gradient-to-r from-brand-orange to-brand-gold text-white shadow-xl'
+                                                            : 'bg-white text-gray-600 hover:bg-brand-orange/10 hover:text-brand-orange shadow-md hover:shadow-lg border border-gray-200'
+                                                        }
+                                                    `}
+                                                >
+                                                    {page}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </>
                         )}
                     </div>
                 </section>
 
-                {/* Newsletter Signup */}
-                <section className="py-16 bg-gradient-to-r from-brand-orange to-brand-gold text-white">
+                {/* Back to Home CTA */}
+                <section className="py-12 bg-gray-50">
                     <div className="container mx-auto px-4 text-center">
-                        <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
-                        <p className="text-orange-100 mb-8 text-lg">
-                            Get the latest posts delivered directly to your inbox
-                        </p>
-                        <div className="max-w-md mx-auto flex gap-4">
-                            <input
-                                type="email"
-                                placeholder="Enter your email"
-                                className="flex-1 px-4 py-3 rounded-xl text-gray-900 focus:ring-2 focus:ring-white focus:outline-none shadow-lg"
-                            />
-                            <Button className="bg-white text-brand-orange hover:bg-gray-100 px-6 py-3 rounded-xl shadow-lg">
-                                Subscribe
-                            </Button>
-                        </div>
+                        <p className="text-gray-600 mb-4">Looking for featured content and highlights?</p>
+                        <Button
+                            onClick={() => router.visit('/')}
+                            className="bg-gradient-to-r from-brand-orange to-brand-gold hover:from-brand-orange/90 hover:to-brand-gold/90 text-white px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                        >
+                            ← Back to Home
+                        </Button>
                     </div>
                 </section>
             </div>
