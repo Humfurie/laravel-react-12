@@ -8,8 +8,11 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
     zip \
     unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Install Node.js
@@ -25,8 +28,8 @@ WORKDIR /var/www/html
 # Copy composer files
 COPY composer.json composer.lock ./
 
-# Install PHP dependencies
-RUN composer install --no-scripts --no-autoloader --no-dev
+# Install PHP dependencies (include dev for testing)
+RUN composer install --no-scripts --no-autoloader
 
 # Copy package.json files
 COPY package.json package-lock.json ./

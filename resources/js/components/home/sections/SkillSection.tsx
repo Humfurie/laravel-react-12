@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import {svgs, CATEGORIES} from "@/components/svgs";
-import { JSX, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 
 
