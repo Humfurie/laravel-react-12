@@ -249,3 +249,52 @@ h1 span {
 .custom-scrollbar::-webkit-scrollbar-track {
     background-color: #f5f5f5; /* Optional: light background */
 }
+
+/* Blog content styling */
+.blog-content {
+    @apply max-w-none;
+}
+
+.blog-content h1 {
+    @apply text-3xl font-bold mt-8 mb-4 text-brand-black;
+}
+
+.blog-content h2 {
+    @apply text-2xl font-bold mt-6 mb-3 text-brand-black;
+}
+
+.blog-content h3 {
+    @apply text-xl font-bold mt-5 mb-2 text-brand-black;
+}
+
+.blog-content p {
+    @apply mb-4 leading-relaxed text-foreground;
+}
+
+.blog-content ul, .blog-content ol {
+    @apply mb-4 pl-6;
+}
+
+.blog-content li {
+    @apply mb-2;
+}
+
+.blog-content img {
+    @apply rounded-lg shadow-lg mx-auto my-6 max-w-full h-auto;
+}
+
+.blog-content blockquote {
+    @apply border-l-4 border-brand-orange pl-4 italic my-6 text-muted-foreground;
+}
+
+.blog-content code {
+    @apply bg-muted px-2 py-1 rounded text-sm;
+}
+
+.blog-content pre {
+    @apply bg-muted p-4 rounded-lg overflow-x-auto my-4;
+}
+
+.blog-content a {
+    @apply text-brand-orange hover:underline;
+}
