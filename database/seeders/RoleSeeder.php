@@ -14,7 +14,13 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $role = Role::create(['name' => 'Admin', 'slug' => 'admin']);
+        $role = Role::firstOrCreate(
+            ['slug' => 'admin'],
+            ['name' => 'Admin', 'slug' => 'admin']
+        );
+
+        // Clear existing permissions before re-attaching
+        $role->permissions()->detach();
 
         $permissions = Permission::all();
 

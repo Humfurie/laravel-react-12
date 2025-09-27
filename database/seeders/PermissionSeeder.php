@@ -22,15 +22,26 @@ class PermissionSeeder extends Seeder
             'forceDelete', // Permanently delete record
         ];
 
-        Permission::create([
-            'resource' => 'user',
-            'actions' => $actions
-        ]);
+        Permission::firstOrCreate(
+            ['resource' => 'user'],
+            ['resource' => 'user', 'actions' => $actions]
+        );
 
-        Permission::create([
-            'resource' => 'role',
-            'actions' => $actions
-        ]);
+        Permission::firstOrCreate(
+            ['resource' => 'role'],
+            ['resource' => 'role', 'actions' => $actions]
+        );
+
+        Permission::firstOrCreate(
+            ['resource' => 'blog'],
+            ['resource' => 'blog', 'actions' => $actions]
+        );
+
+        // Create wildcard permission for admin role
+        Permission::firstOrCreate(
+            ['resource' => '*'],
+            ['resource' => '*', 'actions' => ['*']]
+        );
 
         Permission::create([
             'resource' => 'blog',

@@ -9,6 +9,9 @@ services:
     ports:
       - "${APP_PORT:-80}:80"
     volumes:
+      - .:/var/www/html  # Mount entire project for development
+      - /var/www/html/vendor  # Exclude vendor directory (use built version)
+      - /var/www/html/node_modules  # Exclude node_modules (use built version)
       - laravel-storage:/var/www/html/storage
       - ./.docker/nginx.conf:/etc/nginx/sites-available/default
       - ./.docker/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
