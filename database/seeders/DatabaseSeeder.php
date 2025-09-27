@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -29,6 +30,27 @@ class DatabaseSeeder extends Seeder
                 $firstUser->roles()->attach($adminRole->id);
             }
         } else {
+
+            $actions = [
+                'viewAny',  // List/index - view all records
+                'view',     // Show - view single record
+                'create',   // Create new record
+                'update',   // Edit/update existing record
+                'delete',   // Delete record
+                'restore',  // Restore soft-deleted record
+                'forceDelete', // Permanently delete record
+            ];
+
+            Permission::create([
+                'resource' => 'user',
+                'actions' => $actions
+            ]);
+
+            Permission::create([
+                'resource' => 'role',
+                'actions' => $actions
+            ]);
+
             $adminRole = Role::where('slug', 'admin')->first();
             $user = User::create([
                 'name' => config('app.user_account_name'),
