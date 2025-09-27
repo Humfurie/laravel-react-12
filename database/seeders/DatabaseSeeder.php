@@ -16,20 +16,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-//        if (app()->environment('local')) {
-//            $this->call([
-//                PermissionSeeder::class,
-//                RoleSeeder::class,
-//                UserSeeder::class,
-//            ]);
-//
-//            $adminRole = Role::where('slug', 'admin')->first();
-//            $firstUser = User::first();
-//
-//            if ($adminRole && $firstUser) {
-//                $firstUser->roles()->attach($adminRole->id);
-//            }
-//        } else {
+        if (app()->environment('local')) {
+            $this->call([
+                PermissionSeeder::class,
+                RoleSeeder::class,
+                UserSeeder::class,
+            ]);
+
+            $adminRole = Role::where('slug', 'admin')->first();
+            $firstUser = User::first();
+
+            if ($adminRole && $firstUser) {
+                $firstUser->roles()->attach($adminRole->id);
+            }
+        } else {
 
             $actions = [
                 'viewAny',  // List/index - view all records
@@ -63,5 +63,5 @@ class DatabaseSeeder extends Seeder
                 $user->roles()->attach($adminRole->id);
             }
         }
-//    }
+    }
 }
