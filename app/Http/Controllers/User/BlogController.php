@@ -50,7 +50,7 @@ class BlogController extends Controller
 
         // Get total counts and stats
         $totalPosts = Blog::published()->count();
-        $totalViews = Blog::published()->sum('view_count');
+        $totalViews = (int) Blog::published()->sum('view_count');
         $featuredCount = Blog::published()->where('isPrimary', true)->count();
 
         return [
