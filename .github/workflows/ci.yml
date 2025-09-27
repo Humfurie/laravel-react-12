@@ -18,10 +18,13 @@ jobs:
           cp .env.example .env
           echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
           echo "APP_ENV=testing" >> .env
+          echo "DB_CONNECTION=mysql" >> .env
           echo "DB_HOST=mysql" >> .env
+          echo "DB_PORT=3306" >> .env
           echo "DB_DATABASE=laravel_test" >> .env
           echo "DB_USERNAME=root" >> .env
           echo "DB_PASSWORD=password" >> .env
+          echo "VITE_APP_NAME=\${APP_NAME}" >> .env
 
       - name: Build and start services
         run: |
@@ -37,16 +40,11 @@ jobs:
       - name: Install dependencies and setup
         run: |
           docker compose -f docker-compose.ci.yml exec -T app composer install --optimize-autoloader --dev
+          docker compose -f docker-compose.ci.yml exec -T app npm install
+          docker compose -f docker-compose.ci.yml exec -T app npm run build
           docker compose -f docker-compose.ci.yml exec -T app php artisan key:generate --ansi
           docker compose -f docker-compose.ci.yml exec -T app php artisan config:cache
           docker compose -f docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed
-
-      - name: Run tests
-        run: |
-          docker compose -f docker-compose.ci.yml exec -T app php artisan test
-
-      - name: Cleanup
-        run: docker compose -f docker-compose.ci.yml down -v
 
       - name: Debug GD and test a simple image creation
         run: |
@@ -63,3 +61,10 @@ jobs:
               }
             }
           "
+
+      - name: Run tests
+        run: |
+          docker compose -f docker-compose.ci.yml exec -T app php artisan test
+
+      - name: Cleanup
+        run: docker compose -f docker-compose.ci.yml down -v
