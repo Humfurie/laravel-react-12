@@ -7,8 +7,8 @@ import { parseShortcutKeys } from '@/lib/tiptap-utils';
 import { useTiptapEditor } from '@/hooks/use-tiptap-editor';
 
 // --- Tiptap UI ---
-import type { UseImageUploadConfig } from '@/components/tiptap-ui/image-upload-button';
-import { IMAGE_UPLOAD_SHORTCUT_KEY, useImageUpload } from '@/components/tiptap-ui/image-upload-button';
+import { IMAGE_UPLOAD_SHORTCUT_KEY, useImageUpload } from './use-image-upload';
+import type { UseImageUploadConfig } from './use-image-upload';
 
 // --- UI Primitives ---
 import { Badge } from '@/components/tiptap-ui-primitive/badge';

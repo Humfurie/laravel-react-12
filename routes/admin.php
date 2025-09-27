@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AboutController;
+use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 
@@ -31,4 +32,16 @@ Route::prefix('/admin/about')->group(function () {
     Route::delete('/history/{about}/force', [AboutController::class, 'forceDestroy'])->name('about.history.force-destroy');
     Route::patch('/history/{about}', [AboutController::class, 'restore'])->name('about.history.restore')->withTrashed();
     Route::patch('/{about}', [AboutController::class, 'setPrimary'])->name('about.set.primary');
+});
+
+Route::prefix('admin/blogs')->group(function () {
+    Route::get('/', [BlogController::class, 'index'])->name('blogs.index');
+    Route::get('/create', [BlogController::class, 'create'])->name('blogs.create');
+    Route::post('/', [BlogController::class, 'store'])->name('blogs.store');
+    Route::get('/{blog}', [BlogController::class, 'edit'])->name('blogs.edit');
+    Route::put('/{blog}', [BlogController::class, 'update'])->name('blogs.update');
+    Route::delete('/{blog}', [BlogController::class, 'destroy'])->name('blogs.destroy');
+    Route::patch('/{blog}/restore', [BlogController::class, 'restore'])->name('blogs.restore')->withTrashed();
+    Route::delete('/{blog}/force', [BlogController::class, 'forceDestroy'])->name('blogs.force-destroy');
+    Route::post('/upload-image', [BlogController::class, 'uploadImage'])->name('blogs.upload-image');
 });
