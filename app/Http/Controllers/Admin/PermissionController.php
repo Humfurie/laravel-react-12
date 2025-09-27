@@ -27,7 +27,7 @@ class PermissionController extends Controller
                 'required',
                 'string',
                 'max:255',
-                'unique:permissions,resource,'
+                'unique:permissions,resource'
             ],
             'actions' => 'required|array',
         ]);
