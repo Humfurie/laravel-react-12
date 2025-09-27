@@ -66,6 +66,8 @@ RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions sto
 # Configure Supervisor
 COPY .docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Note: nginx.conf is now mounted as volume in docker-compose.yml
+
 EXPOSE 80
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
