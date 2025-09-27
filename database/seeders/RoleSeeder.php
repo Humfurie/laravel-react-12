@@ -14,12 +14,11 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $role = Role::factory()->create(['name' => 'Admin', 'slug' => 'admin']);
+        $role = Role::create(['name' => 'Admin', 'slug' => 'admin']);
 
         $permissions = Permission::all();
 
         foreach ($permissions as $permission) {
-
             $role->permissions()->attach($permission->id, ['actions' => json_encode($permission->actions, JSON_THROW_ON_ERROR)]);
         }
     }
