@@ -238,17 +238,56 @@ export const handleImageUpload = async (
         throw new Error(`File size exceeds maximum allowed (${MAX_FILE_SIZE / (1024 * 1024)}MB)`);
     }
 
-    // For demo/testing: Simulate upload progress. In production, replace the following code
-    // with your own upload implementation.
-    for (let progress = 0; progress <= 100; progress += 10) {
-        if (abortSignal?.aborted) {
-            throw new Error('Upload cancelled');
-        }
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        onProgress?.({ progress });
-    }
+    const formData = new FormData();
+    formData.append('image', file);
 
-    return '/images/tiptap-ui-placeholder-image.jpg';
+    try {
+        // Get CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        if (!csrfToken) {
+            throw new Error('CSRF token not found. Please refresh the page and try again.');
+        }
+
+        const response = await fetch('/admin/blogs/upload-image', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            signal: abortSignal,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+
+            if (response.status === 419) {
+                throw new Error('Session expired. Please refresh the page and try again.');
+            }
+
+            throw new Error(errorData.message || `Upload failed with status ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success || !result.url) {
+            throw new Error(result.message || 'Upload failed');
+        }
+
+        // Simulate progress for better UX
+        onProgress?.({ progress: 100 });
+
+        return result.url;
+    } catch (error) {
+        if (error instanceof Error) {
+            if (error.name === 'AbortError') {
+                throw new Error('Upload cancelled');
+            }
+            throw error;
+        }
+        throw new Error('Upload failed');
+    }
 };
 
 type ProtocolOptions = {
