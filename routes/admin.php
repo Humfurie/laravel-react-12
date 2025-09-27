@@ -44,4 +44,14 @@ Route::prefix('admin/blogs')->group(function () {
     Route::patch('/{blog}/restore', [BlogController::class, 'restore'])->name('blogs.restore')->withTrashed();
     Route::delete('/{blog}/force', [BlogController::class, 'forceDestroy'])->name('blogs.force-destroy');
     Route::post('/upload-image', [BlogController::class, 'uploadImage'])->name('blogs.upload-image');
+
+    // Web scraper routes
+    Route::prefix('scraper')->group(function () {
+        Route::post('/search', [\App\Http\Controllers\Admin\WebScraperController::class, 'search'])->name('scraper.search');
+        Route::post('/search-urls', [\App\Http\Controllers\Admin\WebScraperController::class, 'searchByUrls'])->name('scraper.search-urls');
+        Route::post('/scrape', [\App\Http\Controllers\Admin\WebScraperController::class, 'scrape'])->name('scraper.scrape');
+        Route::post('/formatted-content', [\App\Http\Controllers\Admin\WebScraperController::class, 'getFormattedContent'])->name('scraper.formatted-content');
+        Route::post('/download-images', [\App\Http\Controllers\Admin\WebScraperController::class, 'downloadImages'])->name('scraper.download-images');
+        Route::post('/content-for-blog', [\App\Http\Controllers\Admin\WebScraperController::class, 'getContentForBlog'])->name('scraper.content-for-blog');
+    });
 });
