@@ -8,11 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, ArrowLeft, Upload, X } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CalendarIcon, ArrowLeft, Upload, X, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import React, { useState, useRef } from 'react';
 import AdminLayout from '@/layouts/AdminLayout';
 import { BlogEditor } from '@/components/blog-editor';
+import WebScraper from '@/components/web-scraper';
 import { cn } from '@/lib/utils';
 
 interface BlogFormData {
@@ -173,6 +175,27 @@ export default function CreateBlog() {
         }
     };
 
+    const handleContentGenerated = (generatedData: {
+        title: string;
+        content: string;
+        excerpt: string;
+        featured_image?: string;
+    }) => {
+        setData(prev => ({
+            ...prev,
+            title: generatedData.title,
+            content: generatedData.content,
+            excerpt: generatedData.excerpt,
+            slug: generateSlug(generatedData.title),
+            featured_image: generatedData.featured_image || prev.featured_image,
+            meta_data: {
+                ...prev.meta_data,
+                meta_title: generatedData.title,
+                meta_keywords: generateKeywords(generatedData.title),
+            }
+        }));
+    };
+
     return (
         <AdminLayout>
             <Head title="Create Blog Post" />
@@ -196,11 +219,21 @@ export default function CreateBlog() {
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Post Content</CardTitle>
-                                <CardDescription>The main content of your blog post</CardDescription>
-                            </CardHeader>
+                        <Tabs defaultValue="manual" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="manual">Manual Entry</TabsTrigger>
+                                <TabsTrigger value="scraper">
+                                    <Globe className="w-4 h-4 mr-2" />
+                                    Web Scraper
+                                </TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="manual">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Post Content</CardTitle>
+                                        <CardDescription>The main content of your blog post</CardDescription>
+                                    </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="title">Title *</Label>
@@ -255,7 +288,13 @@ export default function CreateBlog() {
                                     </p>
                                 </div>
                             </CardContent>
-                        </Card>
+                                </Card>
+                            </TabsContent>
+
+                            <TabsContent value="scraper">
+                                <WebScraper onContentGenerated={handleContentGenerated} />
+                            </TabsContent>
+                        </Tabs>
 
                         <Card>
                             <CardHeader>
