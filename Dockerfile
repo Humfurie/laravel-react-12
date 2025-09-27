@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     supervisor \
+    nginx \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd zip opcache \
     && apt-get clean \
@@ -63,10 +64,6 @@ RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions sto
     && chown -R www-data:www-data storage \
     && chmod -R 775 storage
 
-# Configure Supervisor
-COPY .docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Note: nginx.conf is now mounted as volume in docker-compose.yml
 
 EXPOSE 80
 
