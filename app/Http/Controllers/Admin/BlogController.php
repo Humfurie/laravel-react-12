@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBlogRequest;
 use App\Http\Requests\UpdateBlogRequest;
 use App\Models\Blog;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,18 +15,26 @@ use Inertia\Inertia;
 
 class BlogController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        $this->authorize('viewAny', Blog::class);
+
         $blogs = Blog::query()
             ->withTrashed()
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return Inertia::render('admin/blog', [
-            'blogs' => $blogs
+            'blogs' => $blogs,
+            'can' => [
+                'create' => auth()->user()->can('create', Blog::class),
+                'update' => true, // Will be checked per blog item
+                'delete' => true, // Will be checked per blog item
+            ]
         ]);
     }
 
