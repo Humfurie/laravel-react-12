@@ -16,54 +16,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Always run core seeders (permissions, roles, admin user)
+        $this->call([
+            PermissionSeeder::class,
+            RoleSeeder::class,
+            UserSeeder::class,
+        ]);
+
+        // Only run demo/fake data seeders in local environment
         if (app()->environment('local')) {
             $this->call([
-                PermissionSeeder::class,
-                RoleSeeder::class,
-                UserSeeder::class,
+                BlogSeeder::class,
+                // Add other demo data seeders here when created
+                // AboutSeeder::class,
+                // SkillsSeeder::class,
+                // ExperienceSeeder::class,
             ]);
-
-            $adminRole = Role::where('slug', 'admin')->first();
-            $firstUser = User::first();
-
-            if ($adminRole && $firstUser) {
-                $firstUser->roles()->attach($adminRole->id);
-            }
-        } else {
-
-            $actions = [
-                'viewAny',  // List/index - view all records
-                'view',     // Show - view single record
-                'create',   // Create new record
-                'update',   // Edit/update existing record
-                'delete',   // Delete record
-                'restore',  // Restore soft-deleted record
-                'forceDelete', // Permanently delete record
-            ];
-
-            Permission::create([
-                'resource' => 'user',
-                'actions' => $actions
-            ]);
-
-            Permission::create([
-                'resource' => 'role',
-                'actions' => $actions
-            ]);
-
-            $adminRole = Role::where('slug', 'admin')->first();
-            $user = User::create([
-                'name' => config('app.user_account_name'),
-                'email' => config('app.user_account_email'),
-                'email_verified_at' => now(),
-                'password' => config('app.user_account_password'),
-                'mobile' => config('app.user_account_mobile', '09397535416'),
-                'telephone' => config('app.user_account_telephone', '0322669051'),
-            ]);
-
-            if ($adminRole && $user) {
-                $user->roles()->attach($adminRole->id);
-            }
         }
     }
 }
