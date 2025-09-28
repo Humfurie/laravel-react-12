@@ -9,9 +9,23 @@ services:
     ports:
       - "${APP_PORT:-80}:80"
     volumes:
-      - .:/var/www/html  # Mount entire project for development
-      - /var/www/html/vendor  # Exclude vendor directory (use built version)
-      - /var/www/html/node_modules  # Exclude node_modules (use built version)
+      # Mount specific directories and files for development
+      - ./app:/var/www/html/app
+      - ./config:/var/www/html/config
+      - ./database:/var/www/html/database
+      - ./resources:/var/www/html/resources
+      - ./routes:/var/www/html/routes
+      - ./bootstrap:/var/www/html/bootstrap
+      - ./.env:/var/www/html/.env
+      - ./composer.json:/var/www/html/composer.json
+      - ./composer.lock:/var/www/html/composer.lock
+      - ./package.json:/var/www/html/package.json
+      - ./package-lock.json:/var/www/html/package-lock.json
+      # Keep these from the built image
+      - /var/www/html/vendor  # Use built vendor
+      - /var/www/html/node_modules  # Use built node_modules
+      - /var/www/html/public/build  # Use built assets
+      # Storage and config
       - laravel-storage:/var/www/html/storage
       - ./.docker/nginx.conf:/etc/nginx/sites-available/default
       - ./.docker/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf

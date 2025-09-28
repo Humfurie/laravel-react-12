@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('status')->default('draft'); // draft, published, private
             $table->string('featured_image')->nullable(); // Path to featured image
             $table->json('meta_data')->nullable(); // SEO and other metadata
+            $table->json('tags')->nullable(); // Tags for the blog post
             $table->boolean('isPrimary')->default(false);
             $table->integer('sort_order')->default(0);
             $table->unsignedInteger('view_count')->default(0);

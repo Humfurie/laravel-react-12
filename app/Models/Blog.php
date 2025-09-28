@@ -36,6 +36,7 @@ class Blog extends Model
         'status',
         'featured_image',
         'meta_data',
+        'tags',
         'isPrimary',
         'sort_order',
         'view_count',
@@ -44,6 +45,7 @@ class Blog extends Model
 
     protected $casts = [
         'meta_data' => 'array',
+        'tags' => 'array',
         'isPrimary' => 'boolean',
         'published_at' => 'datetime',
     ];

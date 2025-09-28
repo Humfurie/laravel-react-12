@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
 import Footer from '@/components/global/Footer';
 import { router } from '@inertiajs/react';
-import { Eye, Calendar, TrendingUp, Star } from 'lucide-react';
+import { Eye, Calendar, TrendingUp, Star, Home, Mail, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface Blog {
     id: number;
@@ -154,52 +155,74 @@ function EnhancedBlogCard({ blog, size = 'normal', showStats = true }: {
 
 export default function Home({ primary = [], latest = [], stats }: Props) {
     const trendingBlogs = [...latest].sort(() => Math.random() - 0.5).slice(0, 3);
+    const [isVisible, setIsVisible] = useState(true);
+    const [activeItem, setActiveItem] = useState('home');
 
-    const tabs = [
-        { id: 'home', label: 'Home', icon: '🏠', route: '/', active: true },
-        { id: 'contact', label: 'Contact', icon: '📧', route: '/contact' },
-        { id: 'blog', label: 'Blog', icon: '📝', route: '/blog' }
+    useEffect(() => {
+        let lastScrollY = window.scrollY;
+
+        const updateScrollDirection = () => {
+            const scrollY = window.scrollY;
+            const direction = scrollY > lastScrollY ? "down" : "up";
+            if (direction !== (isVisible ? "up" : "down")) {
+                setIsVisible(direction === "up" || scrollY < 50);
+            }
+            lastScrollY = scrollY > 0 ? scrollY : 0;
+        };
+
+        window.addEventListener("scroll", updateScrollDirection);
+        return () => window.removeEventListener("scroll", updateScrollDirection);
+    }, [isVisible]);
+
+    const navItems = [
+        { id: 'home', label: 'Home', icon: Home, route: '/', showIcon: true },
+        { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
+        { id: 'contact', label: 'Contact', icon: Mail, route: '/contact', showIcon: true }
     ];
 
     return (
         <>
             <Head title="Home" />
 
-            <div className="min-h-screen bg-muted-white">
-                {/* Navigation Tabs */}
-                <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-lg border-b border-brand-orange/10">
-                    <div className="container mx-auto px-4">
-                        <div className="flex items-center justify-between h-16">
-                            {/* Logo */}
-                            <div className="flex items-center space-x-8">
-                                <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-brand-orange to-brand-gold rounded-2xl flex items-center justify-center text-white font-bold shadow-xl">
-                                        HS
-                                    </div>
-                                    <span className="font-bold text-2xl text-brand-black">Humfurie</span>
-                                </Link>
-                            </div>
+            <div className="min-h-screen bg-gray-50">
+                {/* Floating Navbar */}
+                <nav
+                    className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out ${
+                        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+                    }`}
+                >
+                    <div className="bg-white/80 backdrop-blur-md rounded-full px-6 py-4 shadow-lg border border-white/20">
+                        <div className="flex items-center space-x-3">
+                            {navItems.map((item, index) => {
+                                const Icon = item.icon;
+                                const isActive = activeItem === item.id;
 
-                            {/* Navigation Tabs */}
-                            <div className="flex space-x-1">
-                                {tabs.map((tab) => (
+                                return (
                                     <Link
-                                        key={tab.id}
-                                        href={tab.route}
-                                        className={`
-                                            px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300
-                                            hover:bg-brand-orange/10 hover:text-brand-orange hover:shadow-lg transform hover:scale-105
-                                            ${tab.active
-                                                ? 'bg-gradient-to-r from-brand-orange to-brand-gold text-white shadow-xl'
-                                                : 'text-brand-black/70 bg-white/50 hover:bg-white'
-                                            }
-                                        `}
+                                        key={item.id}
+                                        href={item.route}
+                                        onClick={() => setActiveItem(item.id)}
+                                        className={`group relative px-5 py-3 rounded-full transition-all duration-200 flex items-center space-x-2 ${
+                                            isActive
+                                                ? 'bg-orange-500 text-white shadow-md scale-105'
+                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                        }`}
+                                        title={item.label}
                                     >
-                                        <span className="mr-2">{tab.icon}</span>
-                                        {tab.label}
+                                        {/* Desktop: Show both icon and text */}
+                                        <Icon size={20} className="transition-transform duration-200 group-hover:scale-110" />
+                                        <span className="font-medium text-sm hidden sm:block">{item.label}</span>
+
+                                        {/* Mobile tooltip - only for icon-only buttons */}
+                                        <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none sm:hidden">
+                                            <div className="bg-gray-900 text-white text-xs py-1 px-2 rounded whitespace-nowrap">
+                                                {item.label}
+                                            </div>
+                                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent border-b-gray-900"></div>
+                                        </div>
                                     </Link>
-                                ))}
-                            </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </nav>
