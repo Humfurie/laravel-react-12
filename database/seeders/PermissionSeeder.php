@@ -42,16 +42,5 @@ class PermissionSeeder extends Seeder
             ['resource' => '*'],
             ['resource' => '*', 'actions' => ['*']]
         );
-
-        Permission::create([
-            'resource' => 'blog',
-            'actions' => $actions
-        ]);
-
-        // Create wildcard permission for admin role
-        Permission::create([
-            'resource' => '*',
-            'actions' => ['*']
-        ]);
     }
 }
