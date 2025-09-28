@@ -180,7 +180,25 @@ export default function BlogIndex({ blogs }: Props) {
 
     return (
         <>
-            <Head title="Blog" />
+            <Head title="Blog">
+                <meta name="description" content="Browse through all our articles, tutorials, and insights. Discover the latest trends and best practices in technology and development." />
+
+                {/* Open Graph Meta Tags for Social Media */}
+                <meta property="og:title" content="Blog - All Posts" />
+                <meta property="og:description" content="Browse through all our articles, tutorials, and insights. Discover the latest trends and best practices in technology and development." />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+                <meta property="og:image" content="/images/og-default.jpg" />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
+                <meta property="og:image:alt" content="Blog - Technology Articles and Insights" />
+
+                {/* Twitter Card Meta Tags */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Blog - All Posts" />
+                <meta name="twitter:description" content="Browse through all our articles, tutorials, and insights. Discover the latest trends and best practices in technology and development." />
+                <meta name="twitter:image" content="/images/og-default.jpg" />
+            </Head>
 
             <div className="min-h-screen bg-muted-white">
                 {/* Floating Navbar */}
@@ -267,7 +285,7 @@ export default function BlogIndex({ blogs }: Props) {
                             <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                     {blogs.data.map((blog) => (
-                                        <EnhancedBlogCard key={blog.id} blog={blog} showStats={true} />
+                                        <EnhancedBlogCard key={String(blog.id)} blog={blog} showStats={true} />
                                     ))}
                                 </div>
 

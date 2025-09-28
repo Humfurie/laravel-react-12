@@ -143,7 +143,7 @@ export function useLinkHandler(props: LinkHandlerProps) {
         (target: string = '_blank', features: string = 'noopener,noreferrer') => {
             if (!url) return;
 
-            const safeUrl = sanitizeUrl(url, window.location.href);
+            const safeUrl = sanitizeUrl(url, typeof window !== 'undefined' ? window.location.href : '');
             if (safeUrl !== '#') {
                 window.open(safeUrl, target, features);
             }

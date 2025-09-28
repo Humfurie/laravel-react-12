@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, ArrowLeft, Upload, X } from 'lucide-react';
+import { CalendarIcon, ArrowLeft, Upload, X, Plus } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import React, { useState, useRef } from 'react';
 import AdminLayout from '@/layouts/AdminLayout';
@@ -28,6 +28,7 @@ interface Blog {
         meta_description?: string;
         meta_keywords?: string;
     } | null;
+    tags: string[] | null;
     isPrimary: boolean;
     sort_order: number;
     published_at: string | null;
@@ -42,6 +43,7 @@ export default function EditBlog({ blog }: Props) {
         blog.published_at ? parseISO(blog.published_at) : undefined
     );
     const [uploading, setUploading] = useState(false);
+    const [tagInput, setTagInput] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { data, setData, put, processing, errors } = useForm({
@@ -56,6 +58,7 @@ export default function EditBlog({ blog }: Props) {
             meta_description: blog.meta_data?.meta_description || '',
             meta_keywords: blog.meta_data?.meta_keywords || '',
         },
+        tags: blog.tags || [],
         isPrimary: blog.isPrimary,
         sort_order: blog.sort_order,
         published_at: blog.published_at || '',
@@ -151,6 +154,24 @@ export default function EditBlog({ blog }: Props) {
         }
     };
 
+    const addTag = () => {
+        if (tagInput.trim() && !data.tags.includes(tagInput.trim())) {
+            setData('tags', [...data.tags, tagInput.trim()]);
+            setTagInput('');
+        }
+    };
+
+    const removeTag = (tagToRemove: string) => {
+        setData('tags', data.tags.filter(tag => tag !== tagToRemove));
+    };
+
+    const handleTagKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addTag();
+        }
+    };
+
     return (
         <AdminLayout>
             <Head title={`Edit: ${blog.title}`} />
@@ -203,7 +224,7 @@ export default function EditBlog({ blog }: Props) {
                                     />
                                     {errors.slug && <p className="text-sm text-red-500">{errors.slug}</p>}
                                     <p className="text-xs text-muted-foreground">
-                                        URL: {window.location.origin}/blog/{data.slug || 'post-slug'}
+                                        URL: {typeof window !== 'undefined' ? window.location.origin : ''}/blog/{data.slug || 'post-slug'}
                                     </p>
                                 </div>
 
@@ -230,6 +251,50 @@ export default function EditBlog({ blog }: Props) {
                                     {errors.excerpt && <p className="text-sm text-red-500">{errors.excerpt}</p>}
                                     <p className="text-xs text-muted-foreground">
                                         If left empty, an excerpt will be generated from the content
+                                    </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="tags">Tags</Label>
+                                    <div className="flex gap-2">
+                                        <Input
+                                            id="tags"
+                                            value={tagInput}
+                                            onChange={(e) => setTagInput(e.target.value)}
+                                            onKeyDown={handleTagKeyDown}
+                                            placeholder="Enter a tag and press Enter"
+                                            className={errors.tags ? 'border-red-500' : ''}
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={addTag}
+                                            disabled={!tagInput.trim()}
+                                        >
+                                            <Plus className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                    {errors.tags && <p className="text-sm text-red-500">{errors.tags}</p>}
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {data.tags.map((tag) => (
+                                            <span
+                                                key={String(tag)}
+                                                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                                            >
+                                                {tag}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeTag(tag)}
+                                                    className="ml-1 hover:text-blue-600"
+                                                >
+                                                    <X className="h-3 w-3" />
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Press Enter or click + to add tags. Tags help organize and categorize your posts.
                                     </p>
                                 </div>
                             </CardContent>
