@@ -14,6 +14,7 @@ test('it has correct fillable attributes', function () {
         'status',
         'featured_image',
         'meta_data',
+        'tags',
         'isPrimary',
         'sort_order',
         'view_count',
