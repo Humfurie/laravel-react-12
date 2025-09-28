@@ -28,7 +28,7 @@ services:
       # Storage and config
       - laravel-storage:/var/www/html/storage
       - ./.docker/nginx.prod.conf:/etc/nginx/sites-available/default
-      - ./.docker/supervisord.prod.conf:/etc/supervisor/conf.d/supervisord.prod.conf
+      - ./.docker/supervisord.prod.conf:/etc/supervisor/conf.d/supervisord.conf
     env_file:
       - .env.production
     environment:
