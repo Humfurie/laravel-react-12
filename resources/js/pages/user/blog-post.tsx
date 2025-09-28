@@ -75,7 +75,7 @@ export default function BlogPost({ blog }: Props) {
                 <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
                 {blog.display_image && (
                     <>
-                        <meta property="og:image" content={String(blog.display_image)} />
+                        <meta property="og:image" content={blog.display_image} />
                         <meta property="og:image:width" content="1200" />
                         <meta property="og:image:height" content="630" />
                         <meta property="og:image:alt" content={String(blog.title || '')} />
