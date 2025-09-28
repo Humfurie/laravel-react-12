@@ -21,7 +21,7 @@ class BlogController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', Blog::class);
+//        $this->authorize('viewAny', Blog::class);
 
         $blogs = Blog::query()
             ->withTrashed()
@@ -30,11 +30,11 @@ class BlogController extends Controller
 
         return Inertia::render('admin/blog', [
             'blogs' => $blogs,
-            'can' => [
-                'create' => auth()->user()->can('create', Blog::class),
-                'update' => true, // Will be checked per blog item
-                'delete' => true, // Will be checked per blog item
-            ]
+//            'can' => [
+//                'create' => auth()->user()->can('create', Blog::class),
+//                'update' => true, // Will be checked per blog item
+//                'delete' => true, // Will be checked per blog item
+//            ]
         ]);
     }
 
