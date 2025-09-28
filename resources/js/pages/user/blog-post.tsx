@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, User, Home as HomeIcon, FileText, Mail } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Home as HomeIcon, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import Footer from '@/components/global/Footer';
 import { useState, useEffect } from 'react';
@@ -55,7 +55,6 @@ export default function BlogPost({ blog }: Props) {
     const navItems = [
         { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true },
         { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
-        { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true }
     ];
     return (
         <>
