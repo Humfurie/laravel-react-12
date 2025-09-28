@@ -58,14 +58,14 @@ export default function BlogPost({ blog }: Props) {
     ];
     return (
         <>
-            <Head title={String(blog.meta_data?.meta_title || blog.title || '')}>
+            <Head title={blog.meta_data?.meta_title || blog.title}>
                 <meta
                     name="description"
-                    content={String(blog.meta_data?.meta_description || blog.excerpt || '')}
+                    content={blog.meta_data?.meta_description || blog.excerpt || ''}
                 />
                 <meta
                     name="keywords"
-                    content={String(blog.meta_data?.meta_keywords || '')}
+                    content={blog.meta_data?.meta_keywords || ''}
                 />
 
                 {/* Open Graph Meta Tags for Social Media */}
@@ -87,7 +87,7 @@ export default function BlogPost({ blog }: Props) {
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={String(blog.meta_data?.meta_title || blog.title || '')} />
                 <meta name="twitter:description" content={String(blog.meta_data?.meta_description || blog.excerpt || '')} />
-                {blog.display_image && <meta name="twitter:image" content={String(blog.display_image)} />}
+                {blog.display_image && <meta name="twitter:image" content={blog.display_image} />}
             </Head>
 
             <div className="min-h-screen bg-muted-white">
