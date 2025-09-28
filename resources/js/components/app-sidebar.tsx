@@ -26,17 +26,17 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'User Management',
-        href: '/users',
+        href: '/admin/users',
         icon: LayoutGrid,
     },
     {
         title: 'Role Management',
-        href: '/roles',
+        href: '/admin/roles',
         icon: LayoutGrid,
     },
     {
         title: 'Permission Management',
-        href: '/permissions',
+        href: '/admin/permissions',
         icon: LayoutGrid,
     },
 ];

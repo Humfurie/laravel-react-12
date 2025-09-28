@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\UserController;
 
 Route::prefix('roles')->group(function () {
     Route::get('/', [RoleController::class, 'index'])->name('roles.index');
@@ -12,6 +13,15 @@ Route::prefix('roles')->group(function () {
     Route::delete('/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
     Route::patch('/{role}/restore', [RoleController::class, 'restore'])->name('roles.restore')->withTrashed();
     Route::delete('/{role}/force', [RoleController::class, 'forceDestroy'])->name('roles.forceDestroy');
+});
+
+Route::prefix('users')->group(function () {
+    Route::get('/', [UserController::class, 'index'])->name('users.index');
+    Route::post('/', [UserController::class, 'store'])->name('users.store');
+    Route::put('/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::patch('/{user}/restore', [UserController::class, 'restore'])->name('users.restore')->withTrashed();
+    Route::delete('/{user}/force', [UserController::class, 'forceDestroy'])->name('users.forceDestroy');
 });
 
 Route::prefix('permissions')->group(function () {
