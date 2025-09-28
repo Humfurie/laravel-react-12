@@ -43,7 +43,7 @@ RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Copy application files
-COPY . /var/www/html
+COPY ../.. /var/www/html
 
 # Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interaction
