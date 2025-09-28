@@ -17,7 +17,7 @@ test('admin can get all role', function () {
 
     $this->actingAs($user);
 
-    $response = $this->get('/roles');
+    $response = $this->get('/admin/roles');
 
     $response->assertStatus(200)
         ->assertInertia(fn(AssertableInertia $page) => $page
@@ -61,10 +61,10 @@ test('admin can create role', function () {
         'permissions' => ['user.viewAny', 'user.view', 'role.viewAny', 'role.view']
     ];
 
-    $response = $this->post('/roles', $inputRole);
+    $response = $this->post('/admin/roles', $inputRole);
 
     $response->assertStatus(302)
-        ->assertRedirect('/roles');
+        ->assertRedirect('/admin/roles');
 
     $this->assertDatabaseHas('roles', [
         'name' => $inputRole['name'],
@@ -124,10 +124,10 @@ test('admin can update role', function () {
         'permissions' => ['user.viewAny', 'user.view', 'role.viewAny', 'role.view']
     ];
 
-    $response = $this->put("/roles/$userRole->slug", $updatedData);
+    $response = $this->put("/admin/roles/$userRole->slug", $updatedData);
 
     $response->assertStatus(302)
-        ->assertRedirect('/roles');
+        ->assertRedirect('/admin/roles');
 
     $this->assertDatabaseHas('roles', [
         'id' => $userRole->id,
@@ -183,10 +183,10 @@ test('admin can delete role', function () {
 
     $this->actingAs($user);
 
-    $response = $this->delete("/roles/$adminRole->slug");
+    $response = $this->delete("/admin/roles/$adminRole->slug");
 
     $response->assertStatus(302)
-        ->assertRedirect('/roles');
+        ->assertRedirect('/admin/roles');
 
     $this->assertSoftDeleted('roles', [
         'id' => $adminRole->id
@@ -241,10 +241,10 @@ test('admin can restore role', function () {
 
     $userRole->delete();
 
-    $response = $this->patch("roles/$userRole->slug/restore");
+    $response = $this->patch("/admin/roles/$userRole->slug/restore");
 
     $response->assertStatus(302)
-        ->assertRedirect('/roles');
+        ->assertRedirect('/admin/roles');
 
     // Assert that the role is no longer soft-deleted
     $this->assertDatabaseHas('roles', [
@@ -303,10 +303,10 @@ test('admin can force delete role', function () {
         'actions' => json_encode(['viewAny', 'view'], JSON_THROW_ON_ERROR)
     ]);
 
-    $response = $this->delete("/roles/$userRole->slug/force");
+    $response = $this->delete("/admin/roles/$userRole->slug/force");
 
     $response->assertStatus(302)
-        ->assertRedirect('/roles');
+        ->assertRedirect('/admin/roles');
 
     $this->assertDatabaseMissing('roles', [
         'id' => $userRole->id

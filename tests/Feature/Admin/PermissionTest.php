@@ -25,7 +25,7 @@ test('admin can get all permissions', function () {
 
     $this->actingAs($user);
 
-    $response = $this->get('/permissions');
+    $response = $this->get('/admin/permissions');
 
     $response->assertStatus(200)
         ->assertInertia(fn(AssertableInertia $page) => $page
@@ -56,10 +56,10 @@ test('admin can create permissions', function () {
         'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'],
     ];
 
-    $response = $this->post('/permissions', $inputPermission);
+    $response = $this->post('/admin/permissions', $inputPermission);
 
     $response->assertStatus(302)
-        ->assertRedirect('/permissions');
+        ->assertRedirect('/admin/permissions');
 
     $permission = Permission::where('resource', $inputPermission['resource'])->first();
 
@@ -96,10 +96,10 @@ test('admin can update permissions', function () {
         'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
     ];
 
-    $response = $this->put("/permissions/$permission->id", $updatedData);
+    $response = $this->put("/admin/permissions/$permission->id", $updatedData);
 
     $response->assertStatus(302)
-        ->assertRedirect('/permissions');
+        ->assertRedirect('/admin/permissions');
 
     $permission = Permission::where('resource', $updatedData['resource'])->first();
 
@@ -132,10 +132,10 @@ test('admin can delete permissions', function () {
 
     $permission = Permission::factory()->create();
 
-    $response = $this->delete("/permissions/$permission->id");
+    $response = $this->delete("/admin/permissions/$permission->id");
 
     $response->assertStatus(302)
-        ->assertRedirect('/permissions');
+        ->assertRedirect('/admin/permissions');
 
     $this->assertSoftDeleted('permissions', [
         'id' => $permission->id
@@ -158,10 +158,10 @@ test('admin can force delete permissions', function () {
 
     $permission = Permission::factory()->create();
 
-    $response = $this->delete("/permissions/$permission->id/force");
+    $response = $this->delete("/admin/permissions/$permission->id/force");
 
     $response->assertStatus(302)
-        ->assertRedirect('/permissions');
+        ->assertRedirect('/admin/permissions');
 
     $this->assertDatabaseMissing('permissions', [
         'id' => $permission->id
@@ -185,10 +185,10 @@ test('admin can restore permissions', function () {
 
     $permission = Permission::factory()->create();
 
-    $response = $this->patch("permissions/$permission->id/restore");
+    $response = $this->patch("/admin/permissions/$permission->id/restore");
 
     $response->assertStatus(302)
-        ->assertRedirect('/permissions');
+        ->assertRedirect('/admin/permissions');
 
     // Assert that the role is no longer soft-deleted
     $this->assertDatabaseHas('permissions', [
