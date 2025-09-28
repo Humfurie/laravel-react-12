@@ -120,7 +120,25 @@ export default function Home({ primary = [], latest = [] }: Props): JSX.Element 
 
     return (
         <>
-            <Head title="Contact" />
+            <Head title="Portfolio & Blog">
+                <meta name="description" content="Professional portfolio and blog featuring expertise in software development, design, and technology insights." />
+
+                {/* Open Graph Meta Tags for Social Media */}
+                <meta property="og:title" content="Portfolio & Blog" />
+                <meta property="og:description" content="Professional portfolio and blog featuring expertise in software development, design, and technology insights." />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+                <meta property="og:image" content="/images/og-default.jpg" />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
+                <meta property="og:image:alt" content="Portfolio & Blog - Professional Development Portfolio" />
+
+                {/* Twitter Card Meta Tags */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Portfolio & Blog" />
+                <meta name="twitter:description" content="Professional portfolio and blog featuring expertise in software development, design, and technology insights." />
+                <meta name="twitter:image" content="/images/og-default.jpg" />
+            </Head>
 
             {/* Navigation Tabs */}
             {/* Floating Navbar */}
@@ -188,7 +206,7 @@ export default function Home({ primary = [], latest = [] }: Props): JSX.Element 
                             <h3 className="text-xl font-semibold mb-6 text-center">Featured Posts</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {primary.map((blog) => (
-                                    <BlogCard key={blog.id} blog={blog} />
+                                    <BlogCard key={String(blog.id)} blog={blog} />
                                 ))}
                             </div>
                         </div>
@@ -200,7 +218,7 @@ export default function Home({ primary = [], latest = [] }: Props): JSX.Element 
                             <h3 className="text-xl font-semibold mb-6 text-center">Latest Posts</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {latest.slice(0, 6).map((blog) => (
-                                    <BlogCard key={blog.id} blog={blog} />
+                                    <BlogCard key={String(blog.id)} blog={blog} />
                                 ))}
                             </div>
                         </div>

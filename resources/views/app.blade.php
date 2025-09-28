@@ -33,6 +33,26 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
+        {{-- Open Graph Meta Tags for Social Media --}}
+        <meta property="og:site_name" content="{{ config('app.name', 'Laravel') }}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
+
+        {{-- Default Open Graph values (will be overridden by Inertia pages) --}}
+        <meta property="og:title" content="{{ config('app.name', 'Laravel') }}">
+        <meta property="og:description" content="Professional portfolio and blog">
+        <meta property="og:image" content="{{ asset('images/og-default.jpg') }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="{{ config('app.name', 'Laravel') }} - Portfolio and Blog">
+
+        {{-- Twitter Card Meta Tags --}}
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ config('app.name', 'Laravel') }}">
+        <meta name="twitter:description" content="Professional portfolio and blog">
+        <meta name="twitter:image" content="{{ asset('images/og-default.jpg') }}">
+
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
