@@ -1,9 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, User } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Home as HomeIcon, FileText, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import Footer from '@/components/global/Footer';
+import { useState, useEffect } from 'react';
 
 interface Blog {
     id: number;
@@ -32,6 +33,30 @@ interface Props {
     blog: Blog;
 }
 export default function BlogPost({ blog }: Props) {
+    const [isVisible, setIsVisible] = useState(true);
+    const [activeItem, setActiveItem] = useState('blog');
+
+    useEffect(() => {
+        let lastScrollY = window.scrollY;
+
+        const updateScrollDirection = () => {
+            const scrollY = window.scrollY;
+            const direction = scrollY > lastScrollY ? "down" : "up";
+            if (direction !== (isVisible ? "up" : "down")) {
+                setIsVisible(direction === "up" || scrollY < 50);
+            }
+            lastScrollY = scrollY > 0 ? scrollY : 0;
+        };
+
+        window.addEventListener("scroll", updateScrollDirection);
+        return () => window.removeEventListener("scroll", updateScrollDirection);
+    }, [isVisible]);
+
+    const navItems = [
+        { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true },
+        { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
+        { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true }
+    ];
     return (
         <>
             <Head title={blog.meta_data?.meta_title || blog.title}>
@@ -46,6 +71,47 @@ export default function BlogPost({ blog }: Props) {
             </Head>
 
             <div className="min-h-screen bg-muted-white">
+                {/* Floating Navbar */}
+                <nav
+                    className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out ${
+                        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+                    }`}
+                >
+                    <div className="bg-white/80 backdrop-blur-md rounded-full px-6 py-4 shadow-lg border border-white/20">
+                        <div className="flex items-center space-x-3">
+                            {navItems.map((item, index) => {
+                                const Icon = item.icon;
+                                const isActive = activeItem === item.id;
+
+                                return (
+                                    <Link
+                                        key={`${item.id}-${index}`}
+                                        href={item.route}
+                                        onClick={() => setActiveItem(item.id)}
+                                        className={`group relative px-5 py-3 rounded-full transition-all duration-200 flex items-center space-x-2 ${
+                                            isActive
+                                                ? 'bg-orange-500 text-white shadow-md scale-105'
+                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                        }`}
+                                        title={item.label}
+                                    >
+                                        {/* Desktop: Show both icon and text */}
+                                        <Icon size={20} className="transition-transform duration-200 group-hover:scale-110" />
+                                        <span className="font-medium text-sm hidden sm:block">{item.label}</span>
+
+                                        {/* Mobile tooltip - only for icon-only buttons */}
+                                        <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none sm:hidden">
+                                            <div className="bg-gray-900 text-white text-xs py-1 px-2 rounded whitespace-nowrap">
+                                                {item.label}
+                                            </div>
+                                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent border-b-gray-900"></div>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </nav>
                 {/* Hero Section with Featured Image */}
                 <section className={`relative overflow-hidden ${blog.display_image ? '' : 'bg-gradient-to-br from-brand-orange via-brand-gold to-brand-orange'}`}>
                     {/* Featured Image Background */}
