@@ -4,7 +4,7 @@ use App\Http\Controllers\User\BlogController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Home page with featured content
+// Home page - Profile and Portfolio
 Route::get('/', function () {
     $blogController = new BlogController();
     $blogs = $blogController->getPrimaryAndLatest();
@@ -16,13 +16,6 @@ Route::get('/', function () {
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{blog}', [BlogController::class, 'show'])->name('blog.show');
 
-// Contact page
-Route::get('/contact', function () {
-    $blogController = new BlogController();
-    $blogs = $blogController->getPrimaryAndLatest();
-
-    return Inertia::render('user/contact', $blogs);
-})->name('contact');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
