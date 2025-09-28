@@ -58,15 +58,36 @@ export default function BlogPost({ blog }: Props) {
     ];
     return (
         <>
-            <Head title={blog.meta_data?.meta_title || blog.title}>
+            <Head title={String(blog.meta_data?.meta_title || blog.title || '')}>
                 <meta
                     name="description"
-                    content={blog.meta_data?.meta_description || blog.excerpt || ''}
+                    content={String(blog.meta_data?.meta_description || blog.excerpt || '')}
                 />
                 <meta
                     name="keywords"
-                    content={blog.meta_data?.meta_keywords || ''}
+                    content={String(blog.meta_data?.meta_keywords || '')}
                 />
+
+                {/* Open Graph Meta Tags for Social Media */}
+                <meta property="og:title" content={String(blog.meta_data?.meta_title || blog.title || '')} />
+                <meta property="og:description" content={String(blog.meta_data?.meta_description || blog.excerpt || '')} />
+                <meta property="og:type" content="article" />
+                <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+                {blog.display_image && (
+                    <>
+                        <meta property="og:image" content={String(blog.display_image)} />
+                        <meta property="og:image:width" content="1200" />
+                        <meta property="og:image:height" content="630" />
+                        <meta property="og:image:alt" content={String(blog.title || '')} />
+                    </>
+                )}
+                {blog.published_at && <meta property="article:published_time" content={String(blog.published_at)} />}
+
+                {/* Twitter Card Meta Tags */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={String(blog.meta_data?.meta_title || blog.title || '')} />
+                <meta name="twitter:description" content={String(blog.meta_data?.meta_description || blog.excerpt || '')} />
+                {blog.display_image && <meta name="twitter:image" content={String(blog.display_image)} />}
             </Head>
 
             <div className="min-h-screen bg-muted-white">

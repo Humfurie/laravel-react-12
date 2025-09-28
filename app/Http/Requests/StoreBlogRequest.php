@@ -37,6 +37,8 @@ class StoreBlogRequest extends FormRequest
             'isPrimary' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'published_at' => ['nullable', 'date'],
+            'tags' => ['nullable', 'array'],
+            'tags.*' => ['string', 'max:50'],
         ];
     }
 
