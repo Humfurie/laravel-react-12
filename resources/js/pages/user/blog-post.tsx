@@ -35,7 +35,7 @@ interface Props {
 export default function BlogPost({ blog }: Props) {
     const [isVisible, setIsVisible] = useState(true);
     const [activeItem, setActiveItem] = useState('blog');
-
+    console.log("is string?", typeof blog.display_image === "string");
     useEffect(() => {
         let lastScrollY = window.scrollY;
 
@@ -56,16 +56,19 @@ export default function BlogPost({ blog }: Props) {
         { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true },
         { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
     ];
+
+    const safeImage =
+        typeof blog.display_image === "string" ? blog.display_image : "";
     return (
         <>
-            <Head title={blog.meta_data?.meta_title || blog.title}>
+            <Head title={String(blog.meta_data?.meta_title || blog.title || '')}>
                 <meta
                     name="description"
-                    content={blog.meta_data?.meta_description || blog.excerpt || ''}
+                    content={String(blog.meta_data?.meta_description || blog.excerpt || '')}
                 />
                 <meta
                     name="keywords"
-                    content={blog.meta_data?.meta_keywords || ''}
+                    content={String(blog.meta_data?.meta_keywords || '')}
                 />
 
                 {/* Open Graph Meta Tags for Social Media */}
@@ -73,21 +76,22 @@ export default function BlogPost({ blog }: Props) {
                 <meta property="og:description" content={String(blog.meta_data?.meta_description || blog.excerpt || '')} />
                 <meta property="og:type" content="article" />
                 <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
-                {blog.display_image && (
-                    <>
-                        <meta property="og:image" content={blog.display_image} />
-                        <meta property="og:image:width" content="1200" />
-                        <meta property="og:image:height" content="630" />
-                        <meta property="og:image:alt" content={String(blog.title || '')} />
-                    </>
+                {safeImage && (
+                    <meta property="og:image" content={safeImage} />
                 )}
+                {safeImage && <meta property="og:image:width" content="1200" />}
+                {safeImage && <meta property="og:image:height" content="630" />}
+                {safeImage && (
+                    <meta property="og:image:alt" content={blog.title || ""} />
+                )}
+
                 {blog.published_at && <meta property="article:published_time" content={String(blog.published_at)} />}
 
                 {/* Twitter Card Meta Tags */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={String(blog.meta_data?.meta_title || blog.title || '')} />
                 <meta name="twitter:description" content={String(blog.meta_data?.meta_description || blog.excerpt || '')} />
-                {blog.display_image && <meta name="twitter:image" content={blog.display_image} />}
+                {blog.display_image && <meta name="twitter:image" content={String(blog.display_image)} />}
             </Head>
 
             <div className="min-h-screen bg-muted-white">
