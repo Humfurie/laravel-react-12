@@ -8,9 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, ArrowLeft, Upload, X, Plus } from 'lucide-react';
+import { ArrowLeft, CalendarIcon, Plus, Upload, X } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import AdminLayout from '@/layouts/AdminLayout';
 import { BlogEditor } from '@/components/blog-editor';
 import { cn } from '@/lib/utils';
@@ -39,9 +39,7 @@ interface Props {
 }
 
 export default function EditBlog({ blog }: Props) {
-    const [publishedDate, setPublishedDate] = useState<Date | undefined>(
-        blog.published_at ? parseISO(blog.published_at) : undefined
-    );
+    const [publishedDate, setPublishedDate] = useState<Date | undefined>(blog.published_at ? parseISO(blog.published_at) : undefined);
     const [uploading, setUploading] = useState(false);
     const [tagInput, setTagInput] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -74,7 +72,7 @@ export default function EditBlog({ blog }: Props) {
     };
 
     const handleTitleChange = (value: string) => {
-        setData(prev => ({
+        setData((prev) => ({
             ...prev,
             title: value,
             // Only auto-generate slug if it's currently matching the title pattern
@@ -162,7 +160,10 @@ export default function EditBlog({ blog }: Props) {
     };
 
     const removeTag = (tagToRemove: string) => {
-        setData('tags', data.tags.filter(tag => tag !== tagToRemove));
+        setData(
+            'tags',
+            data.tags.filter((tag) => tag !== tagToRemove),
+        );
     };
 
     const handleTagKeyDown = (e: React.KeyboardEvent) => {
@@ -186,15 +187,13 @@ export default function EditBlog({ blog }: Props) {
                     </Link>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Edit Blog Post</h1>
-                        <p className="text-muted-foreground">
-                            Update your blog post content and settings
-                        </p>
+                        <p className="text-muted-foreground">Update your blog post content and settings</p>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-6">
+                    <div className="space-y-6 lg:col-span-2">
                         <Card>
                             <CardHeader>
                                 <CardTitle>Post Content</CardTitle>
@@ -223,7 +222,7 @@ export default function EditBlog({ blog }: Props) {
                                         className={errors.slug ? 'border-red-500' : ''}
                                     />
                                     {errors.slug && <p className="text-sm text-red-500">{errors.slug}</p>}
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-muted-foreground text-xs">
                                         URL: {typeof window !== 'undefined' ? window.location.origin : ''}/blog/{data.slug || 'post-slug'}
                                     </p>
                                 </div>
@@ -249,9 +248,7 @@ export default function EditBlog({ blog }: Props) {
                                         className={errors.excerpt ? 'border-red-500' : ''}
                                     />
                                     {errors.excerpt && <p className="text-sm text-red-500">{errors.excerpt}</p>}
-                                    <p className="text-xs text-muted-foreground">
-                                        If left empty, an excerpt will be generated from the content
-                                    </p>
+                                    <p className="text-muted-foreground text-xs">If left empty, an excerpt will be generated from the content</p>
                                 </div>
 
                                 <div className="space-y-2">
@@ -265,35 +262,25 @@ export default function EditBlog({ blog }: Props) {
                                             placeholder="Enter a tag and press Enter"
                                             className={errors.tags ? 'border-red-500' : ''}
                                         />
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={addTag}
-                                            disabled={!tagInput.trim()}
-                                        >
+                                        <Button type="button" variant="outline" size="sm" onClick={addTag} disabled={!tagInput.trim()}>
                                             <Plus className="h-4 w-4" />
                                         </Button>
                                     </div>
                                     {errors.tags && <p className="text-sm text-red-500">{errors.tags}</p>}
-                                    <div className="flex flex-wrap gap-2 mt-2">
+                                    <div className="mt-2 flex flex-wrap gap-2">
                                         {data.tags.map((tag) => (
                                             <span
                                                 key={String(tag)}
-                                                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                                                className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800"
                                             >
                                                 {tag}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeTag(tag)}
-                                                    className="ml-1 hover:text-blue-600"
-                                                >
+                                                <button type="button" onClick={() => removeTag(tag)} className="ml-1 hover:text-blue-600">
                                                     <X className="h-3 w-3" />
                                                 </button>
                                             </span>
                                         ))}
                                     </div>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-muted-foreground text-xs">
                                         Press Enter or click + to add tags. Tags help organize and categorize your posts.
                                     </p>
                                 </div>
@@ -311,15 +298,17 @@ export default function EditBlog({ blog }: Props) {
                                     <Input
                                         id="meta_title"
                                         value={data.meta_data.meta_title}
-                                        onChange={(e) => setData('meta_data', {
-                                            ...data.meta_data,
-                                            meta_title: e.target.value
-                                        })}
-                                        placeholder="SEO title (max 60 characters)"
-                                        maxLength={60}
+                                        onChange={(e) =>
+                                            setData('meta_data', {
+                                                ...data.meta_data,
+                                                meta_title: e.target.value,
+                                            })
+                                        }
+                                        placeholder="SEO title (recommended: 50-60 characters)"
                                     />
-                                    <p className="text-xs text-muted-foreground">
-                                        {data.meta_data.meta_title.length}/60 characters
+                                    <p className="text-muted-foreground text-xs">
+                                        {data.meta_data.meta_title.length} characters{' '}
+                                        {data.meta_data.meta_title.length > 60 && '(⚠️ Longer than recommended 60 chars for SEO)'}
                                     </p>
                                 </div>
 
@@ -328,17 +317,17 @@ export default function EditBlog({ blog }: Props) {
                                     <Textarea
                                         id="meta_description"
                                         value={data.meta_data.meta_description}
-                                        onChange={(e) => setData('meta_data', {
-                                            ...data.meta_data,
-                                            meta_description: e.target.value
-                                        })}
+                                        onChange={(e) =>
+                                            setData('meta_data', {
+                                                ...data.meta_data,
+                                                meta_description: e.target.value,
+                                            })
+                                        }
                                         placeholder="SEO description (max 160 characters)"
                                         rows={3}
                                         maxLength={160}
                                     />
-                                    <p className="text-xs text-muted-foreground">
-                                        {data.meta_data.meta_description.length}/160 characters
-                                    </p>
+                                    <p className="text-muted-foreground text-xs">{data.meta_data.meta_description.length}/160 characters</p>
                                 </div>
 
                                 <div className="space-y-2">
@@ -346,10 +335,12 @@ export default function EditBlog({ blog }: Props) {
                                     <Input
                                         id="meta_keywords"
                                         value={data.meta_data.meta_keywords}
-                                        onChange={(e) => setData('meta_data', {
-                                            ...data.meta_data,
-                                            meta_keywords: e.target.value
-                                        })}
+                                        onChange={(e) =>
+                                            setData('meta_data', {
+                                                ...data.meta_data,
+                                                meta_keywords: e.target.value,
+                                            })
+                                        }
                                         placeholder="keyword1, keyword2, keyword3"
                                     />
                                 </div>
@@ -366,7 +357,10 @@ export default function EditBlog({ blog }: Props) {
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
                                     <Label>Status</Label>
-                                    <Select value={data.status} onValueChange={(value: 'draft' | 'published' | 'private') => setData('status', value)}>
+                                    <Select
+                                        value={data.status}
+                                        onValueChange={(value: 'draft' | 'published' | 'private') => setData('status', value)}
+                                    >
                                         <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>
@@ -385,33 +379,22 @@ export default function EditBlog({ blog }: Props) {
                                             <Button
                                                 variant="outline"
                                                 className={cn(
-                                                    "w-full justify-start text-left font-normal",
-                                                    !publishedDate && "text-muted-foreground"
+                                                    'w-full justify-start text-left font-normal',
+                                                    !publishedDate && 'text-muted-foreground',
                                                 )}
                                             >
                                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {publishedDate ? format(publishedDate, "PPP") : "Set publish date"}
+                                                {publishedDate ? format(publishedDate, 'PPP') : 'Set publish date'}
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar
-                                                mode="single"
-                                                selected={publishedDate}
-                                                onSelect={setPublishedDate}
-                                                initialFocus
-                                            />
+                                            <Calendar mode="single" selected={publishedDate} onSelect={setPublishedDate} initialFocus />
                                         </PopoverContent>
                                     </Popover>
                                 </div>
 
                                 <div className="flex justify-between gap-2">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={handleSaveAsDraft}
-                                        disabled={processing}
-                                        className="flex-1"
-                                    >
+                                    <Button type="button" variant="outline" onClick={handleSaveAsDraft} disabled={processing} className="flex-1">
                                         Save Draft
                                     </Button>
                                     <Button
@@ -435,15 +418,9 @@ export default function EditBlog({ blog }: Props) {
                                     <Label htmlFor="isPrimary" className="text-sm font-medium">
                                         Primary Post
                                     </Label>
-                                    <Switch
-                                        id="isPrimary"
-                                        checked={data.isPrimary}
-                                        onCheckedChange={(checked) => setData('isPrimary', checked)}
-                                    />
+                                    <Switch id="isPrimary" checked={data.isPrimary} onCheckedChange={(checked) => setData('isPrimary', checked)} />
                                 </div>
-                                <p className="text-xs text-muted-foreground">
-                                    Mark this as a primary/featured post
-                                </p>
+                                <p className="text-muted-foreground text-xs">Mark this as a primary/featured post</p>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="sort_order">Sort Order</Label>
@@ -465,7 +442,7 @@ export default function EditBlog({ blog }: Props) {
                                             <img
                                                 src={data.featured_image}
                                                 alt="Featured image preview"
-                                                className="w-full h-32 object-cover rounded-lg border"
+                                                className="h-32 w-full rounded-lg border object-cover"
                                             />
                                             <Button
                                                 type="button"
@@ -493,13 +470,7 @@ export default function EditBlog({ blog }: Props) {
                                         </Button>
                                     </div>
 
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileUpload}
-                                        className="hidden"
-                                    />
+                                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
 
                                     {/* Manual URL Input */}
                                     <div className="space-y-2">
