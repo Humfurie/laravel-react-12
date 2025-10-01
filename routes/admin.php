@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\RealEstateController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 
@@ -54,4 +55,40 @@ Route::prefix('blogs')->group(function () {
     Route::patch('/{blog}/restore', [BlogController::class, 'restore'])->name('blogs.restore')->withTrashed();
     Route::delete('/{blog}/force', [BlogController::class, 'forceDestroy'])->name('blogs.force-destroy');
     Route::post('/upload-image', [BlogController::class, 'uploadImage'])->name('blogs.upload-image');
+});
+
+Route::prefix('real-estate')->group(function () {
+    // Main admin page
+    Route::get('/', [RealEstateController::class, 'index'])->name('real-estate.index');
+
+    // Developer routes
+    Route::get('/developers/create', [RealEstateController::class, 'createDeveloper'])->name('real-estate.developers.create');
+    Route::post('/developers', [RealEstateController::class, 'storeDeveloper'])->name('real-estate.developers.store');
+    Route::get('/developers/{developer}/edit', [RealEstateController::class, 'editDeveloper'])->name('real-estate.developers.edit');
+    Route::put('/developers/{developer}', [RealEstateController::class, 'updateDeveloper'])->name('real-estate.developers.update');
+    Route::delete('/developers/{developer}', [RealEstateController::class, 'destroyDeveloper'])->name('real-estate.developers.destroy');
+
+    // Project routes
+    Route::get('/projects/create', [RealEstateController::class, 'createProject'])->name('real-estate.projects.create');
+    Route::post('/projects', [RealEstateController::class, 'storeProject'])->name('real-estate.projects.store');
+    Route::get('/projects/{project}/edit', [RealEstateController::class, 'editProject'])->name('real-estate.projects.edit');
+    Route::put('/projects/{project}', [RealEstateController::class, 'updateProject'])->name('real-estate.projects.update');
+    Route::delete('/projects/{project}', [RealEstateController::class, 'destroyProject'])->name('real-estate.projects.destroy');
+
+    // Property routes
+    Route::post('/properties', [RealEstateController::class, 'storeProperty'])->name('real-estate.properties.store');
+    Route::put('/properties/{property}', [RealEstateController::class, 'updateProperty'])->name('real-estate.properties.update');
+    Route::delete('/properties/{property}', [RealEstateController::class, 'destroyProperty'])->name('real-estate.properties.destroy');
+
+    // Property Pricing routes
+    Route::post('/pricing', [RealEstateController::class, 'storePricing'])->name('real-estate.pricing.store');
+    Route::put('/pricing/{pricing}', [RealEstateController::class, 'updatePricing'])->name('real-estate.pricing.update');
+    Route::delete('/pricing/{pricing}', [RealEstateController::class, 'destroyPricing'])->name('real-estate.pricing.destroy');
+
+    // Inquiry routes
+    Route::put('/inquiries/{inquiry}/status', [RealEstateController::class, 'updateInquiryStatus'])->name('real-estate.inquiries.status');
+    Route::delete('/inquiries/{inquiry}', [RealEstateController::class, 'destroyInquiry'])->name('real-estate.inquiries.destroy');
+
+    // Image upload
+    Route::post('/upload-image', [RealEstateController::class, 'uploadImage'])->name('real-estate.upload-image');
 });

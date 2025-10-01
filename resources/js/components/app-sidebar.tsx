@@ -3,7 +3,7 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link } from '@inertiajs/react';
-import { BookOpen, LayoutGrid, FileText } from 'lucide-react';
+import { BookOpen, Building, FileText, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
 import React from 'react';
 
@@ -18,6 +18,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
+    },
+    {
+        title: 'Real Estate Management',
+        href: '/admin/real-estate',
+        icon: Building,
     },
     {
         title: 'Blog Management',
