@@ -133,77 +133,91 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
             <Head title="Crypto Market" />
             <FloatingNav currentPage="crypto" />
 
-            <div className="from-brand-black to-muted-black min-h-screen bg-gradient-to-b pt-20">
-                <div className="mx-auto max-w-7xl px-4 py-8">
-                    <div className="mb-8 text-center">
-                        <h1 className="text-brand-white mb-2 text-4xl font-bold">Cryptocurrency Market</h1>
-                        <p className="text-muted-white">Real-time cryptocurrency prices and market data</p>
+            <div className="from-brand-black to-muted-black min-h-screen bg-gradient-to-b pt-16 sm:pt-20 lg:pt-24">
+                <div className="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6 lg:px-6 lg:py-8">
+                    <div className="mb-6 text-center sm:mb-8">
+                        <h1 className="text-brand-white mb-2 text-xl font-bold sm:text-2xl lg:text-4xl">Cryptocurrency Market</h1>
+                        <p className="text-muted-white text-xs sm:text-sm lg:text-base">Real-time cryptocurrency prices and market data</p>
                     </div>
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-4 sm:gap-6">
                         {/* Summary Cards */}
-                        <div className="grid gap-4 md:grid-cols-3">
-                            <Card className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-6">
-                                <div className="space-y-2">
-                                    <p className="text-muted-white text-sm">Total Market Cap</p>
-                                    <p className="text-brand-white text-3xl font-bold">{formatCurrency(totalMarketCap)}</p>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
+                            <Card className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-2.5 sm:p-4 lg:p-6">
+                                <div className="space-y-0.5 sm:space-y-2">
+                                    <p className="text-muted-white text-[9px] sm:text-xs lg:text-sm">Total Market Cap</p>
+                                    <p className="text-brand-white text-sm font-bold break-all sm:text-lg lg:text-3xl">
+                                        {formatCurrency(totalMarketCap)}
+                                    </p>
                                 </div>
                             </Card>
                             <Card
-                                className={`border p-6 ${
+                                className={`border p-2.5 sm:p-4 lg:p-6 ${
                                     avgChange24h >= 0
                                         ? 'border-green-500/20 bg-gradient-to-br from-green-900/20 to-green-950/20'
                                         : 'border-red-500/20 bg-gradient-to-br from-red-900/20 to-red-950/20'
                                 }`}
                             >
-                                <div className="space-y-2">
-                                    <p className="text-muted-white text-sm">Avg 24h Change</p>
-                                    <div className="flex items-center gap-2">
-                                        <p className={`text-3xl font-bold ${avgChange24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                <div className="space-y-0.5 sm:space-y-2">
+                                    <p className="text-muted-white text-[9px] sm:text-xs lg:text-sm">Avg 24h Change</p>
+                                    <div className="flex items-center gap-0.5 sm:gap-2">
+                                        <p
+                                            className={`text-sm font-bold sm:text-lg lg:text-3xl ${avgChange24h >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                                        >
                                             {formatPercent(avgChange24h)}
                                         </p>
                                         {avgChange24h >= 0 ? (
-                                            <TrendingUp className="h-6 w-6 text-green-400" />
+                                            <TrendingUp className="h-3.5 w-3.5 text-green-400 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                                         ) : (
-                                            <TrendingDown className="h-6 w-6 text-red-400" />
+                                            <TrendingDown className="h-3.5 w-3.5 text-red-400 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                                         )}
                                     </div>
                                 </div>
                             </Card>
-                            <Card className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-6">
-                                <div className="space-y-2">
-                                    <p className="text-muted-white text-sm">Total 24h Volume</p>
-                                    <p className="text-brand-white text-3xl font-bold">{formatCurrency(totalVolume)}</p>
+                            <Card className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-2.5 sm:col-span-2 sm:p-4 lg:col-span-1 lg:p-6">
+                                <div className="space-y-0.5 sm:space-y-2">
+                                    <p className="text-muted-white text-[9px] sm:text-xs lg:text-sm">Total 24h Volume</p>
+                                    <p className="text-brand-white text-sm font-bold break-all sm:text-lg lg:text-3xl">
+                                        {formatCurrency(totalVolume)}
+                                    </p>
                                 </div>
                             </Card>
                         </div>
 
                         {/* Stock Market Section */}
                         {stockData && stockData.length > 0 && (
-                            <div className="mt-8">
-                                <h2 className="text-brand-white mb-4 text-2xl font-bold">Stock Market</h2>
-                                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+                            <div className="mt-2 sm:mt-4 lg:mt-6">
+                                <h2 className="text-brand-white mb-3 text-base font-bold sm:text-lg lg:mb-4 lg:text-2xl">Stock Market</h2>
+                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5 lg:gap-4">
                                     {stockData.map((stock) => (
                                         <Card
                                             key={stock.symbol}
-                                            className="border-brand-orange/20 from-brand-black to-muted-black hover:bg-brand-orange/5 cursor-pointer bg-gradient-to-br p-4 transition-colors"
+                                            className="border-brand-orange/20 from-brand-black to-muted-black hover:bg-brand-orange/5 cursor-pointer bg-gradient-to-br p-2 transition-colors sm:p-3 lg:p-4"
                                             onClick={() => setSelectedStock(stock)}
                                         >
-                                            <div className="space-y-2">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-brand-orange font-mono font-bold">{stock.symbol}</span>
-                                                    <span className="text-muted-white text-xs">{stock.exchange}</span>
+                                            <div className="space-y-1 sm:space-y-1.5 lg:space-y-2">
+                                                <div className="flex items-center justify-between gap-1">
+                                                    <span className="text-brand-orange font-mono text-[10px] font-bold sm:text-xs lg:text-sm">
+                                                        {stock.symbol}
+                                                    </span>
+                                                    <span className="text-muted-white text-[8px] sm:text-[10px] lg:text-xs">{stock.exchange}</span>
                                                 </div>
-                                                <p className="text-muted-white truncate text-sm">{stock.name}</p>
-                                                <p className="text-brand-white text-xl font-bold">{formatCurrency(stock.price)}</p>
+                                                <p className="text-muted-white line-clamp-1 truncate text-[10px] sm:text-xs lg:text-sm">
+                                                    {stock.name}
+                                                </p>
+                                                <p className="text-brand-white text-xs font-bold sm:text-sm lg:text-lg">
+                                                    {formatCurrency(stock.price)}
+                                                </p>
                                                 <div
-                                                    className={`flex items-center gap-1 ${stock.changesPercentage >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                                                    className={`flex items-center gap-0.5 sm:gap-1 ${stock.changesPercentage >= 0 ? 'text-green-400' : 'text-red-400'}`}
                                                 >
                                                     {stock.changesPercentage >= 0 ? (
-                                                        <TrendingUp className="h-4 w-4" />
+                                                        <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
                                                     ) : (
-                                                        <TrendingDown className="h-4 w-4" />
+                                                        <TrendingDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
                                                     )}
-                                                    <span className="text-sm font-semibold">{formatPercent(stock.changesPercentage)}</span>
+                                                    <span className="text-[10px] font-semibold sm:text-xs lg:text-sm">
+                                                        {formatPercent(stock.changesPercentage)}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </Card>
@@ -213,14 +227,14 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                         )}
 
                         {/* Crypto Table Title */}
-                        <h2 className="text-brand-white mt-8 text-2xl font-bold">Cryptocurrencies</h2>
+                        <h2 className="text-brand-white mt-3 text-base font-bold sm:mt-4 sm:text-lg lg:mt-6 lg:text-2xl">Cryptocurrencies</h2>
 
                         {/* Table Controls */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <span className="text-muted-white text-sm">Show</span>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                <span className="text-muted-white text-[10px] sm:text-xs lg:text-sm">Show</span>
                                 <Select value={perPage.toString()} onValueChange={(value) => setPerPage(Number(value))}>
-                                    <SelectTrigger className="border-brand-orange/20 bg-brand-black text-brand-white w-[100px]">
+                                    <SelectTrigger className="border-brand-orange/20 bg-brand-black text-brand-white h-8 w-[70px] text-xs sm:h-9 sm:w-[80px] sm:text-sm lg:w-[100px]">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -229,28 +243,28 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                                         <SelectItem value="1000">1000</SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <span className="text-muted-white text-sm">entries</span>
+                                <span className="text-muted-white text-[10px] sm:text-xs lg:text-sm">entries</span>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-center gap-1.5 sm:gap-2">
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                                     disabled={currentPage === 1}
-                                    className="border-brand-orange/20 bg-brand-black text-brand-white hover:bg-brand-orange/10"
+                                    className="border-brand-orange/20 bg-brand-black text-brand-white hover:bg-brand-orange/10 h-8 px-2 text-[10px] sm:h-9 sm:px-3 sm:text-xs lg:text-sm"
                                 >
-                                    Previous
+                                    Prev
                                 </Button>
-                                <span className="text-muted-white text-sm">
-                                    Page {currentPage} of {totalPages}
+                                <span className="text-muted-white text-[10px] sm:text-xs lg:text-sm">
+                                    {currentPage}/{totalPages}
                                 </span>
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                                     disabled={currentPage === totalPages}
-                                    className="border-brand-orange/20 bg-brand-black text-brand-white hover:bg-brand-orange/10"
+                                    className="border-brand-orange/20 bg-brand-black text-brand-white hover:bg-brand-orange/10 h-8 px-2 text-[10px] sm:h-9 sm:px-3 sm:text-xs lg:text-sm"
                                 >
                                     Next
                                 </Button>
@@ -258,98 +272,123 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                         </div>
 
                         {/* Crypto Table */}
-                        <Card className="border-brand-orange/20 bg-brand-black">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="border-brand-orange/20 hover:bg-brand-orange/5">
-                                        <TableHead className="text-brand-orange">#</TableHead>
-                                        <TableHead
-                                            className="text-brand-orange hover:text-brand-orange/80 cursor-pointer"
-                                            onClick={() => handleSort('symbol')}
-                                        >
-                                            <div className="flex items-center">
-                                                Symbol
-                                                <SortIcon field="symbol" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="text-brand-orange hover:text-brand-orange/80 cursor-pointer"
-                                            onClick={() => handleSort('name')}
-                                        >
-                                            <div className="flex items-center">
-                                                Name
-                                                <SortIcon field="name" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="text-brand-orange hover:text-brand-orange/80 cursor-pointer"
-                                            onClick={() => handleSort('price')}
-                                        >
-                                            <div className="flex items-center">
-                                                Price
-                                                <SortIcon field="price" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="text-brand-orange hover:text-brand-orange/80 cursor-pointer"
-                                            onClick={() => handleSort('change_24h')}
-                                        >
-                                            <div className="flex items-center">
-                                                24h Change
-                                                <SortIcon field="change_24h" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="text-brand-orange hover:text-brand-orange/80 cursor-pointer"
-                                            onClick={() => handleSort('market_cap')}
-                                        >
-                                            <div className="flex items-center">
-                                                Market Cap
-                                                <SortIcon field="market_cap" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="text-brand-orange hover:text-brand-orange/80 cursor-pointer"
-                                            onClick={() => handleSort('total_volume')}
-                                        >
-                                            <div className="flex items-center">
-                                                24h Volume
-                                                <SortIcon field="total_volume" />
-                                            </div>
-                                        </TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {paginatedData.map((crypto, index) => (
-                                        <TableRow
-                                            key={crypto.id}
-                                            className="border-brand-orange/10 hover:bg-brand-orange/5 cursor-pointer transition-colors"
-                                            onClick={() => setSelectedCrypto(crypto)}
-                                        >
-                                            <TableCell className="text-muted-white">{crypto.market_cap_rank || startIndex + index + 1}</TableCell>
-                                            <TableCell className="text-brand-orange font-mono font-bold uppercase">{crypto.symbol}</TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-2">
-                                                    {crypto.image && <img src={crypto.image} alt={crypto.name} className="h-6 w-6 rounded-full" />}
-                                                    <span className="text-brand-white">{crypto.name}</span>
+                        <Card className="border-brand-orange/20 bg-brand-black -mx-3 overflow-x-auto sm:mx-0">
+                            <div className="min-w-[600px]">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="border-brand-orange/20 hover:bg-brand-orange/5">
+                                            <TableHead className="text-brand-orange w-12 text-[10px] sm:text-xs lg:text-sm">#</TableHead>
+                                            <TableHead
+                                                className="text-brand-orange hover:text-brand-orange/80 cursor-pointer text-[10px] sm:text-xs lg:text-sm"
+                                                onClick={() => handleSort('symbol')}
+                                            >
+                                                <div className="flex items-center">
+                                                    Symbol
+                                                    <SortIcon field="symbol" />
                                                 </div>
-                                            </TableCell>
-                                            <TableCell className="text-brand-white">{formatCurrency(crypto.price)}</TableCell>
-                                            <TableCell>
-                                                <span className={crypto.change_24h >= 0 ? 'text-green-400' : 'text-red-400'}>
-                                                    {formatPercent(crypto.change_24h)}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell className="text-brand-white font-semibold">{formatCurrency(crypto.market_cap)}</TableCell>
-                                            <TableCell className="text-brand-white">{formatCurrency(crypto.total_volume)}</TableCell>
+                                            </TableHead>
+                                            <TableHead
+                                                className="text-brand-orange hover:text-brand-orange/80 cursor-pointer text-[10px] sm:text-xs lg:text-sm"
+                                                onClick={() => handleSort('name')}
+                                            >
+                                                <div className="flex items-center">
+                                                    Name
+                                                    <SortIcon field="name" />
+                                                </div>
+                                            </TableHead>
+                                            <TableHead
+                                                className="text-brand-orange hover:text-brand-orange/80 cursor-pointer text-[10px] sm:text-xs lg:text-sm"
+                                                onClick={() => handleSort('price')}
+                                            >
+                                                <div className="flex items-center">
+                                                    Price
+                                                    <SortIcon field="price" />
+                                                </div>
+                                            </TableHead>
+                                            <TableHead
+                                                className="text-brand-orange hover:text-brand-orange/80 cursor-pointer text-[10px] sm:text-xs lg:text-sm"
+                                                onClick={() => handleSort('change_24h')}
+                                            >
+                                                <div className="flex items-center">
+                                                    <span className="hidden sm:inline">24h Change</span>
+                                                    <span className="sm:hidden">24h</span>
+                                                    <SortIcon field="change_24h" />
+                                                </div>
+                                            </TableHead>
+                                            <TableHead
+                                                className="text-brand-orange hover:text-brand-orange/80 cursor-pointer text-[10px] sm:text-xs lg:text-sm"
+                                                onClick={() => handleSort('market_cap')}
+                                            >
+                                                <div className="flex items-center">
+                                                    <span className="hidden lg:inline">Market Cap</span>
+                                                    <span className="lg:hidden">Mkt Cap</span>
+                                                    <SortIcon field="market_cap" />
+                                                </div>
+                                            </TableHead>
+                                            <TableHead
+                                                className="text-brand-orange hover:text-brand-orange/80 cursor-pointer text-[10px] sm:text-xs lg:text-sm"
+                                                onClick={() => handleSort('total_volume')}
+                                            >
+                                                <div className="flex items-center">
+                                                    <span className="hidden lg:inline">24h Volume</span>
+                                                    <span className="lg:hidden">Vol</span>
+                                                    <SortIcon field="total_volume" />
+                                                </div>
+                                            </TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {paginatedData.map((crypto, index) => (
+                                            <TableRow
+                                                key={crypto.id}
+                                                className="border-brand-orange/10 hover:bg-brand-orange/5 cursor-pointer transition-colors"
+                                                onClick={() => setSelectedCrypto(crypto)}
+                                            >
+                                                <TableCell className="text-muted-white text-[10px] sm:text-xs lg:text-sm">
+                                                    {crypto.market_cap_rank || startIndex + index + 1}
+                                                </TableCell>
+                                                <TableCell className="text-brand-orange font-mono text-[10px] font-bold uppercase sm:text-xs lg:text-sm">
+                                                    {crypto.symbol}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-1 sm:gap-2">
+                                                        {crypto.image && (
+                                                            <img
+                                                                src={crypto.image}
+                                                                alt={crypto.name}
+                                                                className="h-4 w-4 rounded-full sm:h-5 sm:w-5 lg:h-6 lg:w-6"
+                                                            />
+                                                        )}
+                                                        <span className="text-brand-white max-w-[100px] truncate text-[10px] sm:max-w-none sm:text-xs lg:text-sm">
+                                                            {crypto.name}
+                                                        </span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-brand-white text-[10px] sm:text-xs lg:text-sm">
+                                                    {formatCurrency(crypto.price)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span
+                                                        className={`text-[10px] sm:text-xs lg:text-sm ${crypto.change_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                                                    >
+                                                        {formatPercent(crypto.change_24h)}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="text-brand-white text-[10px] font-semibold sm:text-xs lg:text-sm">
+                                                    {formatCurrency(crypto.market_cap)}
+                                                </TableCell>
+                                                <TableCell className="text-brand-white text-[10px] sm:text-xs lg:text-sm">
+                                                    {formatCurrency(crypto.total_volume)}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
                         </Card>
 
                         {/* Table Info */}
-                        <div className="text-muted-white text-sm">
+                        <div className="text-muted-white text-[10px] sm:text-xs lg:text-sm">
                             Showing {startIndex + 1} to {Math.min(startIndex + perPage, sortedData.length)} of {sortedData.length} entries
                         </div>
                     </div>
