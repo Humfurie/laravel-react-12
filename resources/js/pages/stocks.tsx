@@ -133,35 +133,39 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
             <Head title="Stock Market" />
             <FloatingNav currentPage="stocks" />
 
-            <div className="from-brand-black to-muted-black min-h-screen bg-gradient-to-b pt-20">
-                <div className="mx-auto max-w-7xl px-4 py-8">
-                    <div className="mb-8 text-center">
-                        <h1 className="text-brand-white mb-2 text-4xl font-bold">Stock Market</h1>
-                        <p className="text-muted-white">Real-time stock prices and market data</p>
+            <div className="from-brand-black to-muted-black min-h-screen bg-gradient-to-b pt-16 sm:pt-20 lg:pt-24">
+                <div className="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6 lg:px-6 lg:py-8">
+                    <div className="mb-6 text-center sm:mb-8">
+                        <h1 className="text-brand-white mb-2 text-xl font-bold sm:text-2xl lg:text-4xl">Stock Market</h1>
+                        <p className="text-muted-white text-xs sm:text-sm lg:text-base">Real-time stock prices and market data</p>
                     </div>
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-4 sm:gap-6">
                         {/* Market Indices */}
                         {indices && indices.length > 0 && (
                             <div>
-                                <h2 className="text-brand-white mb-4 text-xl font-bold">Market Indices</h2>
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <h2 className="text-brand-white mb-3 text-base font-bold sm:text-lg lg:mb-4 lg:text-xl">Market Indices</h2>
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                     {indices.map((index) => (
                                         <Card
                                             key={index.symbol}
-                                            className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-6"
+                                            className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-3 sm:p-4 lg:p-6"
                                         >
-                                            <div className="space-y-2">
-                                                <p className="text-muted-white text-sm">{index.name}</p>
-                                                <p className="text-brand-white text-2xl font-bold">{formatCurrency(index.price)}</p>
+                                            <div className="space-y-1 sm:space-y-2">
+                                                <p className="text-muted-white text-[10px] sm:text-xs lg:text-sm">{index.name}</p>
+                                                <p className="text-brand-white text-base font-bold sm:text-lg lg:text-2xl">
+                                                    {formatCurrency(index.price)}
+                                                </p>
                                                 <div
-                                                    className={`flex items-center gap-1 ${index.changesPercentage >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                                                    className={`flex items-center gap-0.5 sm:gap-1 ${index.changesPercentage >= 0 ? 'text-green-400' : 'text-red-400'}`}
                                                 >
                                                     {index.changesPercentage >= 0 ? (
-                                                        <TrendingUp className="h-4 w-4" />
+                                                        <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
                                                     ) : (
-                                                        <TrendingDown className="h-4 w-4" />
+                                                        <TrendingDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
                                                     )}
-                                                    <span className="font-semibold">{formatPercent(index.changesPercentage)}</span>
+                                                    <span className="text-xs font-semibold sm:text-sm lg:text-base">
+                                                        {formatPercent(index.changesPercentage)}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </Card>
@@ -172,25 +176,33 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
 
                         {/* Gainers and Losers */}
                         {(gainers.length > 0 || losers.length > 0) && (
-                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2 lg:gap-6">
                                 {/* Top Gainers */}
                                 {gainers.length > 0 && (
                                     <div>
-                                        <h2 className="mb-4 text-xl font-bold text-green-400">Top Gainers</h2>
+                                        <h2 className="mb-2 text-base font-bold text-green-400 sm:mb-3 sm:text-lg lg:mb-4 lg:text-xl">Top Gainers</h2>
                                         <div className="space-y-2">
                                             {gainers.map((stock) => (
                                                 <Card
                                                     key={stock.symbol}
-                                                    className="border-green-500/20 bg-gradient-to-r from-green-900/20 to-transparent p-4"
+                                                    className="border-green-500/20 bg-gradient-to-r from-green-900/20 to-transparent p-2.5 sm:p-3 lg:p-4"
                                                 >
-                                                    <div className="flex items-center justify-between">
-                                                        <div>
-                                                            <p className="text-brand-orange font-mono font-bold">{stock.symbol}</p>
-                                                            <p className="text-muted-white truncate text-sm">{stock.name}</p>
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="text-brand-orange font-mono text-xs font-bold sm:text-sm lg:text-base">
+                                                                {stock.symbol}
+                                                            </p>
+                                                            <p className="text-muted-white truncate text-[10px] sm:text-xs lg:text-sm">
+                                                                {stock.name}
+                                                            </p>
                                                         </div>
                                                         <div className="text-right">
-                                                            <p className="text-brand-white font-bold">{formatCurrency(stock.price)}</p>
-                                                            <p className="font-semibold text-green-400">{formatPercent(stock.changesPercentage)}</p>
+                                                            <p className="text-brand-white text-xs font-bold sm:text-sm lg:text-base">
+                                                                {formatCurrency(stock.price)}
+                                                            </p>
+                                                            <p className="text-[10px] font-semibold text-green-400 sm:text-xs lg:text-sm">
+                                                                {formatPercent(stock.changesPercentage)}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </Card>
@@ -202,21 +214,29 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                                 {/* Top Losers */}
                                 {losers.length > 0 && (
                                     <div>
-                                        <h2 className="mb-4 text-xl font-bold text-red-400">Top Losers</h2>
+                                        <h2 className="mb-2 text-base font-bold text-red-400 sm:mb-3 sm:text-lg lg:mb-4 lg:text-xl">Top Losers</h2>
                                         <div className="space-y-2">
                                             {losers.map((stock) => (
                                                 <Card
                                                     key={stock.symbol}
-                                                    className="border-red-500/20 bg-gradient-to-r from-red-900/20 to-transparent p-4"
+                                                    className="border-red-500/20 bg-gradient-to-r from-red-900/20 to-transparent p-2.5 sm:p-3 lg:p-4"
                                                 >
-                                                    <div className="flex items-center justify-between">
-                                                        <div>
-                                                            <p className="text-brand-orange font-mono font-bold">{stock.symbol}</p>
-                                                            <p className="text-muted-white truncate text-sm">{stock.name}</p>
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="text-brand-orange font-mono text-xs font-bold sm:text-sm lg:text-base">
+                                                                {stock.symbol}
+                                                            </p>
+                                                            <p className="text-muted-white truncate text-[10px] sm:text-xs lg:text-sm">
+                                                                {stock.name}
+                                                            </p>
                                                         </div>
                                                         <div className="text-right">
-                                                            <p className="text-brand-white font-bold">{formatCurrency(stock.price)}</p>
-                                                            <p className="font-semibold text-red-400">{formatPercent(stock.changesPercentage)}</p>
+                                                            <p className="text-brand-white text-xs font-bold sm:text-sm lg:text-base">
+                                                                {formatCurrency(stock.price)}
+                                                            </p>
+                                                            <p className="text-[10px] font-semibold text-red-400 sm:text-xs lg:text-sm">
+                                                                {formatPercent(stock.changesPercentage)}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </Card>
@@ -228,51 +248,53 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                         )}
 
                         {/* Summary Cards */}
-                        <div className="grid gap-4 md:grid-cols-3">
-                            <Card className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-6">
-                                <div className="space-y-2">
-                                    <p className="text-muted-white text-sm">Total Market Cap</p>
-                                    <p className="text-brand-white text-3xl font-bold">{formatLargeNumber(totalMarketCap)}</p>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                            <Card className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-3 sm:p-4 lg:p-6">
+                                <div className="space-y-1 sm:space-y-2">
+                                    <p className="text-muted-white text-[10px] sm:text-xs lg:text-sm">Total Market Cap</p>
+                                    <p className="text-brand-white text-base font-bold sm:text-lg lg:text-3xl">{formatLargeNumber(totalMarketCap)}</p>
                                 </div>
                             </Card>
                             <Card
-                                className={`border p-6 ${
+                                className={`border p-3 sm:p-4 lg:p-6 ${
                                     avgChange >= 0
                                         ? 'border-green-500/20 bg-gradient-to-br from-green-900/20 to-green-950/20'
                                         : 'border-red-500/20 bg-gradient-to-br from-red-900/20 to-red-950/20'
                                 }`}
                             >
-                                <div className="space-y-2">
-                                    <p className="text-muted-white text-sm">Avg Change</p>
-                                    <div className="flex items-center gap-2">
-                                        <p className={`text-3xl font-bold ${avgChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                <div className="space-y-1 sm:space-y-2">
+                                    <p className="text-muted-white text-[10px] sm:text-xs lg:text-sm">Avg Change</p>
+                                    <div className="flex items-center gap-1 sm:gap-2">
+                                        <p
+                                            className={`text-base font-bold sm:text-lg lg:text-3xl ${avgChange >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                                        >
                                             {formatPercent(avgChange)}
                                         </p>
                                         {avgChange >= 0 ? (
-                                            <TrendingUp className="h-6 w-6 text-green-400" />
+                                            <TrendingUp className="h-4 w-4 text-green-400 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                                         ) : (
-                                            <TrendingDown className="h-6 w-6 text-red-400" />
+                                            <TrendingDown className="h-4 w-4 text-red-400 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                                         )}
                                     </div>
                                 </div>
                             </Card>
-                            <Card className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-6">
-                                <div className="space-y-2">
-                                    <p className="text-muted-white text-sm">Total Volume</p>
-                                    <p className="text-brand-white text-3xl font-bold">{formatLargeNumber(totalVolume)}</p>
+                            <Card className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-3 sm:col-span-2 sm:p-4 lg:col-span-1 lg:p-6">
+                                <div className="space-y-1 sm:space-y-2">
+                                    <p className="text-muted-white text-[10px] sm:text-xs lg:text-sm">Total Volume</p>
+                                    <p className="text-brand-white text-base font-bold sm:text-lg lg:text-3xl">{formatLargeNumber(totalVolume)}</p>
                                 </div>
                             </Card>
                         </div>
 
                         {/* Stock Table Title */}
-                        <h2 className="text-brand-white mt-8 text-2xl font-bold">Popular Stocks</h2>
+                        <h2 className="text-brand-white mt-3 text-base font-bold sm:mt-4 sm:text-lg lg:mt-6 lg:text-2xl">Popular Stocks</h2>
 
                         {/* Table Controls */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <span className="text-muted-white text-sm">Show</span>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                <span className="text-muted-white text-[10px] sm:text-xs lg:text-sm">Show</span>
                                 <Select value={perPage.toString()} onValueChange={(value) => setPerPage(Number(value))}>
-                                    <SelectTrigger className="border-brand-orange/20 bg-brand-black text-brand-white w-[100px]">
+                                    <SelectTrigger className="border-brand-orange/20 bg-brand-black text-brand-white h-8 w-[70px] text-xs sm:h-9 sm:w-[80px] sm:text-sm lg:w-[100px]">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -281,28 +303,28 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                                         <SelectItem value="1000">1000</SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <span className="text-muted-white text-sm">entries</span>
+                                <span className="text-muted-white text-[10px] sm:text-xs lg:text-sm">entries</span>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-center gap-1.5 sm:gap-2">
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                                     disabled={currentPage === 1}
-                                    className="border-brand-orange/20 bg-brand-black text-brand-white hover:bg-brand-orange/10"
+                                    className="border-brand-orange/20 bg-brand-black text-brand-white hover:bg-brand-orange/10 h-8 px-2 text-[10px] sm:h-9 sm:px-3 sm:text-xs lg:text-sm"
                                 >
-                                    Previous
+                                    Prev
                                 </Button>
-                                <span className="text-muted-white text-sm">
-                                    Page {currentPage} of {totalPages}
+                                <span className="text-muted-white text-[10px] sm:text-xs lg:text-sm">
+                                    {currentPage}/{totalPages}
                                 </span>
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                                     disabled={currentPage === totalPages}
-                                    className="border-brand-orange/20 bg-brand-black text-brand-white hover:bg-brand-orange/10"
+                                    className="border-brand-orange/20 bg-brand-black text-brand-white hover:bg-brand-orange/10 h-8 px-2 text-[10px] sm:h-9 sm:px-3 sm:text-xs lg:text-sm"
                                 >
                                     Next
                                 </Button>
@@ -310,95 +332,109 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                         </div>
 
                         {/* Stock Table */}
-                        <Card className="border-brand-orange/20 bg-brand-black">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="border-brand-orange/20 hover:bg-brand-orange/5">
-                                        <TableHead
-                                            className="text-brand-orange hover:text-brand-orange/80 cursor-pointer"
-                                            onClick={() => handleSort('symbol')}
-                                        >
-                                            <div className="flex items-center">
-                                                Symbol
-                                                <SortIcon field="symbol" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="text-brand-orange hover:text-brand-orange/80 cursor-pointer"
-                                            onClick={() => handleSort('name')}
-                                        >
-                                            <div className="flex items-center">
-                                                Name
-                                                <SortIcon field="name" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="text-brand-orange hover:text-brand-orange/80 cursor-pointer"
-                                            onClick={() => handleSort('price')}
-                                        >
-                                            <div className="flex items-center">
-                                                Price
-                                                <SortIcon field="price" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="text-brand-orange hover:text-brand-orange/80 cursor-pointer"
-                                            onClick={() => handleSort('changesPercentage')}
-                                        >
-                                            <div className="flex items-center">
-                                                Change
-                                                <SortIcon field="changesPercentage" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="text-brand-orange hover:text-brand-orange/80 cursor-pointer"
-                                            onClick={() => handleSort('marketCap')}
-                                        >
-                                            <div className="flex items-center">
-                                                Market Cap
-                                                <SortIcon field="marketCap" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead
-                                            className="text-brand-orange hover:text-brand-orange/80 cursor-pointer"
-                                            onClick={() => handleSort('volume')}
-                                        >
-                                            <div className="flex items-center">
-                                                Volume
-                                                <SortIcon field="volume" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead className="text-brand-orange">Exchange</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {paginatedData.map((stock) => (
-                                        <TableRow
-                                            key={stock.symbol}
-                                            className="border-brand-orange/10 hover:bg-brand-orange/5 cursor-pointer transition-colors"
-                                            onClick={() => setSelectedStock(stock)}
-                                        >
-                                            <TableCell className="text-brand-orange font-mono font-bold uppercase">{stock.symbol}</TableCell>
-                                            <TableCell className="text-brand-white">{stock.name}</TableCell>
-                                            <TableCell className="text-brand-white">{formatCurrency(stock.price)}</TableCell>
-                                            <TableCell>
-                                                <span className={stock.changesPercentage >= 0 ? 'text-green-400' : 'text-red-400'}>
-                                                    {formatPercent(stock.changesPercentage)}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell className="text-brand-white font-semibold">{formatLargeNumber(stock.marketCap)}</TableCell>
-                                            <TableCell className="text-brand-white">
-                                                {stock.volume.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                            </TableCell>
-                                            <TableCell className="text-muted-white">{stock.exchange}</TableCell>
+                        <Card className="border-brand-orange/20 bg-brand-black -mx-3 overflow-x-auto sm:mx-0">
+                            <div className="min-w-[650px]">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="border-brand-orange/20 hover:bg-brand-orange/5">
+                                            <TableHead
+                                                className="text-brand-orange hover:text-brand-orange/80 cursor-pointer text-[10px] sm:text-xs lg:text-sm"
+                                                onClick={() => handleSort('symbol')}
+                                            >
+                                                <div className="flex items-center">
+                                                    Symbol
+                                                    <SortIcon field="symbol" />
+                                                </div>
+                                            </TableHead>
+                                            <TableHead
+                                                className="text-brand-orange hover:text-brand-orange/80 cursor-pointer text-[10px] sm:text-xs lg:text-sm"
+                                                onClick={() => handleSort('name')}
+                                            >
+                                                <div className="flex items-center">
+                                                    Name
+                                                    <SortIcon field="name" />
+                                                </div>
+                                            </TableHead>
+                                            <TableHead
+                                                className="text-brand-orange hover:text-brand-orange/80 cursor-pointer text-[10px] sm:text-xs lg:text-sm"
+                                                onClick={() => handleSort('price')}
+                                            >
+                                                <div className="flex items-center">
+                                                    Price
+                                                    <SortIcon field="price" />
+                                                </div>
+                                            </TableHead>
+                                            <TableHead
+                                                className="text-brand-orange hover:text-brand-orange/80 cursor-pointer text-[10px] sm:text-xs lg:text-sm"
+                                                onClick={() => handleSort('changesPercentage')}
+                                            >
+                                                <div className="flex items-center">
+                                                    Change
+                                                    <SortIcon field="changesPercentage" />
+                                                </div>
+                                            </TableHead>
+                                            <TableHead
+                                                className="text-brand-orange hover:text-brand-orange/80 cursor-pointer text-[10px] sm:text-xs lg:text-sm"
+                                                onClick={() => handleSort('marketCap')}
+                                            >
+                                                <div className="flex items-center">
+                                                    <span className="hidden lg:inline">Market Cap</span>
+                                                    <span className="lg:hidden">Mkt Cap</span>
+                                                    <SortIcon field="marketCap" />
+                                                </div>
+                                            </TableHead>
+                                            <TableHead
+                                                className="text-brand-orange hover:text-brand-orange/80 cursor-pointer text-[10px] sm:text-xs lg:text-sm"
+                                                onClick={() => handleSort('volume')}
+                                            >
+                                                <div className="flex items-center">
+                                                    <span className="hidden lg:inline">Volume</span>
+                                                    <span className="lg:hidden">Vol</span>
+                                                    <SortIcon field="volume" />
+                                                </div>
+                                            </TableHead>
+                                            <TableHead className="text-brand-orange text-[10px] sm:text-xs lg:text-sm">Exchange</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {paginatedData.map((stock) => (
+                                            <TableRow
+                                                key={stock.symbol}
+                                                className="border-brand-orange/10 hover:bg-brand-orange/5 cursor-pointer transition-colors"
+                                                onClick={() => setSelectedStock(stock)}
+                                            >
+                                                <TableCell className="text-brand-orange font-mono text-[10px] font-bold uppercase sm:text-xs lg:text-sm">
+                                                    {stock.symbol}
+                                                </TableCell>
+                                                <TableCell className="text-brand-white max-w-[100px] truncate text-[10px] sm:max-w-none sm:text-xs lg:text-sm">
+                                                    {stock.name}
+                                                </TableCell>
+                                                <TableCell className="text-brand-white text-[10px] sm:text-xs lg:text-sm">
+                                                    {formatCurrency(stock.price)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <span
+                                                        className={`text-[10px] sm:text-xs lg:text-sm ${stock.changesPercentage >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                                                    >
+                                                        {formatPercent(stock.changesPercentage)}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="text-brand-white text-[10px] font-semibold sm:text-xs lg:text-sm">
+                                                    {formatLargeNumber(stock.marketCap)}
+                                                </TableCell>
+                                                <TableCell className="text-brand-white text-[10px] sm:text-xs lg:text-sm">
+                                                    {stock.volume.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                                </TableCell>
+                                                <TableCell className="text-muted-white text-[10px] sm:text-xs lg:text-sm">{stock.exchange}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
                         </Card>
 
                         {/* Table Info */}
-                        <div className="text-muted-white text-sm">
+                        <div className="text-muted-white text-[10px] sm:text-xs lg:text-sm">
                             Showing {startIndex + 1} to {Math.min(startIndex + perPage, sortedData.length)} of {sortedData.length} entries
                         </div>
                     </div>
