@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 interface ChartData {
@@ -38,11 +38,7 @@ export default function PriceChart({ coinId, symbol, type, initialDays = 7, init
         { label: '1Y', value: '1y' },
     ];
 
-    useEffect(() => {
-        fetchChartData();
-    }, [selectedPeriod]);
-
-    const fetchChartData = async () => {
+    const fetchChartData = useCallback(async () => {
         setLoading(true);
         try {
             let url = '';
@@ -60,7 +56,11 @@ export default function PriceChart({ coinId, symbol, type, initialDays = 7, init
         } finally {
             setLoading(false);
         }
-    };
+    }, [type, coinId, symbol, selectedPeriod]);
+
+    useEffect(() => {
+        fetchChartData();
+    }, [fetchChartData]);
 
     const formatDate = (date: string) => {
         const d = new Date(date);
@@ -79,7 +79,15 @@ export default function PriceChart({ coinId, symbol, type, initialDays = 7, init
         }).format(value);
     };
 
-    const CustomTooltip = ({ active, payload }: any) => {
+    interface TooltipProps {
+        active?: boolean;
+        payload?: Array<{
+            value: number;
+            payload: ChartData;
+        }>;
+    }
+
+    const CustomTooltip = ({ active, payload }: TooltipProps) => {
         if (active && payload && payload.length) {
             return (
                 <div className="bg-brand-black border-brand-orange/20 rounded-lg border p-3 shadow-lg">
