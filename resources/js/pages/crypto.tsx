@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Head } from '@inertiajs/react';
 import { ArrowDown, ArrowUp, ArrowUpDown, TrendingDown, TrendingUp } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 type SortField = 'name' | 'symbol' | 'price' | 'market_cap' | 'change_24h' | 'total_volume';
 type SortOrder = 'asc' | 'desc';
@@ -75,27 +75,45 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
     const [selectedCrypto, setSelectedCrypto] = useState<CryptoData | null>(null);
     const [selectedStock, setSelectedStock] = useState<StockData | null>(null);
 
-    // Sort data
-    const sortedData = [...cryptoData].sort((a, b) => {
-        const aValue = a[sortField];
-        const bValue = b[sortField];
+    // Memoized sorted data
+    const sortedData = useMemo(() => {
+        return [...cryptoData].sort((a, b) => {
+            const aValue = a[sortField];
+            const bValue = b[sortField];
 
-        if (typeof aValue === 'string' && typeof bValue === 'string') {
-            return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-        }
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+                return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+            }
 
-        return sortOrder === 'asc' ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
-    });
+            return sortOrder === 'asc' ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
+        });
+    }, [cryptoData, sortField, sortOrder]);
 
-    // Paginate data
-    const totalPages = Math.ceil(sortedData.length / perPage);
-    const startIndex = (currentPage - 1) * perPage;
-    const paginatedData = sortedData.slice(startIndex, startIndex + perPage);
+    // Memoized pagination
+    const { totalPages, startIndex, paginatedData } = useMemo(() => {
+        const pages = Math.ceil(sortedData.length / perPage);
+        const start = (currentPage - 1) * perPage;
+        const paginated = sortedData.slice(start, start + perPage);
 
-    // Calculate totals from market data
-    const totalMarketCap = cryptoData.reduce((sum, item) => sum + item.market_cap, 0);
-    const totalVolume = cryptoData.reduce((sum, item) => sum + item.total_volume, 0);
-    const avgChange24h = cryptoData.reduce((sum, item) => sum + item.change_24h, 0) / cryptoData.length;
+        return {
+            totalPages: pages,
+            startIndex: start,
+            paginatedData: paginated,
+        };
+    }, [sortedData, perPage, currentPage]);
+
+    // Memoized market statistics
+    const { totalMarketCap, totalVolume, avgChange24h } = useMemo(() => {
+        const marketCap = cryptoData.reduce((sum, item) => sum + item.market_cap, 0);
+        const volume = cryptoData.reduce((sum, item) => sum + item.total_volume, 0);
+        const avgChange = cryptoData.length > 0 ? cryptoData.reduce((sum, item) => sum + item.change_24h, 0) / cryptoData.length : 0;
+
+        return {
+            totalMarketCap: marketCap,
+            totalVolume: volume,
+            avgChange24h: avgChange,
+        };
+    }, [cryptoData]);
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
