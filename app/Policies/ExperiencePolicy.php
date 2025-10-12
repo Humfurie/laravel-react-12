@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Experience;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ExperiencePolicy
 {
@@ -13,7 +12,7 @@ class ExperiencePolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,7 +20,7 @@ class ExperiencePolicy
      */
     public function view(User $user, Experience $experience): bool
     {
-        return false;
+        return $user->id === $experience->user_id;
     }
 
     /**
@@ -29,7 +28,7 @@ class ExperiencePolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -37,7 +36,7 @@ class ExperiencePolicy
      */
     public function update(User $user, Experience $experience): bool
     {
-        return false;
+        return $user->id === $experience->user_id;
     }
 
     /**
@@ -45,7 +44,7 @@ class ExperiencePolicy
      */
     public function delete(User $user, Experience $experience): bool
     {
-        return false;
+        return $user->id === $experience->user_id;
     }
 
     /**
@@ -53,7 +52,7 @@ class ExperiencePolicy
      */
     public function restore(User $user, Experience $experience): bool
     {
-        return false;
+        return $user->id === $experience->user_id;
     }
 
     /**
@@ -61,6 +60,6 @@ class ExperiencePolicy
      */
     public function forceDelete(User $user, Experience $experience): bool
     {
-        return false;
+        return $user->id === $experience->user_id;
     }
 }

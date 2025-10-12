@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\ExperienceController;
 
 Route::prefix('roles')->group(function () {
     Route::get('/', [RoleController::class, 'index'])->name('roles.index');
@@ -54,4 +55,14 @@ Route::prefix('blogs')->group(function () {
     Route::patch('/{blog}/restore', [BlogController::class, 'restore'])->name('blogs.restore')->withTrashed();
     Route::delete('/{blog}/force', [BlogController::class, 'forceDestroy'])->name('blogs.force-destroy');
     Route::post('/upload-image', [BlogController::class, 'uploadImage'])->name('blogs.upload-image');
+});
+
+Route::prefix('experiences')->name('admin.experiences.')->group(function () {
+    Route::get('/', [ExperienceController::class, 'index'])->name('index');
+    Route::get('/create', [ExperienceController::class, 'create'])->name('create');
+    Route::post('/', [ExperienceController::class, 'store'])->name('store');
+    Route::get('/{experience}', [ExperienceController::class, 'show'])->name('show');
+    Route::get('/{experience}/edit', [ExperienceController::class, 'edit'])->name('edit');
+    Route::put('/{experience}', [ExperienceController::class, 'update'])->name('update');
+    Route::delete('/{experience}', [ExperienceController::class, 'destroy'])->name('destroy');
 });
