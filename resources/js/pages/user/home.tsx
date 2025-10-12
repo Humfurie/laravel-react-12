@@ -32,9 +32,24 @@ interface Blog {
     status_label: string;
 }
 
+interface Experience {
+    id: number;
+    company: string;
+    image_url: string | null;
+    location: string;
+    description: string[];
+    position: string;
+    start_month: number;
+    start_year: number;
+    end_month: number | null;
+    end_year: number | null;
+    is_current_position: boolean;
+}
+
 interface Props {
     primary: Blog[];
     latest: Blog[];
+    experiences: Experience[];
 }
 
 const truncateText = (text: string, maxLength: number = 100) => {
@@ -78,7 +93,7 @@ function BlogCard({ blog }: { blog: Blog }) {
     );
 }
 
-export default function Home({ primary = [], latest = [] }: Props): JSX.Element {
+export default function Home({ primary = [], latest = [], experiences = [] }: Props): JSX.Element {
     return (
         <>
             <Head title="Portfolio & Blog">
@@ -116,7 +131,7 @@ export default function Home({ primary = [], latest = [] }: Props): JSX.Element 
             <HomeAboutMe />
             {/*<HomeProjects />*/}
             <HomeExpertise />
-            <ExperienceSection />
+            <ExperienceSection experiences={experiences} />
             {/*<HomeCTA />*/}
 
             {/* Blog Section */}
