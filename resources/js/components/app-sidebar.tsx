@@ -3,7 +3,7 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link } from '@inertiajs/react';
-import { BookOpen, LayoutGrid, FileText } from 'lucide-react';
+import { BookOpen, Briefcase, FileText, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
 import React from 'react';
 
@@ -23,6 +23,11 @@ const mainNavItems: NavItem[] = [
         title: 'Blog Management',
         href: '/admin/blogs',
         icon: FileText,
+    },
+    {
+        title: 'Experience Management',
+        href: '/admin/experiences',
+        icon: Briefcase,
     },
     {
         title: 'User Management',
