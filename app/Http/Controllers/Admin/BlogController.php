@@ -12,43 +12,63 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Throwable;
 
 class BlogController extends Controller
 {
     use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-//        $this->authorize('viewAny', Blog::class);
+        $this->authorize('viewAny', Blog::class);
 
         $blogs = Blog::query()
             ->withTrashed()
-            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->paginate(10);
 
         return Inertia::render('admin/blog', [
             'blogs' => $blogs,
-//            'can' => [
-//                'create' => auth()->user()->can('create', Blog::class),
-//                'update' => true, // Will be checked per blog item
-//                'delete' => true, // Will be checked per blog item
-//            ]
+            'can' => [
+                'create' => auth()->user()->can('create', Blog::class),
+                'update' => true, // Will be checked per blog item
+                'delete' => true, // Will be checked per blog item
+            ],
         ]);
     }
 
     public function create()
     {
+        $this->authorize('create', Blog::class);
+
         return Inertia::render('admin/blog/create');
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function store(StoreBlogRequest $request)
     {
+        $this->authorize('create', Blog::class);
+
         $validated = $request->validated();
+
+        // Handle file upload if present
+        if ($request->hasFile('featured_image_file')) {
+            $image = $request->file('featured_image_file');
+
+            // Create unique filename
+            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+
+            // Store in public/blog-images directory
+            $path = $image->storeAs('blog-images', $filename, 'public');
+
+            // Set the URL
+            $validated['featured_image'] = Storage::url($path);
+        }
 
         // Generate slug if not provided
         if (empty($validated['slug'])) {
@@ -71,11 +91,16 @@ class BlogController extends Controller
             $validated['published_at'] = now();
         }
 
-        DB::transaction(function () use ($validated) {
-            Blog::create($validated);
+        $blog = DB::transaction(function () use ($validated) {
+            // If this blog is being set as primary, unset all other primary blogs
+            if (isset($validated['isPrimary']) && $validated['isPrimary']) {
+                Blog::where('isPrimary', true)->update(['isPrimary' => false]);
+            }
+
+            return Blog::create($validated);
         });
 
-        return redirect()->route('blogs.index')
+        return redirect()->route('blogs.edit', $blog->slug)
             ->with('success', 'Blog created successfully.');
     }
 
@@ -88,20 +113,43 @@ class BlogController extends Controller
             ->implode(', ');
     }
 
-
     public function edit(Blog $blog)
     {
+        $this->authorize('update', $blog);
+
         return Inertia::render('admin/blog/edit', [
-            'blog' => $blog
+            'blog' => $blog,
         ]);
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function update(UpdateBlogRequest $request, Blog $blog)
     {
+        $this->authorize('update', $blog);
+
         $validated = $request->validated();
+
+        // Handle file upload if present
+        if ($request->hasFile('featured_image_file')) {
+            $image = $request->file('featured_image_file');
+
+            // Delete old image if it exists and is stored locally
+            if ($blog->featured_image && str_starts_with($blog->featured_image, '/storage/blog-images/')) {
+                $oldPath = str_replace('/storage/', '', $blog->featured_image);
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            // Create unique filename
+            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+
+            // Store in public/blog-images directory
+            $path = $image->storeAs('blog-images', $filename, 'public');
+
+            // Set the URL
+            $validated['featured_image'] = Storage::url($path);
+        }
 
         // Generate slug if not provided
         if (empty($validated['slug'])) {
@@ -116,15 +164,24 @@ class BlogController extends Controller
         }
 
         DB::transaction(function () use ($blog, $validated) {
+            // If this blog is being set as primary, unset all other primary blogs
+            if (isset($validated['isPrimary']) && $validated['isPrimary'] && !$blog->isPrimary) {
+                Blog::where('id', '!=', $blog->id)
+                    ->where('isPrimary', true)
+                    ->update(['isPrimary' => false]);
+            }
+
             $blog->update($validated);
         });
 
-        return redirect()->route('blogs.index')
+        return redirect()->route('blogs.edit', $blog->slug)
             ->with('success', 'Blog updated successfully.');
     }
 
     public function destroy(Blog $blog)
     {
+        $this->authorize('delete', $blog);
+
         $blog->delete();
 
         return redirect()->route('blogs.index')
@@ -134,6 +191,8 @@ class BlogController extends Controller
     public function restore($slug)
     {
         $blog = Blog::withTrashed()->where('slug', $slug)->firstOrFail();
+        $this->authorize('restore', $blog);
+
         $blog->restore();
 
         return redirect()->route('blogs.index')
@@ -143,6 +202,8 @@ class BlogController extends Controller
     public function forceDestroy($slug)
     {
         $blog = Blog::withTrashed()->where('slug', $slug)->firstOrFail();
+        $this->authorize('forceDelete', $blog);
+
         $blog->forceDelete();
 
         return redirect()->route('blogs.index')
@@ -170,13 +231,13 @@ class BlogController extends Controller
             return response()->json([
                 'success' => true,
                 'url' => $url,
-                'path' => $path
+                'path' => $path,
             ]);
         }
 
         return response()->json([
             'success' => false,
-            'message' => 'No image file provided'
+            'message' => 'No image file provided',
         ], 400);
     }
 }

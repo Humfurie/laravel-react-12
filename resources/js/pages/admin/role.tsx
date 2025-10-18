@@ -1,10 +1,10 @@
+import RoleActions from '@/components/role-actions';
 import RoleFormModal from '@/components/role-form-modal';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { Edit, Plus, RotateCw, Search, Settings, Shield, Trash2, Users } from 'lucide-react';
 import { useState } from 'react';
-import RoleActions from '@/components/role-actions';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

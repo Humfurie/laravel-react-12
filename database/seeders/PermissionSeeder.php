@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Permission;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 
 class PermissionSeeder extends Seeder
 {
@@ -12,6 +12,15 @@ class PermissionSeeder extends Seeder
      */
     public function run(): void
     {
+        // Option 1: Use the automatic permission generation command
+        // This will scan all models and create permissions automatically
+        $this->command->info('Generating permissions from models...');
+        Artisan::call('permissions:generate', ['--fresh' => true]);
+        $this->command->info(Artisan::output());
+
+        // Option 2: Manual permission creation (commented out)
+        // Uncomment this section if you prefer manual control
+        /*
         $actions = [
             'viewAny',  // List/index - view all records
             'view',     // Show - view single record
@@ -22,25 +31,30 @@ class PermissionSeeder extends Seeder
             'forceDelete', // Permanently delete record
         ];
 
-        Permission::firstOrCreate(
-            ['resource' => 'user'],
-            ['resource' => 'user', 'actions' => $actions]
-        );
+        $resources = [
+            'user',
+            'role',
+            'blog',
+            'developer',
+            'realestate-project',
+            'property',
+            'technology',
+            'skill',
+            'experience',
+        ];
 
-        Permission::firstOrCreate(
-            ['resource' => 'role'],
-            ['resource' => 'role', 'actions' => $actions]
-        );
+        foreach ($resources as $resource) {
+            Permission::firstOrCreate(
+                ['resource' => $resource],
+                ['resource' => $resource, 'actions' => $actions]
+            );
+        }
 
-        Permission::firstOrCreate(
-            ['resource' => 'blog'],
-            ['resource' => 'blog', 'actions' => $actions]
-        );
-
-        // Create wildcard permission for admin role
+        // Create wildcard permission for super admin
         Permission::firstOrCreate(
             ['resource' => '*'],
             ['resource' => '*', 'actions' => ['*']]
         );
+        */
     }
 }

@@ -1,9 +1,9 @@
-import { DeveloperModal, ProjectModal } from '@/components/real-estate-modals';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { Building, Edit, Home, Mail, Plus, Trash2 } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -85,318 +85,40 @@ interface RealEstateProps {
 }
 
 export default function RealEstateManagement({ developers, projects, properties, inquiries }: RealEstateProps) {
-    const [activeTab, setActiveTab] = useState<'developers' | 'projects' | 'properties' | 'inquiries'>('developers');
+    const { can } = usePermissions();
 
-    // Modal states
-    const [showDeveloperModal, setShowDeveloperModal] = useState(false);
-    const [showProjectModal, setShowProjectModal] = useState(false);
-    const [showPropertyModal, setShowPropertyModal] = useState(false);
-    const [editingDeveloper, setEditingDeveloper] = useState<Developer | null>(null);
-    const [editingProject, setEditingProject] = useState<RealEstateProject | null>(null);
-    const [editingProperty, setEditingProperty] = useState<Property | null>(null);
-
-    // Developer form
-    const developerForm = useForm({
-        company_name: '',
-        description: '',
-        logo_url: '',
-        contact_email: '',
-        contact_phone: '',
-        website: '',
-    });
-
-    // Project form
-    const projectForm = useForm({
-        developer_id: '',
-        name: '',
-        description: '',
-        project_type: 'condominium',
-        address: '',
-        city: '',
-        province: '',
-        region: '',
-        country: 'Philippines',
-        postal_code: '',
-        latitude: '',
-        longitude: '',
-        turnover_date: '',
-        completion_year: '',
-        status: 'pre-selling',
-        total_units: '',
-        total_floors: '',
-        virtual_tour_url: '',
-        featured: false,
-        images: [],
-        featured_image: '',
-    });
-
-    // Property form
-    const propertyForm = useForm({
-        project_id: '',
-        title: '',
-        description: '',
-        unit_number: '',
-        floor_level: '',
-        building_phase: '',
-        property_type: 'studio',
-        floor_area: '',
-        floor_area_unit: 'sq.m.',
-        balcony_area: '',
-        bedrooms: '',
-        bathrooms: '',
-        parking_spaces: '',
-        orientation: '',
-        view_type: '',
-        listing_status: 'available',
-        floor_plan_url: '',
-        featured: false,
-    });
-
-    // Developer CRUD functions
-    const handleCreateDeveloper = () => {
-        setEditingDeveloper(null);
-        developerForm.reset();
-        setShowDeveloperModal(true);
-    };
-
-    const handleEditDeveloper = (developer: Developer) => {
-        setEditingDeveloper(developer);
-        developerForm.setData({
-            company_name: developer.company_name || '',
-            description: developer.description || '',
-            logo_url: developer.logo_url || '',
-            contact_email: developer.contact_email || '',
-            contact_phone: developer.contact_phone || '',
-            website: developer.website || '',
-        });
-        setShowDeveloperModal(true);
-    };
-
-    const handleSubmitDeveloper = (e: FormEvent, selectedFile?: File | null) => {
-        e.preventDefault();
-
-        // If there's a selected file, handle the upload first, then create developer
-        if (selectedFile) {
-            // First upload the file using fetch (since it's a utility endpoint)
-            const uploadFile = async () => {
-                const formData = new FormData();
-                formData.append('image', selectedFile);
-                formData.append('type', 'logo');
-
-                try {
-                    const response = await fetch('/admin/real-estate/upload-image', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                        },
-                        body: formData,
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        // Update the form data with the uploaded URL
-                        developerForm.setData('logo_url', result.url);
-
-                        // Then submit the developer form using Inertia
-                        if (editingDeveloper) {
-                            developerForm.put(`/admin/real-estate/developers/${editingDeveloper.id}`, {
-                                onSuccess: () => {
-                                    setShowDeveloperModal(false);
-                                    setEditingDeveloper(null);
-                                },
-                            });
-                        } else {
-                            developerForm.post('/admin/real-estate/developers', {
-                                onSuccess: () => {
-                                    setShowDeveloperModal(false);
-                                },
-                            });
-                        }
-                    } else {
-                        alert('Upload failed: ' + (result.message || 'Unknown error'));
-                    }
-                } catch (error) {
-                    console.error('Upload error:', error);
-                    alert('Upload failed: ' + (error as Error).message);
-                }
-            };
-
-            uploadFile();
-        } else {
-            // No file to upload, proceed with form submission
-            if (editingDeveloper) {
-                developerForm.put(`/admin/real-estate/developers/${editingDeveloper.id}`, {
-                    onSuccess: () => {
-                        setShowDeveloperModal(false);
-                        setEditingDeveloper(null);
-                    },
-                });
-            } else {
-                developerForm.post('/admin/real-estate/developers', {
-                    onSuccess: () => {
-                        setShowDeveloperModal(false);
-                    },
-                });
-            }
+    // Get active tab from URL or default based on permissions
+    const getInitialTab = (): 'developers' | 'projects' | 'properties' | 'inquiries' => {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+        if (tab === 'developers' || tab === 'projects' || tab === 'properties' || tab === 'inquiries') {
+            return tab;
         }
+
+        // Default to first tab user has viewAny permission for
+        if (can('developer', 'viewAny')) return 'developers';
+        if (can('realestate-project', 'viewAny')) return 'projects';
+        if (can('property', 'viewAny')) return 'properties';
+
+        return 'developers'; // Fallback
     };
 
+    const [activeTab, setActiveTab] = useState<'developers' | 'projects' | 'properties' | 'inquiries'>(getInitialTab());
+
+    // Update URL when tab changes
+    const handleTabChange = (tabId: 'developers' | 'projects' | 'properties' | 'inquiries') => {
+        setActiveTab(tabId);
+        router.visit(`/admin/real-estate?tab=${tabId}`, {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
+    };
+
+    // CRUD functions
     const handleDeleteDeveloper = (id: number) => {
         if (confirm('Are you sure you want to delete this developer?')) {
             router.delete(`/admin/real-estate/developers/${id}`);
-        }
-    };
-
-    // Project CRUD functions
-    const handleCreateProject = () => {
-        setEditingProject(null);
-        projectForm.reset();
-        setShowProjectModal(true);
-    };
-
-    const handleEditProject = (project: RealEstateProject) => {
-        setEditingProject(project);
-        projectForm.setData({
-            developer_id: project.developer.id.toString(),
-            name: project.name || '',
-            description: project.description || '',
-            project_type: project.project_type || 'condominium',
-            address: project.address || '',
-            city: project.city || '',
-            province: project.province || '',
-            region: project.region || '',
-            country: project.country || 'Philippines',
-            postal_code: project.postal_code || '',
-            latitude: project.latitude?.toString() || '',
-            longitude: project.longitude?.toString() || '',
-            turnover_date: project.turnover_date || '',
-            completion_year: project.completion_year?.toString() || '',
-            status: project.status || 'pre-selling',
-            total_units: project.total_units?.toString() || '',
-            total_floors: project.total_floors?.toString() || '',
-            virtual_tour_url: project.virtual_tour_url || '',
-            featured: project.featured || false,
-            images: (project as any).images || [],
-            featured_image: (project as any).featured_image || '',
-        });
-        setShowProjectModal(true);
-    };
-
-    const handleSubmitProject = (e: FormEvent, selectedFiles?: File[], featuredFile?: File | null) => {
-        e.preventDefault();
-
-        // Function to handle final form submission
-        const submitForm = () => {
-            if (editingProject) {
-                projectForm.put(`/admin/real-estate/projects/${editingProject.id}`, {
-                    onSuccess: () => {
-                        setShowProjectModal(false);
-                        setEditingProject(null);
-                    },
-                });
-            } else {
-                projectForm.post('/admin/real-estate/projects', {
-                    onSuccess: () => {
-                        setShowProjectModal(false);
-                    },
-                });
-            }
-        };
-
-        // If there are files to upload, handle uploads first
-        const hasFiles = (selectedFiles && selectedFiles.length > 0) || featuredFile;
-
-        if (hasFiles) {
-            const uploadFiles = async () => {
-                try {
-                    const uploadPromises = [];
-
-                    // Upload featured image if provided
-                    if (featuredFile) {
-                        const featuredFormData = new FormData();
-                        featuredFormData.append('image', featuredFile);
-                        featuredFormData.append('type', 'project');
-
-                        const featuredPromise = fetch('/admin/real-estate/upload-image', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                            },
-                            body: featuredFormData,
-                        }).then((response) => response.json());
-
-                        uploadPromises.push(featuredPromise);
-                    }
-
-                    // Upload additional images if provided
-                    if (selectedFiles && selectedFiles.length > 0) {
-                        for (const file of selectedFiles) {
-                            const formData = new FormData();
-                            formData.append('image', file);
-                            formData.append('type', 'project');
-
-                            const promise = fetch('/admin/real-estate/upload-image', {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                                },
-                                body: formData,
-                            }).then((response) => response.json());
-
-                            uploadPromises.push(promise);
-                        }
-                    }
-
-                    // Wait for all uploads to complete
-                    const results = await Promise.all(uploadPromises);
-
-                    // Check if all uploads were successful
-                    const allSuccessful = results.every((result) => result.success);
-
-                    if (allSuccessful) {
-                        // Separate featured image result from additional images
-                        let featuredImageUrl = projectForm.data.featured_image;
-                        let additionalImages = [...(projectForm.data.images || [])];
-
-                        // If we uploaded a featured image, it's the first result
-                        if (featuredFile) {
-                            featuredImageUrl = results[0].url;
-                            // Additional images start from index 1
-                            const additionalResults = results.slice(1);
-                            additionalImages = additionalResults.map((result) => result.url);
-                        } else {
-                            // All results are additional images
-                            additionalImages = results.map((result) => result.url);
-                        }
-
-                        // Update form data with uploaded URLs
-                        projectForm.setData({
-                            ...projectForm.data,
-                            featured_image: featuredImageUrl,
-                            images: additionalImages,
-                        });
-
-                        // Submit the form
-                        submitForm();
-                    } else {
-                        const failedUploads = results.filter((result) => !result.success);
-                        alert('Some uploads failed: ' + failedUploads.map((r) => r.message).join(', '));
-                    }
-                } catch (error) {
-                    console.error('Upload error:', error);
-                    alert('Upload failed: ' + (error as Error).message);
-                }
-            };
-
-            uploadFiles();
-        } else {
-            // No files to upload, proceed with form submission
-            submitForm();
         }
     };
 
@@ -407,56 +129,6 @@ export default function RealEstateManagement({ developers, projects, properties,
     };
 
     // Property CRUD functions
-    const handleCreateProperty = () => {
-        setEditingProperty(null);
-        propertyForm.reset();
-        setShowPropertyModal(true);
-    };
-
-    const handleEditProperty = (property: Property) => {
-        setEditingProperty(property);
-        propertyForm.setData({
-            project_id: property.project?.id.toString() || '',
-            title: property.title || '',
-            description: property.description || '',
-            unit_number: property.unit_number || '',
-            floor_level: property.floor_level?.toString() || '',
-            building_phase: property.building_phase || '',
-            property_type: property.property_type || 'studio',
-            floor_area: property.floor_area?.toString() || '',
-            floor_area_unit: property.floor_area_unit || 'sq.m.',
-            balcony_area: property.balcony_area?.toString() || '',
-            bedrooms: property.bedrooms?.toString() || '',
-            bathrooms: property.bathrooms?.toString() || '',
-            parking_spaces: property.parking_spaces?.toString() || '',
-            orientation: property.orientation || '',
-            view_type: property.view_type || '',
-            listing_status: property.listing_status || 'available',
-            floor_plan_url: property.floor_plan_url || '',
-            featured: property.featured || false,
-        });
-        setShowPropertyModal(true);
-    };
-
-    const handleSubmitProperty = (e: FormEvent) => {
-        e.preventDefault();
-
-        if (editingProperty) {
-            propertyForm.put(`/admin/real-estate/properties/${editingProperty.id}`, {
-                onSuccess: () => {
-                    setShowPropertyModal(false);
-                    setEditingProperty(null);
-                },
-            });
-        } else {
-            propertyForm.post('/admin/real-estate/properties', {
-                onSuccess: () => {
-                    setShowPropertyModal(false);
-                },
-            });
-        }
-    };
-
     const handleDeleteProperty = (id: number) => {
         if (confirm('Are you sure you want to delete this property?')) {
             router.delete(`/admin/real-estate/properties/${id}`);
@@ -515,10 +187,14 @@ export default function RealEstateManagement({ developers, projects, properties,
                             'from-orange-300 to-orange-400',
                             'from-orange-200 to-orange-300',
                         ];
+                        const isActive = activeTab === tab.id;
                         return (
-                            <div
+                            <button
                                 key={tab.id}
-                                className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
+                                onClick={() => handleTabChange(tab.id)}
+                                className={`overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-md ${
+                                    isActive ? 'border-orange-500 ring-2 ring-orange-200' : 'border-gray-100'
+                                }`}
                             >
                                 <div className="p-6">
                                     <div className="flex items-center">
@@ -527,7 +203,7 @@ export default function RealEstateManagement({ developers, projects, properties,
                                                 <Icon className="h-6 w-6 text-white" />
                                             </div>
                                         </div>
-                                        <div className="ml-5 w-0 flex-1">
+                                        <div className="ml-5 w-0 flex-1 text-left">
                                             <dl>
                                                 <dt className="truncate text-sm font-medium text-gray-600">{tab.name}</dt>
                                                 <dd className="text-2xl font-bold text-gray-900">{tab.count}</dd>
@@ -535,7 +211,7 @@ export default function RealEstateManagement({ developers, projects, properties,
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </button>
                         );
                     })}
                 </div>
@@ -549,7 +225,7 @@ export default function RealEstateManagement({ developers, projects, properties,
                                 return (
                                     <button
                                         key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
+                                        onClick={() => handleTabChange(tab.id)}
                                         className={`${
                                             activeTab === tab.id
                                                 ? 'border-orange-500 text-orange-600'
@@ -570,13 +246,15 @@ export default function RealEstateManagement({ developers, projects, properties,
                             <div>
                                 <div className="mb-6 flex items-center justify-between">
                                     <h2 className="text-xl font-semibold text-gray-900">Developers Management</h2>
-                                    <a
-                                        href="/admin/real-estate/developers/create"
-                                        className="flex items-center rounded-lg bg-orange-500 px-4 py-2 text-white shadow-sm transition-colors hover:bg-orange-600"
-                                    >
-                                        <Plus className="mr-2 h-4 w-4" />
-                                        Add Developer
-                                    </a>
+                                    {can('developer', 'create') && (
+                                        <a
+                                            href="/admin/real-estate/developers/create"
+                                            className="flex items-center rounded-lg bg-orange-500 px-4 py-2 text-white shadow-sm transition-colors hover:bg-orange-600"
+                                        >
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Add Developer
+                                        </a>
+                                    )}
                                 </div>
 
                                 {/* Developers Table */}
@@ -649,20 +327,24 @@ export default function RealEstateManagement({ developers, projects, properties,
                                                         </td>
                                                         <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                                             <div className="flex items-center space-x-3">
-                                                                <a
-                                                                    href={`/admin/real-estate/developers/${developer.id}/edit`}
-                                                                    className="flex items-center text-orange-600 transition-colors hover:text-orange-800"
-                                                                >
-                                                                    <Edit className="mr-1 h-4 w-4" />
-                                                                    Edit
-                                                                </a>
-                                                                <button
-                                                                    onClick={() => handleDeleteDeveloper(developer.id)}
-                                                                    className="flex items-center text-red-600 transition-colors hover:text-red-800"
-                                                                >
-                                                                    <Trash2 className="mr-1 h-4 w-4" />
-                                                                    Delete
-                                                                </button>
+                                                                {can('developer', 'update') && (
+                                                                    <a
+                                                                        href={`/admin/real-estate/developers/${developer.id}/edit`}
+                                                                        className="flex items-center text-orange-600 transition-colors hover:text-orange-800"
+                                                                    >
+                                                                        <Edit className="mr-1 h-4 w-4" />
+                                                                        Edit
+                                                                    </a>
+                                                                )}
+                                                                {can('developer', 'delete') && (
+                                                                    <button
+                                                                        onClick={() => handleDeleteDeveloper(developer.id)}
+                                                                        className="flex items-center text-red-600 transition-colors hover:text-red-800"
+                                                                    >
+                                                                        <Trash2 className="mr-1 h-4 w-4" />
+                                                                        Delete
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -672,12 +354,12 @@ export default function RealEstateManagement({ developers, projects, properties,
                                                     <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
                                                         <Building className="mx-auto mb-4 h-12 w-12 text-gray-300" />
                                                         <p className="mb-2 text-lg font-medium text-gray-600">No developers found</p>
-                                                        <button
-                                                            onClick={handleCreateDeveloper}
+                                                        <a
+                                                            href="/admin/real-estate/developers/create"
                                                             className="font-medium text-orange-600 transition-colors hover:text-orange-800"
                                                         >
                                                             Add your first developer
-                                                        </button>
+                                                        </a>
                                                     </td>
                                                 </tr>
                                             )}
@@ -691,13 +373,15 @@ export default function RealEstateManagement({ developers, projects, properties,
                             <div>
                                 <div className="mb-6 flex items-center justify-between">
                                     <h2 className="text-xl font-semibold text-gray-900">Projects Management</h2>
-                                    <a
-                                        href="/admin/real-estate/projects/create"
-                                        className="flex items-center rounded-lg bg-orange-500 px-4 py-2 text-white shadow-sm transition-colors hover:bg-orange-600"
-                                    >
-                                        <Plus className="mr-2 h-4 w-4" />
-                                        Add Project
-                                    </a>
+                                    {can('realestate-project', 'create') && (
+                                        <a
+                                            href="/admin/real-estate/projects/create"
+                                            className="flex items-center rounded-lg bg-orange-500 px-4 py-2 text-white shadow-sm transition-colors hover:bg-orange-600"
+                                        >
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Add Project
+                                        </a>
+                                    )}
                                 </div>
 
                                 {/* Projects Table */}
@@ -779,20 +463,24 @@ export default function RealEstateManagement({ developers, projects, properties,
                                                         </td>
                                                         <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                                             <div className="flex items-center space-x-3">
-                                                                <a
-                                                                    href={`/admin/real-estate/projects/${project.id}/edit`}
-                                                                    className="flex items-center text-orange-600 transition-colors hover:text-orange-800"
-                                                                >
-                                                                    <Edit className="mr-1 h-4 w-4" />
-                                                                    Edit
-                                                                </a>
-                                                                <button
-                                                                    onClick={() => handleDeleteProject(project.id)}
-                                                                    className="flex items-center text-red-600 transition-colors hover:text-red-800"
-                                                                >
-                                                                    <Trash2 className="mr-1 h-4 w-4" />
-                                                                    Delete
-                                                                </button>
+                                                                {can('realestate-project', 'update') && (
+                                                                    <a
+                                                                        href={`/admin/real-estate/projects/${project.id}/edit`}
+                                                                        className="flex items-center text-orange-600 transition-colors hover:text-orange-800"
+                                                                    >
+                                                                        <Edit className="mr-1 h-4 w-4" />
+                                                                        Edit
+                                                                    </a>
+                                                                )}
+                                                                {can('realestate-project', 'delete') && (
+                                                                    <button
+                                                                        onClick={() => handleDeleteProject(project.id)}
+                                                                        className="flex items-center text-red-600 transition-colors hover:text-red-800"
+                                                                    >
+                                                                        <Trash2 className="mr-1 h-4 w-4" />
+                                                                        Delete
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -821,12 +509,129 @@ export default function RealEstateManagement({ developers, projects, properties,
                             <div>
                                 <div className="mb-6 flex items-center justify-between">
                                     <h2 className="text-xl font-semibold text-gray-900">Properties Management</h2>
-                                    <button className="flex items-center rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
-                                        <Plus className="mr-2 h-4 w-4" />
-                                        Add Property
-                                    </button>
+                                    {can('property', 'create') && (
+                                        <a
+                                            href="/admin/real-estate/properties/create"
+                                            className="flex items-center rounded-lg bg-orange-500 px-4 py-2 text-white shadow-sm transition-colors hover:bg-orange-600"
+                                        >
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Add Property
+                                        </a>
+                                    )}
                                 </div>
-                                <p className="text-gray-600">Properties management content will be implemented here.</p>
+
+                                {/* Properties Table */}
+                                <div className="overflow-hidden rounded-lg bg-white shadow">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                                    Property
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                                    Project
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                                    Type
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                                    Status
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200 bg-white">
+                                            {properties.length > 0 ? (
+                                                properties.map((property) => (
+                                                    <tr key={property.id} className="hover:bg-gray-50">
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <div className="flex items-center">
+                                                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
+                                                                    <Home className="h-6 w-6 text-orange-600" />
+                                                                </div>
+                                                                <div className="ml-4">
+                                                                    <div className="text-sm font-medium text-gray-900">{property.title}</div>
+                                                                    {property.unit_number && (
+                                                                        <div className="text-sm text-gray-500">Unit: {property.unit_number}</div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <div className="text-sm text-gray-900">{property.project?.name || 'N/A'}</div>
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <div className="text-sm text-gray-900">
+                                                                {property.property_type.charAt(0).toUpperCase() +
+                                                                    property.property_type.slice(1).replace('-', ' ')}
+                                                            </div>
+                                                            {property.bedrooms !== undefined && (
+                                                                <div className="text-sm text-gray-500">
+                                                                    {property.bedrooms} bed, {property.bathrooms || 0} bath
+                                                                </div>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <span
+                                                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                                                    property.listing_status === 'available'
+                                                                        ? 'bg-green-100 text-green-800'
+                                                                        : property.listing_status === 'reserved'
+                                                                          ? 'bg-yellow-100 text-yellow-800'
+                                                                          : property.listing_status === 'sold'
+                                                                            ? 'bg-gray-100 text-gray-800'
+                                                                            : 'bg-red-100 text-red-800'
+                                                                }`}
+                                                            >
+                                                                {property.listing_status.charAt(0).toUpperCase() +
+                                                                    property.listing_status.slice(1).replace('_', ' ')}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                                                            <div className="flex items-center space-x-3">
+                                                                {can('property', 'update') && (
+                                                                    <a
+                                                                        href={`/admin/real-estate/properties/${property.id}/edit`}
+                                                                        className="flex items-center text-orange-600 transition-colors hover:text-orange-800"
+                                                                    >
+                                                                        <Edit className="mr-1 h-4 w-4" />
+                                                                        Edit
+                                                                    </a>
+                                                                )}
+                                                                {can('property', 'delete') && (
+                                                                    <button
+                                                                        onClick={() => handleDeleteProperty(property.id)}
+                                                                        className="flex items-center text-red-600 transition-colors hover:text-red-800"
+                                                                    >
+                                                                        <Trash2 className="mr-1 h-4 w-4" />
+                                                                        Delete
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                                        <Home className="mx-auto mb-4 h-12 w-12 text-gray-300" />
+                                                        <p className="mb-2 text-lg font-medium text-gray-600">No properties found</p>
+                                                        {can('property', 'create') && (
+                                                            <a
+                                                                href="/admin/real-estate/properties/create"
+                                                                className="font-medium text-orange-600 transition-colors hover:text-orange-800"
+                                                            >
+                                                                Add your first property
+                                                            </a>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         )}
 
@@ -840,25 +645,6 @@ export default function RealEstateManagement({ developers, projects, properties,
                         )}
                     </div>
                 </div>
-
-                {/* Developer Modal */}
-                <DeveloperModal
-                    show={showDeveloperModal}
-                    onClose={() => setShowDeveloperModal(false)}
-                    developer={editingDeveloper}
-                    onSubmit={handleSubmitDeveloper}
-                    form={developerForm}
-                />
-
-                {/* Project Modal */}
-                <ProjectModal
-                    show={showProjectModal}
-                    onClose={() => setShowProjectModal(false)}
-                    project={editingProject}
-                    onSubmit={handleSubmitProject}
-                    form={projectForm}
-                    developers={developers}
-                />
             </div>
         </AppLayout>
     );

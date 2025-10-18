@@ -16,7 +16,7 @@ class PermissionController extends Controller
         $permissions = Permission::all();
 
         return Inertia::render('admin/permission', [
-            'permissions' => $permissions
+            'permissions' => $permissions,
         ]);
     }
 
@@ -27,7 +27,7 @@ class PermissionController extends Controller
                 'required',
                 'string',
                 'max:255',
-                'unique:permissions,resource'
+                'unique:permissions,resource',
             ],
             'actions' => 'required|array',
         ]);
@@ -52,7 +52,7 @@ class PermissionController extends Controller
 
         Permission::create([
             'resource' => $validated['resource'],
-            'actions' => $actions
+            'actions' => $actions,
         ]);
 
         return redirect()->route('permissions.index')
@@ -66,11 +66,10 @@ class PermissionController extends Controller
                 'required',
                 'string',
                 'max:255',
-                'unique:permissions,resource,' . $permission->id
+                'unique:permissions,resource,' . $permission->id,
             ],
             'actions' => 'required|array',
         ]);
-
 
         $actions = $request->actions ?? [];
 
@@ -92,7 +91,7 @@ class PermissionController extends Controller
 
         $permission->update([
             'resource' => $validated['resource'],
-            'actions' => $actions // Auto-add default actions
+            'actions' => $actions, // Auto-add default actions
         ]);
 
         return redirect()->route('permissions.index')

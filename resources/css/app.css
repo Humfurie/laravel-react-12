@@ -256,22 +256,23 @@ h1 span {
 }
 
 .blog-content h1 {
-    @apply text-3xl font-bold mt-8 mb-4 text-brand-black;
+    @apply text-brand-black mt-8 mb-4 text-3xl font-bold;
 }
 
 .blog-content h2 {
-    @apply text-2xl font-bold mt-6 mb-3 text-brand-black;
+    @apply text-brand-black mt-6 mb-3 text-2xl font-bold;
 }
 
 .blog-content h3 {
-    @apply text-xl font-bold mt-5 mb-2 text-brand-black;
+    @apply text-brand-black mt-5 mb-2 text-xl font-bold;
 }
 
 .blog-content p {
-    @apply mb-4 leading-relaxed text-foreground;
+    @apply text-foreground mb-4 leading-relaxed;
 }
 
-.blog-content ul, .blog-content ol {
+.blog-content ul,
+.blog-content ol {
     @apply mb-4 pl-6;
 }
 
@@ -280,19 +281,19 @@ h1 span {
 }
 
 .blog-content img {
-    @apply rounded-lg shadow-lg mx-auto my-6 max-w-full h-auto;
+    @apply mx-auto my-6 h-auto max-w-full rounded-lg shadow-lg;
 }
 
 .blog-content blockquote {
-    @apply border-l-4 border-brand-orange pl-4 italic my-6 text-muted-foreground;
+    @apply border-brand-orange text-muted-foreground my-6 border-l-4 pl-4 italic;
 }
 
 .blog-content code {
-    @apply bg-muted px-2 py-1 rounded text-sm;
+    @apply bg-muted rounded px-2 py-1 text-sm;
 }
 
 .blog-content pre {
-    @apply bg-muted p-4 rounded-lg overflow-x-auto my-4;
+    @apply bg-muted my-4 overflow-x-auto rounded-lg p-4;
 }
 
 .blog-content a {

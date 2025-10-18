@@ -1,19 +1,19 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { BlogEditor } from '@/components/blog-editor';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, ArrowLeft, Upload, X, Plus } from 'lucide-react';
-import { format } from 'date-fns';
-import React, { useState, useRef } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
-import { BlogEditor } from '@/components/blog-editor';
 import { cn } from '@/lib/utils';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { format } from 'date-fns';
+import { ArrowLeft, CalendarIcon, Plus, Upload, X } from 'lucide-react';
+import React, { useRef, useState } from 'react';
 
 interface BlogFormData {
     title: string;
@@ -36,8 +36,9 @@ interface BlogFormData {
 
 export default function CreateBlog() {
     const [publishedDate, setPublishedDate] = useState<Date>();
-    const [uploading, setUploading] = useState(false);
     const [tagInput, setTagInput] = useState('');
+    const [imageInputType, setImageInputType] = useState<'upload' | 'url'>('url');
+    const [imagePreview, setImagePreview] = useState<string>('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { data, setData, post, processing, errors } = useForm<BlogFormData>({
@@ -47,6 +48,7 @@ export default function CreateBlog() {
         excerpt: '',
         status: 'draft',
         featured_image: '',
+        featured_image_file: null as File | null,
         meta_data: {
             meta_title: '',
             meta_description: '',
@@ -72,12 +74,12 @@ export default function CreateBlog() {
             .toLowerCase()
             .replace(/[^a-z0-9 ]/g, '')
             .split(' ')
-            .filter(word => word.length > 2) // Filter out short words
+            .filter((word) => word.length > 2) // Filter out short words
             .join(', ');
     };
 
     const handleTitleChange = (value: string) => {
-        setData(prev => ({
+        setData((prev) => ({
             ...prev,
             title: value,
             slug: prev.slug || generateSlug(value),
@@ -104,7 +106,16 @@ export default function CreateBlog() {
         };
 
         setData(formDataToSubmit);
-        post(route('blogs.store'));
+        setTimeout(() => {
+            post(route('blogs.store'), {
+                forceFormData: true,
+                onSuccess: () => {
+                    if (imagePreview && imagePreview.startsWith('blob:')) {
+                        URL.revokeObjectURL(imagePreview);
+                    }
+                },
+            });
+        }, 0);
     };
 
     const handleSaveAsDraft = () => {
@@ -120,7 +131,16 @@ export default function CreateBlog() {
             published_at: '',
         };
         setData(formDataToSubmit);
-        post(route('blogs.store'));
+        setTimeout(() => {
+            post(route('blogs.store'), {
+                forceFormData: true,
+                onSuccess: () => {
+                    if (imagePreview && imagePreview.startsWith('blob:')) {
+                        URL.revokeObjectURL(imagePreview);
+                    }
+                },
+            });
+        }, 0);
     };
 
     const handlePublish = () => {
@@ -136,41 +156,42 @@ export default function CreateBlog() {
             published_at: publishedDate ? format(publishedDate, 'yyyy-MM-dd HH:mm:ss') : format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
         };
         setData(formDataToSubmit);
-        post(route('blogs.store'));
+        setTimeout(() => {
+            post(route('blogs.store'), {
+                forceFormData: true,
+                onSuccess: () => {
+                    if (imagePreview && imagePreview.startsWith('blob:')) {
+                        URL.revokeObjectURL(imagePreview);
+                    }
+                },
+            });
+        }, 0);
     };
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        setUploading(true);
-        const formData = new FormData();
-        formData.append('image', file);
-
-        try {
-            const response = await fetch('/admin/blogs/upload-image', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                setData('featured_image', result.url);
-            } else {
-                alert('Upload failed: ' + result.message);
-            }
-        } catch (error) {
-            alert('Upload failed: ' + error);
-        } finally {
-            setUploading(false);
+        // Clean up old blob URL if exists
+        if (imagePreview && imagePreview.startsWith('blob:')) {
+            URL.revokeObjectURL(imagePreview);
         }
+
+        // Create preview and set file in form
+        const previewUrl = URL.createObjectURL(file);
+        setImagePreview(previewUrl);
+        setData('featured_image_file', file);
     };
 
     const clearFeaturedImage = () => {
+        // Clean up blob URL if exists
+        if (imagePreview && imagePreview.startsWith('blob:')) {
+            URL.revokeObjectURL(imagePreview);
+        }
+
+        setImagePreview('');
         setData('featured_image', '');
+        setData('featured_image_file', null);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -184,7 +205,10 @@ export default function CreateBlog() {
     };
 
     const removeTag = (tagToRemove: string) => {
-        setData('tags', data.tags.filter(tag => tag !== tagToRemove));
+        setData(
+            'tags',
+            data.tags.filter((tag) => tag !== tagToRemove),
+        );
     };
 
     const handleTagKeyDown = (e: React.KeyboardEvent) => {
@@ -208,15 +232,13 @@ export default function CreateBlog() {
                     </Link>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Create New Blog Post</h1>
-                        <p className="text-muted-foreground">
-                            Write and publish your blog post using the rich text editor
-                        </p>
+                        <p className="text-muted-foreground">Write and publish your blog post using the rich text editor</p>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-6">
+                    <div className="space-y-6 lg:col-span-2">
                         <Card>
                             <CardHeader>
                                 <CardTitle>Post Content</CardTitle>
@@ -245,7 +267,7 @@ export default function CreateBlog() {
                                         className={errors.slug ? 'border-red-500' : ''}
                                     />
                                     {errors.slug && <p className="text-sm text-red-500">{errors.slug}</p>}
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-muted-foreground text-xs">
                                         URL: {typeof window !== 'undefined' ? window.location.origin : ''}/blog/{data.slug || 'post-slug'}
                                     </p>
                                 </div>
@@ -271,9 +293,7 @@ export default function CreateBlog() {
                                         className={errors.excerpt ? 'border-red-500' : ''}
                                     />
                                     {errors.excerpt && <p className="text-sm text-red-500">{errors.excerpt}</p>}
-                                    <p className="text-xs text-muted-foreground">
-                                        If left empty, an excerpt will be generated from the content
-                                    </p>
+                                    <p className="text-muted-foreground text-xs">If left empty, an excerpt will be generated from the content</p>
                                 </div>
 
                                 <div className="space-y-2">
@@ -287,35 +307,25 @@ export default function CreateBlog() {
                                             placeholder="Enter a tag and press Enter"
                                             className={errors.tags ? 'border-red-500' : ''}
                                         />
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={addTag}
-                                            disabled={!tagInput.trim()}
-                                        >
+                                        <Button type="button" variant="outline" size="sm" onClick={addTag} disabled={!tagInput.trim()}>
                                             <Plus className="h-4 w-4" />
                                         </Button>
                                     </div>
                                     {errors.tags && <p className="text-sm text-red-500">{errors.tags}</p>}
-                                    <div className="flex flex-wrap gap-2 mt-2">
+                                    <div className="mt-2 flex flex-wrap gap-2">
                                         {data.tags.map((tag) => (
                                             <span
                                                 key={String(tag)}
-                                                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                                                className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800"
                                             >
                                                 {tag}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeTag(tag)}
-                                                    className="ml-1 hover:text-blue-600"
-                                                >
+                                                <button type="button" onClick={() => removeTag(tag)} className="ml-1 hover:text-blue-600">
                                                     <X className="h-3 w-3" />
                                                 </button>
                                             </span>
                                         ))}
                                     </div>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-muted-foreground text-xs">
                                         Press Enter or click + to add tags. Tags help organize and categorize your posts.
                                     </p>
                                 </div>
@@ -333,16 +343,16 @@ export default function CreateBlog() {
                                     <Input
                                         id="meta_title"
                                         value={data.meta_data.meta_title}
-                                        onChange={(e) => setData('meta_data', {
-                                            ...data.meta_data,
-                                            meta_title: e.target.value
-                                        })}
+                                        onChange={(e) =>
+                                            setData('meta_data', {
+                                                ...data.meta_data,
+                                                meta_title: e.target.value,
+                                            })
+                                        }
                                         placeholder="SEO title (max 60 characters)"
                                         maxLength={60}
                                     />
-                                    <p className="text-xs text-muted-foreground">
-                                        {data.meta_data.meta_title.length}/60 characters
-                                    </p>
+                                    <p className="text-muted-foreground text-xs">{data.meta_data.meta_title.length}/60 characters</p>
                                 </div>
 
                                 <div className="space-y-2">
@@ -350,17 +360,17 @@ export default function CreateBlog() {
                                     <Textarea
                                         id="meta_description"
                                         value={data.meta_data.meta_description}
-                                        onChange={(e) => setData('meta_data', {
-                                            ...data.meta_data,
-                                            meta_description: e.target.value
-                                        })}
+                                        onChange={(e) =>
+                                            setData('meta_data', {
+                                                ...data.meta_data,
+                                                meta_description: e.target.value,
+                                            })
+                                        }
                                         placeholder="SEO description (max 160 characters)"
                                         rows={3}
                                         maxLength={160}
                                     />
-                                    <p className="text-xs text-muted-foreground">
-                                        {data.meta_data.meta_description.length}/160 characters
-                                    </p>
+                                    <p className="text-muted-foreground text-xs">{data.meta_data.meta_description.length}/160 characters</p>
                                 </div>
 
                                 <div className="space-y-2">
@@ -368,10 +378,12 @@ export default function CreateBlog() {
                                     <Input
                                         id="meta_keywords"
                                         value={data.meta_data.meta_keywords}
-                                        onChange={(e) => setData('meta_data', {
-                                            ...data.meta_data,
-                                            meta_keywords: e.target.value
-                                        })}
+                                        onChange={(e) =>
+                                            setData('meta_data', {
+                                                ...data.meta_data,
+                                                meta_keywords: e.target.value,
+                                            })
+                                        }
                                         placeholder="keyword1, keyword2, keyword3"
                                     />
                                 </div>
@@ -388,7 +400,10 @@ export default function CreateBlog() {
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
                                     <Label>Status</Label>
-                                    <Select value={data.status} onValueChange={(value: 'draft' | 'published' | 'private') => setData('status', value)}>
+                                    <Select
+                                        value={data.status}
+                                        onValueChange={(value: 'draft' | 'published' | 'private') => setData('status', value)}
+                                    >
                                         <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>
@@ -407,41 +422,25 @@ export default function CreateBlog() {
                                             <Button
                                                 variant="outline"
                                                 className={cn(
-                                                    "w-full justify-start text-left font-normal",
-                                                    !publishedDate && "text-muted-foreground"
+                                                    'w-full justify-start text-left font-normal',
+                                                    !publishedDate && 'text-muted-foreground',
                                                 )}
                                             >
                                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {publishedDate ? format(publishedDate, "PPP") : "Set publish date"}
+                                                {publishedDate ? format(publishedDate, 'PPP') : 'Set publish date'}
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar
-                                                mode="single"
-                                                selected={publishedDate}
-                                                onSelect={setPublishedDate}
-                                                initialFocus
-                                            />
+                                            <Calendar mode="single" selected={publishedDate} onSelect={setPublishedDate} initialFocus />
                                         </PopoverContent>
                                     </Popover>
                                 </div>
 
                                 <div className="flex justify-between gap-2">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={handleSaveAsDraft}
-                                        disabled={processing}
-                                        className="flex-1"
-                                    >
+                                    <Button type="button" variant="outline" onClick={handleSaveAsDraft} disabled={processing} className="flex-1">
                                         Save Draft
                                     </Button>
-                                    <Button
-                                        type="button"
-                                        onClick={handlePublish}
-                                        disabled={processing}
-                                        className="flex-1"
-                                    >
+                                    <Button type="button" onClick={handlePublish} disabled={processing} className="flex-1">
                                         Publish
                                     </Button>
                                 </div>
@@ -457,15 +456,9 @@ export default function CreateBlog() {
                                     <Label htmlFor="isPrimary" className="text-sm font-medium">
                                         Primary Post
                                     </Label>
-                                    <Switch
-                                        id="isPrimary"
-                                        checked={data.isPrimary}
-                                        onCheckedChange={(checked) => setData('isPrimary', checked)}
-                                    />
+                                    <Switch id="isPrimary" checked={data.isPrimary} onCheckedChange={(checked) => setData('isPrimary', checked)} />
                                 </div>
-                                <p className="text-xs text-muted-foreground">
-                                    Mark this as a primary/featured post
-                                </p>
+                                <p className="text-muted-foreground text-xs">Mark this as a primary/featured post</p>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="sort_order">Sort Order</Label>
@@ -487,7 +480,7 @@ export default function CreateBlog() {
                                             <img
                                                 src={data.featured_image}
                                                 alt="Featured image preview"
-                                                className="w-full h-32 object-cover rounded-lg border"
+                                                className="h-32 w-full rounded-lg border object-cover"
                                             />
                                             <Button
                                                 type="button"
@@ -501,38 +494,98 @@ export default function CreateBlog() {
                                         </div>
                                     )}
 
-                                    {/* Upload Button */}
-                                    <div className="flex gap-2">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => fileInputRef.current?.click()}
-                                            disabled={uploading}
-                                            className="flex-1"
-                                        >
-                                            <Upload className="mr-2 h-4 w-4" />
-                                            {uploading ? 'Uploading...' : 'Upload Image'}
-                                        </Button>
+                                    {/* Input type selector */}
+                                    <div className="flex space-x-6">
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                checked={imageInputType === 'upload'}
+                                                onChange={() => {
+                                                    setImageInputType('upload');
+                                                    if (fileInputRef.current) fileInputRef.current.value = '';
+                                                }}
+                                                className="mr-2 h-4 w-4 text-orange-600 focus:ring-orange-500"
+                                            />
+                                            <span className="text-sm font-medium">Upload New Image</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                checked={imageInputType === 'url'}
+                                                onChange={() => {
+                                                    setImageInputType('url');
+                                                    if (fileInputRef.current) fileInputRef.current.value = '';
+                                                }}
+                                                className="mr-2 h-4 w-4 text-orange-600 focus:ring-orange-500"
+                                            />
+                                            <span className="text-sm font-medium">Enter URL</span>
+                                        </label>
                                     </div>
 
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileUpload}
-                                        className="hidden"
-                                    />
+                                    {/* File upload */}
+                                    {imageInputType === 'upload' && (
+                                        <div>
+                                            <input
+                                                ref={fileInputRef}
+                                                type="file"
+                                                onChange={handleFileSelect}
+                                                accept="image/*,image/svg+xml"
+                                                className="w-full rounded-lg border border-gray-300 px-4 py-3 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                                            />
+                                            <p className="mt-2 text-xs text-gray-500">Supports: JPG, PNG, GIF, SVG, WEBP (max 5MB)</p>
+                                            {data.featured_image_file && (
+                                                <div className="mt-3 flex items-center text-green-600">
+                                                    <Upload className="mr-2 h-4 w-4" />
+                                                    <span className="text-sm">Selected: {data.featured_image_file.name}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
 
-                                    {/* Manual URL Input */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="featured_image_url">Or enter image URL</Label>
-                                        <Input
-                                            id="featured_image_url"
-                                            value={data.featured_image}
-                                            onChange={(e) => setData('featured_image', e.target.value)}
-                                            placeholder="https://example.com/image.jpg"
-                                        />
-                                    </div>
+                                    {/* URL input */}
+                                    {imageInputType === 'url' && (
+                                        <div>
+                                            <input
+                                                type="text"
+                                                value={data.featured_image}
+                                                onChange={(e) => {
+                                                    setData('featured_image', e.target.value);
+                                                    setImagePreview(e.target.value);
+                                                }}
+                                                placeholder="https://example.com/image.jpg or /storage/image.jpg"
+                                                className="w-full rounded-lg border border-gray-300 px-4 py-3 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                                            />
+                                            <p className="mt-2 text-xs text-gray-500">Enter any valid image URL (external or storage path)</p>
+                                        </div>
+                                    )}
+
+                                    {/* Preview */}
+                                    {imagePreview && (
+                                        <div className="mt-4">
+                                            <label className="mb-3 block text-sm font-medium">Preview:</label>
+                                            <div className="flex items-center space-x-4">
+                                                <img
+                                                    src={imagePreview}
+                                                    alt="Featured image preview"
+                                                    className="h-20 w-20 rounded-lg border border-gray-300 object-cover"
+                                                    onError={(e) => {
+                                                        (e.target as HTMLImageElement).src =
+                                                            'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23666">Error</text></svg>';
+                                                    }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={clearFeaturedImage}
+                                                    className="flex items-center text-sm text-red-600 transition-colors hover:text-red-800"
+                                                >
+                                                    <X className="mr-1 h-4 w-4" />
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {errors.featured_image && <div className="mt-1 text-sm text-red-600">{errors.featured_image}</div>}
                                 </div>
                             </CardContent>
                         </Card>

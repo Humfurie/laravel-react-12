@@ -3,12 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Property extends Model
@@ -16,19 +16,29 @@ class Property extends Model
     use HasFactory, SoftDeletes;
 
     const LISTING_STATUS_AVAILABLE = 'available';
+
     const LISTING_STATUS_RESERVED = 'reserved';
+
     const LISTING_STATUS_SOLD = 'sold';
+
     const LISTING_STATUS_NOT_AVAILABLE = 'not_available';
 
     const PROPERTY_TYPE_STUDIO = 'studio';
+
     const PROPERTY_TYPE_1BR = '1br';
+
     const PROPERTY_TYPE_2BR = '2br';
+
     const PROPERTY_TYPE_3BR = '3br';
+
     const PROPERTY_TYPE_PENTHOUSE = 'penthouse';
 
     const ORIENTATION_NORTH = 'North';
+
     const ORIENTATION_SOUTH = 'South';
+
     const ORIENTATION_EAST = 'East';
+
     const ORIENTATION_WEST = 'West';
 
     protected $fillable = [
@@ -74,7 +84,6 @@ class Property extends Model
 
     protected $casts = [
         'features' => 'array',
-        'images' => 'array',
         'floor_area' => 'decimal:2',
         'balcony_area' => 'decimal:2',
         'bathrooms' => 'decimal:1',
@@ -139,9 +148,9 @@ class Property extends Model
     // Scopes
     public function scopeAvailable($query)
     {
-        return $query->where(function($q) {
+        return $query->where(function ($q) {
             $q->where('listing_status', self::LISTING_STATUS_AVAILABLE)
-              ->orWhere('status', 'available');
+                ->orWhere('status', 'available');
         });
     }
 
@@ -152,9 +161,9 @@ class Property extends Model
 
     public function scopeSold($query)
     {
-        return $query->where(function($q) {
+        return $query->where(function ($q) {
             $q->where('listing_status', self::LISTING_STATUS_SOLD)
-              ->orWhere('status', 'sold');
+                ->orWhere('status', 'sold');
         });
     }
 
@@ -186,6 +195,7 @@ class Property extends Model
         if ($maxArea) {
             $query->where('floor_area', '<=', $maxArea);
         }
+
         return $query;
     }
 
@@ -197,6 +207,7 @@ class Property extends Model
         if ($maxFloor) {
             $query->where('floor_level', '<=', $maxFloor);
         }
+
         return $query;
     }
 
@@ -236,6 +247,7 @@ class Property extends Model
         if ($maxPrice) {
             $query->where('price', '<=', $maxPrice);
         }
+
         return $query;
     }
 
@@ -274,6 +286,7 @@ class Property extends Model
         }
 
         $currency = $this->currency ?? 'PHP';
+
         return number_format($this->price, 2) . ' ' . $currency;
     }
 

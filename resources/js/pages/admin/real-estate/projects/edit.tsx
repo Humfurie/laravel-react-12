@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, useForm } from '@inertiajs/react';
-import { ArrowLeft, Camera, CloudUpload, Image as ImageIcon, Plus, Save, Star, X } from 'lucide-react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, Camera, CloudUpload, Image as ImageIcon, Loader, Plus, Save, Star, X } from 'lucide-react';
 import { FormEvent, useRef, useState } from 'react';
 
 interface Developer {
@@ -44,8 +44,24 @@ interface EditProjectProps {
 }
 
 export default function EditProject({ project, developers }: EditProjectProps) {
-    const [featuredImageFile, setFeaturedImageFile] = useState<File | null>(null);
-    const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([]);
+    // Debug: Log what we receive from backend
+    console.log('Project data:', {
+        featured_image: (project as any).featured_image,
+        images: (project as any).images,
+        full_project: project,
+    });
+
+    const [featuredImagePreview, setFeaturedImagePreview] = useState<string>((project as any).featured_image || '');
+    const [additionalImagePreviews, setAdditionalImagePreviews] = useState<string[]>((project as any).images || []);
+    const [showToast, setShowToast] = useState<{
+        show: boolean;
+        message: string;
+        type: 'success' | 'error';
+    }>({
+        show: false,
+        message: '',
+        type: 'success',
+    });
     const featuredImageRef = useRef<HTMLInputElement>(null);
     const additionalImagesRef = useRef<HTMLInputElement>(null);
 
@@ -69,8 +85,10 @@ export default function EditProject({ project, developers }: EditProjectProps) {
         total_floors: project.total_floors?.toString() || '',
         virtual_tour_url: project.virtual_tour_url || '',
         featured: project.featured || false,
-        images: (project as any).images || [],
-        featured_image: (project as any).featured_image || '',
+        // Include both featured and additional images in existing_images
+        existing_images: [...((project as any).featured_image ? [(project as any).featured_image] : []), ...((project as any).images || [])],
+        featured_image: null as File | null,
+        additional_images: [] as File[],
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -106,141 +124,139 @@ export default function EditProject({ project, developers }: EditProjectProps) {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        setFeaturedImageFile(file);
+        console.log('Selected featured image:', file);
+
+        // Validate it's an image
+        if (!file.type.startsWith('image/')) {
+            console.error('File is not an image:', file.type);
+            return;
+        }
+
+        // If replacing an existing server image, remove it from existing_images
+        if (featuredImagePreview && !featuredImagePreview.startsWith('blob:')) {
+            const updatedExisting = form.data.existing_images.filter((url: string) => url !== featuredImagePreview);
+            form.setData('existing_images', updatedExisting);
+        }
+
+        // Clean up old blob URL if it exists and is a blob
+        if (featuredImagePreview && featuredImagePreview.startsWith('blob:')) {
+            URL.revokeObjectURL(featuredImagePreview);
+        }
+
+        // Create preview URL for display
         const previewUrl = URL.createObjectURL(file);
-        form.setData('featured_image', previewUrl);
+        console.log('Created blob URL:', previewUrl);
+        setFeaturedImagePreview(previewUrl);
+        // Set the file directly in form data
+        form.setData('featured_image', file);
     };
 
     const handleAdditionalImagesSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(event.target.files || []);
         if (files.length === 0) return;
 
-        setAdditionalImageFiles((prev) => [...prev, ...files]);
+        console.log('Selected additional images:', files);
 
-        // Create preview URLs
-        const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
-        const existingImages = form.data.images || [];
-        form.setData('images', [...existingImages, ...newPreviewUrls]);
+        // Filter only image files
+        const imageFiles = files.filter((file) => file.type.startsWith('image/'));
+        if (imageFiles.length !== files.length) {
+            console.warn('Some files were not images and were filtered out');
+        }
+
+        // Create preview URLs for display
+        const newPreviewUrls = imageFiles.map((file) => {
+            const url = URL.createObjectURL(file);
+            console.log('Created blob URL for additional image:', url, file.name);
+            return url;
+        });
+
+        setAdditionalImagePreviews((prev) => [...prev, ...newPreviewUrls]);
+        // Set the files directly in form data
+        form.setData('additional_images', [...form.data.additional_images, ...imageFiles]);
     };
 
     const removeFeaturedImage = () => {
-        setFeaturedImageFile(null);
-        form.setData('featured_image', '');
+        // Clean up blob URL if it's a blob
+        if (featuredImagePreview && featuredImagePreview.startsWith('blob:')) {
+            URL.revokeObjectURL(featuredImagePreview);
+        } else if (featuredImagePreview) {
+            // This is an existing server image, remove from existing_images
+            const updatedExisting = form.data.existing_images.filter((url: string) => url !== featuredImagePreview);
+            form.setData('existing_images', updatedExisting);
+        }
+
+        setFeaturedImagePreview('');
+        form.setData('featured_image', null);
         if (featuredImageRef.current) {
             featuredImageRef.current.value = '';
         }
     };
 
     const removeAdditionalImage = (index: number) => {
-        const updatedFiles = additionalImageFiles.filter((_, i) => i !== index);
-        setAdditionalImageFiles(updatedFiles);
+        const imageUrl = additionalImagePreviews[index];
 
-        const updatedImages = form.data.images.filter((_, i) => i !== index);
-        form.setData('images', updatedImages);
+        // Clean up blob URL if it's a blob
+        if (imageUrl && imageUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(imageUrl);
+            // This is a new file, remove from additional_images
+            const newFileIndex = additionalImagePreviews.slice(0, index).filter((url) => url.startsWith('blob:')).length;
+            const updatedFiles = form.data.additional_images.filter((_, i) => i !== newFileIndex);
+            form.setData('additional_images', updatedFiles);
+        } else {
+            // This is an existing image, remove from existing_images
+            const updatedExisting = form.data.existing_images.filter((url: string) => url !== imageUrl);
+            form.setData('existing_images', updatedExisting);
+        }
+
+        // Update preview array
+        const updatedPreviews = additionalImagePreviews.filter((_, i) => i !== index);
+        setAdditionalImagePreviews(updatedPreviews);
+    };
+
+    const showToastMessage = (message: string, type: 'success' | 'error') => {
+        setShowToast({ show: true, message, type });
+        setTimeout(() => {
+            setShowToast({ show: false, message: '', type: 'success' });
+        }, 5000);
     };
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
 
-        // Function to handle final form submission
-        const submitForm = () => {
-            form.put(`/admin/real-estate/projects/${project.id}`, {
-                onSuccess: () => {
-                    // Will redirect automatically
-                },
-            });
-        };
+        // Transform data before submission
+        form.transform((data) => ({
+            ...data,
+            // Convert empty strings to null for numeric fields
+            latitude: data.latitude || null,
+            longitude: data.longitude || null,
+            completion_year: data.completion_year || null,
+            total_units: data.total_units || null,
+            total_floors: data.total_floors || null,
+            // Ensure featured is properly formatted for FormData
+            featured: data.featured ? '1' : '0',
+            _method: 'PUT',
+        }));
 
-        // If there are files to upload, handle uploads first
-        const hasFiles = (additionalImageFiles && additionalImageFiles.length > 0) || featuredImageFile;
-
-        if (hasFiles) {
-            const uploadFiles = async () => {
-                try {
-                    const uploadPromises = [];
-
-                    // Upload featured image if provided
-                    if (featuredImageFile) {
-                        const featuredFormData = new FormData();
-                        featuredFormData.append('image', featuredImageFile);
-                        featuredFormData.append('type', 'project');
-
-                        const featuredPromise = fetch('/admin/real-estate/upload-image', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                            },
-                            body: featuredFormData,
-                        }).then((response) => response.json());
-
-                        uploadPromises.push(featuredPromise);
-                    }
-
-                    // Upload additional images if provided
-                    if (additionalImageFiles && additionalImageFiles.length > 0) {
-                        for (const file of additionalImageFiles) {
-                            const formData = new FormData();
-                            formData.append('image', file);
-                            formData.append('type', 'project');
-
-                            const promise = fetch('/admin/real-estate/upload-image', {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                                },
-                                body: formData,
-                            }).then((response) => response.json());
-
-                            uploadPromises.push(promise);
-                        }
-                    }
-
-                    // Wait for all uploads to complete
-                    const results = await Promise.all(uploadPromises);
-
-                    // Check if all uploads were successful
-                    const allSuccessful = results.every((result) => result.success);
-
-                    if (allSuccessful) {
-                        // Separate featured image result from additional images
-                        let featuredImageUrl = form.data.featured_image;
-                        let additionalImages = [...form.data.images];
-
-                        // If we uploaded a featured image, it's the first result
-                        if (featuredImageFile) {
-                            featuredImageUrl = results[0].url;
-                            // Additional images start from index 1
-                            const additionalResults = results.slice(1);
-                            additionalImages = [...additionalImages, ...additionalResults.map((result) => result.url)];
-                        } else {
-                            // All results are additional images
-                            additionalImages = [...additionalImages, ...results.map((result) => result.url)];
-                        }
-
-                        // Update form data with uploaded URLs
-                        form.setData({
-                            ...form.data,
-                            featured_image: featuredImageUrl,
-                            images: additionalImages,
-                        });
-
-                        // Submit the form
-                        submitForm();
-                    } else {
-                        const failedUploads = results.filter((result) => !result.success);
-                        alert('Some uploads failed: ' + failedUploads.map((r) => r.message).join(', '));
-                    }
-                } catch (error) {
-                    console.error('Upload error:', error);
-                    alert('Upload failed: ' + (error as Error).message);
+        // Submit using POST with _method=PUT (Laravel's form method spoofing for file uploads)
+        form.post(`/admin/real-estate/projects/${project.id}`, {
+            forceFormData: true,
+            onSuccess: () => {
+                // Clean up blob URLs (these are only for browser preview)
+                if (featuredImagePreview && featuredImagePreview.startsWith('blob:')) {
+                    URL.revokeObjectURL(featuredImagePreview);
                 }
-            };
-
-            uploadFiles();
-        } else {
-            // No files to upload, proceed with form submission
-            submitForm();
-        }
+                additionalImagePreviews.forEach((url) => {
+                    if (url.startsWith('blob:')) {
+                        URL.revokeObjectURL(url);
+                    }
+                });
+                showToastMessage('Project updated successfully!', 'success');
+            },
+            onError: (errors: any) => {
+                console.error('Submission errors:', errors);
+                showToastMessage('Failed to update project. Please check the form.', 'error');
+            },
+        });
     };
 
     return (
@@ -248,16 +264,29 @@ export default function EditProject({ project, developers }: EditProjectProps) {
             <Head title={`Edit ${project.name}`} />
 
             <div className="mx-auto max-w-6xl">
+                {/* Toast Notification */}
+                {showToast.show && (
+                    <div
+                        className={`mb-6 rounded-xl border p-4 shadow-sm ${
+                            showToast.type === 'success' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+                        }`}
+                    >
+                        <p className={`text-sm font-medium ${showToast.type === 'success' ? 'text-green-900' : 'text-red-900'}`}>
+                            {showToast.message}
+                        </p>
+                    </div>
+                )}
+
                 {/* Header */}
                 <div className="mb-6 rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                            <a
+                            <Link
                                 href="/admin/real-estate"
                                 className="mr-4 rounded-lg p-2 text-gray-600 transition-colors hover:bg-orange-50 hover:text-orange-600"
                             >
                                 <ArrowLeft className="h-5 w-5" />
-                            </a>
+                            </Link>
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">Edit Project</h1>
                                 <p className="mt-1 text-gray-600">Update {project.name} information</p>
@@ -527,7 +556,7 @@ export default function EditProject({ project, developers }: EditProjectProps) {
                                         <span className="ml-2 rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-800">Main</span>
                                     </div>
 
-                                    {!form.data.featured_image ? (
+                                    {!featuredImagePreview ? (
                                         <div
                                             className="relative cursor-pointer rounded-xl border-2 border-dashed border-orange-300 bg-orange-50/50 p-8 text-center transition-colors hover:border-orange-400"
                                             onClick={() => featuredImageRef.current?.click()}
@@ -548,17 +577,18 @@ export default function EditProject({ project, developers }: EditProjectProps) {
                                                 <div className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600">
                                                     Choose File
                                                 </div>
-                                                <p className="mt-3 text-xs text-gray-500">Supports: JPG, PNG, GIF (max 2MB)</p>
+                                                <p className="mt-3 text-xs text-gray-500">Supports: JPG, PNG, GIF (max 5MB)</p>
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="relative">
+                                        <div className="group relative">
                                             <div className="relative overflow-hidden rounded-xl border border-gray-200">
                                                 <img
-                                                    src={form.data.featured_image}
+                                                    src={featuredImagePreview}
                                                     alt="Featured image preview"
                                                     className="h-48 w-full object-cover"
                                                     onError={(e) => {
+                                                        console.error('Image load error:', featuredImagePreview);
                                                         (e.target as HTMLImageElement).src =
                                                             'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23666">Error loading image</text></svg>';
                                                     }}
@@ -568,8 +598,8 @@ export default function EditProject({ project, developers }: EditProjectProps) {
                                                         <Star className="h-4 w-4" />
                                                     </div>
                                                 </div>
-                                                <div className="bg-opacity-0 hover:bg-opacity-20 absolute inset-0 flex items-center justify-center bg-black transition-all duration-300">
-                                                    <div className="flex space-x-2 opacity-0 transition-opacity duration-300 hover:opacity-100">
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 hover:bg-black/20">
+                                                    <div className="flex gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                                                         <button
                                                             type="button"
                                                             onClick={() => featuredImageRef.current?.click()}
@@ -613,9 +643,9 @@ export default function EditProject({ project, developers }: EditProjectProps) {
                                             <h3 className="text-lg font-medium text-gray-900">Additional Images</h3>
                                             <span className="ml-2 rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">Gallery</span>
                                         </div>
-                                        {form.data.images && form.data.images.length > 0 && (
+                                        {additionalImagePreviews.length > 0 && (
                                             <span className="text-sm text-gray-600">
-                                                {form.data.images.length} image{form.data.images.length !== 1 ? 's' : ''}
+                                                {additionalImagePreviews.length} image{additionalImagePreviews.length !== 1 ? 's' : ''}
                                             </span>
                                         )}
                                     </div>
@@ -647,9 +677,9 @@ export default function EditProject({ project, developers }: EditProjectProps) {
                                     </div>
 
                                     {/* Images Grid */}
-                                    {form.data.images && form.data.images.length > 0 && (
+                                    {additionalImagePreviews.length > 0 && (
                                         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                                            {form.data.images.map((imageUrl: string, index: number) => (
+                                            {additionalImagePreviews.map((imageUrl: string, index: number) => (
                                                 <div key={index} className="group relative">
                                                     <div className="aspect-square overflow-hidden rounded-xl border border-gray-200 shadow-sm">
                                                         <img
@@ -662,7 +692,7 @@ export default function EditProject({ project, developers }: EditProjectProps) {
                                                             }}
                                                         />
                                                     </div>
-                                                    <div className="bg-opacity-0 group-hover:bg-opacity-40 absolute inset-0 flex items-center justify-center rounded-xl bg-black transition-all duration-300">
+                                                    <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/0 transition-all duration-300 group-hover:bg-black/40">
                                                         <button
                                                             type="button"
                                                             onClick={() => removeAdditionalImage(index)}
@@ -679,10 +709,10 @@ export default function EditProject({ project, developers }: EditProjectProps) {
                                         </div>
                                     )}
 
-                                    {form.errors.images && (
+                                    {form.errors.additional_images && (
                                         <div className="mt-3 flex items-center text-sm text-red-600">
                                             <X className="mr-1 h-4 w-4" />
-                                            {form.errors.images}
+                                            {form.errors.additional_images}
                                         </div>
                                     )}
                                 </div>
@@ -691,19 +721,28 @@ export default function EditProject({ project, developers }: EditProjectProps) {
 
                         {/* Form Actions */}
                         <div className="flex justify-end space-x-4 border-t border-gray-200 pt-6">
-                            <a
+                            <Link
                                 href="/admin/real-estate"
                                 className="rounded-lg bg-gray-200 px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-300"
                             >
                                 Cancel
-                            </a>
+                            </Link>
                             <button
                                 type="submit"
                                 disabled={form.processing}
-                                className="flex items-center rounded-lg bg-orange-500 px-6 py-3 font-medium text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
+                                className="flex items-center rounded-lg bg-orange-500 px-6 py-3 font-medium text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                <Save className="mr-2 h-4 w-4" />
-                                {form.processing ? 'Updating...' : 'Update Project'}
+                                {form.processing ? (
+                                    <>
+                                        <Loader className="mr-2 h-4 w-4 animate-spin" />
+                                        Updating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save className="mr-2 h-4 w-4" />
+                                        Update Project
+                                    </>
+                                )}
                             </button>
                         </div>
                     </form>
