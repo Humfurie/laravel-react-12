@@ -1,4 +1,4 @@
-import Head from 'next/head'
+import Head from 'next/head';
 
 function IndexPage() {
     return (
@@ -8,7 +8,7 @@ function IndexPage() {
             </Head>
             <p>Hello world!</p>
         </div>
-    )
+    );
 }
 
-export default IndexPage
+export default IndexPage;

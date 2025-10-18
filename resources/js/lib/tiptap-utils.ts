@@ -254,7 +254,7 @@ export const handleImageUpload = async (
             body: formData,
             headers: {
                 'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json',
+                Accept: 'application/json',
             },
             signal: abortSignal,
         });
@@ -264,6 +264,12 @@ export const handleImageUpload = async (
 
             if (response.status === 419) {
                 throw new Error('Session expired. Please refresh the page and try again.');
+            }
+
+            // Handle Laravel validation errors
+            if (errorData.errors) {
+                const validationMessages = Object.values(errorData.errors).flat();
+                throw new Error(validationMessages.join(' '));
             }
 
             throw new Error(errorData.message || `Upload failed with status ${response.status}`);

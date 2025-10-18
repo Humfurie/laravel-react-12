@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save, Upload, X } from 'lucide-react';
 import { FormEvent, useRef, useState } from 'react';
 
@@ -10,13 +10,14 @@ interface BreadcrumbItem {
 
 export default function CreateDeveloper() {
     const [logoInputType, setLogoInputType] = useState<'upload' | 'url'>('upload');
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [logoPreview, setLogoPreview] = useState<string>('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const form = useForm({
         company_name: '',
         description: '',
         logo_url: '',
+        logo_file: null as File | null,
         contact_email: '',
         contact_phone: '',
         website: '',
@@ -32,14 +33,23 @@ export default function CreateDeveloper() {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        setSelectedFile(file);
+        if (logoPreview && logoPreview.startsWith('blob:')) {
+            URL.revokeObjectURL(logoPreview);
+        }
+
         const previewUrl = URL.createObjectURL(file);
-        form.setData('logo_url', previewUrl);
+        setLogoPreview(previewUrl);
+        form.setData('logo_file', file);
     };
 
     const clearLogo = () => {
+        if (logoPreview && logoPreview.startsWith('blob:')) {
+            URL.revokeObjectURL(logoPreview);
+        }
+
+        setLogoPreview('');
         form.setData('logo_url', '');
-        setSelectedFile(null);
+        form.setData('logo_file', null);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -48,49 +58,14 @@ export default function CreateDeveloper() {
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
 
-        // Function to handle final form submission
-        const submitForm = () => {
-            form.post('/admin/real-estate/developers', {
-                onSuccess: () => {
-                    // Will redirect automatically
-                },
-            });
-        };
-
-        // If there's a file to upload, handle upload first
-        if (selectedFile) {
-            const uploadFile = async () => {
-                try {
-                    const formData = new FormData();
-                    formData.append('image', selectedFile);
-                    formData.append('type', 'logo');
-
-                    const response = await fetch('/admin/real-estate/upload-image', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                        },
-                        body: formData,
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        form.setData('logo_url', result.url);
-                        submitForm();
-                    } else {
-                        alert('Upload failed: ' + result.message);
-                    }
-                } catch (error) {
-                    console.error('Upload error:', error);
-                    alert('Upload failed: ' + (error as Error).message);
+        form.post('/admin/real-estate/developers', {
+            forceFormData: true,
+            onSuccess: () => {
+                if (logoPreview && logoPreview.startsWith('blob:')) {
+                    URL.revokeObjectURL(logoPreview);
                 }
-            };
-
-            uploadFile();
-        } else {
-            submitForm();
-        }
+            },
+        });
     };
 
     return (
@@ -102,12 +77,12 @@ export default function CreateDeveloper() {
                 <div className="mb-6 rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                            <a
+                            <Link
                                 href="/admin/real-estate"
                                 className="mr-4 rounded-lg p-2 text-gray-600 transition-colors hover:bg-orange-50 hover:text-orange-600"
                             >
                                 <ArrowLeft className="h-5 w-5" />
-                            </a>
+                            </Link>
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">Create New Developer</h1>
                                 <p className="mt-1 text-gray-600">Add a new real estate developer to your platform</p>
@@ -229,12 +204,12 @@ export default function CreateDeveloper() {
                                             className="w-full rounded-lg border border-gray-300 px-4 py-3 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                                         />
                                         <p className="mt-2 text-xs text-gray-500">
-                                            Supports: JPG, PNG, GIF, SVG (max 2MB). File will be uploaded when you save the developer.
+                                            Supports: JPG, PNG, GIF, SVG (max 5MB). File will be uploaded when you save the developer.
                                         </p>
-                                        {selectedFile && (
+                                        {form.data.logo_file && (
                                             <div className="mt-3 flex items-center text-green-600">
                                                 <Upload className="mr-2 h-4 w-4" />
-                                                <span className="text-sm">Selected: {selectedFile.name}</span>
+                                                <span className="text-sm">Selected: {form.data.logo_file.name}</span>
                                             </div>
                                         )}
                                     </div>
@@ -246,7 +221,14 @@ export default function CreateDeveloper() {
                                         <input
                                             type="text"
                                             value={form.data.logo_url}
-                                            onChange={(e) => form.setData('logo_url', e.target.value)}
+                                            onChange={(e) => {
+                                                form.setData('logo_url', e.target.value);
+                                                setLogoPreview(e.target.value);
+                                                form.setData('logo_file', null);
+                                                if (fileInputRef.current) {
+                                                    fileInputRef.current.value = '';
+                                                }
+                                            }}
                                             placeholder="https://example.com/logo.png or /storage/logo.png"
                                             className="w-full rounded-lg border border-gray-300 px-4 py-3 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                                         />
@@ -255,12 +237,12 @@ export default function CreateDeveloper() {
                                 )}
 
                                 {/* Preview */}
-                                {form.data.logo_url && (
+                                {logoPreview && (
                                     <div className="mt-4">
                                         <label className="mb-3 block text-sm font-medium text-gray-700">Preview:</label>
                                         <div className="flex items-center space-x-4">
                                             <img
-                                                src={form.data.logo_url}
+                                                src={logoPreview}
                                                 alt="Logo preview"
                                                 className="h-20 w-20 rounded-lg border border-gray-300 object-cover"
                                                 onError={(e) => {
@@ -281,17 +263,18 @@ export default function CreateDeveloper() {
                                 )}
 
                                 {form.errors.logo_url && <div className="mt-1 text-sm text-red-600">{form.errors.logo_url}</div>}
+                                {form.errors.logo_file && <div className="mt-1 text-sm text-red-600">{form.errors.logo_file}</div>}
                             </div>
                         </div>
 
                         {/* Form Actions */}
                         <div className="flex justify-end space-x-4 border-t border-gray-200 pt-6">
-                            <a
+                            <Link
                                 href="/admin/real-estate"
                                 className="rounded-lg bg-gray-200 px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-300"
                             >
                                 Cancel
-                            </a>
+                            </Link>
                             <button
                                 type="submit"
                                 disabled={form.processing}

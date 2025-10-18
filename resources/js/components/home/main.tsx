@@ -1,10 +1,10 @@
-import {BannerTextSection} from "@/components/home/sections/BannerTextSection";
+import { BannerTextSection } from '@/components/home/sections/BannerTextSection';
 
 export default function Main() {
     return (
-        <section className="relative h-full w-full min-h-screen">
-            <div className="primary-container max-xl:px-[20px] flex flex-col justify-center items-start md:justify-center">
-                <BannerTextSection/>
+        <section className="relative h-full min-h-screen w-full">
+            <div className="primary-container flex flex-col items-start justify-center max-xl:px-[20px] md:justify-center">
+                <BannerTextSection />
             </div>
 
             <div>
@@ -14,22 +14,21 @@ export default function Main() {
                     alt="Humphrey"
                     height={1000}
                     width={1000}
-                    className="block w-full h-full object-cover min-h-screen min-w-full shadow-md md:hidden"
+                    className="block h-full min-h-screen w-full min-w-full object-cover shadow-md md:hidden"
                 />
                 {/* Mobile Image */}
 
-                <div className="min-h-screen min-w-full hidden md:flex">
+                <div className="hidden min-h-screen min-w-full md:flex">
                     <img
                         src="/humps.jpg"
                         alt="Humphrey"
                         height={1000}
                         width={1000}
-                        className="w-full h-full object-cover min-h-screen min-w-full shadow-md hidden md:flex"
+                        className="hidden h-full min-h-screen w-full min-w-full object-cover shadow-md md:flex"
                     />
                 </div>
             </div>
-            <div className={`absolute top-0 w-full h-full bg-black/50 backdrop-blur-sm`}></div>
+            <div className={`absolute top-0 h-full w-full bg-black/50 backdrop-blur-sm`}></div>
         </section>
-
-    )
+    );
 }

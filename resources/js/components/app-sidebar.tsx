@@ -2,18 +2,21 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { Link } from '@inertiajs/react';
-import { BookOpen, Building, FileText, LayoutGrid } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { BookOpen, Building, FileText, LayoutGrid, Shield, Users } from 'lucide-react';
+import React, { useMemo } from 'react';
+import type { Permissions } from '@/types';
 import AppLogo from './app-logo';
-import React from 'react';
 
 interface NavItem {
     title: string;
     href: string;
     icon: React.ComponentType<{ className?: string }>;
+    requiredPermission?: keyof Permissions;
+    requiredPermissions?: (keyof Permissions)[]; // For items requiring any of multiple permissions
 }
 
-const mainNavItems: NavItem[] = [
+const allNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
@@ -23,35 +26,35 @@ const mainNavItems: NavItem[] = [
         title: 'Real Estate Management',
         href: '/admin/real-estate',
         icon: Building,
+        requiredPermissions: ['developer', 'realestate-project', 'property'],
     },
     {
         title: 'Blog Management',
         href: '/admin/blogs',
         icon: FileText,
+        requiredPermission: 'blog',
     },
     {
         title: 'User Management',
         href: '/admin/users',
-        icon: LayoutGrid,
+        icon: Users,
+        requiredPermission: 'user',
     },
     {
         title: 'Role Management',
         href: '/admin/roles',
-        icon: LayoutGrid,
+        icon: Shield,
+        requiredPermission: 'role',
     },
     {
         title: 'Permission Management',
         href: '/admin/permissions',
         icon: LayoutGrid,
+        requiredPermission: 'permission',
     },
 ];
 
 const footerNavItems: NavItem[] = [
-    // {
-    //     title: 'Repository',
-    //     href: 'https://github.com/laravel/react-starter-kit',
-    //     icon: Folder,
-    // },
     {
         title: 'About',
         href: '/admin/about',
@@ -60,6 +63,31 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { auth } = usePage().props as { auth: { permissions: Permissions } };
+
+    const visibleNavItems = useMemo(() => {
+        return allNavItems.filter((item) => {
+            // If no permission required, always show
+            if (!item.requiredPermission && !item.requiredPermissions) {
+                return true;
+            }
+            
+            // Check single permission
+            if (item.requiredPermission) {
+                return auth.permissions[item.requiredPermission]?.viewAny ?? false;
+            }
+            
+            // Check multiple permissions (OR logic - show if user has ANY of them)
+            if (item.requiredPermissions) {
+                return item.requiredPermissions.some(
+                    (permission) => auth.permissions[permission]?.viewAny ?? false
+                );
+            }
+            
+            return false;
+        });
+    }, [auth.permissions]);
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -75,7 +103,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={visibleNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

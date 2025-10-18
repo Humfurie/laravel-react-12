@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
 import SectionTitle from '@/components/global/SectionTitle';
+import { motion } from 'framer-motion';
 
 type Experience = {
     company: string;

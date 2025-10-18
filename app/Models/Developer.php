@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Developer extends Model
 {
@@ -36,6 +37,11 @@ class Developer extends Model
     public function realEstateProjects(): HasMany
     {
         return $this->hasMany(RealEstateProject::class);
+    }
+
+    public function images(): MorphMany
+    {
+        return $this->morphMany(Image::class, 'imageable');
     }
 
     public function getActiveProjectsCountAttribute(): int
