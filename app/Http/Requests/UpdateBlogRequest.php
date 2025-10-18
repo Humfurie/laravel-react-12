@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Blog;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -19,7 +20,7 @@ class UpdateBlogRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -32,6 +33,7 @@ class UpdateBlogRequest extends FormRequest
             'excerpt' => ['nullable', 'string', 'max:500'],
             'status' => ['required', Rule::in([Blog::STATUS_DRAFT, Blog::STATUS_PUBLISHED, Blog::STATUS_PRIVATE])],
             'featured_image' => ['nullable', 'string', 'max:255'],
+            'featured_image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp,svg', 'max:5120'],
             'meta_data' => ['nullable', 'array'],
             'meta_data.meta_title' => ['nullable', 'string', 'max:60'],
             'meta_data.meta_description' => ['nullable', 'string', 'max:160'],

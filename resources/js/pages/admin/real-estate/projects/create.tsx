@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, useForm } from '@inertiajs/react';
-import { ArrowLeft, Camera, CloudUpload, Image as ImageIcon, Plus, Save, Star, X } from 'lucide-react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, Camera, CloudUpload, Image as ImageIcon, Loader, Plus, Save, Star, X } from 'lucide-react';
 import { FormEvent, useRef, useState } from 'react';
 
 interface Developer {
@@ -18,8 +18,17 @@ interface CreateProjectProps {
 }
 
 export default function CreateProject({ developers }: CreateProjectProps) {
-    const [featuredImageFile, setFeaturedImageFile] = useState<File | null>(null);
-    const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([]);
+    const [featuredImagePreview, setFeaturedImagePreview] = useState<string>('');
+    const [additionalImagePreviews, setAdditionalImagePreviews] = useState<string[]>([]);
+    const [showToast, setShowToast] = useState<{
+        show: boolean;
+        message: string;
+        type: 'success' | 'error';
+    }>({
+        show: false,
+        message: '',
+        type: 'success',
+    });
     const featuredImageRef = useRef<HTMLInputElement>(null);
     const additionalImagesRef = useRef<HTMLInputElement>(null);
 
@@ -43,8 +52,8 @@ export default function CreateProject({ developers }: CreateProjectProps) {
         total_floors: '',
         virtual_tour_url: '',
         featured: false,
-        images: [] as string[],
-        featured_image: '',
+        featured_image: null as File | null,
+        additional_images: [] as File[],
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -80,141 +89,72 @@ export default function CreateProject({ developers }: CreateProjectProps) {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        setFeaturedImageFile(file);
+        // Create preview URL for display
         const previewUrl = URL.createObjectURL(file);
-        form.setData('featured_image', previewUrl);
+        setFeaturedImagePreview(previewUrl);
+        // Set the file directly in form data
+        form.setData('featured_image', file);
     };
 
     const handleAdditionalImagesSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(event.target.files || []);
         if (files.length === 0) return;
 
-        setAdditionalImageFiles((prev) => [...prev, ...files]);
-
-        // Create preview URLs
+        // Create preview URLs for display
         const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
-        const existingImages = form.data.images || [];
-        form.setData('images', [...existingImages, ...newPreviewUrls]);
+        setAdditionalImagePreviews((prev) => [...prev, ...newPreviewUrls]);
+        // Set the files directly in form data
+        form.setData('additional_images', [...form.data.additional_images, ...files]);
     };
 
     const removeFeaturedImage = () => {
-        setFeaturedImageFile(null);
-        form.setData('featured_image', '');
+        // Clean up blob URL to prevent memory leaks
+        if (featuredImagePreview) {
+            URL.revokeObjectURL(featuredImagePreview);
+        }
+        setFeaturedImagePreview('');
+        form.setData('featured_image', null);
         if (featuredImageRef.current) {
             featuredImageRef.current.value = '';
         }
     };
 
     const removeAdditionalImage = (index: number) => {
-        const updatedFiles = additionalImageFiles.filter((_, i) => i !== index);
-        setAdditionalImageFiles(updatedFiles);
+        // Clean up blob URL to prevent memory leaks
+        if (additionalImagePreviews[index]) {
+            URL.revokeObjectURL(additionalImagePreviews[index]);
+        }
 
-        const updatedImages = form.data.images.filter((_, i) => i !== index);
-        form.setData('images', updatedImages);
+        const updatedFiles = form.data.additional_images.filter((_, i) => i !== index);
+        const updatedPreviews = additionalImagePreviews.filter((_, i) => i !== index);
+
+        setAdditionalImagePreviews(updatedPreviews);
+        form.setData('additional_images', updatedFiles);
+    };
+
+    const showToastMessage = (message: string, type: 'success' | 'error') => {
+        setShowToast({ show: true, message, type });
+        setTimeout(() => {
+            setShowToast({ show: false, message: '', type: 'success' });
+        }, 5000);
     };
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
 
-        // Function to handle final form submission
-        const submitForm = () => {
-            form.post('/admin/real-estate/projects', {
-                onSuccess: () => {
-                    // Will redirect automatically
-                },
-            });
-        };
-
-        // If there are files to upload, handle uploads first
-        const hasFiles = (additionalImageFiles && additionalImageFiles.length > 0) || featuredImageFile;
-
-        if (hasFiles) {
-            const uploadFiles = async () => {
-                try {
-                    const uploadPromises = [];
-
-                    // Upload featured image if provided
-                    if (featuredImageFile) {
-                        const featuredFormData = new FormData();
-                        featuredFormData.append('image', featuredImageFile);
-                        featuredFormData.append('type', 'project');
-
-                        const featuredPromise = fetch('/admin/real-estate/upload-image', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                            },
-                            body: featuredFormData,
-                        }).then((response) => response.json());
-
-                        uploadPromises.push(featuredPromise);
-                    }
-
-                    // Upload additional images if provided
-                    if (additionalImageFiles && additionalImageFiles.length > 0) {
-                        for (const file of additionalImageFiles) {
-                            const formData = new FormData();
-                            formData.append('image', file);
-                            formData.append('type', 'project');
-
-                            const promise = fetch('/admin/real-estate/upload-image', {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                                },
-                                body: formData,
-                            }).then((response) => response.json());
-
-                            uploadPromises.push(promise);
-                        }
-                    }
-
-                    // Wait for all uploads to complete
-                    const results = await Promise.all(uploadPromises);
-
-                    // Check if all uploads were successful
-                    const allSuccessful = results.every((result) => result.success);
-
-                    if (allSuccessful) {
-                        // Separate featured image result from additional images
-                        let featuredImageUrl = form.data.featured_image;
-                        let additionalImages = [...form.data.images];
-
-                        // If we uploaded a featured image, it's the first result
-                        if (featuredImageFile) {
-                            featuredImageUrl = results[0].url;
-                            // Additional images start from index 1
-                            const additionalResults = results.slice(1);
-                            additionalImages = additionalResults.map((result) => result.url);
-                        } else {
-                            // All results are additional images
-                            additionalImages = results.map((result) => result.url);
-                        }
-
-                        // Update form data with uploaded URLs
-                        form.setData({
-                            ...form.data,
-                            featured_image: featuredImageUrl,
-                            images: additionalImages,
-                        });
-
-                        // Submit the form
-                        submitForm();
-                    } else {
-                        const failedUploads = results.filter((result) => !result.success);
-                        alert('Some uploads failed: ' + failedUploads.map((r) => r.message).join(', '));
-                    }
-                } catch (error) {
-                    console.error('Upload error:', error);
-                    alert('Upload failed: ' + (error as Error).message);
-                }
-            };
-
-            uploadFiles();
-        } else {
-            // No files to upload, proceed with form submission
-            submitForm();
-        }
+        // Submit the form - Inertia will handle file uploads automatically
+        form.post('/admin/real-estate/projects', {
+            onSuccess: () => {
+                // Clean up blob URLs
+                if (featuredImagePreview) URL.revokeObjectURL(featuredImagePreview);
+                additionalImagePreviews.forEach((url) => URL.revokeObjectURL(url));
+                showToastMessage('Project created successfully!', 'success');
+            },
+            onError: (errors) => {
+                console.error('Submission errors:', errors);
+                showToastMessage('Failed to create project. Please check the form.', 'error');
+            },
+        });
     };
 
     return (
@@ -222,16 +162,29 @@ export default function CreateProject({ developers }: CreateProjectProps) {
             <Head title="Create Project" />
 
             <div className="mx-auto max-w-6xl">
+                {/* Toast Notification */}
+                {showToast.show && (
+                    <div
+                        className={`mb-6 rounded-xl border p-4 shadow-sm ${
+                            showToast.type === 'success' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+                        }`}
+                    >
+                        <p className={`text-sm font-medium ${showToast.type === 'success' ? 'text-green-900' : 'text-red-900'}`}>
+                            {showToast.message}
+                        </p>
+                    </div>
+                )}
+
                 {/* Header */}
                 <div className="mb-6 rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                            <a
+                            <Link
                                 href="/admin/real-estate"
                                 className="mr-4 rounded-lg p-2 text-gray-600 transition-colors hover:bg-orange-50 hover:text-orange-600"
                             >
                                 <ArrowLeft className="h-5 w-5" />
-                            </a>
+                            </Link>
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">Create New Project</h1>
                                 <p className="mt-1 text-gray-600">Add a new real estate project to your platform</p>
@@ -501,7 +454,7 @@ export default function CreateProject({ developers }: CreateProjectProps) {
                                         <span className="ml-2 rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-800">Main</span>
                                     </div>
 
-                                    {!form.data.featured_image ? (
+                                    {!featuredImagePreview ? (
                                         <div
                                             className="relative cursor-pointer rounded-xl border-2 border-dashed border-orange-300 bg-orange-50/50 p-8 text-center transition-colors hover:border-orange-400"
                                             onClick={() => featuredImageRef.current?.click()}
@@ -522,17 +475,18 @@ export default function CreateProject({ developers }: CreateProjectProps) {
                                                 <div className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600">
                                                     Choose File
                                                 </div>
-                                                <p className="mt-3 text-xs text-gray-500">Supports: JPG, PNG, GIF (max 2MB)</p>
+                                                <p className="mt-3 text-xs text-gray-500">Supports: JPG, PNG, GIF (max 5MB)</p>
                                             </div>
                                         </div>
                                     ) : (
                                         <div className="relative">
                                             <div className="relative overflow-hidden rounded-xl border border-gray-200">
                                                 <img
-                                                    src={form.data.featured_image}
+                                                    src={featuredImagePreview}
                                                     alt="Featured image preview"
                                                     className="h-48 w-full object-cover"
                                                     onError={(e) => {
+                                                        console.error('Image load error:', featuredImagePreview);
                                                         (e.target as HTMLImageElement).src =
                                                             'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23666">Error loading image</text></svg>';
                                                     }}
@@ -587,9 +541,9 @@ export default function CreateProject({ developers }: CreateProjectProps) {
                                             <h3 className="text-lg font-medium text-gray-900">Additional Images</h3>
                                             <span className="ml-2 rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">Gallery</span>
                                         </div>
-                                        {form.data.images && form.data.images.length > 0 && (
+                                        {additionalImagePreviews.length > 0 && (
                                             <span className="text-sm text-gray-600">
-                                                {form.data.images.length} image{form.data.images.length !== 1 ? 's' : ''}
+                                                {additionalImagePreviews.length} image{additionalImagePreviews.length !== 1 ? 's' : ''}
                                             </span>
                                         )}
                                     </div>
@@ -621,9 +575,9 @@ export default function CreateProject({ developers }: CreateProjectProps) {
                                     </div>
 
                                     {/* Images Grid */}
-                                    {form.data.images && form.data.images.length > 0 && (
+                                    {additionalImagePreviews.length > 0 && (
                                         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                                            {form.data.images.map((imageUrl: string, index: number) => (
+                                            {additionalImagePreviews.map((imageUrl: string, index: number) => (
                                                 <div key={index} className="group relative">
                                                     <div className="aspect-square overflow-hidden rounded-xl border border-gray-200 shadow-sm">
                                                         <img
@@ -653,10 +607,10 @@ export default function CreateProject({ developers }: CreateProjectProps) {
                                         </div>
                                     )}
 
-                                    {form.errors.images && (
+                                    {form.errors.additional_images && (
                                         <div className="mt-3 flex items-center text-sm text-red-600">
                                             <X className="mr-1 h-4 w-4" />
-                                            {form.errors.images}
+                                            {form.errors.additional_images}
                                         </div>
                                     )}
                                 </div>
@@ -665,19 +619,28 @@ export default function CreateProject({ developers }: CreateProjectProps) {
 
                         {/* Form Actions */}
                         <div className="flex justify-end space-x-4 border-t border-gray-200 pt-6">
-                            <a
+                            <Link
                                 href="/admin/real-estate"
                                 className="rounded-lg bg-gray-200 px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-300"
                             >
                                 Cancel
-                            </a>
+                            </Link>
                             <button
                                 type="submit"
                                 disabled={form.processing}
-                                className="flex items-center rounded-lg bg-orange-500 px-6 py-3 font-medium text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
+                                className="flex items-center rounded-lg bg-orange-500 px-6 py-3 font-medium text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                <Save className="mr-2 h-4 w-4" />
-                                {form.processing ? 'Creating...' : 'Create Project'}
+                                {form.processing ? (
+                                    <>
+                                        <Loader className="mr-2 h-4 w-4 animate-spin" />
+                                        Creating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save className="mr-2 h-4 w-4" />
+                                        Create Project
+                                    </>
+                                )}
                             </button>
                         </div>
                     </form>

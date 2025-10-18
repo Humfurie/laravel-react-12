@@ -53,14 +53,14 @@ export default function RoleFormModal({ isOpen, onClose, role, permissions }: Ro
         e.preventDefault();
 
         if (isEditing) {
-            put(`/roles/${role.slug}`, {
+            put(route('roles.update', role.slug), {
                 onSuccess: () => {
                     onClose();
                     reset();
                 },
             });
         } else {
-            post('/roles', {
+            post(route('roles.store'), {
                 onSuccess: () => {
                     onClose();
                     reset();

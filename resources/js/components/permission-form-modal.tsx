@@ -52,7 +52,7 @@ export default function PermissionFormModal({ isOpen, onClose, permission, allAc
         };
 
         if (isEditing && permission?.id) {
-            router.put(`/permissions/${permission.id}`, permData, {
+            router.put(route('permissions.update', permission.id), permData, {
                 onSuccess: () => {
                     if (onSave) {
                         onSave(permData);
@@ -65,7 +65,7 @@ export default function PermissionFormModal({ isOpen, onClose, permission, allAc
                 },
             });
         } else {
-            router.post('/permissions', permData, {
+            router.post(route('permissions.store'), permData, {
                 onSuccess: () => {
                     if (onSave) {
                         onSave(permData);
@@ -79,6 +79,8 @@ export default function PermissionFormModal({ isOpen, onClose, permission, allAc
             });
         }
     };
+
+    const isFormValid = resource.trim().length > 0 && actions.length > 0;
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -100,7 +102,10 @@ export default function PermissionFormModal({ isOpen, onClose, permission, allAc
 
                         {/* Actions List */}
                         <div className="space-y-3">
-                            <Label>Actions</Label>
+                            <Label>
+                                Actions <span className="text-red-500">*</span>
+                            </Label>
+                            {actions.length === 0 && <p className="text-xs text-gray-500">Select at least one action</p>}
                             <div className="max-h-60 space-y-4 overflow-y-auto rounded-lg border border-gray-200 p-4">
                                 <div className="grid grid-cols-3 gap-2">
                                     {allActions.map((action) => (
@@ -128,7 +133,7 @@ export default function PermissionFormModal({ isOpen, onClose, permission, allAc
                         <Button type="button" variant="outline" onClick={onClose} disabled={processing}>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={processing} className="bg-orange-600 hover:bg-orange-700">
+                        <Button type="submit" disabled={!isFormValid || processing} className="bg-orange-600 hover:bg-orange-700">
                             {processing ? (isEditing ? 'Updating...' : 'Creating...') : isEditing ? 'Update Permission' : 'Create Permission'}
                         </Button>
                     </DialogFooter>

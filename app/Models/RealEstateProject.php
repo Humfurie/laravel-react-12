@@ -16,12 +16,17 @@ class RealEstateProject extends Model
     protected $table = 'real_estate_projects';
 
     const PROJECT_TYPE_CONDOMINIUM = 'condominium';
+
     const PROJECT_TYPE_HOUSE_AND_LOT = 'house_and_lot';
+
     const PROJECT_TYPE_TOWNHOUSE = 'townhouse';
+
     const PROJECT_TYPE_COMMERCIAL = 'commercial';
 
     const STATUS_PRE_SELLING = 'pre-selling';
+
     const STATUS_READY_FOR_OCCUPANCY = 'ready_for_occupancy';
+
     const STATUS_COMPLETED = 'completed';
 
     protected $fillable = [
@@ -51,7 +56,6 @@ class RealEstateProject extends Model
 
     protected $casts = [
         'amenities' => 'array',
-        'images' => 'array',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
         'featured' => 'boolean',
@@ -118,6 +122,7 @@ class RealEstateProject extends Model
         if ($region) {
             $query->where('region', 'like', "%{$region}%");
         }
+
         return $query;
     }
 
@@ -130,7 +135,7 @@ class RealEstateProject extends Model
             $this->province,
             $this->region,
             $this->postal_code,
-            $this->country
+            $this->country,
         ]));
     }
 
