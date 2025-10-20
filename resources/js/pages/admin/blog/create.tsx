@@ -15,7 +15,7 @@ import { format } from 'date-fns';
 import { ArrowLeft, CalendarIcon, Plus, Upload, X } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
-interface BlogFormData {
+type BlogFormData = {
     title: string;
     slug: string;
     content: string;
@@ -31,8 +31,7 @@ interface BlogFormData {
     isPrimary: boolean;
     sort_order: number;
     published_at: string;
-    [key: string]: string | number | boolean | object;
-}
+};
 
 export default function CreateBlog() {
     const [publishedDate, setPublishedDate] = useState<Date>();
@@ -41,7 +40,7 @@ export default function CreateBlog() {
     const [imagePreview, setImagePreview] = useState<string>('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const { data, setData, post, processing, errors } = useForm<BlogFormData>({
+    const { data, setData, post, processing, errors, transform } = useForm<BlogFormData>({
         title: '',
         slug: '',
         content: '',
@@ -66,7 +65,8 @@ export default function CreateBlog() {
             .replace(/[^a-z0-9 -]/g, '')
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-')
-            .trim();
+            .trim()
+            .substring(0, 255); // Ensure slug doesn't exceed 255 characters
     };
 
     const generateKeywords = (title: string) => {
@@ -94,7 +94,7 @@ export default function CreateBlog() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const formDataToSubmit = {
+        transform((data) => ({
             ...data,
             slug: data.slug || generateSlug(data.title),
             meta_data: {
@@ -103,7 +103,7 @@ export default function CreateBlog() {
                 meta_keywords: data.meta_data.meta_keywords || generateKeywords(data.title),
             },
             published_at: publishedDate ? format(publishedDate, 'yyyy-MM-dd HH:mm:ss') : '',
-        };
+        }));
 
         setData(formDataToSubmit);
         setTimeout(() => {
@@ -119,9 +119,11 @@ export default function CreateBlog() {
     };
 
     const handleSaveAsDraft = () => {
-        const formDataToSubmit = {
+        setData('status', 'draft');
+        setData('published_at', '');
+
+        transform((data) => ({
             ...data,
-            status: 'draft' as const,
             slug: data.slug || generateSlug(data.title),
             meta_data: {
                 ...data.meta_data,
@@ -144,9 +146,15 @@ export default function CreateBlog() {
     };
 
     const handlePublish = () => {
-        const formDataToSubmit = {
+        setData('status', 'published');
+        if (!publishedDate) {
+            setData('published_at', format(new Date(), 'yyyy-MM-dd HH:mm:ss'));
+        } else {
+            setData('published_at', format(publishedDate, 'yyyy-MM-dd HH:mm:ss'));
+        }
+
+        transform((data) => ({
             ...data,
-            status: 'published' as const,
             slug: data.slug || generateSlug(data.title),
             meta_data: {
                 ...data.meta_data,
@@ -253,8 +261,10 @@ export default function CreateBlog() {
                                         onChange={(e) => handleTitleChange(e.target.value)}
                                         placeholder="Enter post title..."
                                         className={errors.title ? 'border-red-500' : ''}
+                                        maxLength={255}
                                     />
                                     {errors.title && <p className="text-sm text-red-500">{errors.title}</p>}
+                                    <p className="text-muted-foreground text-xs">{data.title.length}/255 characters</p>
                                 </div>
 
                                 <div className="space-y-2">
