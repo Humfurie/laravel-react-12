@@ -22,6 +22,7 @@ type BlogFormData = {
     excerpt: string;
     status: 'draft' | 'published' | 'private';
     featured_image: string;
+    featured_image_file: File | null;
     meta_data: {
         meta_title: string;
         meta_description: string;
@@ -47,7 +48,7 @@ export default function CreateBlog() {
         excerpt: '',
         status: 'draft',
         featured_image: '',
-        featured_image_file: null as File | null,
+        featured_image_file: null,
         meta_data: {
             meta_title: '',
             meta_description: '',
@@ -105,17 +106,14 @@ export default function CreateBlog() {
             published_at: publishedDate ? format(publishedDate, 'yyyy-MM-dd HH:mm:ss') : '',
         }));
 
-        setData(formDataToSubmit);
-        setTimeout(() => {
-            post(route('blogs.store'), {
-                forceFormData: true,
-                onSuccess: () => {
-                    if (imagePreview && imagePreview.startsWith('blob:')) {
-                        URL.revokeObjectURL(imagePreview);
-                    }
-                },
-            });
-        }, 0);
+        post(route('blogs.store'), {
+            forceFormData: true,
+            onSuccess: () => {
+                if (imagePreview && imagePreview.startsWith('blob:')) {
+                    URL.revokeObjectURL(imagePreview);
+                }
+            },
+        });
     };
 
     const handleSaveAsDraft = () => {
@@ -131,18 +129,16 @@ export default function CreateBlog() {
                 meta_keywords: data.meta_data.meta_keywords || generateKeywords(data.title),
             },
             published_at: '',
-        };
-        setData(formDataToSubmit);
-        setTimeout(() => {
-            post(route('blogs.store'), {
-                forceFormData: true,
-                onSuccess: () => {
-                    if (imagePreview && imagePreview.startsWith('blob:')) {
-                        URL.revokeObjectURL(imagePreview);
-                    }
-                },
-            });
-        }, 0);
+        }));
+
+        post(route('blogs.store'), {
+            forceFormData: true,
+            onSuccess: () => {
+                if (imagePreview && imagePreview.startsWith('blob:')) {
+                    URL.revokeObjectURL(imagePreview);
+                }
+            },
+        });
     };
 
     const handlePublish = () => {
@@ -162,18 +158,16 @@ export default function CreateBlog() {
                 meta_keywords: data.meta_data.meta_keywords || generateKeywords(data.title),
             },
             published_at: publishedDate ? format(publishedDate, 'yyyy-MM-dd HH:mm:ss') : format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-        };
-        setData(formDataToSubmit);
-        setTimeout(() => {
-            post(route('blogs.store'), {
-                forceFormData: true,
-                onSuccess: () => {
-                    if (imagePreview && imagePreview.startsWith('blob:')) {
-                        URL.revokeObjectURL(imagePreview);
-                    }
-                },
-            });
-        }, 0);
+        }));
+
+        post(route('blogs.store'), {
+            forceFormData: true,
+            onSuccess: () => {
+                if (imagePreview && imagePreview.startsWith('blob:')) {
+                    URL.revokeObjectURL(imagePreview);
+                }
+            },
+        });
     };
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
