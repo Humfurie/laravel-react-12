@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RealEstateController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\ExperienceController;
 
 Route::prefix('roles')->middleware('permission:role,viewAny')->group(function () {
     Route::get('/', [RoleController::class, 'index'])->name('roles.index');
@@ -99,4 +100,14 @@ Route::prefix('real-estate')->group(function () {
     //    Route::post('/reorder-images', [RealEstateController::class, 'reorderImages'])->name('real-estate.reorder-images');
     //    Route::delete('/images/{image}', [RealEstateController::class, 'deleteImage'])->name('real-estate.images.delete');
     //    Route::patch('/images/{image}/primary', [RealEstateController::class, 'setPrimaryImage'])->name('real-estate.images.set-primary');
+});
+
+Route::prefix('experiences')->name('admin.experiences.')->group(function () {
+    Route::get('/', [ExperienceController::class, 'index'])->name('index');
+    Route::get('/create', [ExperienceController::class, 'create'])->name('create');
+    Route::post('/', [ExperienceController::class, 'store'])->name('store');
+    Route::get('/{experience}', [ExperienceController::class, 'show'])->name('show');
+    Route::get('/{experience}/edit', [ExperienceController::class, 'edit'])->name('edit');
+    Route::put('/{experience}', [ExperienceController::class, 'update'])->name('update');
+    Route::delete('/{experience}', [ExperienceController::class, 'destroy'])->name('destroy');
 });
