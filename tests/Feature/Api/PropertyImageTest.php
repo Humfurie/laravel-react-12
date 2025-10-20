@@ -1,14 +1,19 @@
 <?php
 
-use App\Models\Property;
 use App\Models\Image;
+use App\Models\Property;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     Storage::fake('public');
+
+    // Create admin user with property permissions
+    $this->user = createAdminUser('property');
+    $this->actingAs($this->user);
 });
 
 describe('Property Image Management', function () {
@@ -16,8 +21,7 @@ describe('Property Image Management', function () {
         $property = Property::factory()->create();
         $file = UploadedFile::fake()->image('property-photo.jpg', 800, 600)->size(1024);
 
-        $response = $this->postJson('/api/v1/properties-upload-image', [
-            'property_id' => $property->id,
+        $response = $this->postJson("/api/v1/properties/{$property->slug}/images", [
             'image' => $file,
             'name' => 'Beautiful Living Room'
         ]);
@@ -47,10 +51,11 @@ describe('Property Image Management', function () {
     });
 
     test('validates required fields for image upload', function () {
-        $response = $this->postJson('/api/v1/properties-upload-image', []);
+        $property = Property::factory()->create();
+        $response = $this->postJson("/api/v1/properties/{$property->slug}/images", []);
 
         $response->assertUnprocessable()
-            ->assertJsonValidationErrors(['property_id', 'image']);
+            ->assertJsonValidationErrors(['image']);
     });
 
     test('validates image file type and size', function () {
@@ -59,8 +64,7 @@ describe('Property Image Management', function () {
         // Test invalid file type
         $invalidFile = UploadedFile::fake()->create('document.txt', 100);
 
-        $response = $this->postJson('/api/v1/properties-upload-image', [
-            'property_id' => $property->id,
+        $response = $this->postJson("/api/v1/properties/{$property->slug}/images", [
             'image' => $invalidFile
         ]);
 
@@ -70,8 +74,7 @@ describe('Property Image Management', function () {
         // Test oversized file (> 5MB)
         $oversizedFile = UploadedFile::fake()->image('huge.jpg')->size(6000);
 
-        $response = $this->postJson('/api/v1/properties-upload-image', [
-            'property_id' => $property->id,
+        $response = $this->postJson("/api/v1/properties/{$property->slug}/images", [
             'image' => $oversizedFile
         ]);
 
@@ -82,21 +85,18 @@ describe('Property Image Management', function () {
     test('validates property exists for image upload', function () {
         $file = UploadedFile::fake()->image('test.jpg');
 
-        $response = $this->postJson('/api/v1/properties-upload-image', [
-            'property_id' => 99999, // Non-existent property
+        $response = $this->postJson("/api/v1/properties/nonexistent-slug/images", [
             'image' => $file
         ]);
 
-        $response->assertUnprocessable()
-            ->assertJsonValidationErrors(['property_id']);
+        $response->assertNotFound(); // 404 since property doesn't exist
     });
 
     test('uses original filename as name if not provided', function () {
         $property = Property::factory()->create();
         $file = UploadedFile::fake()->image('original-name.jpg');
 
-        $response = $this->postJson('/api/v1/properties-upload-image', [
-            'property_id' => $property->id,
+        $response = $this->postJson("/api/v1/properties/{$property->slug}/images", [
             'image' => $file
         ]);
 
@@ -157,7 +157,7 @@ describe('Property Image Management', function () {
         $response = $this->deleteJson("/api/v1/properties/{$property1->slug}/images/{$image->id}");
 
         $response->assertNotFound()
-            ->assertJsonFragment(['error' => 'Image not found for this property']);
+            ->assertJsonFragment(['message' => 'Image not found for this property']);
 
         // Verify image was not deleted
         $this->assertDatabaseHas('images', ['id' => $image->id, 'deleted_at' => null]);
@@ -186,9 +186,9 @@ describe('Polymorphic Relationships', function () {
         $response = $this->getJson("/api/v1/properties/{$property->slug}");
 
         $response->assertOk();
-        expect($response->json('images'))->toHaveCount(3);
+        expect($response->json('data.images'))->toHaveCount(3);
 
-        foreach ($response->json('images') as $imageData) {
+        foreach ($response->json('data.images') as $imageData) {
             expect($imageData)->toHaveKeys(['id', 'name', 'path', 'url']);
         }
     });
@@ -251,7 +251,7 @@ describe('Polymorphic Relationships', function () {
         $response1 = $this->getJson("/api/v1/properties/{$property1->slug}");
         $response2 = $this->getJson("/api/v1/properties/{$property2->slug}");
 
-        expect($response1->json('images'))->toHaveCount(2);
-        expect($response2->json('images'))->toHaveCount(3);
+        expect($response1->json('data.images'))->toHaveCount(2);
+        expect($response2->json('data.images'))->toHaveCount(3);
     });
 });

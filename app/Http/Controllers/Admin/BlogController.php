@@ -100,7 +100,7 @@ class BlogController extends Controller
             return Blog::create($validated);
         });
 
-        return redirect()->route('blogs.edit', $blog->slug)
+        return redirect()->route('blogs.index')
             ->with('success', 'Blog created successfully.');
     }
 
@@ -174,7 +174,7 @@ class BlogController extends Controller
             $blog->update($validated);
         });
 
-        return redirect()->route('blogs.edit', $blog->slug)
+        return redirect()->route('blogs.index')
             ->with('success', 'Blog updated successfully.');
     }
 

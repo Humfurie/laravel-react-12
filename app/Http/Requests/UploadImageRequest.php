@@ -22,10 +22,28 @@ class UploadImageRequest extends FormRequest
      */
     public function rules(): array
     {
+        // Support both single image and multiple images upload
+        if ($this->hasFile('image') || $this->has('image')) {
+            return [
+                'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5MB max
+                'name' => ['nullable', 'string', 'max:255'],
+                'is_primary' => ['boolean'],
+            ];
+        }
+
+        if ($this->hasFile('images') || $this->has('images')) {
+            return [
+                'images' => ['required', 'array', 'max:20'],
+                'images.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5MB max
+                'is_primary' => ['boolean'],
+            ];
+        }
+
+        // Default: require at least one of them
         return [
-            'images' => ['required', 'array', 'max:20'],
-            'images.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5MB max
-            'is_primary' => ['boolean'],
+            'image' => ['required_without:images', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'images' => ['required_without:image', 'array', 'max:20'],
+            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }
 

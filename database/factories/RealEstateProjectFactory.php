@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Developer;
+use App\Models\RealEstateProject;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\RealEstateProject>
+ * @extends Factory<RealEstateProject>
  */
 class RealEstateProjectFactory extends Factory
 {
@@ -55,7 +56,6 @@ class RealEstateProjectFactory extends Factory
                 'Basketball Court', 'Tennis Court', 'Jogging Path', 'Security', 'Covered Parking',
                 'Shopping Center', 'Business Center', 'Spa', 'Game Room', 'Library'
             ], $this->faker->numberBetween(5, 10)),
-            'images' => null, // Will be handled by polymorphic relationship
             'virtual_tour_url' => $this->faker->optional(0.3)->url(),
             'featured' => $this->faker->boolean(20),
         ];

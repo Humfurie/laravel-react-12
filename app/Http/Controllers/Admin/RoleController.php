@@ -38,7 +38,18 @@ class RoleController extends Controller
                     'permissions' => function () use ($role) {
                         $role_permissions = [];
                         foreach ($role->permissions as $permission) {
-                            foreach (json_decode($permission->pivot->actions, false, 512, JSON_THROW_ON_ERROR) as $action) {
+                            $actions = $permission->pivot->actions ?? '[]';
+                            if (is_string($actions)) {
+                                try {
+                                    $decodedActions = json_decode($actions, false, 512, JSON_THROW_ON_ERROR);
+                                } catch (JsonException $e) {
+                                    $decodedActions = [];
+                                }
+                            } else {
+                                $decodedActions = is_array($actions) ? $actions : [];
+                            }
+
+                            foreach ($decodedActions as $action) {
                                 $role_permissions[] = "$permission->resource.$action";
                             }
                         }
