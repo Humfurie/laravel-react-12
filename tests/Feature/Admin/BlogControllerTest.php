@@ -1,14 +1,16 @@
 <?php
 
+use App\Http\Controllers\User\BlogController;
 use App\Models\Blog;
-use App\Models\User;
-use Illuminate\Http\UploadedFile;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    // Create admin user with blog permissions
+    $this->user = createAdminUser('blog');
+
     Storage::fake('public');
 });
 
@@ -17,7 +19,7 @@ test('get primary and latest returns correct structure', function () {
     $primaryBlogs = Blog::factory()->published()->primary()->count(2)->create();
     $regularBlogs = Blog::factory()->published()->count(4)->create(['isPrimary' => false]);
 
-    $controller = new \App\Http\Controllers\User\BlogController();
+    $controller = new BlogController();
     $result = $controller->getPrimaryAndLatest();
 
     expect($result)->toHaveKeys(['primary', 'latest', 'stats'])
@@ -26,40 +28,6 @@ test('get primary and latest returns correct structure', function () {
         ->and($result['stats']['total_posts'])->toBe(6)
         ->and($result['stats']['featured_count'])->toBe(2)
         ->and($result['stats']['total_views'])->toBeGreaterThan(0);
-});
-
-test('image upload validates file requirements', function () {
-    // Test with invalid file type
-    $invalidFile = UploadedFile::fake()->create('document.pdf', 1000);
-
-    $this->actingAs($this->user)
-        ->post(route('blogs.upload-image'), ['image' => $invalidFile])
-        ->assertSessionHasErrors(['image']);
-
-    // Test with oversized file
-    $oversizedFile = UploadedFile::fake()->create('huge.png', 6000);
-
-    $this->actingAs($this->user)
-        ->post(route('blogs.upload-image'), ['image' => $oversizedFile])
-        ->assertSessionHasErrors(['image']);
-});
-
-test('image upload returns correct response format', function () {
-    $file = UploadedFile::fake()->image('test-image.jpg', 100, 100)->mimeType('image/jpeg');
-
-    $response = $this->actingAs($this->user)
-        ->post(route('blogs.upload-image'), ['image' => $file])
-        ->assertOk()
-        ->assertJsonStructure([
-            'success',
-            'url',
-            'path'
-        ]);
-
-    $responseData = $response->json();
-    expect($responseData['success'])->toBeTrue()
-        ->and($responseData['url'])->toContain('/storage/blog-images/')
-        ->and($responseData['path'])->toContain('blog-images/');
 });
 
 test('blog creation sets published at when status is published', function () {

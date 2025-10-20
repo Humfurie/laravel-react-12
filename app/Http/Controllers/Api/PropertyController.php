@@ -42,14 +42,11 @@ class PropertyController extends Controller
         $properties = $this->propertyService->getProperties($request->all(), $perPage);
 
         return response()->json([
-            'success' => true,
             'data' => PropertyResource::collection($properties),
-            'meta' => [
-                'current_page' => $properties->currentPage(),
-                'per_page' => $properties->perPage(),
-                'total' => $properties->total(),
-                'last_page' => $properties->lastPage(),
-            ],
+            'current_page' => $properties->currentPage(),
+            'per_page' => $properties->perPage(),
+            'total' => $properties->total(),
+            'last_page' => $properties->lastPage(),
         ]);
     }
 
@@ -120,18 +117,54 @@ class PropertyController extends Controller
     {
         Gate::authorize('update', $property);
 
-        $images = $this->imageService->uploadMultiple(
-            $request->file('images'),
-            $property,
-            'property-images',
-            $request->boolean('is_primary', false)
-        );
+        // Handle single image upload
+        if ($request->hasFile('image')) {
+            $name = $request->input('name') ?? $request->file('image')->getClientOriginalName();
+            $isPrimary = $property->images()->count() === 0 || $request->boolean('is_primary', false);
+
+            $image = $this->imageService->upload(
+                $request->file('image'),
+                $property,
+                'property-images',
+                $isPrimary
+            );
+
+            // Update name if provided
+            if ($request->has('name')) {
+                $image->update(['name' => $name]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'image' => [
+                    'id' => $image->id,
+                    'name' => $image->name,
+                    'path' => $image->path,
+                ],
+                'url' => $image->url,
+                'path' => $image->path,
+            ]);
+        }
+
+        // Handle multiple images upload (backward compatibility)
+        if ($request->hasFile('images')) {
+            $images = $this->imageService->uploadMultiple(
+                $request->file('images'),
+                $property,
+                'property-images'
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => count($images) > 1 ? 'Images uploaded successfully' : 'Image uploaded successfully',
+                'data' => ImageResource::collection($images),
+            ], 201);
+        }
 
         return response()->json([
-            'success' => true,
-            'message' => count($images) > 1 ? 'Images uploaded successfully' : 'Image uploaded successfully',
-            'data' => ImageResource::collection($images),
-        ], 201);
+            'success' => false,
+            'message' => 'No image file provided',
+        ], 422);
     }
 
     public function deleteImage(Property $property, Image $image): JsonResponse
@@ -158,20 +191,25 @@ class PropertyController extends Controller
     {
         $images = $property->images()->ordered()->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => ImageResource::collection($images),
-        ]);
+        // Return empty array if no images
+        if ($images->isEmpty()) {
+            return response()->json([]);
+        }
+
+        return response()->json(ImageResource::collection($images));
     }
 
     public function reorderImages(ReorderImagesRequest $request, Property $property): JsonResponse
     {
         Gate::authorize('update', $property);
 
-        $reorderedImages = $this->imageService->reorder(
+        $this->imageService->reorder(
             $property,
             $request->input('images')
         );
+
+        // Fetch the reordered images
+        $reorderedImages = $property->images()->ordered()->get();
 
         return response()->json([
             'success' => true,
@@ -284,7 +322,13 @@ class PropertyController extends Controller
 
         $properties = $query->paginate($validated['per_page'] ?? 15);
 
-        return response()->json($properties);
+        return response()->json([
+            'data' => PropertyResource::collection($properties),
+            'current_page' => $properties->currentPage(),
+            'per_page' => $properties->perPage(),
+            'total' => $properties->total(),
+            'last_page' => $properties->lastPage(),
+        ]);
     }
 
     public function createInquiry(Request $request, Property $property): JsonResponse

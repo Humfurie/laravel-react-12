@@ -11,6 +11,10 @@
 |
 */
 
+use App\Models\Permission;
+use App\Models\Role;
+use App\Models\User;
+
 pest()->extend(Tests\TestCase::class)
  // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature', 'Unit');
@@ -41,7 +45,75 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Create a user with admin role and specified permissions.
+ *
+ * @param string|array $resources Resource(s) to grant permissions for (e.g., 'blog', ['blog', 'user'])
+ * @param array $actions Actions to grant (default: all CRUD actions)
+ * @return User
+ */
+function createAdminUser(string|array $resources = [], array $actions = ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']): User
 {
-    // ..
+    $resources = is_string($resources) ? [$resources] : $resources;
+
+    $role = Role::factory()
+        ->state([
+            'name' => 'Admin',
+            'slug' => 'admin'
+        ])
+        ->create();
+
+    // Attach permissions for each resource
+    foreach ($resources as $resource) {
+        $permission = Permission::factory()
+            ->state([
+                'resource' => $resource,
+            ])
+            ->create();
+
+        $role->permissions()->attach($permission->id, [
+            'actions' => json_encode($actions, JSON_THROW_ON_ERROR)
+        ]);
+    }
+
+    return User::factory()
+        ->hasAttached($role)
+        ->create();
+}
+
+/**
+ * Create a user with a specific role and permissions.
+ *
+ * @param string $roleName
+ * @param string $roleSlug
+ * @param string|array $resources
+ * @param array $actions
+ * @return User
+ */
+function createUserWithRole(string $roleName, string $roleSlug, string|array $resources, array $actions = ['viewAny', 'view']): User
+{
+    $resources = is_string($resources) ? [$resources] : $resources;
+
+    $role = Role::factory()
+        ->state([
+            'name' => $roleName,
+            'slug' => $roleSlug
+        ])
+        ->create();
+
+    foreach ($resources as $resource) {
+        $permission = Permission::factory()
+            ->state([
+                'resource' => $resource,
+            ])
+            ->create();
+
+        $role->permissions()->attach($permission->id, [
+            'actions' => json_encode($actions, JSON_THROW_ON_ERROR)
+        ]);
+    }
+
+    return User::factory()
+        ->hasAttached($role)
+        ->create();
 }

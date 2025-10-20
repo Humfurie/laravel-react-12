@@ -12,12 +12,17 @@ class PropertyPolicy
 
     /**
      * Determine whether the user can view any models.
-     * Override to allow public access.
+     * Override to allow public access for guests, but check permissions for authenticated users.
      */
     public function viewAny(?User $user): bool
     {
-        // Anyone can view properties list (including guests for public API)
-        return true;
+        // Guests can view properties list (for public API)
+        if (!$user) {
+            return true;
+        }
+
+        // Authenticated users need proper permissions
+        return $this->hasPermission($user, 'viewAny');
     }
 
     /**

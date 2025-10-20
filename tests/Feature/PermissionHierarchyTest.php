@@ -16,29 +16,34 @@ beforeEach(function () {
 
     // Create users
     $this->admin = User::factory()->create(); // First user will be admin
-    $this->admin->update(['id' => 1]); // Force ID to 1
     $this->editorUser = User::factory()->create();
     $this->viewerUser = User::factory()->create();
     $this->noPermUser = User::factory()->create();
 
     // Assign roles
+    $this->admin->roles()->attach($this->adminRole);
     $this->editorUser->roles()->attach($this->editorRole);
     $this->viewerUser->roles()->attach($this->viewerRole);
     $this->noPermUser->roles()->attach($this->viewerRole);
 
-    // Create permissions for editor
-    $editorDevPermission = Permission::factory()->create([
-        'resource' => 'developer-editor',
-        'actions' => json_encode(['viewAny', 'view', 'create', 'update']),
-    ]);
-    $editorDevPermission->roles()->attach($this->editorRole);
+    // Create single developer permission (use firstOrCreate to avoid duplicates)
+    $developerPermission = Permission::firstOrCreate(
+        ['resource' => 'developer'],
+        ['actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']]
+    );
 
-    // Create permissions for viewer
-    $viewerDevPermission = Permission::factory()->create([
-        'resource' => 'developer-viewer',
-        'actions' => json_encode(['viewAny', 'view']),
+    // Sync permissions to roles (replaces existing, avoids duplicates)
+    $this->adminRole->permissions()->sync([
+        $developerPermission->id => ['actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)]
     ]);
-    $viewerDevPermission->roles()->attach($this->viewerRole);
+
+    $this->editorRole->permissions()->sync([
+        $developerPermission->id => ['actions' => json_encode(['viewAny', 'view', 'create', 'update'], JSON_THROW_ON_ERROR)]
+    ]);
+
+    $this->viewerRole->permissions()->sync([
+        $developerPermission->id => ['actions' => json_encode(['viewAny', 'view'], JSON_THROW_ON_ERROR)]
+    ]);
 });
 
 test('admin user can access all resources', function () {
@@ -56,10 +61,13 @@ test('user without viewAny permission cannot access resource index', function ()
     $user->roles()->attach($noDevPermRole);
 
     // Give permission for blog but not developer
-    Permission::factory()->create([
+    $blogPermission = Permission::factory()->create([
         'resource' => 'blog',
-        'actions' => json_encode(['viewAny', 'view']),
-    ])->roles()->attach($noDevPermRole);
+        'actions' => ['viewAny', 'view'],
+    ]);
+    $noDevPermRole->permissions()->attach($blogPermission->id, [
+        'actions' => json_encode(['viewAny', 'view'], JSON_THROW_ON_ERROR)
+    ]);
 
     $this->actingAs($user);
 
@@ -137,11 +145,11 @@ test('policy methods require viewAny as prerequisite', function () {
     $user = User::factory()->create();
     $user->roles()->attach($specificPermRole);
 
-    // Give create, update, delete but NOT viewAny
-    Permission::factory()->create([
-        'resource' => 'developer',
-        'actions' => json_encode(['create', 'update', 'delete']),
-    ])->roles()->attach($specificPermRole);
+    // Use existing developer permission and give create, update, delete but NOT viewAny
+    $developerPermission = Permission::where('resource', 'developer')->first();
+    $specificPermRole->permissions()->sync([
+        $developerPermission->id => ['actions' => json_encode(['create', 'update', 'delete'], JSON_THROW_ON_ERROR)]
+    ]);
 
     $this->actingAs($user);
     $developer = Developer::factory()->create();

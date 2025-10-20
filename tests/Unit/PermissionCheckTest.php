@@ -30,7 +30,9 @@ test('user with specific permission can perform action', function () {
     );
     $permission->update(['actions' => ['viewAny', 'create', 'update']]);
 
-    $role->permissions()->attach($permission);
+    $role->permissions()->sync([
+        $permission->id => ['actions' => json_encode(['viewAny', 'create'], JSON_THROW_ON_ERROR)]
+    ]);
     $this->user->roles()->attach($role);
 
     expect($this->user->hasPermission('developer', 'viewAny'))->toBeTrue();
@@ -46,7 +48,9 @@ test('user with wildcard resource permission can perform any action on that reso
     );
     $permission->update(['actions' => ['*']]);
 
-    $role->permissions()->attach($permission);
+    $role->permissions()->sync([
+        $permission->id => ['actions' => json_encode(['*'], JSON_THROW_ON_ERROR)]
+    ]);
     $this->user->roles()->attach($role);
 
     expect($this->user->hasPermission('developer', 'viewAny'))->toBeTrue();
@@ -63,7 +67,9 @@ test('user with wildcard action permission can perform specific action on any re
     );
     $permission->update(['actions' => ['viewAny']]);
 
-    $role->permissions()->attach($permission);
+    $role->permissions()->sync([
+        $permission->id => ['actions' => json_encode(['viewAny'], JSON_THROW_ON_ERROR)]
+    ]);
     $this->user->roles()->attach($role);
 
     expect($this->user->hasPermission('developer', 'viewAny'))->toBeTrue();
@@ -79,7 +85,9 @@ test('user with full wildcard permission can perform any action on any resource'
     );
     $permission->update(['actions' => ['*']]);
 
-    $role->permissions()->attach($permission);
+    $role->permissions()->sync([
+        $permission->id => ['actions' => json_encode(['*'], JSON_THROW_ON_ERROR)]
+    ]);
     $this->user->roles()->attach($role);
 
     expect($this->user->hasPermission('developer', 'viewAny'))->toBeTrue();
