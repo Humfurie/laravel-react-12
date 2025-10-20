@@ -3,9 +3,9 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Building, FileText, LayoutGrid, Shield, Users } from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { Permissions } from '@/types';
+import { BookOpen, Briefcase, FileText, LayoutGrid, Building, Users, Shield } from 'lucide-react';
 import AppLogo from './app-logo';
 
 interface NavItem {
@@ -33,6 +33,11 @@ const allNavItems: NavItem[] = [
         href: '/admin/blogs',
         icon: FileText,
         requiredPermission: 'blog',
+    },
+    {
+        title: 'Experience Management',
+        href: '/admin/experiences',
+        icon: Briefcase,
     },
     {
         title: 'User Management',
@@ -71,19 +76,19 @@ export function AppSidebar() {
             if (!item.requiredPermission && !item.requiredPermissions) {
                 return true;
             }
-            
+
             // Check single permission
             if (item.requiredPermission) {
                 return auth.permissions[item.requiredPermission]?.viewAny ?? false;
             }
-            
+
             // Check multiple permissions (OR logic - show if user has ANY of them)
             if (item.requiredPermissions) {
                 return item.requiredPermissions.some(
                     (permission) => auth.permissions[permission]?.viewAny ?? false
                 );
             }
-            
+
             return false;
         });
     }, [auth.permissions]);

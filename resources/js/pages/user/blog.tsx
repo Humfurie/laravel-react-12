@@ -1,8 +1,8 @@
 import Footer from '@/components/global/Footer';
+import { Head, router, Link } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
 import { Calendar, Eye, FileText, Home as HomeIcon, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
