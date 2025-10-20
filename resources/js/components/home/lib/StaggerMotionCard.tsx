@@ -1,6 +1,6 @@
-"use client"
-import {motion, useScroll} from "framer-motion"
-import {useRef} from "react";
+'use client';
+import { motion, useScroll } from 'framer-motion';
+import { useRef } from 'react';
 
 interface Experience {
     start: string;

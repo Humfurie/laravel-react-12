@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
@@ -43,12 +44,22 @@ class User extends Authenticatable
     {
         parent::boot();
 
-
     }
 
     public function isAdmin(): bool
     {
         return $this->id === 1;
+    }
+
+    public function hasRole(string|array $roles): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        $roles = is_array($roles) ? $roles : [$roles];
+
+        return $this->roles()->whereIn('slug', $roles)->exists();
     }
 
     public function images(): MorphMany
@@ -69,23 +80,59 @@ class User extends Authenticatable
 
         return $this->roles()->whereHas('permissions', function ($query) use ($resource, $action) {
             $query->where(function ($subQuery) use ($resource, $action) {
-                // Check for exact match
-                $subQuery->where('resource', $resource)
-                         ->whereJsonContains('actions', $action);
-            })->orWhere(function ($subQuery) use ($resource, $action) {
-                // Check for wildcard permissions
-                $subQuery->where('resource', '*')
-                         ->whereJsonContains('actions', '*');
-            })->orWhere(function ($subQuery) use ($resource, $action) {
-                // Check for resource wildcard (e.g., blog.*)
-                $subQuery->where('resource', $resource)
-                         ->whereJsonContains('actions', '*');
-            })->orWhere(function ($subQuery) use ($resource, $action) {
-                // Check for action wildcard (e.g., *.viewAny)
-                $subQuery->where('resource', '*')
-                         ->whereJsonContains('actions', $action);
+                // Check for exact match in pivot table actions
+                $subQuery->where('permissions.resource', $resource)
+                    ->whereJsonContains('permission_role.actions', $action);
+            })->orWhere(function ($subQuery) {
+                // Check for wildcard permissions in pivot table
+                $subQuery->where('permissions.resource', '*')
+                    ->whereJsonContains('permission_role.actions', '*');
+            })->orWhere(function ($subQuery) use ($resource) {
+                // Check for resource wildcard (e.g., blog.*) in pivot table
+                $subQuery->where('permissions.resource', $resource)
+                    ->whereJsonContains('permission_role.actions', '*');
+            })->orWhere(function ($subQuery) use ($action) {
+                // Check for action wildcard (e.g., *.viewAny) in pivot table
+                $subQuery->where('permissions.resource', '*')
+                    ->whereJsonContains('permission_role.actions', $action);
             });
         })->exists();
+    }
+
+    public function getResourcePermissions(string $resource): array
+    {
+        $actions = ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'];
+        $permissions = [];
+
+        foreach ($actions as $action) {
+            $permissions[$action] = $this->hasPermission($resource, $action);
+        }
+
+        return $permissions;
+    }
+
+    public function getAllPermissions(): array
+    {
+        $resources = [
+            'developer',
+            'project',
+            'realestate-project',
+            'property',
+            'blog',
+            'user',
+            'role',
+            'permission',
+            'experience',
+            'skills',
+            'technology',
+        ];
+        $allPermissions = [];
+
+        foreach ($resources as $resource) {
+            $allPermissions[$resource] = $this->getResourcePermissions($resource);
+        }
+
+        return $allPermissions;
     }
 
     /**
@@ -98,6 +145,25 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+        ];
+    }
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     */
+    public function getJWTIdentifier(): mixed
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     */
+    public function getJWTCustomClaims(): array
+    {
+        return [
+            'email' => $this->email,
+            'name' => $this->name,
         ];
     }
 }

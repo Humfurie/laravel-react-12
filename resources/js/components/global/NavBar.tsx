@@ -3,9 +3,8 @@ import { Link } from '@inertiajs/react';
 
 const links = [
     { id: 1, url: '/', title: 'Home', disabled: false },
-    { id: 2, url: '/crypto', title: 'Crypto', disabled: false },
-    { id: 3, url: '/about', title: 'About', disabled: true },
-    { id: 4, url: '/contact', title: 'Contact', disabled: true },
+    { id: 2, url: '/about', title: 'About', disabled: true },
+    { id: 3, url: '/contact', title: 'Contact', disabled: true },
 ];
 
 // Define the User type

@@ -239,12 +239,7 @@ export function BlogEditor({ content = '', onChange, placeholder = 'Start writin
                     )}
                 </Toolbar>
 
-                <EditorContent
-                    editor={editor}
-                    role="presentation"
-                    className="blog-editor-content"
-                    style={{ minHeight: '400px' }}
-                />
+                <EditorContent editor={editor} role="presentation" className="blog-editor-content" style={{ minHeight: '400px' }} />
             </EditorContext.Provider>
         </div>
     );

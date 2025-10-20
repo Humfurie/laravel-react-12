@@ -1,5 +1,5 @@
-import { motion, useCycle } from 'framer-motion';
 import { Link } from '@inertiajs/react';
+import { motion, useCycle } from 'framer-motion';
 import { useEffect } from 'react';
 
 export const NavDropdown = () => {
@@ -51,9 +51,6 @@ export const NavDropdown = () => {
                         <ul className="space-y-5 text-4xl font-bold text-white">
                             <li>
                                 <Link href="/">Home</Link>
-                            </li>
-                            <li>
-                                <Link href="/crypto">Crypto</Link>
                             </li>
                             <li>
                                 <div className="text-gray-400">(About)</div>

@@ -7,19 +7,11 @@
     --tt-button-default-bg-color: var(--tt-gray-light-a-100);
     --tt-button-hover-bg-color: var(--tt-gray-light-200);
     --tt-button-active-bg-color: var(--tt-gray-light-a-200);
-    --tt-button-active-bg-color-emphasized: var(
-            --tt-brand-color-100
-    ); //more important active state
-    --tt-button-active-bg-color-subdued: var(
-            --tt-gray-light-a-200
-    ); //less important active state
+    --tt-button-active-bg-color-emphasized: var(--tt-brand-color-100); //more important active state
+    --tt-button-active-bg-color-subdued: var(--tt-gray-light-a-200); //less important active state
     --tt-button-active-hover-bg-color: var(--tt-gray-light-300);
-    --tt-button-active-hover-bg-color-emphasized: var(
-            --tt-brand-color-200
-    ); //more important active state hover
-    --tt-button-active-hover-bg-color-subdued: var(
-            --tt-gray-light-a-300
-    ); //less important active state hover
+    --tt-button-active-hover-bg-color-emphasized: var(--tt-brand-color-200); //more important active state hover
+    --tt-button-active-hover-bg-color-subdued: var(--tt-gray-light-a-300); //less important active state hover
     --tt-button-disabled-bg-color: var(--tt-gray-light-a-50);
 
     /* Dark mode */
@@ -27,19 +19,11 @@
         --tt-button-default-bg-color: var(--tt-gray-dark-a-100);
         --tt-button-hover-bg-color: var(--tt-gray-dark-200);
         --tt-button-active-bg-color: var(--tt-gray-dark-a-200);
-        --tt-button-active-bg-color-emphasized: var(
-                --tt-brand-color-900
-        ); //more important active state
-        --tt-button-active-bg-color-subdued: var(
-                --tt-gray-dark-a-200
-        ); //less important active state
+        --tt-button-active-bg-color-emphasized: var(--tt-brand-color-900); //more important active state
+        --tt-button-active-bg-color-subdued: var(--tt-gray-dark-a-200); //less important active state
         --tt-button-active-hover-bg-color: var(--tt-gray-dark-300);
-        --tt-button-active-hover-bg-color-emphasized: var(
-                --tt-brand-color-800
-        ); //more important active state hover
-        --tt-button-active-hover-bg-color-subdued: var(
-                --tt-gray-dark-a-300
-        ); //less important active state hover
+        --tt-button-active-hover-bg-color-emphasized: var(--tt-brand-color-800); //more important active state hover
+        --tt-button-active-hover-bg-color-subdued: var(--tt-gray-dark-a-300); //less important active state hover
         --tt-button-disabled-bg-color: var(--tt-gray-dark-a-50);
     }
 
@@ -117,9 +101,7 @@
     --tt-button-default-dropdown-arrows-color: var(--tt-gray-light-a-600);
     --tt-button-hover-dropdown-arrows-color: var(--tt-gray-light-a-700);
     --tt-button-active-dropdown-arrows-color: var(--tt-gray-light-a-600);
-    --tt-button-active-dropdown-arrows-color-emphasized: var(
-            --tt-gray-light-a-700
-    );
+    --tt-button-active-dropdown-arrows-color-emphasized: var(--tt-gray-light-a-700);
     --tt-button-active-dropdown-arrows-color-subdued: var(--tt-gray-light-a-600);
     --tt-button-disabled-dropdown-arrows-color: var(--tt-gray-light-a-400);
 
@@ -128,9 +110,7 @@
         --tt-button-default-dropdown-arrows-color: var(--tt-gray-dark-a-600);
         --tt-button-hover-dropdown-arrows-color: var(--tt-gray-dark-a-700);
         --tt-button-active-dropdown-arrows-color: var(--tt-gray-dark-a-600);
-        --tt-button-active-dropdown-arrows-color-emphasized: var(
-                --tt-gray-dark-a-700
-        );
+        --tt-button-active-dropdown-arrows-color-emphasized: var(--tt-gray-dark-a-700);
         --tt-button-active-dropdown-arrows-color-subdued: var(--tt-gray-dark-a-600);
         --tt-button-disabled-dropdown-arrows-color: var(--tt-gray-dark-a-400);
     }
@@ -139,7 +119,7 @@
         --------------------------- GHOST BUTTON --------------------------
         ---------------------------------------------------------------- */
 
-    &[data-style="ghost"] {
+    &[data-style='ghost'] {
         /**************************************************
             Ghost button background color
         **************************************************/
@@ -148,19 +128,11 @@
         --tt-button-default-bg-color: var(--transparent);
         --tt-button-hover-bg-color: var(--tt-gray-light-200);
         --tt-button-active-bg-color: var(--tt-gray-light-a-100);
-        --tt-button-active-bg-color-emphasized: var(
-                --tt-brand-color-100
-        ); //more important active state
-        --tt-button-active-bg-color-subdued: var(
-                --tt-gray-light-a-100
-        ); //less important active state
+        --tt-button-active-bg-color-emphasized: var(--tt-brand-color-100); //more important active state
+        --tt-button-active-bg-color-subdued: var(--tt-gray-light-a-100); //less important active state
         --tt-button-active-hover-bg-color: var(--tt-gray-light-200);
-        --tt-button-active-hover-bg-color-emphasized: var(
-                --tt-brand-color-200
-        ); //more important active state hover
-        --tt-button-active-hover-bg-color-subdued: var(
-                --tt-gray-light-a-200
-        ); //less important active state hover
+        --tt-button-active-hover-bg-color-emphasized: var(--tt-brand-color-200); //more important active state hover
+        --tt-button-active-hover-bg-color-subdued: var(--tt-gray-light-a-200); //less important active state hover
         --tt-button-disabled-bg-color: var(--transparent);
 
         /* Dark mode */
@@ -168,19 +140,11 @@
             --tt-button-default-bg-color: var(--transparent);
             --tt-button-hover-bg-color: var(--tt-gray-dark-200);
             --tt-button-active-bg-color: var(--tt-gray-dark-a-100);
-            --tt-button-active-bg-color-emphasized: var(
-                    --tt-brand-color-900
-            ); //more important active state
-            --tt-button-active-bg-color-subdued: var(
-                    --tt-gray-dark-a-100
-            ); //less important active state
+            --tt-button-active-bg-color-emphasized: var(--tt-brand-color-900); //more important active state
+            --tt-button-active-bg-color-subdued: var(--tt-gray-dark-a-100); //less important active state
             --tt-button-active-hover-bg-color: var(--tt-gray-dark-200);
-            --tt-button-active-hover-bg-color-emphasized: var(
-                    --tt-brand-color-800
-            ); //more important active state hover
-            --tt-button-active-hover-bg-color-subdued: var(
-                    --tt-gray-dark-a-200
-            ); //less important active state hover
+            --tt-button-active-hover-bg-color-emphasized: var(--tt-brand-color-800); //more important active state hover
+            --tt-button-active-hover-bg-color-subdued: var(--tt-gray-dark-a-200); //less important active state hover
             --tt-button-disabled-bg-color: var(--transparent);
         }
 
@@ -258,12 +222,8 @@
         --tt-button-default-dropdown-arrows-color: var(--tt-gray-light-a-600);
         --tt-button-hover-dropdown-arrows-color: var(--tt-gray-light-a-700);
         --tt-button-active-dropdown-arrows-color: var(--tt-gray-light-a-600);
-        --tt-button-active-dropdown-arrows-color-emphasized: var(
-                --tt-gray-light-a-700
-        );
-        --tt-button-active-dropdown-arrows-color-subdued: var(
-                --tt-gray-light-a-600
-        );
+        --tt-button-active-dropdown-arrows-color-emphasized: var(--tt-gray-light-a-700);
+        --tt-button-active-dropdown-arrows-color-subdued: var(--tt-gray-light-a-600);
         --tt-button-disabled-dropdown-arrows-color: var(--tt-gray-light-a-400);
 
         /* Dark mode */
@@ -271,12 +231,8 @@
             --tt-button-default-dropdown-arrows-color: var(--tt-gray-dark-a-600);
             --tt-button-hover-dropdown-arrows-color: var(--tt-gray-dark-a-700);
             --tt-button-active-dropdown-arrows-color: var(--tt-gray-dark-a-600);
-            --tt-button-active-dropdown-arrows-color-emphasized: var(
-                    --tt-gray-dark-a-700
-            );
-            --tt-button-active-dropdown-arrows-color-subdued: var(
-                    --tt-gray-dark-a-600
-            );
+            --tt-button-active-dropdown-arrows-color-emphasized: var(--tt-gray-dark-a-700);
+            --tt-button-active-dropdown-arrows-color-subdued: var(--tt-gray-dark-a-600);
             --tt-button-disabled-dropdown-arrows-color: var(--tt-gray-dark-a-400);
         }
     }
@@ -285,7 +241,7 @@
         -------------------------- PRIMARY BUTTON -------------------------
         ---------------------------------------------------------------- */
 
-    &[data-style="primary"] {
+    &[data-style='primary'] {
         /**************************************************
             Primary button background color
         **************************************************/
@@ -294,19 +250,11 @@
         --tt-button-default-bg-color: var(--tt-brand-color-500);
         --tt-button-hover-bg-color: var(--tt-brand-color-600);
         --tt-button-active-bg-color: var(--tt-brand-color-100);
-        --tt-button-active-bg-color-emphasized: var(
-                --tt-brand-color-100
-        ); //more important active state
-        --tt-button-active-bg-color-subdued: var(
-                --tt-brand-color-100
-        ); //less important active state
+        --tt-button-active-bg-color-emphasized: var(--tt-brand-color-100); //more important active state
+        --tt-button-active-bg-color-subdued: var(--tt-brand-color-100); //less important active state
         --tt-button-active-hover-bg-color: var(--tt-brand-color-200);
-        --tt-button-active-hover-bg-color-emphasized: var(
-                --tt-brand-color-200
-        ); //more important active state hover
-        --tt-button-active-hover-bg-color-subdued: var(
-                --tt-brand-color-200
-        ); //less important active state hover
+        --tt-button-active-hover-bg-color-emphasized: var(--tt-brand-color-200); //more important active state hover
+        --tt-button-active-hover-bg-color-subdued: var(--tt-brand-color-200); //less important active state hover
         --tt-button-disabled-bg-color: var(--tt-gray-light-a-100);
 
         /* Dark mode */
@@ -314,19 +262,11 @@
             --tt-button-default-bg-color: var(--tt-brand-color-500);
             --tt-button-hover-bg-color: var(--tt-brand-color-600);
             --tt-button-active-bg-color: var(--tt-brand-color-900);
-            --tt-button-active-bg-color-emphasized: var(
-                    --tt-brand-color-900
-            ); //more important active state
-            --tt-button-active-bg-color-subdued: var(
-                    --tt-brand-color-900
-            ); //less important active state
+            --tt-button-active-bg-color-emphasized: var(--tt-brand-color-900); //more important active state
+            --tt-button-active-bg-color-subdued: var(--tt-brand-color-900); //less important active state
             --tt-button-active-hover-bg-color: var(--tt-brand-color-800);
-            --tt-button-active-hover-bg-color-emphasized: var(
-                    --tt-brand-color-800
-            ); //more important active state hover
-            --tt-button-active-hover-bg-color-subdued: var(
-                    --tt-brand-color-800
-            ); //less important active state hover
+            --tt-button-active-hover-bg-color-emphasized: var(--tt-brand-color-800); //more important active state hover
+            --tt-button-active-hover-bg-color-subdued: var(--tt-brand-color-800); //less important active state hover
             --tt-button-disabled-bg-color: var(--tt-gray-dark-a-100);
         }
 
@@ -404,12 +344,8 @@
         --tt-button-default-dropdown-arrows-color: var(--white);
         --tt-button-hover-dropdown-arrows-color: var(--white);
         --tt-button-active-dropdown-arrows-color: var(--tt-gray-light-a-700);
-        --tt-button-active-dropdown-arrows-color-emphasized: var(
-                --tt-gray-light-a-700
-        );
-        --tt-button-active-dropdown-arrows-color-subdued: var(
-                --tt-gray-light-a-700
-        );
+        --tt-button-active-dropdown-arrows-color-emphasized: var(--tt-gray-light-a-700);
+        --tt-button-active-dropdown-arrows-color-subdued: var(--tt-gray-light-a-700);
         --tt-button-disabled-dropdown-arrows-color: var(--tt-gray-light-a-400);
 
         /* Dark mode */
@@ -417,12 +353,8 @@
             --tt-button-default-dropdown-arrows-color: var(--white);
             --tt-button-hover-dropdown-arrows-color: var(--white);
             --tt-button-active-dropdown-arrows-color: var(--tt-gray-dark-a-600);
-            --tt-button-active-dropdown-arrows-color-emphasized: var(
-                    --tt-gray-dark-a-600
-            );
-            --tt-button-active-dropdown-arrows-color-subdued: var(
-                    --tt-gray-dark-a-600
-            );
+            --tt-button-active-dropdown-arrows-color-emphasized: var(--tt-gray-dark-a-600);
+            --tt-button-active-dropdown-arrows-color-subdued: var(--tt-gray-dark-a-600);
             --tt-button-disabled-dropdown-arrows-color: var(--tt-gray-dark-a-400);
         }
     }

@@ -27,10 +27,12 @@ test('admin can get all permissions', function () {
 
     $response = $this->get('/admin/permissions');
 
+    $totalPermissions = Permission::count(); // Get actual count
+
     $response->assertStatus(200)
         ->assertInertia(fn(AssertableInertia $page) => $page
             ->component('admin/permission') // The React component name
-            ->has('permissions', 5) // Assert we have 5 permissions
+            ->has('permissions', $totalPermissions) // Assert we have correct number of permissions
             ->has('permissions.0.resource') // Assert first permission has resource property
             ->has('permissions.0.actions') // Assert first permission has actions property
         );
@@ -171,14 +173,13 @@ test('admin can force delete permissions', function () {
 test('admin can restore permissions', function () {
     $user = User::factory()
         ->has(Role::factory()
-            ->has(Permission::factory()->state([
-                'resource' => 'permission',
-            ]))
             ->state([
                 'name' => 'Admin',
-                'slug' => 'admin',
-            ])
-        )
+                'slug' => 'admin'
+            ])->hasAttached(Permission::factory()
+                ->state([
+                    'resource' => 'permission',
+                ]), ['actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)], 'permissions'))
         ->create();
 
     $this->actingAs($user);

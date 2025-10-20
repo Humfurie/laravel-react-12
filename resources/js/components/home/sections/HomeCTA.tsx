@@ -13,18 +13,13 @@ const blogData = [
 const HomeCTA = () => {
     return (
         <section className="home-blog call-to-action py-[40px] md:py-[80px]">
-            <div className="primary-container flex flex-col lg:flex-row items-center gap-[32px] min-h-[546px] ">
+            <div className="primary-container flex min-h-[546px] flex-col items-center gap-[32px] lg:flex-row">
                 {/* Blog Preview */}
-                <div className="from-the-blogs w-full lg:w-[40%] ">
+                <div className="from-the-blogs w-full lg:w-[40%]">
                     <SectionTitle title="From the Blogs" link="/blogs" />
-                    <div className="mt-4 flex flex-col justify-center items-center">
+                    <div className="mt-4 flex flex-col items-center justify-center">
                         {blogData.map((blog, index) => (
-                            <MyCard
-                                key={index}
-                                imgUrl={blog.imgUrl}
-                                title={blog.title}
-                                excerpt={blog.excerpt}
-                            />
+                            <MyCard key={index} imgUrl={blog.imgUrl} title={blog.title} excerpt={blog.excerpt} />
                         ))}
                     </div>
                 </div>
