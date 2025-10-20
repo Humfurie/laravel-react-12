@@ -1,5 +1,5 @@
-import {FaLinkedin} from "react-icons/fa";
-import {JSX} from "react";
+import { JSX } from 'react';
+import { FaLinkedin } from 'react-icons/fa';
 
 export const AccountLinks = ({ className }: { className: string }) => {
     const Links = [

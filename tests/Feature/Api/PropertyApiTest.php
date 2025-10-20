@@ -1,14 +1,21 @@
 <?php
 
-use App\Models\Property;
 use App\Models\Image;
-use Illuminate\Http\UploadedFile;
+use App\Models\Property;
+use App\Models\PropertyPricing;
+use App\Models\RealEstateProject;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     Storage::fake('public');
+
+    // Create admin user with property permissions
+    $this->user = createAdminUser('property');
+
+    $this->actingAs($this->user);
 });
 
 describe('Property CRUD Operations', function () {
@@ -34,12 +41,12 @@ describe('Property CRUD Operations', function () {
     });
 
     test('can create a new property', function () {
-        $project = \App\Models\RealEstateProject::factory()->create();
+        $project = RealEstateProject::factory()->create();
 
         $propertyData = [
             'project_id' => $project->id,
             'title' => 'Test Property',
-            'description' => 'A beautiful test property for testing',
+            'description' => 'A beautiful test property for testing purposes. This property features modern amenities and excellent location.',
             'property_type' => '2br',
             'unit_number' => '15A02',
             'floor_level' => 15,
@@ -117,7 +124,7 @@ describe('Property CRUD Operations', function () {
 
         $updateData = [
             'floor_area' => 85.0,
-            'description' => 'Updated description'
+            'description' => 'Updated description for this property with all the necessary details and information.'
         ];
 
         $response = $this->putJson("/api/v1/properties/{$property->slug}", $updateData);
@@ -125,7 +132,7 @@ describe('Property CRUD Operations', function () {
         $response->assertOk()
             ->assertJsonFragment([
                 'floor_area' => '85.00',
-                'description' => 'Updated description'
+                'description' => 'Updated description for this property with all the necessary details and information.'
             ]);
 
         $this->assertDatabaseHas('properties', [
@@ -155,13 +162,13 @@ describe('Property CRUD Operations', function () {
 describe('Property Search and Filtering', function () {
     beforeEach(function () {
         // Create a project in Makati
-        $makatiProject = \App\Models\RealEstateProject::factory()->create([
+        $makatiProject = RealEstateProject::factory()->create([
             'name' => 'Makati Heights',
             'city' => 'Makati'
         ]);
 
         // Create a project in BGC
-        $bgcProject = \App\Models\RealEstateProject::factory()->create([
+        $bgcProject = RealEstateProject::factory()->create([
             'name' => 'BGC Center',
             'city' => 'BGC'
         ]);
@@ -222,12 +229,12 @@ describe('Property Search and Filtering', function () {
         $property1 = Property::factory()->available()->create();
         $property2 = Property::factory()->available()->create();
 
-        \App\Models\PropertyPricing::factory()->create([
+        PropertyPricing::factory()->create([
             'property_id' => $property1->id,
             'total_contract_price' => 5000000
         ]);
 
-        \App\Models\PropertyPricing::factory()->create([
+        PropertyPricing::factory()->create([
             'property_id' => $property2->id,
             'total_contract_price' => 8000000
         ]);
