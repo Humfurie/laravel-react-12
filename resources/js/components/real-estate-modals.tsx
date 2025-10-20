@@ -35,12 +35,28 @@ interface RealEstateProject {
     developer: Developer;
 }
 
+interface DeveloperFormData {
+    company_name: string;
+    description: string;
+    logo_url?: string;
+    contact_email: string;
+    contact_phone: string;
+    website: string;
+}
+
+interface DeveloperForm {
+    data: DeveloperFormData;
+    errors: Record<string, string>;
+    processing: boolean;
+    setData: (key: string | object, value?: string | number | boolean | File | null) => void;
+}
+
 interface DeveloperModalProps {
     show: boolean;
     onClose: () => void;
     developer: Developer | null;
     onSubmit: (e: FormEvent, selectedFile?: File | null) => void;
-    form: any;
+    form: DeveloperForm;
 }
 
 export function DeveloperModal({ show, onClose, developer, onSubmit, form }: DeveloperModalProps) {
@@ -255,12 +271,43 @@ export function DeveloperModal({ show, onClose, developer, onSubmit, form }: Dev
     );
 }
 
+interface ProjectFormData {
+    developer_id: string;
+    name: string;
+    description: string;
+    project_type: string;
+    address: string;
+    city: string;
+    province: string;
+    region: string;
+    country?: string;
+    postal_code: string;
+    latitude?: string;
+    longitude?: string;
+    turnover_date: string;
+    completion_year: string;
+    status: string;
+    total_units: string;
+    total_floors: string;
+    virtual_tour_url: string;
+    featured: boolean;
+    featured_image: string | null;
+    images: string[];
+}
+
+interface ProjectForm {
+    data: ProjectFormData;
+    errors: Record<string, string>;
+    processing: boolean;
+    setData: (key: string | object, value?: string | number | boolean | File | null | File[] | string[]) => void;
+}
+
 interface ProjectModalProps {
     show: boolean;
     onClose: () => void;
     project: RealEstateProject | null;
     onSubmit: (e: FormEvent, selectedFiles?: File[], featuredFile?: File | null) => void;
-    form: any;
+    form: ProjectForm;
     developers: Developer[];
 }
 
@@ -303,7 +350,7 @@ export function ProjectModal({ show, onClose, project, onSubmit, form, developer
         const updatedFiles = additionalImageFiles.filter((_, i) => i !== index);
         setAdditionalImageFiles(updatedFiles);
 
-        const updatedImages = (form.data.images || []).filter((_: any, i: number) => i !== index);
+        const updatedImages = (form.data.images || []).filter((_: string, i: number) => i !== index);
         form.setData('images', updatedImages);
     };
 

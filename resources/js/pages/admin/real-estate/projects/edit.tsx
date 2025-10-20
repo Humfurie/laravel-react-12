@@ -34,8 +34,8 @@ interface RealEstateProject {
 }
 
 interface BreadcrumbItem {
-    label: string;
-    href?: string;
+    title: string;
+    href: string;
 }
 
 interface EditProjectProps {
@@ -46,13 +46,13 @@ interface EditProjectProps {
 export default function EditProject({ project, developers }: EditProjectProps) {
     // Debug: Log what we receive from backend
     console.log('Project data:', {
-        featured_image: (project as any).featured_image,
-        images: (project as any).images,
+        featured_image: project.featured_image,
+        images: project.images,
         full_project: project,
     });
 
-    const [featuredImagePreview, setFeaturedImagePreview] = useState<string>((project as any).featured_image || '');
-    const [additionalImagePreviews, setAdditionalImagePreviews] = useState<string[]>((project as any).images || []);
+    const [featuredImagePreview, setFeaturedImagePreview] = useState<string>(project.featured_image || '');
+    const [additionalImagePreviews, setAdditionalImagePreviews] = useState<string[]>(project.images || []);
     const [showToast, setShowToast] = useState<{
         show: boolean;
         message: string;
@@ -86,15 +86,15 @@ export default function EditProject({ project, developers }: EditProjectProps) {
         virtual_tour_url: project.virtual_tour_url || '',
         featured: project.featured || false,
         // Include both featured and additional images in existing_images
-        existing_images: [...((project as any).featured_image ? [(project as any).featured_image] : []), ...((project as any).images || [])],
+        existing_images: [...(project.featured_image ? [project.featured_image] : []), ...(project.images || [])],
         featured_image: null as File | null,
         additional_images: [] as File[],
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { label: 'Real Estate', href: '/admin/real-estate' },
-        { label: 'Projects', href: '/admin/real-estate' },
-        { label: 'Edit' },
+        { title: 'Real Estate', href: '/admin/real-estate' },
+        { title: 'Projects', href: '/admin/real-estate' },
+        { title: 'Edit', href: '' },
     ];
 
     const projectTypes = ['condominium', 'subdivision', 'townhouse', 'commercial', 'mixed-use', 'office', 'industrial'];
@@ -252,7 +252,7 @@ export default function EditProject({ project, developers }: EditProjectProps) {
                 });
                 showToastMessage('Project updated successfully!', 'success');
             },
-            onError: (errors: any) => {
+            onError: (errors: Record<string, string>) => {
                 console.error('Submission errors:', errors);
                 showToastMessage('Failed to update project. Please check the form.', 'error');
             },
