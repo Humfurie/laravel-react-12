@@ -38,49 +38,55 @@ trait HasDynamicPermissions
 
     /**
      * Determine whether the user can view the model.
+     * Requires viewAny permission as prerequisite.
      */
     public function view(User $user, $model): bool
     {
-        return $this->hasPermission($user, 'view');
+        return $this->hasPermission($user, 'viewAny') && $this->hasPermission($user, 'view');
     }
 
     /**
      * Determine whether the user can create models.
+     * Requires viewAny permission as prerequisite.
      */
     public function create(User $user): bool
     {
-        return $this->hasPermission($user, 'create');
+        return $this->hasPermission($user, 'viewAny') && $this->hasPermission($user, 'create');
     }
 
     /**
      * Determine whether the user can update the model.
+     * Requires viewAny permission as prerequisite.
      */
     public function update(User $user, $model): bool
     {
-        return $this->hasPermission($user, 'update');
+        return $this->hasPermission($user, 'viewAny') && $this->hasPermission($user, 'update');
     }
 
     /**
      * Determine whether the user can delete the model.
+     * Requires viewAny permission as prerequisite.
      */
     public function delete(User $user, $model): bool
     {
-        return $this->hasPermission($user, 'delete');
+        return $this->hasPermission($user, 'viewAny') && $this->hasPermission($user, 'delete');
     }
 
     /**
      * Determine whether the user can restore the model.
+     * Requires viewAny permission as prerequisite.
      */
     public function restore(User $user, $model): bool
     {
-        return $this->hasPermission($user, 'restore');
+        return $this->hasPermission($user, 'viewAny') && $this->hasPermission($user, 'restore');
     }
 
     /**
      * Determine whether the user can permanently delete the model.
+     * Requires viewAny permission as prerequisite.
      */
     public function forceDelete(User $user, $model): bool
     {
-        return $this->hasPermission($user, 'forceDelete');
+        return $this->hasPermission($user, 'viewAny') && $this->hasPermission($user, 'forceDelete');
     }
 }

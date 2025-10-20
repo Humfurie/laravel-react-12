@@ -1,8 +1,34 @@
 import { LucideIcon } from 'lucide-react';
 import type { Config } from 'ziggy-js';
 
+export interface ResourcePermissions {
+    viewAny: boolean;
+    view: boolean;
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+    restore: boolean;
+    forceDelete: boolean;
+}
+
+export interface Permissions {
+    developer: ResourcePermissions;
+    'realestate-project': ResourcePermissions;
+    property: ResourcePermissions;
+    blog: ResourcePermissions;
+    user: ResourcePermissions;
+    role: ResourcePermissions;
+    permission: ResourcePermissions;
+    experience: ResourcePermissions;
+    skills: ResourcePermissions;
+    technology: ResourcePermissions;
+}
+
 export interface Auth {
     user: User;
+    isAdmin: boolean;
+    roles: string[];
+    permissions: Permissions;
 }
 
 export interface BreadcrumbItem {

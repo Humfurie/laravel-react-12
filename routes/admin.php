@@ -3,35 +3,37 @@
 use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\RealEstateController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ExperienceController;
 
-Route::prefix('roles')->group(function () {
+Route::prefix('roles')->middleware('permission:role,viewAny')->group(function () {
     Route::get('/', [RoleController::class, 'index'])->name('roles.index');
-    Route::post('/', [RoleController::class, 'store'])->name('roles.store');
-    Route::put('/{role}', [RoleController::class, 'update'])->name('roles.update');
-    Route::delete('/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
-    Route::patch('/{role}/restore', [RoleController::class, 'restore'])->name('roles.restore')->withTrashed();
-    Route::delete('/{role}/force', [RoleController::class, 'forceDestroy'])->name('roles.forceDestroy');
+    Route::post('/', [RoleController::class, 'store'])->name('roles.store')->middleware('permission:role,create');
+    Route::put('/{role}', [RoleController::class, 'update'])->name('roles.update')->middleware('permission:role,update');
+    Route::delete('/{role}', [RoleController::class, 'destroy'])->name('roles.destroy')->middleware('permission:role,delete');
+    Route::patch('/{role}/restore', [RoleController::class, 'restore'])->name('roles.restore')->withTrashed()->middleware('permission:role,restore');
+    Route::delete('/{role}/force', [RoleController::class, 'forceDestroy'])->name('roles.forceDestroy')->middleware('permission:role,forceDelete');
 });
 
-Route::prefix('users')->group(function () {
+Route::prefix('users')->middleware('permission:user,viewAny')->group(function () {
     Route::get('/', [UserController::class, 'index'])->name('users.index');
-    Route::post('/', [UserController::class, 'store'])->name('users.store');
-    Route::put('/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-    Route::patch('/{user}/restore', [UserController::class, 'restore'])->name('users.restore')->withTrashed();
-    Route::delete('/{user}/force', [UserController::class, 'forceDestroy'])->name('users.forceDestroy');
+    Route::post('/', [UserController::class, 'store'])->name('users.store')->middleware('permission:user,create');
+    Route::put('/{user}', [UserController::class, 'update'])->name('users.update')->middleware('permission:user,update');
+    Route::patch('/{user}/assign-role', [UserController::class, 'assignRole'])->name('users.assign-role')->middleware('permission:user,update');
+    Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy')->middleware('permission:user,delete');
+    Route::patch('/{user}/restore', [UserController::class, 'restore'])->name('users.restore')->withTrashed()->middleware('permission:user,restore');
+    Route::delete('/{user}/force', [UserController::class, 'forceDestroy'])->name('users.forceDestroy')->middleware('permission:user,forceDelete');
 });
 
-Route::prefix('permissions')->group(function () {
+Route::prefix('permissions')->middleware('permission:permission,viewAny')->group(function () {
     Route::get('/', [PermissionController::class, 'index'])->name('permissions.index');
-    Route::post('/', [PermissionController::class, 'store'])->name('permissions.store');
-    Route::put('/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
-    Route::delete('/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
-    Route::patch('/{permission}/restore', [PermissionController::class, 'restore'])->name('permissions.restore')->withTrashed();
-    Route::delete('/{permission}/force', [PermissionController::class, 'forceDestroy'])->name('permissions.force');
+    Route::post('/', [PermissionController::class, 'store'])->name('permissions.store')->middleware('permission:permission,create');
+    Route::put('/{permission}', [PermissionController::class, 'update'])->name('permissions.update')->middleware('permission:permission,update');
+    Route::delete('/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy')->middleware('permission:permission,delete');
+    Route::patch('/{permission}/restore', [PermissionController::class, 'restore'])->name('permissions.restore')->withTrashed()->middleware('permission:permission,restore');
+    Route::delete('/{permission}/force', [PermissionController::class, 'forceDestroy'])->name('permissions.force')->middleware('permission:permission,forceDelete');
 });
 
 Route::prefix('about')->group(function () {
@@ -45,16 +47,59 @@ Route::prefix('about')->group(function () {
     Route::patch('/{about}', [AboutController::class, 'setPrimary'])->name('about.set.primary');
 });
 
-Route::prefix('blogs')->group(function () {
+Route::prefix('blogs')->middleware('permission:blog,viewAny')->group(function () {
     Route::get('/', [BlogController::class, 'index'])->name('blogs.index');
-    Route::get('/create', [BlogController::class, 'create'])->name('blogs.create');
-    Route::post('/', [BlogController::class, 'store'])->name('blogs.store');
-    Route::get('/{blog}', [BlogController::class, 'edit'])->name('blogs.edit');
-    Route::put('/{blog}', [BlogController::class, 'update'])->name('blogs.update');
-    Route::delete('/{blog}', [BlogController::class, 'destroy'])->name('blogs.destroy');
-    Route::patch('/{blog}/restore', [BlogController::class, 'restore'])->name('blogs.restore')->withTrashed();
-    Route::delete('/{blog}/force', [BlogController::class, 'forceDestroy'])->name('blogs.force-destroy');
-    Route::post('/upload-image', [BlogController::class, 'uploadImage'])->name('blogs.upload-image');
+    Route::get('/create', [BlogController::class, 'create'])->name('blogs.create')->middleware('permission:blog,create');
+    Route::post('/', [BlogController::class, 'store'])->name('blogs.store')->middleware('permission:blog,create');
+    Route::get('/{blog}', [BlogController::class, 'edit'])->name('blogs.edit')->middleware('permission:blog,view');
+    Route::put('/{blog}', [BlogController::class, 'update'])->name('blogs.update')->middleware('permission:blog,update');
+    Route::delete('/{blog}', [BlogController::class, 'destroy'])->name('blogs.destroy')->middleware('permission:blog,delete');
+    Route::patch('/{blog}/restore', [BlogController::class, 'restore'])->name('blogs.restore')->withTrashed()->middleware('permission:blog,restore');
+    Route::delete('/{blog}/force', [BlogController::class, 'forceDestroy'])->name('blogs.force-destroy')->middleware('permission:blog,forceDelete');
+    Route::post('/upload-image', [BlogController::class, 'uploadImage'])->name('blogs.upload-image')->middleware('permission:blog,create');
+});
+
+Route::prefix('real-estate')->group(function () {
+    // Main admin page - controller handles authorization for multiple resources
+    Route::get('/', [RealEstateController::class, 'index'])->name('real-estate.index');
+
+    // Developer routes
+    Route::get('/developers/create', [RealEstateController::class, 'createDeveloper'])->name('real-estate.developers.create')->middleware('permission:developer,create');
+    Route::post('/developers', [RealEstateController::class, 'storeDeveloper'])->name('real-estate.developers.store')->middleware('permission:developer,create');
+    Route::get('/developers/{developer}/edit', [RealEstateController::class, 'editDeveloper'])->name('real-estate.developers.edit')->middleware('permission:developer,view');
+    Route::put('/developers/{developer}', [RealEstateController::class, 'updateDeveloper'])->name('real-estate.developers.update')->middleware('permission:developer,update');
+    Route::delete('/developers/{developer}', [RealEstateController::class, 'destroyDeveloper'])->name('real-estate.developers.destroy')->middleware('permission:developer,delete');
+
+    // Project routes
+    Route::get('/projects/create', [RealEstateController::class, 'createProject'])->name('real-estate.projects.create')->middleware('permission:realestate-project,create');
+    Route::post('/projects', [RealEstateController::class, 'storeProject'])->name('real-estate.projects.store')->middleware('permission:realestate-project,create');
+    Route::get('/projects/{project}/edit', [RealEstateController::class, 'editProject'])->name('real-estate.projects.edit')->middleware('permission:realestate-project,view');
+    Route::put('/projects/{project}', [RealEstateController::class, 'updateProject'])->name('real-estate.projects.update')->middleware('permission:realestate-project,update');
+    Route::delete('/projects/{project}', [RealEstateController::class, 'destroyProject'])->name('real-estate.projects.destroy')->middleware('permission:realestate-project,delete');
+
+    // Property routes
+    Route::get('/properties', [RealEstateController::class, 'indexProperty'])->name('real-estate.properties.index')->middleware('permission:property,viewAny');
+    Route::get('/properties/create', [RealEstateController::class, 'createProperty'])->name('real-estate.properties.create')->middleware('permission:property,create');
+    Route::post('/properties', [RealEstateController::class, 'storeProperty'])->name('real-estate.properties.store')->middleware('permission:property,create');
+    Route::get('/properties/{property}/edit', [RealEstateController::class, 'editProperty'])->name('real-estate.properties.edit')->middleware('permission:property,view');
+    Route::put('/properties/{property}', [RealEstateController::class, 'updateProperty'])->name('real-estate.properties.update')->middleware('permission:property,update');
+    Route::delete('/properties/{property}', [RealEstateController::class, 'destroyProperty'])->name('real-estate.properties.destroy')->middleware('permission:property,delete');
+
+    // Property Pricing routes (requires property update permission)
+    Route::post('/pricing', [RealEstateController::class, 'storePricing'])->name('real-estate.pricing.store')->middleware('permission:property,update');
+    Route::put('/pricing/{pricing}', [RealEstateController::class, 'updatePricing'])->name('real-estate.pricing.update')->middleware('permission:property,update');
+    Route::delete('/pricing/{pricing}', [RealEstateController::class, 'destroyPricing'])->name('real-estate.pricing.destroy')->middleware('permission:property,update');
+
+    // Inquiry routes (requires property viewAny permission)
+    Route::put('/inquiries/{inquiry}/status', [RealEstateController::class, 'updateInquiryStatus'])->name('real-estate.inquiries.status')->middleware('permission:property,update');
+    Route::delete('/inquiries/{inquiry}', [RealEstateController::class, 'destroyInquiry'])->name('real-estate.inquiries.destroy')->middleware('permission:property,delete');
+
+    // Image management
+    //    Route::post('/upload-image', [RealEstateController::class, 'uploadImage'])->name('real-estate.upload-image');
+    //    Route::post('/attach-images', [RealEstateController::class, 'attachImages'])->name('real-estate.attach-images');
+    //    Route::post('/reorder-images', [RealEstateController::class, 'reorderImages'])->name('real-estate.reorder-images');
+    //    Route::delete('/images/{image}', [RealEstateController::class, 'deleteImage'])->name('real-estate.images.delete');
+    //    Route::patch('/images/{image}/primary', [RealEstateController::class, 'setPrimaryImage'])->name('real-estate.images.set-primary');
 });
 
 Route::prefix('experiences')->name('admin.experiences.')->group(function () {

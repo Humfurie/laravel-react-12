@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, Search, Globe, Download, FileText, ExternalLink } from 'lucide-react';
+import { Download, ExternalLink, FileText, Globe, Loader2, Search } from 'lucide-react';
+import { useState } from 'react';
 
 interface SearchResult {
     title: string;
@@ -37,12 +37,7 @@ interface ProcessedImage {
 }
 
 interface WebScraperProps {
-    onContentGenerated: (data: {
-        title: string;
-        content: string;
-        excerpt: string;
-        featured_image?: string;
-    }) => void;
+    onContentGenerated: (data: { title: string; content: string; excerpt: string; featured_image?: string }) => void;
 }
 
 interface BlogData {
@@ -82,8 +77,8 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                 },
                 body: JSON.stringify({
                     topic: searchTopic,
-                    max_results: 10
-                })
+                    max_results: 10,
+                }),
             });
 
             const data = await response.json();
@@ -103,11 +98,7 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
     };
 
     const handleUrlToggle = (url: string) => {
-        setSelectedUrls(prev =>
-            prev.includes(url)
-                ? prev.filter(u => u !== url)
-                : [...prev, url]
-        );
+        setSelectedUrls((prev) => (prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url]));
     };
 
     const handleScrapeSelected = async () => {
@@ -130,8 +121,8 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                         url,
                         include_images: includeImages,
                         summarize: autoSummarize,
-                        summary_length: 300
-                    })
+                        summary_length: 300,
+                    }),
                 });
 
                 const data = await response.json();
@@ -165,8 +156,8 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                 body: JSON.stringify({
                     topic: searchTopic,
                     auto_search: true,
-                    include_images: includeImages
-                })
+                    include_images: includeImages,
+                }),
             });
 
             const data = await response.json();
@@ -206,7 +197,7 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
-                body: JSON.stringify({ images })
+                body: JSON.stringify({ images }),
             });
 
             const data = await response.json();
@@ -254,7 +245,7 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
-                body: JSON.stringify({ url })
+                body: JSON.stringify({ url }),
             });
 
             const data = await response.json();
@@ -290,12 +281,10 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
 
         // Combine all scraped content
         const combinedTitle = scrapedContent[0]?.title || searchTopic;
-        const combinedSummaries = scrapedContent
-            .map(content => content.summary || content.content.substring(0, 300))
-            .join('\n\n');
+        const combinedSummaries = scrapedContent.map((content) => content.summary || content.content.substring(0, 300)).join('\n\n');
 
         const fullContent = scrapedContent
-            .map(content => `<h3>${content.title}</h3><p>${content.summary || content.content.substring(0, 500)}...</p>`)
+            .map((content) => `<h3>${content.title}</h3><p>${content.summary || content.content.substring(0, 500)}...</p>`)
             .join('\n');
 
         const blogData: BlogData = {
@@ -316,7 +305,7 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
         <Card className="w-full">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <Globe className="w-5 h-5" />
+                    <Globe className="h-5 w-5" />
                     Web Content Scraper
                 </CardTitle>
             </CardHeader>
@@ -342,7 +331,7 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                                         onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                                     />
                                     <Button onClick={handleSearch} disabled={loading}>
-                                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                                         Search
                                     </Button>
                                 </div>
@@ -367,41 +356,30 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                                 </div>
                             </div>
 
-                            <Button
-                                onClick={handleQuickGenerate}
-                                disabled={loading || !searchTopic.trim()}
-                                className="w-full"
-                                variant="outline"
-                            >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileText className="w-4 h-4 mr-2" />}
+                            <Button onClick={handleQuickGenerate} disabled={loading || !searchTopic.trim()} className="w-full" variant="outline">
+                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileText className="mr-2 h-4 w-4" />}
                                 Quick Generate Blog Content
                             </Button>
                         </div>
                     </TabsContent>
 
                     <TabsContent value="results" className="space-y-4">
-                        <div className="flex justify-between items-center">
+                        <div className="flex items-center justify-between">
                             <h3 className="text-lg font-semibold">Search Results ({searchResults.length})</h3>
-                            <Button
-                                onClick={handleScrapeSelected}
-                                disabled={selectedUrls.length === 0 || loading}
-                            >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Download className="w-4 h-4 mr-2" />}
+                            <Button onClick={handleScrapeSelected} disabled={selectedUrls.length === 0 || loading}>
+                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
                                 Scrape Selected ({selectedUrls.length})
                             </Button>
                         </div>
 
-                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                        <div className="max-h-96 space-y-2 overflow-y-auto">
                             {searchResults.map((result, index) => (
-                                <div key={index} className="flex items-start space-x-3 p-3 border rounded">
-                                    <Checkbox
-                                        checked={selectedUrls.includes(result.url)}
-                                        onCheckedChange={() => handleUrlToggle(result.url)}
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="font-medium truncate">{result.title}</h4>
-                                        <div className="flex items-center space-x-2 mt-1">
-                                            <p className="text-sm text-gray-600 truncate">{result.url}</p>
+                                <div key={index} className="flex items-start space-x-3 rounded border p-3">
+                                    <Checkbox checked={selectedUrls.includes(result.url)} onCheckedChange={() => handleUrlToggle(result.url)} />
+                                    <div className="min-w-0 flex-1">
+                                        <h4 className="truncate font-medium">{result.title}</h4>
+                                        <div className="mt-1 flex items-center space-x-2">
+                                            <p className="truncate text-sm text-gray-600">{result.url}</p>
                                             <Badge variant="secondary" className="text-xs">
                                                 {result.source}
                                             </Badge>
@@ -415,14 +393,10 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                                             disabled={loading}
                                             title="Fill rich text editor with content"
                                         >
-                                            <FileText className="w-4 h-4" />
+                                            <FileText className="h-4 w-4" />
                                         </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => window.open(result.url, '_blank')}
-                                        >
-                                            <ExternalLink className="w-4 h-4" />
+                                        <Button size="sm" variant="ghost" onClick={() => window.open(result.url, '_blank')}>
+                                            <ExternalLink className="h-4 w-4" />
                                         </Button>
                                     </div>
                                 </div>
@@ -431,15 +405,15 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                     </TabsContent>
 
                     <TabsContent value="content" className="space-y-4">
-                        <div className="flex justify-between items-center">
+                        <div className="flex items-center justify-between">
                             <h3 className="text-lg font-semibold">Scraped Content ({scrapedContent.length})</h3>
                             <Button onClick={generateBlogFromContent} disabled={scrapedContent.length === 0}>
-                                <FileText className="w-4 h-4 mr-2" />
+                                <FileText className="mr-2 h-4 w-4" />
                                 Generate Blog Post
                             </Button>
                         </div>
 
-                        <div className="space-y-4 max-h-96 overflow-y-auto">
+                        <div className="max-h-96 space-y-4 overflow-y-auto">
                             {scrapedContent.map((content, index) => (
                                 <Card key={index}>
                                     <CardHeader className="pb-2">
@@ -450,39 +424,31 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                                         {content.summary && (
                                             <div className="mb-3">
                                                 <Label className="text-sm font-medium">Summary:</Label>
-                                                <p className="text-sm mt-1">{content.summary}</p>
+                                                <p className="mt-1 text-sm">{content.summary}</p>
                                             </div>
                                         )}
 
                                         {content.images && content.images.length > 0 && (
                                             <div>
                                                 <Label className="text-sm font-medium">Images ({content.images.length}):</Label>
-                                                <div className="flex gap-2 mt-2 overflow-x-auto">
+                                                <div className="mt-2 flex gap-2 overflow-x-auto">
                                                     {content.images.slice(0, 3).map((image, imgIndex) => (
                                                         <img
                                                             key={imgIndex}
                                                             src={image.url}
                                                             alt={image.alt}
-                                                            className="w-20 h-20 object-cover rounded border"
-                                                            onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                                                            className="h-20 w-20 rounded border object-cover"
+                                                            onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')}
                                                         />
                                                     ))}
                                                 </div>
-                                                <div className="flex gap-2 mt-2">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => handleDownloadImages(content.images!)}
-                                                    >
-                                                        <Download className="w-4 h-4 mr-2" />
+                                                <div className="mt-2 flex gap-2">
+                                                    <Button size="sm" variant="outline" onClick={() => handleDownloadImages(content.images!)}>
+                                                        <Download className="mr-2 h-4 w-4" />
                                                         Download Images
                                                     </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        onClick={() => handleScrapeForRichText(content.url)}
-                                                        disabled={loading}
-                                                    >
-                                                        <FileText className="w-4 h-4 mr-2" />
+                                                    <Button size="sm" onClick={() => handleScrapeForRichText(content.url)} disabled={loading}>
+                                                        <FileText className="mr-2 h-4 w-4" />
                                                         Fill Rich Text
                                                     </Button>
                                                 </div>
@@ -495,7 +461,7 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                     </TabsContent>
 
                     <TabsContent value="generate" className="space-y-4">
-                        <div className="text-center space-y-4">
+                        <div className="space-y-4 text-center">
                             <h3 className="text-lg font-semibold">Generate Blog Content</h3>
                             <p className="text-gray-600">
                                 Use the scraped content to automatically generate a blog post with title, content, and images.
@@ -504,27 +470,19 @@ export default function WebScraper({ onContentGenerated }: WebScraperProps) {
                             {processedImages.length > 0 && (
                                 <div>
                                     <Label className="text-sm font-medium">Processed Images ({processedImages.length}):</Label>
-                                    <div className="grid grid-cols-3 gap-2 mt-2">
+                                    <div className="mt-2 grid grid-cols-3 gap-2">
                                         {processedImages.map((image, index) => (
                                             <div key={index} className="text-center">
-                                                <img
-                                                    src={image.public_url}
-                                                    alt={image.alt}
-                                                    className="w-full h-20 object-cover rounded border"
-                                                />
-                                                <p className="text-xs text-gray-600 mt-1">{image.filename}</p>
+                                                <img src={image.public_url} alt={image.alt} className="h-20 w-full rounded border object-cover" />
+                                                <p className="mt-1 text-xs text-gray-600">{image.filename}</p>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             )}
 
-                            <Button
-                                onClick={generateBlogFromContent}
-                                disabled={scrapedContent.length === 0}
-                                className="w-full"
-                            >
-                                <FileText className="w-4 h-4 mr-2" />
+                            <Button onClick={generateBlogFromContent} disabled={scrapedContent.length === 0} className="w-full">
+                                <FileText className="mr-2 h-4 w-4" />
                                 Generate Blog Post from Scraped Content
                             </Button>
                         </div>

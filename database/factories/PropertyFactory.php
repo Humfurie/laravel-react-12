@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\RealEstateProject;
 use App\Models\Property;
+use App\Models\RealEstateProject;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Property>
+ * @extends Factory<Property>
  */
 class PropertyFactory extends Factory
 {
@@ -91,7 +91,6 @@ class PropertyFactory extends Factory
                 'Service Area', 'Maid\'s Room', 'Walk-in Closet', 'Study Room',
                 'Storage Room', 'Smart Home Ready'
             ], $this->faker->numberBetween(2, 5)),
-            'images' => null, // Will be handled by polymorphic relationship
             'floor_plan_url' => $this->faker->optional(0.3)->url(),
             'featured' => $this->faker->boolean(15), // 15% chance of being featured
             'view_count' => $this->faker->numberBetween(0, 500),
