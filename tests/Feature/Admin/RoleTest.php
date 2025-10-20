@@ -11,25 +11,37 @@ uses(RefreshDatabase::class);
 test('admin can get all role', function () {
     $roles = Role::factory()->count(5)->create();
 
+    // Create permission for role resource
+    $rolePermission = Permission::factory()->create([
+        'resource' => 'role',
+        'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
+    ]);
+
     $user = User::factory()->createOne();
 
-    $user->roles()->attach($roles->pluck('id')->first());
+    $firstRole = $roles->first();
+    $firstRole->permissions()->attach($rolePermission->id, [
+        'actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)
+    ]);
+
+    $user->roles()->attach($firstRole->id);
 
     $this->actingAs($user);
 
     $response = $this->get('/admin/roles');
 
+    $totalRoles = Role::count(); // Get actual count of roles
+
     $response->assertStatus(200)
         ->assertInertia(fn(AssertableInertia $page) => $page
             ->component('admin/role') // The React component name
-            ->has('roles', 5) // Assert we have 5 roles
+            ->has('roles', $totalRoles) // Assert we have the actual number of roles
             ->hasAll([
                 'roles.0.name',
                 'roles.0.slug',
                 'roles.0.permissions',
             ])
         );
-
 });
 
 /**
@@ -43,11 +55,11 @@ test('admin can create role', function () {
     ]);
 
     $permission = Permission::factory()->create([
-        'resource' => 'user',
+        'resource' => 'role',
         'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
     ]);
 
-    $role->permissions()->attach($permission->id, ['actions' => json_encode(['user.viewAny', 'user.view', 'user.create', 'user.update', 'user.delete', 'user.restore', 'user.forceDelete'], JSON_THROW_ON_ERROR)]);
+    $role->permissions()->attach($permission->id, ['actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)]);
 
     $user = User::factory()->createOne();
 
@@ -312,5 +324,3 @@ test('admin can force delete role', function () {
         'id' => $userRole->id
     ]);
 });
-
-

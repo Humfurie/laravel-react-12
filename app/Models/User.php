@@ -80,21 +80,21 @@ class User extends Authenticatable implements JWTSubject
 
         return $this->roles()->whereHas('permissions', function ($query) use ($resource, $action) {
             $query->where(function ($subQuery) use ($resource, $action) {
-                // Check for exact match
+                // Check for exact match in pivot table actions
                 $subQuery->where('permissions.resource', $resource)
-                    ->whereJsonContains('permissions.actions', $action);
+                    ->whereJsonContains('permission_role.actions', $action);
             })->orWhere(function ($subQuery) {
-                // Check for wildcard permissions
+                // Check for wildcard permissions in pivot table
                 $subQuery->where('permissions.resource', '*')
-                    ->whereJsonContains('permissions.actions', '*');
+                    ->whereJsonContains('permission_role.actions', '*');
             })->orWhere(function ($subQuery) use ($resource) {
-                // Check for resource wildcard (e.g., blog.*)
+                // Check for resource wildcard (e.g., blog.*) in pivot table
                 $subQuery->where('permissions.resource', $resource)
-                    ->whereJsonContains('permissions.actions', '*');
+                    ->whereJsonContains('permission_role.actions', '*');
             })->orWhere(function ($subQuery) use ($action) {
-                // Check for action wildcard (e.g., *.viewAny)
+                // Check for action wildcard (e.g., *.viewAny) in pivot table
                 $subQuery->where('permissions.resource', '*')
-                    ->whereJsonContains('permissions.actions', $action);
+                    ->whereJsonContains('permission_role.actions', $action);
             });
         })->exists();
     }
@@ -115,6 +115,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $resources = [
             'developer',
+            'project',
             'realestate-project',
             'property',
             'blog',

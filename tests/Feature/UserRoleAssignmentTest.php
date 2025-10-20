@@ -13,7 +13,9 @@ beforeEach(function () {
         ['actions' => ['viewAny', 'create', 'update', 'delete']]
     );
     $permission->update(['actions' => ['viewAny', 'create', 'update', 'delete']]);
-    $role->permissions()->attach($permission);
+    $role->permissions()->sync([
+        $permission->id => ['actions' => json_encode(['viewAny', 'create', 'update', 'delete'], JSON_THROW_ON_ERROR)]
+    ]);
     $this->adminUser->roles()->attach($role);
 
     // Create test roles using firstOrCreate to avoid unique constraint violations
