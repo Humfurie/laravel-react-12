@@ -1,5 +1,6 @@
-import { Camera, CloudUpload, Image as ImageIcon, Plus, Star, Upload, X } from 'lucide-react';
+import { Camera, CloudUpload, DollarSign, Image as ImageIcon, Plus, Star, Upload, X } from 'lucide-react';
 import { FormEvent, useRef, useState } from 'react';
+import { router, useForm } from '@inertiajs/react';
 
 interface Developer {
     id: number;
@@ -813,6 +814,553 @@ export function ProjectModal({ show, onClose, project, onSubmit, form, developer
                             className="rounded-lg bg-orange-500 px-4 py-2 text-white shadow-sm transition-colors hover:bg-orange-600 disabled:opacity-50"
                         >
                             {form.processing ? 'Saving...' : project ? 'Update' : 'Create'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+interface PropertyPricing {
+    id: number;
+    property_id: number;
+    reservation_fee?: number;
+    total_contract_price: number;
+    net_selling_price?: number;
+    currency: string;
+    downpayment_percentage?: number;
+    downpayment_amount?: number;
+    equity_terms_months?: number;
+    monthly_equity?: number;
+    balloon_payment?: number;
+    balloon_payment_month?: number;
+    bank_financing_amount?: number;
+    bank_financing_percentage?: number;
+    miscellaneous_fees_included: boolean;
+    transfer_fee_percentage?: number;
+    move_in_fee_percentage?: number;
+    association_dues_monthly?: number;
+    parking_slot_price?: number;
+    payment_scheme_name?: string;
+    payment_notes?: string;
+}
+
+interface PropertyPricingModalProps {
+    show: boolean;
+    onClose: () => void;
+    pricing: PropertyPricing | null;
+    propertyId: number;
+    onSuccess?: () => void;
+}
+
+export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuccess }: PropertyPricingModalProps) {
+    const { data, setData, post, put, processing, errors, reset } = useForm({
+        property_id: propertyId,
+        reservation_fee: pricing?.reservation_fee?.toString() || '',
+        total_contract_price: pricing?.total_contract_price?.toString() || '',
+        net_selling_price: pricing?.net_selling_price?.toString() || '',
+        currency: pricing?.currency || 'PHP',
+        downpayment_percentage: pricing?.downpayment_percentage?.toString() || '',
+        downpayment_amount: pricing?.downpayment_amount?.toString() || '',
+        equity_terms_months: pricing?.equity_terms_months?.toString() || '',
+        monthly_equity: pricing?.monthly_equity?.toString() || '',
+        balloon_payment: pricing?.balloon_payment?.toString() || '',
+        balloon_payment_month: pricing?.balloon_payment_month?.toString() || '',
+        bank_financing_amount: pricing?.bank_financing_amount?.toString() || '',
+        bank_financing_percentage: pricing?.bank_financing_percentage?.toString() || '',
+        miscellaneous_fees_included: pricing?.miscellaneous_fees_included || false,
+        transfer_fee_percentage: pricing?.transfer_fee_percentage?.toString() || '',
+        move_in_fee_percentage: pricing?.move_in_fee_percentage?.toString() || '',
+        association_dues_monthly: pricing?.association_dues_monthly?.toString() || '',
+        parking_slot_price: pricing?.parking_slot_price?.toString() || '',
+        payment_scheme_name: pricing?.payment_scheme_name || '',
+        payment_notes: pricing?.payment_notes || '',
+    });
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+
+        if (pricing) {
+            put(`/admin/real-estate/pricing/${pricing.id}`, {
+                onSuccess: () => {
+                    onClose();
+                    if (onSuccess) onSuccess();
+                },
+            });
+        } else {
+            post('/admin/real-estate/pricing', {
+                onSuccess: () => {
+                    reset();
+                    onClose();
+                    if (onSuccess) onSuccess();
+                },
+            });
+        }
+    };
+
+    if (!show) return null;
+
+    return (
+        <div className="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600">
+            <div className="relative top-10 mx-auto max-h-[90vh] w-11/12 overflow-y-auto rounded-xl border border-gray-200 bg-white p-6 shadow-xl md:w-3/4 lg:w-2/3">
+                <div className="mb-6 flex items-center justify-between">
+                    <h3 className="text-xl font-semibold text-gray-900">
+                        {pricing ? 'Edit Pricing Scheme' : 'Add Pricing Scheme'}
+                    </h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                        <X className="h-6 w-6" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {/* Basic Pricing */}
+                        <div className="lg:col-span-3">
+                            <h4 className="mb-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Basic Pricing</h4>
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Payment Scheme Name</label>
+                            <input
+                                type="text"
+                                value={data.payment_scheme_name}
+                                onChange={(e) => setData('payment_scheme_name', e.target.value)}
+                                placeholder="e.g., Cash Payment, Bank Financing"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                            {errors.payment_scheme_name && <div className="mt-1 text-sm text-red-600">{errors.payment_scheme_name}</div>}
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Total Contract Price *</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.total_contract_price}
+                                onChange={(e) => setData('total_contract_price', e.target.value)}
+                                required
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                            {errors.total_contract_price && <div className="mt-1 text-sm text-red-600">{errors.total_contract_price}</div>}
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Currency</label>
+                            <select
+                                value={data.currency}
+                                onChange={(e) => setData('currency', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            >
+                                <option value="PHP">PHP</option>
+                                <option value="USD">USD</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Net Selling Price</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.net_selling_price}
+                                onChange={(e) => setData('net_selling_price', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Reservation Fee</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.reservation_fee}
+                                onChange={(e) => setData('reservation_fee', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        {/* Downpayment */}
+                        <div className="lg:col-span-3">
+                            <h4 className="mb-4 mt-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Downpayment</h4>
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Downpayment %</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.downpayment_percentage}
+                                onChange={(e) => setData('downpayment_percentage', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Downpayment Amount</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.downpayment_amount}
+                                onChange={(e) => setData('downpayment_amount', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Equity Terms (Months)</label>
+                            <input
+                                type="number"
+                                value={data.equity_terms_months}
+                                onChange={(e) => setData('equity_terms_months', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Monthly Equity</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.monthly_equity}
+                                onChange={(e) => setData('monthly_equity', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        {/* Balloon Payment */}
+                        <div className="lg:col-span-3">
+                            <h4 className="mb-4 mt-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Balloon Payment</h4>
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Balloon Payment Amount</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.balloon_payment}
+                                onChange={(e) => setData('balloon_payment', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Balloon Payment Month</label>
+                            <input
+                                type="number"
+                                value={data.balloon_payment_month}
+                                onChange={(e) => setData('balloon_payment_month', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        {/* Bank Financing */}
+                        <div className="lg:col-span-3">
+                            <h4 className="mb-4 mt-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Bank Financing</h4>
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Bank Financing Amount</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.bank_financing_amount}
+                                onChange={(e) => setData('bank_financing_amount', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Bank Financing %</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.bank_financing_percentage}
+                                onChange={(e) => setData('bank_financing_percentage', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        {/* Additional Fees */}
+                        <div className="lg:col-span-3">
+                            <h4 className="mb-4 mt-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Additional Fees</h4>
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Transfer Fee %</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.transfer_fee_percentage}
+                                onChange={(e) => setData('transfer_fee_percentage', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Move-in Fee %</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.move_in_fee_percentage}
+                                onChange={(e) => setData('move_in_fee_percentage', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Association Dues (Monthly)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.association_dues_monthly}
+                                onChange={(e) => setData('association_dues_monthly', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Parking Slot Price</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.parking_slot_price}
+                                onChange={(e) => setData('parking_slot_price', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div className="lg:col-span-3">
+                            <label className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    checked={data.miscellaneous_fees_included}
+                                    onChange={(e) => setData('miscellaneous_fees_included', e.target.checked)}
+                                    className="mr-2 h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                                />
+                                <span className="text-sm font-medium text-gray-700">Miscellaneous Fees Included</span>
+                            </label>
+                        </div>
+
+                        <div className="lg:col-span-3">
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Payment Notes</label>
+                            <textarea
+                                value={data.payment_notes}
+                                onChange={(e) => setData('payment_notes', e.target.value)}
+                                rows={3}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-end space-x-3 border-t border-gray-200 pt-6">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="rounded-lg bg-gray-200 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-300"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="rounded-lg bg-orange-500 px-4 py-2 text-white shadow-sm transition-colors hover:bg-orange-600 disabled:opacity-50"
+                        >
+                            {processing ? 'Saving...' : pricing ? 'Update' : 'Create'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+interface FinancingOption {
+    id: number;
+    property_pricing_id: number;
+    bank_name: string;
+    loan_to_value_ratio?: number;
+    interest_rate?: number;
+    loan_term_years: number;
+    monthly_amortization?: number;
+    processing_fee?: number;
+    requirements?: string[];
+    is_active: boolean;
+}
+
+interface FinancingOptionModalProps {
+    show: boolean;
+    onClose: () => void;
+    financingOption: FinancingOption | null;
+    pricingId: number;
+    onSuccess?: () => void;
+}
+
+export function FinancingOptionModal({ show, onClose, financingOption, pricingId, onSuccess }: FinancingOptionModalProps) {
+    const { data, setData, post, put, processing, errors, reset } = useForm({
+        property_pricing_id: pricingId,
+        bank_name: financingOption?.bank_name || '',
+        loan_to_value_ratio: financingOption?.loan_to_value_ratio?.toString() || '',
+        interest_rate: financingOption?.interest_rate?.toString() || '',
+        loan_term_years: financingOption?.loan_term_years?.toString() || '',
+        monthly_amortization: financingOption?.monthly_amortization?.toString() || '',
+        processing_fee: financingOption?.processing_fee?.toString() || '',
+        requirements: financingOption?.requirements?.join('\n') || '',
+        is_active: financingOption?.is_active || true,
+    });
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+
+        // Convert requirements from textarea to array
+        const formData = {
+            ...data,
+            requirements: data.requirements.split('\n').filter(r => r.trim() !== ''),
+        };
+
+        if (financingOption) {
+            router.put(`/admin/real-estate/financing-options/${financingOption.id}`, formData, {
+                onSuccess: () => {
+                    onClose();
+                    if (onSuccess) onSuccess();
+                },
+            });
+        } else {
+            router.post('/admin/real-estate/financing-options', formData, {
+                onSuccess: () => {
+                    reset();
+                    onClose();
+                    if (onSuccess) onSuccess();
+                },
+            });
+        }
+    };
+
+    if (!show) return null;
+
+    return (
+        <div className="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600">
+            <div className="relative top-20 mx-auto w-11/12 rounded-xl border border-gray-200 bg-white p-6 shadow-xl md:w-3/4 lg:w-1/2">
+                <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-xl font-semibold text-gray-900">
+                        {financingOption ? 'Edit Financing Option' : 'Add Financing Option'}
+                    </h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                        <X className="h-6 w-6" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div className="md:col-span-2">
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Bank Name *</label>
+                            <input
+                                type="text"
+                                value={data.bank_name}
+                                onChange={(e) => setData('bank_name', e.target.value)}
+                                required
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                            {errors.bank_name && <div className="mt-1 text-sm text-red-600">{errors.bank_name}</div>}
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Loan-to-Value Ratio (%)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.loan_to_value_ratio}
+                                onChange={(e) => setData('loan_to_value_ratio', e.target.value)}
+                                placeholder="e.g., 80"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Interest Rate (%)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.interest_rate}
+                                onChange={(e) => setData('interest_rate', e.target.value)}
+                                placeholder="e.g., 5.5"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Loan Term (Years) *</label>
+                            <input
+                                type="number"
+                                value={data.loan_term_years}
+                                onChange={(e) => setData('loan_term_years', e.target.value)}
+                                required
+                                placeholder="e.g., 20"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                            {errors.loan_term_years && <div className="mt-1 text-sm text-red-600">{errors.loan_term_years}</div>}
+                        </div>
+
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Monthly Amortization</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.monthly_amortization}
+                                onChange={(e) => setData('monthly_amortization', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Processing Fee</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={data.processing_fee}
+                                onChange={(e) => setData('processing_fee', e.target.value)}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="mb-2 block text-sm font-medium text-gray-700">Requirements (one per line)</label>
+                            <textarea
+                                value={data.requirements}
+                                onChange={(e) => setData('requirements', e.target.value)}
+                                rows={4}
+                                placeholder="e.g.,&#10;Valid ID&#10;Proof of Income&#10;ITR for past 2 years"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                            <p className="mt-1 text-xs text-gray-500">Enter each requirement on a new line</p>
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    checked={data.is_active}
+                                    onChange={(e) => setData('is_active', e.target.checked)}
+                                    className="mr-2 h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                                />
+                                <span className="text-sm font-medium text-gray-700">Active</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-end space-x-3">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="rounded-lg bg-gray-200 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-300"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="rounded-lg bg-orange-500 px-4 py-2 text-white shadow-sm transition-colors hover:bg-orange-600 disabled:opacity-50"
+                        >
+                            {processing ? 'Saving...' : financingOption ? 'Update' : 'Create'}
                         </button>
                     </div>
                 </form>
