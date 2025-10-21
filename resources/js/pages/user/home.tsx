@@ -35,6 +35,27 @@ interface Blog {
 interface Props {
     primary: Blog[];
     latest: Blog[];
+    experiences: {
+        id: number;
+        title: string;
+        company: string;
+        description: string;
+        start_date: string;
+        end_date: string | null;
+        user_id: number;
+        sort_order: number;
+        created_at: string;
+        updated_at: string;
+        image?: {
+            id: number;
+            name: string;
+            path: string;
+            imageable_id: number;
+            imageable_type: string;
+            created_at: string;
+            updated_at: string;
+        };
+    }[];
 }
 
 const truncateText = (text: string, maxLength: number = 100) => {
@@ -78,7 +99,7 @@ function BlogCard({ blog }: { blog: Blog }) {
     );
 }
 
-export default function Home({ primary = [], latest = [] }: Props): JSX.Element {
+export default function Home({ primary = [], latest = [], experiences = [] }: Props): JSX.Element {
     const [isVisible, setIsVisible] = useState(true);
     const [activeItem, setActiveItem] = useState('home');
 
@@ -179,7 +200,26 @@ export default function Home({ primary = [], latest = [] }: Props): JSX.Element 
             <HomeAboutMe />
             {/*<HomeProjects />*/}
             <HomeExpertise />
-            <ExperienceSection />
+            <ExperienceSection
+                experiences={experiences.map((exp) => {
+                    const startDate = new Date(exp.start_date);
+                    const endDate = exp.end_date ? new Date(exp.end_date) : null;
+
+                    return {
+                        id: exp.id,
+                        company: exp.company,
+                        image_url: exp.image?.path || null,
+                        location: '',
+                        description: exp.description ? exp.description.split('\n').filter((line) => line.trim()) : [],
+                        position: exp.title,
+                        start_month: startDate.getMonth(),
+                        start_year: startDate.getFullYear(),
+                        end_month: endDate ? endDate.getMonth() : null,
+                        end_year: endDate ? endDate.getFullYear() : null,
+                        is_current_position: !exp.end_date,
+                    };
+                })}
+            />
             {/*<HomeCTA />*/}
 
             {/* Blog Section */}
