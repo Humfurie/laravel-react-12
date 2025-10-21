@@ -26,8 +26,8 @@ RUN apt-get update && apt-get install -y \
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
 
-# Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+# Install Node.js 20 LTS
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
 # Configure PHP for production
@@ -44,7 +44,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
     && chmod +x /usr/local/bin/composer
 
 # Copy application files
-COPY ../.. /var/www/html
+COPY . /var/www/html
 
 # Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interaction
