@@ -6,8 +6,8 @@ services:
       context: .
       dockerfile: docker/production/Dockerfile
     restart: unless-stopped
-    ports:
-      - "${APP_PORT:-80}:80"
+    # ports:
+    #   - "${APP_PORT:-80}:80"  # Disabled - using Traefik proxy
     volumes:
       # Mount specific directories and files for development
       - ./app:/var/www/html/app
@@ -52,12 +52,12 @@ services:
       - "traefik.http.routers.humfurie.entrypoints=websecure"
       - "traefik.http.routers.humfurie.tls=true"
       - "traefik.http.routers.humfurie.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.humfurie.middlewares=my-giam-traefik-plugin@file,my-souin@file"
+      # - "traefik.http.routers.humfurie.middlewares=my-giam-traefik-plugin@file,my-souin@file"
       - "traefik.http.routers.humfurie-www.rule=Host(`www.humfurie.org`)"
       - "traefik.http.routers.humfurie-www.entrypoints=websecure"
       - "traefik.http.routers.humfurie-www.tls=true"
       - "traefik.http.routers.humfurie-www.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.humfurie-www.middlewares=my-giam-traefik-plugin@file, my-souin@file"
+      # - "traefik.http.routers.humfurie-www.middlewares=my-giam-traefik-plugin@file, my-souin@file"
     depends_on:
       postgres:
         condition: service_healthy
@@ -68,8 +68,8 @@ services:
     image: postgres:17
     restart: unless-stopped
     user: postgres
-    ports:
-      - '${DB_PORT:-5432}:5432'
+    # ports:
+    #   - '${DB_PORT:-5432}:5432'  # Commented out for production security
     environment:
       POSTGRES_DB: '${DB_DATABASE}'
       POSTGRES_USER: '${DB_USERNAME}'

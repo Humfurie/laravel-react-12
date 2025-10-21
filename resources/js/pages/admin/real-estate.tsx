@@ -1,16 +1,8 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import AdminLayout from '@/layouts/AdminLayout';
 import { Head, router } from '@inertiajs/react';
 import { Building, Edit, Home, Mail, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { usePermissions } from '@/hooks/usePermissions';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Real Estate Management',
-        href: '/admin/real-estate',
-    },
-];
 
 interface Developer {
     id: number;
@@ -163,9 +155,9 @@ export default function RealEstateManagement({ developers, projects, properties,
     ];
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AdminLayout>
             <Head title="Real Estate Management" />
-            <div className="flex h-full flex-1 flex-col gap-6 bg-gray-50/50 p-6">
+            <div className="flex h-full flex-1 flex-col gap-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -646,6 +638,6 @@ export default function RealEstateManagement({ developers, projects, properties,
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }
