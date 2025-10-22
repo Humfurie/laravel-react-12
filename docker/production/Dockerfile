@@ -43,17 +43,29 @@ RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && chmod +x /usr/local/bin/composer
 
-# Copy application files
+# Copy composer files first for better Docker layer caching
+COPY composer.json composer.lock /var/www/html/
+
+# Install PHP dependencies (before copying all files for better caching)
+RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interaction --prefer-dist
+
+# Copy package files for Node dependencies
+COPY package.json package-lock.json /var/www/html/
+
+# Install Node.js dependencies
+RUN npm ci --only=production
+
+# Copy the rest of application files
 COPY . /var/www/html
 
-# Install PHP dependencies
-RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interaction
-
-# Install Node.js dependencies and build assets
-RUN npm install && npm run build
+# Build frontend assets
+RUN npm run build
 
 # Generate optimized class loader
 RUN composer dump-autoload --optimize --classmap-authoritative
+
+# Run post-autoload-dump scripts
+RUN php artisan package:discover --ansi || true
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
