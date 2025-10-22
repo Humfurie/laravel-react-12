@@ -52,14 +52,18 @@ RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interactio
 # Copy package files for Node dependencies
 COPY package.json package-lock.json /var/www/html/
 
-# Install Node.js dependencies
-RUN npm ci --only=production
+# Install Node.js dependencies (including dev dependencies for build)
+# Force install optional dependencies for Linux platform
+RUN npm ci --include=optional
 
 # Copy the rest of application files
 COPY . /var/www/html
 
 # Build frontend assets
 RUN npm run build
+
+# Remove dev dependencies after build
+RUN npm prune --production
 
 # Generate optimized class loader
 RUN composer dump-autoload --optimize --classmap-authoritative
