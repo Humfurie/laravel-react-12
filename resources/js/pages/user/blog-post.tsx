@@ -81,6 +81,40 @@ export default function BlogPost({ blog }: Props) {
                 <meta name="twitter:title" content={String(blog.meta_data?.meta_title || blog.title || '')} />
                 <meta name="twitter:description" content={String(blog.meta_data?.meta_description || blog.excerpt || '')} />
                 {blog.display_image && <meta name="twitter:image" content={String(blog.display_image)} />}
+
+                {/* Schema.org JSON-LD Structured Data */}
+                <script type="application/ld+json">
+                    {JSON.stringify({
+                        '@context': 'https://schema.org',
+                        '@type': 'BlogPosting',
+                        headline: blog.title,
+                        description: blog.meta_data?.meta_description || blog.excerpt || '',
+                        image: blog.display_image || '',
+                        datePublished: blog.published_at || blog.created_at,
+                        dateModified: blog.updated_at,
+                        author: {
+                            '@type': 'Person',
+                            name: 'Admin',
+                        },
+                        publisher: {
+                            '@type': 'Organization',
+                            name: typeof window !== 'undefined' ? document.title.split(' - ')[0] || 'Blog' : 'Blog',
+                            logo: {
+                                '@type': 'ImageObject',
+                                url: typeof window !== 'undefined' ? `${window.location.origin}/images/logo.png` : '',
+                            },
+                        },
+                        mainEntityOfPage: {
+                            '@type': 'WebPage',
+                            '@id': typeof window !== 'undefined' ? window.location.href : '',
+                        },
+                        keywords: blog.meta_data?.meta_keywords || '',
+                        articleBody: blog.content.replace(/<[^>]*>/g, '').substring(0, 500),
+                    })}
+                </script>
+
+                {/* Canonical URL */}
+                <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
             </Head>
 
             <div className="bg-muted-white min-h-screen">
