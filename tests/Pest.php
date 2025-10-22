@@ -56,24 +56,24 @@ function createAdminUser(string|array $resources = [], array $actions = ['viewAn
 {
     $resources = is_string($resources) ? [$resources] : $resources;
 
-    $role = Role::factory()
-        ->state([
-            'name' => 'Admin',
-            'slug' => 'admin'
-        ])
-        ->create();
+    // Use firstOrCreate to avoid duplicate role errors
+    $role = Role::firstOrCreate(
+        ['slug' => 'admin'],
+        ['name' => 'Admin']
+    );
 
     // Attach permissions for each resource
     foreach ($resources as $resource) {
-        $permission = Permission::factory()
-            ->state([
-                'resource' => $resource,
-            ])
-            ->create();
+        $permission = Permission::firstOrCreate(
+            ['resource' => $resource]
+        );
 
-        $role->permissions()->attach($permission->id, [
-            'actions' => json_encode($actions, JSON_THROW_ON_ERROR)
-        ]);
+        // Only attach if not already attached
+        if (!$role->permissions()->where('permission_id', $permission->id)->exists()) {
+            $role->permissions()->attach($permission->id, [
+                'actions' => json_encode($actions, JSON_THROW_ON_ERROR)
+            ]);
+        }
     }
 
     return User::factory()
@@ -94,23 +94,23 @@ function createUserWithRole(string $roleName, string $roleSlug, string|array $re
 {
     $resources = is_string($resources) ? [$resources] : $resources;
 
-    $role = Role::factory()
-        ->state([
-            'name' => $roleName,
-            'slug' => $roleSlug
-        ])
-        ->create();
+    // Use firstOrCreate to avoid duplicate role errors
+    $role = Role::firstOrCreate(
+        ['slug' => $roleSlug],
+        ['name' => $roleName]
+    );
 
     foreach ($resources as $resource) {
-        $permission = Permission::factory()
-            ->state([
-                'resource' => $resource,
-            ])
-            ->create();
+        $permission = Permission::firstOrCreate(
+            ['resource' => $resource]
+        );
 
-        $role->permissions()->attach($permission->id, [
-            'actions' => json_encode($actions, JSON_THROW_ON_ERROR)
-        ]);
+        // Only attach if not already attached
+        if (!$role->permissions()->where('permission_id', $permission->id)->exists()) {
+            $role->permissions()->attach($permission->id, [
+                'actions' => json_encode($actions, JSON_THROW_ON_ERROR)
+            ]);
+        }
     }
 
     return User::factory()
