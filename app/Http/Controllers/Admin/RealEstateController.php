@@ -548,6 +548,63 @@ class RealEstateController extends Controller
         ]);
     }
 
+    // Financing Options management
+    public function storeFinancingOption(Request $request)
+    {
+        $validated = $request->validate([
+            'property_pricing_id' => 'required|exists:property_pricing,id',
+            'bank_name' => 'required|string|max:100',
+            'loan_to_value_ratio' => 'nullable|numeric',
+            'interest_rate' => 'nullable|numeric',
+            'loan_term_years' => 'required|integer',
+            'monthly_amortization' => 'nullable|numeric',
+            'processing_fee' => 'nullable|numeric',
+            'requirements' => 'nullable|array',
+            'is_active' => 'boolean',
+        ]);
+
+        $financingOption = \App\Models\FinancingOption::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Financing option created successfully',
+            'financing_option' => $financingOption,
+        ]);
+    }
+
+    public function updateFinancingOption(Request $request, \App\Models\FinancingOption $financingOption)
+    {
+        $validated = $request->validate([
+            'property_pricing_id' => 'required|exists:property_pricing,id',
+            'bank_name' => 'required|string|max:100',
+            'loan_to_value_ratio' => 'nullable|numeric',
+            'interest_rate' => 'nullable|numeric',
+            'loan_term_years' => 'required|integer',
+            'monthly_amortization' => 'nullable|numeric',
+            'processing_fee' => 'nullable|numeric',
+            'requirements' => 'nullable|array',
+            'is_active' => 'boolean',
+        ]);
+
+        $financingOption->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Financing option updated successfully',
+            'financing_option' => $financingOption,
+        ]);
+    }
+
+    public function destroyFinancingOption(\App\Models\FinancingOption $financingOption)
+    {
+        $financingOption->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Financing option deleted successfully',
+        ]);
+    }
+
     // Inquiry management
     public function updateInquiryStatus(Request $request, Inquiry $inquiry)
     {

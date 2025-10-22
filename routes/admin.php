@@ -90,6 +90,11 @@ Route::prefix('real-estate')->group(function () {
     Route::put('/pricing/{pricing}', [RealEstateController::class, 'updatePricing'])->name('real-estate.pricing.update')->middleware('permission:property,update');
     Route::delete('/pricing/{pricing}', [RealEstateController::class, 'destroyPricing'])->name('real-estate.pricing.destroy')->middleware('permission:property,update');
 
+    // Financing Option routes (requires property update permission)
+    Route::post('/financing-options', [RealEstateController::class, 'storeFinancingOption'])->name('real-estate.financing-options.store')->middleware('permission:property,update');
+    Route::put('/financing-options/{financingOption}', [RealEstateController::class, 'updateFinancingOption'])->name('real-estate.financing-options.update')->middleware('permission:property,update');
+    Route::delete('/financing-options/{financingOption}', [RealEstateController::class, 'destroyFinancingOption'])->name('real-estate.financing-options.destroy')->middleware('permission:property,update');
+
     // Inquiry routes (requires property viewAny permission)
     Route::put('/inquiries/{inquiry}/status', [RealEstateController::class, 'updateInquiryStatus'])->name('real-estate.inquiries.status')->middleware('permission:property,update');
     Route::delete('/inquiries/{inquiry}', [RealEstateController::class, 'destroyInquiry'])->name('real-estate.inquiries.destroy')->middleware('permission:property,delete');
