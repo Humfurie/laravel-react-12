@@ -14,7 +14,7 @@ beforeEach(function () {
 it('sends email notification when inquiry is created', function () {
     Mail::fake();
 
-    $this->postJson("/api/v1/properties/{$this->property->id}/inquiries", [
+    $this->postJson("/api/v1/properties/{$this->property->slug}/inquiries", [
         'customer_name' => 'John Doe',
         'customer_email' => 'john@example.com',
         'customer_phone' => '1234567890',
@@ -31,7 +31,7 @@ it('sends email notification when inquiry is created', function () {
 it('creates inquiry with correct data', function () {
     Mail::fake();
 
-    $response = $this->postJson("/api/v1/properties/{$this->property->id}/inquiries", [
+    $response = $this->postJson("/api/v1/properties/{$this->property->slug}/inquiries", [
         'customer_name' => 'Jane Smith',
         'customer_email' => 'jane@example.com',
         'customer_phone' => '0987654321',
@@ -52,7 +52,7 @@ it('creates inquiry with correct data', function () {
 });
 
 it('validates inquiry data', function () {
-    $this->postJson("/api/v1/properties/{$this->property->id}/inquiries", [
+    $this->postJson("/api/v1/properties/{$this->property->slug}/inquiries", [
         'customer_name' => '',
         'customer_email' => 'invalid-email',
         'customer_phone' => '',
