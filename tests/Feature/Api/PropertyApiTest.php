@@ -15,7 +15,7 @@ beforeEach(function () {
     // Create admin user with property permissions
     $this->user = createAdminUser('property');
 
-    $this->actingAs($this->user);
+    $this->actingAs($this->user, 'api');
 });
 
 describe('Property CRUD Operations', function () {

@@ -9,10 +9,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    // Create roles
-    $this->adminRole = Role::factory()->create(['name' => 'Admin', 'slug' => 'admin']);
-    $this->editorRole = Role::factory()->create(['name' => 'Editor', 'slug' => 'editor']);
-    $this->viewerRole = Role::factory()->create(['name' => 'Viewer', 'slug' => 'viewer']);
+    // Create roles using firstOrCreate to avoid duplicates
+    $this->adminRole = Role::firstOrCreate(['slug' => 'admin'], ['name' => 'Admin']);
+    $this->editorRole = Role::firstOrCreate(['slug' => 'editor'], ['name' => 'Editor']);
+    $this->viewerRole = Role::firstOrCreate(['slug' => 'viewer'], ['name' => 'Viewer']);
 
     // Create users
     $this->admin = User::factory()->create(); // First user will be admin
@@ -56,15 +56,15 @@ test('admin user can access all resources', function () {
 
 test('user without viewAny permission cannot access resource index', function () {
     // Create a role with no developer permissions
-    $noDevPermRole = Role::factory()->create(['name' => 'No Dev Perm', 'slug' => 'no-dev-perm']);
+    $noDevPermRole = Role::firstOrCreate(['slug' => 'no-dev-perm'], ['name' => 'No Dev Perm']);
     $user = User::factory()->create();
     $user->roles()->attach($noDevPermRole);
 
     // Give permission for blog but not developer
-    $blogPermission = Permission::factory()->create([
-        'resource' => 'blog',
-        'actions' => ['viewAny', 'view'],
-    ]);
+    $blogPermission = Permission::firstOrCreate(
+        ['resource' => 'blog'],
+        ['actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']]
+    );
     $noDevPermRole->permissions()->attach($blogPermission->id, [
         'actions' => json_encode(['viewAny', 'view'], JSON_THROW_ON_ERROR)
     ]);
