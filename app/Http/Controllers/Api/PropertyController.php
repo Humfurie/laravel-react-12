@@ -11,6 +11,8 @@ use App\Http\Resources\ImageResource;
 use App\Http\Resources\PropertyResource;
 use App\Models\Image;
 use App\Models\Inquiry;
+use App\Mail\NewInquiryNotification;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Property;
 use App\Services\ImageService;
 use App\Services\PropertyService;
@@ -352,6 +354,12 @@ class PropertyController extends Controller
             $validated,
             ['status' => Inquiry::STATUS_NEW]
         ));
+
+        // Send email notification to admin
+        $adminEmail = config('mail.admin_email', config('mail.from.address'));
+        if ($adminEmail) {
+            Mail::to($adminEmail)->send(new NewInquiryNotification($inquiry->load('property')));
+        }
 
         return response()->json($inquiry, 201);
     }
