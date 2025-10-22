@@ -56,6 +56,30 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
+        {{-- Google Consent Mode v2 - Must load BEFORE any Google services --}}
+        <script>
+            // Default consent state (denied until user chooses)
+            window.dataLayer = window.dataLayer || [];
+
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+
+            gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'denied',
+                'functionality_storage': 'granted',
+                'personalization_storage': 'granted',
+                'security_storage': 'granted',
+                'wait_for_update': 500
+            });
+
+            gtag('set', 'ads_data_redaction', true);
+            gtag('set', 'url_passthrough', true);
+        </script>
+
         @routes
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])

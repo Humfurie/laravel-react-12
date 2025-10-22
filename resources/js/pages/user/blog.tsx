@@ -1,5 +1,5 @@
 import Footer from '@/components/global/Footer';
-import { Head, router, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -204,6 +204,58 @@ export default function BlogIndex({ blogs }: Props) {
                     content="Browse through all our articles, tutorials, and insights. Discover the latest trends and best practices in technology and development."
                 />
                 <meta name="twitter:image" content="/images/og-default.jpg" />
+
+                {/* Schema.org JSON-LD Structured Data */}
+                <script type="application/ld+json">
+                    {JSON.stringify({
+                        '@context': 'https://schema.org',
+                        '@type': 'CollectionPage',
+                        name: 'Blog - All Posts',
+                        description:
+                            'Browse through all our articles, tutorials, and insights. Discover the latest trends and best practices in technology and development.',
+                        url: typeof window !== 'undefined' ? window.location.href : '',
+                        mainEntity: {
+                            '@type': 'ItemList',
+                            itemListElement: blogs.data.map((blog, index) => ({
+                                '@type': 'ListItem',
+                                position: index + 1,
+                                item: {
+                                    '@type': 'BlogPosting',
+                                    '@id': typeof window !== 'undefined' ? `${window.location.origin}/blog/${blog.slug}` : '',
+                                    headline: blog.title,
+                                    description: blog.excerpt || '',
+                                    image: blog.display_image || '',
+                                    datePublished: blog.published_at || blog.created_at,
+                                    dateModified: blog.updated_at,
+                                    author: {
+                                        '@type': 'Person',
+                                        name: 'Admin',
+                                    },
+                                },
+                            })),
+                        },
+                        breadcrumb: {
+                            '@type': 'BreadcrumbList',
+                            itemListElement: [
+                                {
+                                    '@type': 'ListItem',
+                                    position: 1,
+                                    name: 'Home',
+                                    item: typeof window !== 'undefined' ? window.location.origin : '',
+                                },
+                                {
+                                    '@type': 'ListItem',
+                                    position: 2,
+                                    name: 'Blog',
+                                    item: typeof window !== 'undefined' ? window.location.href : '',
+                                },
+                            ],
+                        },
+                    })}
+                </script>
+
+                {/* Canonical URL */}
+                <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href.split('?')[0] : ''} />
             </Head>
 
             <div className="bg-muted-white min-h-screen">
