@@ -39,7 +39,7 @@ interface Props {
         id: number;
         title: string;
         company: string;
-        description: string;
+        description: string[];
         start_date: string;
         end_date: string | null;
         user_id: number;
@@ -210,7 +210,7 @@ export default function Home({ primary = [], latest = [], experiences = [] }: Pr
                         company: exp.company,
                         image_url: exp.image?.path || null,
                         location: '',
-                        description: exp.description ? exp.description.split('\n').filter((line) => line.trim()) : [],
+                        description: Array.isArray(exp.description) ? exp.description : [],
                         position: exp.title,
                         start_month: startDate.getMonth(),
                         start_year: startDate.getFullYear(),

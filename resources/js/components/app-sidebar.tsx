@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { Link, usePage } from '@inertiajs/react';
 import React, { useMemo } from 'react';
 import type { Permissions } from '@/types';
-import { BookOpen, Briefcase, FileText, LayoutGrid, Building, Users, Shield } from 'lucide-react';
+import { BookOpen, Briefcase, Building, FileText, LayoutGrid, Shield, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 interface NavItem {
@@ -38,6 +38,7 @@ const allNavItems: NavItem[] = [
         title: 'Experience Management',
         href: '/admin/experiences',
         icon: Briefcase,
+        requiredPermission: 'experience',
     },
     {
         title: 'User Management',
@@ -84,9 +85,7 @@ export function AppSidebar() {
 
             // Check multiple permissions (OR logic - show if user has ANY of them)
             if (item.requiredPermissions) {
-                return item.requiredPermissions.some(
-                    (permission) => auth.permissions[permission]?.viewAny ?? false
-                );
+                return item.requiredPermissions.some((permission) => auth.permissions[permission]?.viewAny ?? false);
             }
 
             return false;
