@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\User\BlogController;
 use App\Models\Experience;
 use Illuminate\Support\Facades\Gate;
@@ -9,7 +10,7 @@ use Inertia\Inertia;
 
 // Home page - Profile and Portfolio
 Route::get('/', function () {
-    $blogController = new BlogController();
+    $blogController = new BlogController;
     $blogs = $blogController->getPrimaryAndLatest();
 
     $experiences = Experience::with('image')
@@ -20,6 +21,10 @@ Route::get('/', function () {
         'experiences' => $experiences,
     ]));
 })->name('home');
+
+// Sitemap routes
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemap-blogs.xml', [SitemapController::class, 'blogs'])->name('sitemap.blogs');
 
 // Blog listing page
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
@@ -38,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Gate::authorize('viewAny', Experience::class);
 
         $experiences = Experience::with('image')->ordered()->get();
+
         return Inertia::render('debug-experiences', [
             'experiences' => $experiences,
         ]);
