@@ -46,8 +46,8 @@ README.md
 docker-compose.yml
 docker-compose.*.yml
 Dockerfile
-.docker
 .dockerignore
+# Note: .docker directory is needed for startup scripts
 
 # CI/CD
 .github
