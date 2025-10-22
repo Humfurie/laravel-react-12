@@ -18,7 +18,7 @@ class PermissionFactory extends Factory
     public function definition(): array
     {
         return [
-            'resource' => fake()->domainWord,
+            'resource' => fake()->unique()->uuid(),
             'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'],
         ];
     }
