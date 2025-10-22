@@ -1,0 +1,59 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies (will be installed fresh in container)
+/vendor
+/node_modules
+
+# Build artifacts
+/public/hot
+/public/storage
+/public/build
+
+# Storage
+/storage/*.key
+/storage/logs
+/storage/framework/cache
+/storage/framework/sessions
+/storage/framework/views
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.phpunit.result.cache
+coverage
+.phpunit.cache
+
+# Documentation
+README.md
+*.md
+!CLAUDE.md
+
+# Docker
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile
+.docker
+.dockerignore
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Miscellaneous
+npm-debug.log
+yarn-error.log
+.editorconfig
