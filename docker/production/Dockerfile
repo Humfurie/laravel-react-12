@@ -77,10 +77,9 @@ RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions sto
     && chown -R www-data:www-data storage \
     && chmod -R 775 storage
 
-# Copy and make startup script executable
-COPY .docker/startup.prod.sh /usr/local/bin/startup.sh
-RUN chmod +x /usr/local/bin/startup.sh
+# Make startup script executable (already copied with COPY . above)
+RUN chmod +x /var/www/html/.docker/startup.prod.sh
 
 EXPOSE 80
 
-CMD ["/usr/local/bin/startup.sh"]
+CMD ["/var/www/html/.docker/startup.prod.sh"]
