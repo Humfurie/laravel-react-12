@@ -1,4 +1,4 @@
-import { Camera, CloudUpload, DollarSign, Image as ImageIcon, Plus, Star, Upload, X } from 'lucide-react';
+import { Camera, CloudUpload, Image as ImageIcon, Plus, Star, Upload, X } from 'lucide-react';
 import { FormEvent, useRef, useState } from 'react';
 import { router, useForm } from '@inertiajs/react';
 
@@ -1196,7 +1196,7 @@ interface FinancingOptionModalProps {
 }
 
 export function FinancingOptionModal({ show, onClose, financingOption, pricingId, onSuccess }: FinancingOptionModalProps) {
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, processing, errors, reset } = useForm({
         property_pricing_id: pricingId,
         bank_name: financingOption?.bank_name || '',
         loan_to_value_ratio: financingOption?.loan_to_value_ratio?.toString() || '',

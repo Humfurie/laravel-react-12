@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import { Bed, Bath, Maximize, MapPin, Building2, Calendar, Mail, Phone, User, MessageSquare, Clock } from 'lucide-react';
+import { Bed, Bath, Maximize, MapPin, Building2, Mail, Phone, User, MessageSquare, Clock } from 'lucide-react';
 import { FormEvent } from 'react';
 
 interface Property {

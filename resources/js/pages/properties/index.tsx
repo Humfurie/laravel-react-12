@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Building2, Bed, Bath, Maximize, MapPin, Search, SlidersHorizontal } from 'lucide-react';
+import { Bed, Bath, Maximize, MapPin, Search, SlidersHorizontal } from 'lucide-react';
 import { useState } from 'react';
 
 interface Property {
