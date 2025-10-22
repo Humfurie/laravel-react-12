@@ -3,6 +3,7 @@
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\User\BlogController;
 use App\Models\Experience;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -27,16 +28,16 @@ Route::get('/blog/{blog}', [BlogController::class, 'show'])->name('blog.show');
 // Public API for experiences
 Route::get('/api/experiences', [ExperienceController::class, 'public'])->name('experiences.public');
 
-// Debug route to check experience data
-Route::get('/debug-experiences', function () {
-    $experiences = Experience::with('image')->ordered()->get();
-    return Inertia::render('debug-experiences', [
-        'experiences' => $experiences,
-    ]);
-});
-
-
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Debug route to check experience data
+    Route::get('/debug-experiences', function () {
+        Gate::authorize('viewAny', Experience::class);
+
+        $experiences = Experience::with('image')->ordered()->get();
+        return Inertia::render('debug-experiences', [
+            'experiences' => $experiences,
+        ]);
+    });
     Route::get('dashboard', function () {
         return Inertia::render('admin/dashboard');
     })->name('dashboard');

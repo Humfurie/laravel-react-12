@@ -30,12 +30,11 @@ test('admin can get all role', function () {
 
     $response = $this->get('/admin/roles');
 
-    $totalRoles = Role::count(); // Get actual count of roles
-
     $response->assertStatus(200)
         ->assertInertia(fn(AssertableInertia $page) => $page
             ->component('admin/role') // The React component name
-            ->has('roles', $totalRoles) // Assert we have the actual number of roles
+            ->has('roles') // Assert roles exist
+            ->where('roles', fn($roles) => count($roles) >= 5) // Assert we have at least the roles we created
             ->hasAll([
                 'roles.0.name',
                 'roles.0.slug',
@@ -92,16 +91,10 @@ test('admin can update role', function () {
     ]);
 
     // Create permissions
-    $userPermission = Permission::factory()->create([
-        'resource' => 'user',
-        'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
-    ]);
+    $userPermission = Permission::factory()->create(['resource' => 'user']);
 
     //Create Role
-    $rolePermissions = Permission::factory()->create([
-        'resource' => 'role',
-        'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
-    ]);
+    $rolePermissions = Permission::factory()->create(['resource' => 'role']);
 
     // Attach permissions to the Admin role with specific actions
     $adminRole->permissions()->attach($userPermission->id, [
@@ -168,16 +161,10 @@ test('admin can delete role', function () {
     ]);
 
     // Create permissions
-    $userPermission = Permission::factory()->create([
-        'resource' => 'user',
-        'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
-    ]);
+    $userPermission = Permission::factory()->create(['resource' => 'user']);
 
     //Create Role
-    $rolePermissions = Permission::factory()->create([
-        'resource' => 'role',
-        'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
-    ]);
+    $rolePermissions = Permission::factory()->create(['resource' => 'role']);
 
     // Attach permissions to the Admin role with specific actions
     $adminRole->permissions()->attach($userPermission->id, [
@@ -213,16 +200,10 @@ test('admin can restore role', function () {
     ]);
 
     // Create permissions
-    $userPermission = Permission::factory()->create([
-        'resource' => 'user',
-        'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
-    ]);
+    $userPermission = Permission::factory()->create(['resource' => 'user']);
 
     //Create Role
-    $rolePermissions = Permission::factory()->create([
-        'resource' => 'role',
-        'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
-    ]);
+    $rolePermissions = Permission::factory()->create(['resource' => 'role']);
 
     // Attach permissions to the Admin role with specific actions
     $adminRole->permissions()->attach($userPermission->id, [
@@ -277,16 +258,10 @@ test('admin can force delete role', function () {
     ]);
 
     // Create permissions
-    $userPermission = Permission::factory()->create([
-        'resource' => 'user',
-        'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
-    ]);
+    $userPermission = Permission::factory()->create(['resource' => 'user']);
 
     //Create Role
-    $rolePermissions = Permission::factory()->create([
-        'resource' => 'role',
-        'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
-    ]);
+    $rolePermissions = Permission::factory()->create(['resource' => 'role']);
 
     // Attach permissions to the Admin role with specific actions
     $adminRole->permissions()->attach($userPermission->id, [

@@ -45,16 +45,13 @@ test('admin can create permissions', function () {
             ->state([
                 'name' => 'Admin',
                 'slug' => 'admin'
-            ])->hasAttached(Permission::factory()
-                ->state([
-                    'resource' => 'permission',
-                ]), ['actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)], 'permissions'))
+            ])->hasAttached(Permission::factory()->state(['resource' => 'permission']), ['actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)], 'permissions'))
         ->create();
 
     $this->actingAs($user);
 
     $inputPermission = [
-        'resource' => 'user',
+        'resource' => fake()->unique()->word(),
         'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'],
     ];
 
@@ -80,21 +77,16 @@ test('admin can update permissions', function () {
             ->state([
                 'name' => 'Admin',
                 'slug' => 'admin'
-            ])->hasAttached(Permission::factory()
-                ->state([
-                    'resource' => 'permission',
-                ]), ['actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)], 'permissions'))
+            ])->hasAttached(Permission::factory()->state(['resource' => 'permission']), ['actions' => json_encode(['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete'], JSON_THROW_ON_ERROR)], 'permissions'))
         ->create();
 
     //Create Permission
-    $permission = Permission::factory()->create([
-        'resource' => 'user',
-    ]);
+    $permission = Permission::factory()->create();
 
     $this->actingAs($user);
 
     $updatedData = [
-        'resource' => 'manager',
+        'resource' => fake()->unique()->word(),
         'actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']
     ];
 
