@@ -34,7 +34,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Authenticated write operations - standard rate limit (30 requests per minute)
-    Route::middleware(['auth:sanctum', 'throttle:30,1'])->group(function () {
+    Route::middleware(['auth:api', 'throttle:30,1'])->group(function () {
         // Property resource endpoints (create, update, delete)
         Route::post('properties', [PropertyController::class, 'store'])->name('properties.store');
         Route::put('properties/{property}', [PropertyController::class, 'update'])->name('properties.update');
