@@ -65,7 +65,8 @@ function createAdminUser(string|array $resources = [], array $actions = ['viewAn
     // Attach permissions for each resource
     foreach ($resources as $resource) {
         $permission = Permission::firstOrCreate(
-            ['resource' => $resource]
+            ['resource' => $resource],
+            ['actions' => $actions] // Provide default actions for the permission
         );
 
         // Only attach if not already attached
@@ -102,7 +103,8 @@ function createUserWithRole(string $roleName, string $roleSlug, string|array $re
 
     foreach ($resources as $resource) {
         $permission = Permission::firstOrCreate(
-            ['resource' => $resource]
+            ['resource' => $resource],
+            ['actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']] // All possible actions
         );
 
         // Only attach if not already attached
