@@ -6,7 +6,7 @@ use App\Models\RealEstateProject;
 use App\Models\User;
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    $this->user = createAdminUser('property');
     $this->actingAs($this->user);
 
     $this->project = RealEstateProject::factory()->create();
