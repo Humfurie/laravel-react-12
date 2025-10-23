@@ -25,8 +25,14 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Redis extension
-RUN pecl install redis && docker-php-ext-enable redis
+# Install Redis extension with retry and cleanup
+RUN pecl channel-update pecl.php.net \
+    && rm -rf /tmp/pear \
+    && mkdir -p /tmp/pear/cache \
+    && (pecl install redis || (rm -rf /tmp/pear && pecl install redis)) \
+    && docker-php-ext-enable redis \
+    && php -m | grep redis \
+    && rm -rf /tmp/pear
 
 # Install Node.js 20 LTS with retry
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
