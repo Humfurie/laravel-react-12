@@ -3,132 +3,81 @@ FROM php:8.4-fpm
 # Set working directory
 WORKDIR /var/www/html
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    wget \
+# Install only essential system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libonig-dev \
-    libxml2-dev \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
     libzip-dev \
     libpq-dev \
-    zip \
     unzip \
     supervisor \
     nginx \
-    ca-certificates \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd zip opcache \
+    curl \
+    && docker-php-ext-install -j$(nproc) pdo_pgsql mbstring exif pcntl bcmath gd zip opcache \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install Redis extension with retry and cleanup
+# Install Redis extension (lightweight)
 RUN pecl channel-update pecl.php.net \
-    && rm -rf /tmp/pear \
-    && mkdir -p /tmp/pear/cache \
-    && (pecl install redis || (rm -rf /tmp/pear && pecl install redis)) \
+    && pecl install --onlyreqdeps redis \
     && docker-php-ext-enable redis \
-    && php -m | grep redis \
     && rm -rf /tmp/pear
 
-# Install Node.js 20 LTS with retry
+# Install Node.js 20 LTS (minimal)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get update \
-    && apt-get install -y nodejs \
+    && apt-get install -y --no-install-recommends nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure PHP for production with aggressive OPcache
-RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.enable_cli=0" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.memory_consumption=256" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.interned_strings_buffer=16" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.max_accelerated_files=10000" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.revalidate_freq=0" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.validate_timestamps=0" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.fast_shutdown=1" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "realpath_cache_size=4096K" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "realpath_cache_ttl=600" >> /usr/local/etc/php/conf.d/opcache.ini
+# Configure PHP OPcache for production
+COPY <<EOF /usr/local/etc/php/conf.d/opcache.ini
+opcache.enable=1
+opcache.enable_cli=0
+opcache.memory_consumption=128
+opcache.interned_strings_buffer=8
+opcache.max_accelerated_files=10000
+opcache.revalidate_freq=0
+opcache.validate_timestamps=0
+opcache.fast_shutdown=1
+realpath_cache_size=4096K
+realpath_cache_ttl=600
+EOF
 
-# Install Composer with retry logic
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    || (sleep 5 && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer) \
-    && chmod +x /usr/local/bin/composer
+# Install Composer (2.x latest)
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
-# Configure Composer for better network handling
-RUN composer config -g repos.packagist composer https://packagist.org \
-    && composer config -g process-timeout 600
-
-# Copy composer files first for better Docker layer caching
-COPY composer.json composer.lock /var/www/html/
-
-# Install PHP dependencies with better error handling
-RUN composer install \
-    --optimize-autoloader \
-    --no-dev \
-    --no-scripts \
-    --no-interaction \
-    --prefer-dist \
-    --verbose \
-    || composer install \
-        --optimize-autoloader \
-        --no-dev \
-        --no-scripts \
-        --no-interaction \
-        --prefer-dist \
-        --verbose
-
-# Copy package files for Node dependencies
-COPY package.json package-lock.json /var/www/html/
-
-# Configure npm for better reliability
-RUN npm config set fetch-retry-mintimeout 20000 \
+# Configure Composer and npm for faster downloads
+RUN composer config -g process-timeout 300 \
+    && npm config set fetch-retry-mintimeout 20000 \
     && npm config set fetch-retry-maxtimeout 120000 \
-    && npm config set fetch-retries 5
+    && npm config set fetch-retries 3
 
-# Install Node.js dependencies with retry logic
-RUN npm ci --include=optional --verbose \
-    || npm ci --include=optional --verbose
+# Copy dependency files
+COPY composer.json composer.lock package.json package-lock.json ./
 
-# Copy the rest of application files
-COPY . /var/www/html
+# Install dependencies (parallel where possible)
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction \
+    && npm ci --include=optional --omit=dev
 
-# Build frontend assets (including SSR bundle)
-RUN npm run build:ssr
+# Copy application files
+COPY . .
 
-# Verify SSR bundle was created
-RUN ls -la /var/www/html/bootstrap/ssr/ && \
-    test -f /var/www/html/bootstrap/ssr/ssr.mjs || (echo "SSR bundle not found!" && exit 1)
+# Build assets
+RUN npm run build:ssr \
+    && npm prune --production
 
-# Remove dev dependencies after build
-RUN npm prune --production
+# Finalize Composer autoload
+RUN composer dump-autoload --optimize --classmap-authoritative \
+    && php artisan package:discover --ansi || true
 
-# Generate optimized class loader
-RUN composer dump-autoload --optimize --classmap-authoritative
+# Create required directories
+RUN mkdir -p storage/{logs,framework/{cache,sessions,views},app/public} bootstrap/cache
 
-# Run post-autoload-dump scripts
-RUN php artisan package:discover --ansi || true
-
-# Create storage directories first (before setting permissions)
-RUN mkdir -p storage/logs \
-    storage/framework/cache \
-    storage/framework/sessions \
-    storage/framework/views \
-    storage/app/public \
-    bootstrap/cache
-
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache \
-    && chmod -R 775 storage
-
-# Make startup script executable
-RUN chmod +x /var/www/html/.docker/startup.prod.sh
+# Set permissions
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache \
+    && chmod +x .docker/startup.prod.sh
 
 EXPOSE 80
 
-CMD ["/var/www/html/.docker/startup.prod.sh"]
+CMD [".docker/startup.prod.sh"]
