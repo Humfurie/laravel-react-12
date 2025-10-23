@@ -3,35 +3,15 @@ services:
     build:
       context: .
       dockerfile: docker/production/Dockerfile
-      args:
-        BUILDKIT_INLINE_CACHE: 1
+      cache_from:
+        - ghcr.io/yourusername/yourapp:latest  # Optional: use registry cache
+    image: yourapp:latest
     restart: unless-stopped
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
-    # ports:
-    #   - "${APP_PORT:-80}:80"  # Disabled - using Traefik proxy
+    # Production: No volume mounts - use built image only
     volumes:
-      # Mount specific directories and files for development
-      - ./app:/var/www/html/app
-      - ./config:/var/www/html/config
-      - ./database:/var/www/html/database
-      - ./resources:/var/www/html/resources
-      - ./routes:/var/www/html/routes
-      - ./bootstrap:/var/www/html/bootstrap
-      - ./.env:/var/www/html/.env
-      - ./composer.json:/var/www/html/composer.json
-      - ./composer.lock:/var/www/html/composer.lock
-      - ./package.json:/var/www/html/package.json
-      - ./package-lock.json:/var/www/html/package-lock.json
-      # Keep these from the built image
-      - /var/www/html/vendor  # Use built vendor
-      - /var/www/html/node_modules  # Use built node_modules
-      - /var/www/html/public/build  # Use built assets
-      # Storage and config
       - laravel-storage:/var/www/html/storage
-      - ./.docker/nginx.prod.conf:/etc/nginx/sites-available/default
-      - ./.docker/supervisord.prod.conf:/etc/supervisor/conf.d/supervisord.conf
+      - ./.docker/nginx.prod.conf:/etc/nginx/sites-available/default:ro
+      - ./.docker/supervisord.prod.conf:/etc/supervisor/conf.d/supervisord.conf:ro
     env_file:
       - .env.production
     environment:
@@ -55,41 +35,54 @@ services:
       - "traefik.http.routers.humfurie.entrypoints=websecure"
       - "traefik.http.routers.humfurie.tls=true"
       - "traefik.http.routers.humfurie.tls.certresolver=letsencrypt"
-      # - "traefik.http.routers.humfurie.middlewares=my-giam-traefik-plugin@file,my-souin@file"
       - "traefik.http.routers.humfurie-www.rule=Host(`www.humfurie.org`)"
       - "traefik.http.routers.humfurie-www.entrypoints=websecure"
       - "traefik.http.routers.humfurie-www.tls=true"
       - "traefik.http.routers.humfurie-www.tls.certresolver=letsencrypt"
-      # - "traefik.http.routers.humfurie-www.middlewares=my-giam-traefik-plugin@file, my-souin@file"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
 
   postgres:
-    image: postgres:17
+    image: postgres:17-alpine  # Alpine = 50% smaller
     restart: unless-stopped
     user: postgres
+    # Keep port exposed for migrations/debugging
     ports:
-      - '${DB_PORT:-5432}:5432'  # Commented out for production security
+      - '${DB_PORT:-5432}:5432'
     environment:
       POSTGRES_DB: '${DB_DATABASE}'
       POSTGRES_USER: '${DB_USERNAME}'
       POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+      POSTGRES_INITDB_ARGS: '-E UTF8 --locale=C'
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - laravel
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}" ]
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine  # Specific version + Alpine
     restart: unless-stopped
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
     networks:
       - laravel
     healthcheck:
@@ -97,23 +90,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
 
   ssr:
-    build:
-      context: .
-      dockerfile: docker/production/Dockerfile
-      args:
-        BUILDKIT_INLINE_CACHE: 1
+    image: yourapp:latest  # Reuse the same built image!
     restart: unless-stopped
     command: node /var/www/html/bootstrap/ssr/ssr.mjs
     working_dir: /var/www/html
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
-    volumes:
-      # Keep these from the built image - no mounts needed for production SSR
-      - /var/www/html/node_modules  # Use built node_modules
-      - /var/www/html/bootstrap/ssr  # Use built SSR bundle
     env_file:
       - .env.production
     environment:
@@ -131,13 +119,22 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
 
 networks:
   laravel:
+    driver: bridge
   proxy:
     external: true
     name: proxy
 
 volumes:
   postgres-data:
+    driver: local
   laravel-storage:
+    driver: local
