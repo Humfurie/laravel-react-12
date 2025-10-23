@@ -71,8 +71,8 @@ services:
     image: postgres:17
     restart: unless-stopped
     user: postgres
-    # ports:
-    #   - '${DB_PORT:-5432}:5432'  # Commented out for production security
+    ports:
+      - '${DB_PORT:-5432}:5432'  # Commented out for production security
     environment:
       POSTGRES_DB: '${DB_DATABASE}'
       POSTGRES_USER: '${DB_USERNAME}'
