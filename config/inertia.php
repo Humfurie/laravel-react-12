@@ -19,7 +19,7 @@ return [
         // Enabled for production - SSR server running as separate service
         'enabled' => env('SSR_ENABLED', true),
         'url' => env('SSR_URL', 'http://ssr:13714'),
-        'bundle' => base_path('bootstrap/ssr/ssr.js'),
+        'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
 
     ],
 
