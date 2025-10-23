@@ -14,7 +14,7 @@ RUN npm ci --include=optional
 # Copy source files needed for build
 COPY resources ./resources
 COPY public ./public
-COPY vite.config.ts tsconfig.json tailwind.config.ts postcss.config.js ./
+COPY vite.config.ts tsconfig.json tailwind.config.js .prettierrc ./
 
 # Build frontend assets including SSR
 RUN npm run build:ssr

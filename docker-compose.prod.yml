@@ -3,9 +3,7 @@ services:
     build:
       context: .
       dockerfile: docker/production/Dockerfile
-      cache_from:
-        - ghcr.io/yourusername/yourapp:latest  # Optional: use registry cache
-    image: yourapp:latest
+    image: humfurie-app:latest
     restart: unless-stopped
     # Production: No volume mounts - use built image only
     volumes:
@@ -98,7 +96,7 @@ services:
           memory: 128M
 
   ssr:
-    image: yourapp:latest  # Reuse the same built image!
+    image: humfurie-app:latest  # Reuse the same built image!
     restart: unless-stopped
     command: node /var/www/html/bootstrap/ssr/ssr.mjs
     working_dir: /var/www/html
