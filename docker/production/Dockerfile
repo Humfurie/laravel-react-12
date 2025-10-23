@@ -50,20 +50,33 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 COPY composer.json composer.lock /var/www/html/
 
 # Install PHP dependencies (before copying all files for better caching)
-RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interaction --prefer-dist
+# Increase timeout and add retry logic for better reliability
+RUN COMPOSER_PROCESS_TIMEOUT=600 composer install \
+    --optimize-autoloader \
+    --no-dev \
+    --no-scripts \
+    --no-interaction \
+    --prefer-dist \
+    || (sleep 5 && COMPOSER_PROCESS_TIMEOUT=600 composer install \
+        --optimize-autoloader \
+        --no-dev \
+        --no-scripts \
+        --no-interaction \
+        --prefer-dist)
 
 # Copy package files for Node dependencies
 COPY package.json package-lock.json /var/www/html/
 
 # Install Node.js dependencies (including dev dependencies for build)
-# Force install optional dependencies for Linux platform
-RUN npm ci --include=optional
+# Force install optional dependencies for Linux platform with retry
+RUN npm ci --include=optional || (sleep 5 && npm ci --include=optional)
 
 # Copy the rest of application files
 COPY . /var/www/html
 
 # Build frontend assets (including SSR bundle)
-RUN npm run build:ssr
+# The build:ssr script runs both regular build and SSR build
+RUN npm run build:ssr && ls -la /var/www/html/bootstrap/ssr/
 
 # Remove dev dependencies after build
 RUN npm prune --production
