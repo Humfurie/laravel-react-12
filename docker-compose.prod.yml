@@ -102,9 +102,14 @@ services:
     build:
       context: .
       dockerfile: docker/production/Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
     restart: unless-stopped
     command: node /var/www/html/bootstrap/ssr/ssr.mjs
     working_dir: /var/www/html
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     volumes:
       # Keep these from the built image - no mounts needed for production SSR
       - /var/www/html/node_modules  # Use built node_modules
