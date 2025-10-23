@@ -1,80 +1,94 @@
-FROM php:8.4-fpm
+# ================================
+# Stage 1: Build Dependencies
+# ================================
+FROM node:20-alpine AS node-builder
 
-# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json ./
+
+# Install ALL dependencies (including dev) for building
+RUN npm ci --include=optional
+
+# Copy source files needed for build
+COPY resources ./resources
+COPY public ./public
+COPY vite.config.ts tsconfig.json tailwind.config.ts postcss.config.js ./
+
+# Build frontend assets including SSR
+RUN npm run build:ssr
+
+# ================================
+# Stage 2: PHP Dependencies
+# ================================
+FROM composer:2 AS composer-builder
+
+WORKDIR /app
+
+# Copy composer files
+COPY composer.json composer.lock ./
+
+# Install PHP dependencies
+RUN composer install \
+    --no-dev \
+    --no-scripts \
+    --no-autoloader \
+    --prefer-dist \
+    --no-interaction
+
+# ================================
+# Stage 3: Final Production Image
+# ================================
+FROM php:8.4-fpm-alpine
+
 WORKDIR /var/www/html
 
-# Install only essential system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpng-dev \
-    libonig-dev \
+# Install ONLY runtime dependencies (Alpine = smaller)
+RUN apk add --no-cache \
+    postgresql-dev \
     libzip-dev \
-    libpq-dev \
-    unzip \
-    supervisor \
+    libpng-dev \
+    oniguruma-dev \
     nginx \
-    curl \
-    && docker-php-ext-install -j$(nproc) pdo_pgsql mbstring exif pcntl bcmath gd zip opcache \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Install Redis extension (lightweight)
-RUN pecl channel-update pecl.php.net \
-    && pecl install --onlyreqdeps redis \
+    supervisor \
+    && docker-php-ext-install -j$(nproc) \
+        pdo_pgsql \
+        opcache \
+        pcntl \
+        bcmath \
+        zip \
+        gd \
+    && pecl install redis \
     && docker-php-ext-enable redis \
-    && rm -rf /tmp/pear
+    && rm -rf /tmp/* /var/cache/apk/*
 
-# Install Node.js 20 LTS (minimal)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Copy PHP configuration
+RUN echo 'opcache.enable=1' >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo 'opcache.memory_consumption=128' >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo 'opcache.max_accelerated_files=10000' >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo 'opcache.validate_timestamps=0' >> /usr/local/etc/php/conf.d/opcache.ini
 
-# Configure PHP OPcache for production
-COPY <<EOF /usr/local/etc/php/conf.d/opcache.ini
-opcache.enable=1
-opcache.enable_cli=0
-opcache.memory_consumption=128
-opcache.interned_strings_buffer=8
-opcache.max_accelerated_files=10000
-opcache.revalidate_freq=0
-opcache.validate_timestamps=0
-opcache.fast_shutdown=1
-realpath_cache_size=4096K
-realpath_cache_ttl=600
-EOF
-
-# Install Composer (2.x latest)
+# Copy Composer binary
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
-# Configure Composer and npm for faster downloads
-RUN composer config -g process-timeout 300 \
-    && npm config set fetch-retry-mintimeout 20000 \
-    && npm config set fetch-retry-maxtimeout 120000 \
-    && npm config set fetch-retries 3
+# Copy vendor from composer-builder stage
+COPY --from=composer-builder /app/vendor ./vendor
 
-# Copy dependency files
-COPY composer.json composer.lock package.json package-lock.json ./
+# Copy built assets from node-builder stage
+COPY --from=node-builder /app/public/build ./public/build
+COPY --from=node-builder /app/bootstrap/ssr ./bootstrap/ssr
 
-# Install dependencies (parallel where possible)
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction \
-    && npm ci --include=optional --omit=dev
-
-# Copy application files
+# Copy application code
 COPY . .
 
-# Build assets
-RUN npm run build:ssr \
-    && npm prune --production
-
-# Finalize Composer autoload
+# Generate optimized autoloader
 RUN composer dump-autoload --optimize --classmap-authoritative \
     && php artisan package:discover --ansi || true
 
-# Create required directories
-RUN mkdir -p storage/{logs,framework/{cache,sessions,views},app/public} bootstrap/cache
-
-# Set permissions
-RUN chown -R www-data:www-data storage bootstrap/cache \
+# Create required directories and set permissions
+RUN mkdir -p storage/{logs,framework/{cache,sessions,views},app/public} bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache \
     && chmod +x .docker/startup.prod.sh
 
