@@ -1,9 +1,14 @@
-#!/bin/bash
+#!/bin/sh
 
 # Exit on any error
 set -e
 
 echo "Starting Laravel production initialization..."
+
+# Enable nginx site configuration
+if [ ! -L /etc/nginx/sites-enabled/default ]; then
+    ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+fi
 
 # Wait for database to be ready
 echo "Waiting for database..."
@@ -26,7 +31,7 @@ php artisan storage:link --force
 echo "Caching configuration..."
 php artisan config:cache
 php artisan route:cache
-php artisan view:cache
+# Skip view:cache for Inertia apps (no Blade views)
 
 # NOTE: Do NOT clear cache in production - it defeats the purpose!
 # Only clear cache when deploying new code or debugging
