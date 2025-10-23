@@ -485,3 +485,4 @@ defaults
 - Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test` with a specific
   filename or filter.
   </laravel-boost-guidelines>
+- docker compose -f docker-compose.prod.yml --env-file .env.production

@@ -28,9 +28,8 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Clear any stale caches
-echo "Clearing old caches..."
-php artisan cache:clear
+# NOTE: Do NOT clear cache in production - it defeats the purpose!
+# Only clear cache when deploying new code or debugging
 
 echo "Laravel initialization complete!"
 

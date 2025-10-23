@@ -95,6 +95,31 @@ services:
       timeout: 5s
       retries: 3
 
+  ssr:
+    build:
+      context: .
+      dockerfile: docker/production/Dockerfile
+    restart: unless-stopped
+    command: node /var/www/html/bootstrap/ssr/ssr.js
+    volumes:
+      # Mount specific directories for development
+      - ./resources:/var/www/html/resources
+      - ./bootstrap:/var/www/html/bootstrap
+      - ./.env:/var/www/html/.env
+      # Keep these from the built image
+      - /var/www/html/node_modules  # Use built node_modules
+      - /var/www/html/public/build  # Use built assets
+    env_file:
+      - .env.production
+    environment:
+      - APP_ENV=production
+      - NODE_ENV=production
+    networks:
+      - laravel
+    depends_on:
+      app:
+        condition: service_started
+
 networks:
   laravel:
   proxy:
