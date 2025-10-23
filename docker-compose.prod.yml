@@ -28,6 +28,7 @@ services:
       - proxy
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       - "traefik.http.services.humfurie.loadbalancer.server.port=80"
       - "traefik.http.routers.humfurie.rule=Host(`humfurie.org`)"
       - "traefik.http.routers.humfurie.entrypoints=websecure"
@@ -52,7 +53,6 @@ services:
   postgres:
     image: postgres:17-alpine  # Alpine = 50% smaller
     restart: unless-stopped
-    user: postgres
     # Keep port exposed for migrations/debugging
     ports:
       - '${DB_PORT:-5432}:5432'
@@ -98,7 +98,7 @@ services:
   ssr:
     image: humfurie-app:latest  # Reuse the same built image!
     restart: unless-stopped
-    command: node /var/www/html/bootstrap/ssr/ssr.mjs
+    command: node /var/www/html/bootstrap/ssr/ssr.js
     working_dir: /var/www/html
     env_file:
       - .env.production

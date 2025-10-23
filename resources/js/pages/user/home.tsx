@@ -37,19 +37,24 @@ interface Props {
     latest: Blog[];
     experiences: {
         id: number;
-        title: string;
+        position: string;
         company: string;
+        location: string;
         description: string[];
-        start_date: string;
-        end_date: string | null;
+        start_month: number;
+        start_year: number;
+        end_month: number | null;
+        end_year: number | null;
+        is_current_position: boolean;
         user_id: number;
-        sort_order: number;
+        display_order: number;
         created_at: string;
         updated_at: string;
         image?: {
             id: number;
             name: string;
             path: string;
+            url: string;
             imageable_id: number;
             imageable_type: string;
             created_at: string;
@@ -201,24 +206,19 @@ export default function Home({ primary = [], latest = [], experiences = [] }: Pr
             {/*<HomeProjects />*/}
             <HomeExpertise />
             <ExperienceSection
-                experiences={experiences.map((exp) => {
-                    const startDate = new Date(exp.start_date);
-                    const endDate = exp.end_date ? new Date(exp.end_date) : null;
-
-                    return {
-                        id: exp.id,
-                        company: exp.company,
-                        image_url: exp.image?.path || null,
-                        location: '',
-                        description: Array.isArray(exp.description) ? exp.description : [],
-                        position: exp.title,
-                        start_month: startDate.getMonth(),
-                        start_year: startDate.getFullYear(),
-                        end_month: endDate ? endDate.getMonth() : null,
-                        end_year: endDate ? endDate.getFullYear() : null,
-                        is_current_position: !exp.end_date,
-                    };
-                })}
+                experiences={experiences.map((exp) => ({
+                    id: exp.id,
+                    company: exp.company,
+                    image_url: exp.image?.url || null,
+                    location: exp.location,
+                    description: Array.isArray(exp.description) ? exp.description : [],
+                    position: exp.position,
+                    start_month: exp.start_month,
+                    start_year: exp.start_year,
+                    end_month: exp.end_month,
+                    end_year: exp.end_year,
+                    is_current_position: exp.is_current_position,
+                }))}
             />
             {/*<HomeCTA />*/}
 
