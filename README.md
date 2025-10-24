@@ -4,6 +4,11 @@ A modern, full-stack portfolio and blog platform built with Laravel 12, React 19
 SEO optimization, GDPR-compliant consent management, and production-ready Docker deployment.
 
 **Live Site:** [https://humfurie.org](https://humfurie.org)
+test user:
+[https://humfurie.org/login](https://humfurie.org/login)
+note: this won't do a thing, it can only view
+user: test@gmail.com
+pass:password123
 
 ---
 
