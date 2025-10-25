@@ -5,6 +5,16 @@ SEO optimization, GDPR-compliant consent management, and production-ready Docker
 
 **Live Site:** [https://humfurie.org](https://humfurie.org)
 
+test user:
+
+[https://humfurie.org/login](https://humfurie.org/login)
+
+note: this won't do a thing, it can only view
+
+user: test@gmail.com
+
+pass:password123
+
 ---
 
 ## ✨ Features
