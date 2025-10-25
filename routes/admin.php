@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\ExpertiseController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RealEstateController;
 use App\Http\Controllers\Admin\RoleController;
@@ -115,4 +116,14 @@ Route::prefix('experiences')->name('admin.experiences.')->group(function () {
     Route::get('/{experience}/edit', [ExperienceController::class, 'edit'])->name('edit');
     Route::put('/{experience}', [ExperienceController::class, 'update'])->name('update');
     Route::delete('/{experience}', [ExperienceController::class, 'destroy'])->name('destroy');
+});
+
+Route::prefix('expertises')->name('admin.expertises.')->group(function () {
+    Route::get('/', [ExpertiseController::class, 'index'])->name('index');
+    Route::get('/create', [ExpertiseController::class, 'create'])->name('create');
+    Route::post('/', [ExpertiseController::class, 'store'])->name('store');
+    Route::get('/{expertise}/edit', [ExpertiseController::class, 'edit'])->name('edit');
+    Route::put('/{expertise}', [ExpertiseController::class, 'update'])->name('update');
+    Route::delete('/{expertise}', [ExpertiseController::class, 'destroy'])->name('destroy');
+    Route::post('/reorder', [ExpertiseController::class, 'reorder'])->name('reorder');
 });
