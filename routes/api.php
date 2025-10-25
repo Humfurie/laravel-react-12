@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ExpertiseController;
 use App\Http\Controllers\Api\InquiryController;
 use App\Http\Controllers\Api\PropertyController;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,10 @@ Route::prefix('v1')->group(function () {
         Route::get('properties-featured', [PropertyController::class, 'featured'])->name('properties.featured');
         Route::post('properties-search', [PropertyController::class, 'search'])->name('properties.search');
         Route::get('properties/{property}/images', [PropertyController::class, 'getImages'])->name('properties.images.index');
+
+        // Expertise public endpoints
+        Route::get('expertises', [ExpertiseController::class, 'index'])->name('expertises.index');
+        Route::get('expertises/categories', [ExpertiseController::class, 'categories'])->name('expertises.categories');
     });
 
     // Inquiry creation - moderate rate limit (10 requests per minute)
@@ -63,5 +68,13 @@ Route::prefix('v1')->group(function () {
         Route::post('inquiries-bulk-update', [InquiryController::class, 'bulkUpdate'])->name('inquiries.bulk-update');
         Route::post('inquiries/{inquiry}/mark-in-progress', [InquiryController::class, 'markInProgress'])->name('inquiries.mark-in-progress');
         Route::post('inquiries/{inquiry}/mark-responded', [InquiryController::class, 'markResponded'])->name('inquiries.mark-responded');
+
+        // Expertise management endpoints
+        Route::post('expertises', [ExpertiseController::class, 'store'])->name('expertises.store');
+        Route::get('expertises/{expertise}', [ExpertiseController::class, 'show'])->name('expertises.show');
+        Route::put('expertises/{expertise}', [ExpertiseController::class, 'update'])->name('expertises.update');
+        Route::patch('expertises/{expertise}', [ExpertiseController::class, 'update']);
+        Route::delete('expertises/{expertise}', [ExpertiseController::class, 'destroy'])->name('expertises.destroy');
+        Route::post('expertises/reorder', [ExpertiseController::class, 'reorder'])->name('expertises.reorder');
     });
 });
