@@ -12,10 +12,11 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
+    libwebp-dev \
     libzip-dev \
     zip \
     unzip \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip opcache
 
 # Install Redis extension
