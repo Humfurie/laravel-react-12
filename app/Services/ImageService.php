@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Image;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
@@ -91,17 +92,17 @@ class ImageService
      */
     public function upload(
         UploadedFile $file,
-        Model        $model,
-        string       $directory = 'property-images',
-        bool         $isPrimary = false,
-        ?int         $order = null
+        Model  $model,
+        string $directory = 'property-images',
+        bool   $isPrimary = false,
+        ?int   $order = null
     ): Image
     {
-        // Generate unique filename
-        $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+        // Generate unique filename with .webp extension
+        $filename = time() . '_' . Str::random(10) . '.webp';
 
-        // Store the original file
-        $path = $file->storeAs($directory, $filename, 'public');
+        // Convert and store the image as WebP
+        $path = $this->convertToWebP($file, $directory, $filename);
 
         // Generate thumbnails
         $thumbnailPaths = $this->generateThumbnails($file, $directory, $filename);
@@ -118,19 +119,45 @@ class ImageService
             $order = 0;
         }
 
+        // Get the file size of the converted WebP image
+        $fileSize = Storage::disk('public')->size($path);
+
         // Create the image record
         $image = $model->images()->create([
             'name' => $file->getClientOriginalName(),
             'path' => $path,
             'filename' => $filename,
-            'mime_type' => $file->getMimeType(),
-            'size' => $file->getSize(),
+            'mime_type' => 'image/webp',
+            'size' => $fileSize,
             'order' => $order,
             'is_primary' => $isPrimary,
             'sizes' => $thumbnailPaths,
         ]);
 
         return $image;
+    }
+
+    /**
+     * Convert an uploaded file to WebP format
+     *
+     * @param UploadedFile $file The uploaded file
+     * @param string $directory Storage directory
+     * @param string $filename Target filename (should have .webp extension)
+     * @return string The storage path of the converted image
+     */
+    protected function convertToWebP(UploadedFile $file, string $directory, string $filename): string
+    {
+        // Load the image
+        $image = $this->imageManager->read($file->path());
+
+        // Encode as WebP with quality 85 (good balance between quality and file size)
+        $encodedImage = $image->toWebp(85);
+
+        // Store using Laravel's Storage facade (works with both real and fake storage)
+        $path = $directory . '/' . $filename;
+        Storage::disk('public')->put($path, (string)$encodedImage);
+
+        return $path;
     }
 
     /**
@@ -148,23 +175,21 @@ class ImageService
         foreach (self::SIZES as $sizeName => $maxWidth) {
             // Create thumbnail directory
             $thumbnailDir = $directory . '/thumbs/' . $sizeName;
-            $thumbnailFilename = pathinfo($originalFilename, PATHINFO_FILENAME) . '_' . $sizeName . '.' . pathinfo($originalFilename, PATHINFO_EXTENSION);
+            // Use .webp extension for thumbnails
+            $thumbnailFilename = pathinfo($originalFilename, PATHINFO_FILENAME) . '_' . $sizeName . '.webp';
 
             // Resize image maintaining aspect ratio
             $thumbnail = clone $image;
             $thumbnail->scale(width: $maxWidth);
 
+            // Encode as WebP with quality 85
+            $encodedThumbnail = $thumbnail->toWebp(85);
+
             // Generate the path
             $thumbnailPath = $thumbnailDir . '/' . $thumbnailFilename;
-            $fullPath = storage_path('app/public/' . $thumbnailPath);
 
-            // Ensure directory exists
-            if (!file_exists(dirname($fullPath))) {
-                mkdir(dirname($fullPath), 0755, true);
-            }
-
-            // Save the thumbnail
-            $thumbnail->save($fullPath);
+            // Store using Laravel's Storage facade (works with both real and fake storage)
+            Storage::disk('public')->put($thumbnailPath, (string)$encodedThumbnail);
 
             $thumbnailPaths[$sizeName] = $thumbnailPath;
         }

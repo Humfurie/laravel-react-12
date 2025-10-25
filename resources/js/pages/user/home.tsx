@@ -61,6 +61,17 @@ interface Props {
             updated_at: string;
         };
     }[];
+    expertises: {
+        id: number;
+        name: string;
+        image: string;
+        image_url: string;
+        category_slug: string;
+        order: number;
+        is_active: boolean;
+        created_at: string;
+        updated_at: string;
+    }[];
 }
 
 const truncateText = (text: string, maxLength: number = 100) => {
@@ -104,7 +115,7 @@ function BlogCard({ blog }: { blog: Blog }) {
     );
 }
 
-export default function Home({ primary = [], latest = [], experiences = [] }: Props): JSX.Element {
+export default function Home({ primary = [], latest = [], experiences = [], expertises = [] }: Props): JSX.Element {
     const [isVisible, setIsVisible] = useState(true);
     const [activeItem, setActiveItem] = useState('home');
 
@@ -204,7 +215,7 @@ export default function Home({ primary = [], latest = [], experiences = [] }: Pr
             <HomeBanner />
             <HomeAboutMe />
             {/*<HomeProjects />*/}
-            <HomeExpertise />
+            <HomeExpertise expertises={expertises} />
             <ExperienceSection
                 experiences={experiences.map((exp) => ({
                     id: exp.id,

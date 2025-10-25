@@ -4,6 +4,7 @@ use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\User\BlogController;
 use App\Models\Experience;
+use App\Models\Expertise;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -17,8 +18,13 @@ Route::get('/', function () {
         ->ordered()
         ->get();
 
+    $expertises = Expertise::active()
+        ->ordered()
+        ->get();
+
     return Inertia::render('user/home', array_merge($blogs, [
         'experiences' => $experiences,
+        'expertises' => $expertises,
     ]));
 })->name('home');
 
