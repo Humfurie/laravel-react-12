@@ -1,10 +1,16 @@
 <?php
 
 use App\Models\Property;
+use App\Models\RealEstateProject;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 describe('Advanced Property Search', function () {
+    beforeEach(function () {
+        Property::query()->forceDelete();
+    });
+
     test('location-based search with radius works correctly', function () {
         // Create properties at different coordinates
         Property::factory()->create([
@@ -70,6 +76,10 @@ describe('Advanced Property Search', function () {
 });
 
 describe('Property Model Scopes', function () {
+    beforeEach(function () {
+        Property::query()->forceDelete();
+    });
+
     test('available scope filters correctly', function () {
         Property::factory()->create(['status' => 'available', 'listing_status' => 'not_available']);
         Property::factory()->create(['status' => 'available', 'listing_status' => 'not_available']);
@@ -140,6 +150,10 @@ describe('Property Model Scopes', function () {
 });
 
 describe('Property Model Attributes and Methods', function () {
+    beforeEach(function () {
+        Property::query()->forceDelete();
+    });
+
     test('slug is automatically generated from title', function () {
         $propertyData = Property::factory()->make(['title' => 'Beautiful Test House'])->toArray();
         unset($propertyData['slug']); // Remove factory-generated slug
@@ -207,6 +221,10 @@ describe('Property Model Attributes and Methods', function () {
 });
 
 describe('Edge Cases and Error Handling', function () {
+    beforeEach(function () {
+        Property::query()->forceDelete();
+    });
+
     test('handles non-existent property gracefully', function () {
         $response = $this->getJson('/api/v1/properties/non-existent-slug');
 
@@ -252,7 +270,7 @@ describe('Edge Cases and Error Handling', function () {
 
     test('filters maintain data integrity', function () {
         // Create a project in TestCity since city filter searches through project relationship
-        $testProject = \App\Models\RealEstateProject::factory()->create([
+        $testProject = RealEstateProject::factory()->create([
             'name' => 'Test Project in TestCity',
             'city' => 'TestCity'
         ]);
