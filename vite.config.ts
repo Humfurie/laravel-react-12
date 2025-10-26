@@ -17,6 +17,29 @@ export default defineConfig({
     ],
     esbuild: {
         jsx: 'automatic',
+        // Drop console.log in production
+        drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+    },
+    build: {
+        // Optimize chunks
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    // Split vendor code into separate chunk
+                    vendor: ['react', 'react-dom', '@inertiajs/react'],
+                    // Split framer-motion into separate chunk (it's large)
+                    framer: ['framer-motion'],
+                    // Split date utilities
+                    'date-utils': ['date-fns'],
+                },
+            },
+        },
+        // Increase chunk size warning limit
+        chunkSizeWarningLimit: 1000,
+        // Enable minification
+        minify: 'esbuild',
+        // Target modern browsers for smaller bundle
+        target: 'es2020',
     },
     resolve: {
         alias: {

@@ -99,6 +99,9 @@ const HomeExpertise: React.FC<HomeExpertiseProps> = ({ expertises = [] }) => {
                                     src={item.image_url}
                                     alt={item.name}
                                     className="bg-brand-white hs-shadow mb-2 h-[60px] w-[60px] rounded-[18px] object-contain p-2 sm:h-[80px] sm:w-[80px] md:h-[100px] md:w-[100px]"
+                                    width={100}
+                                    height={100}
+                                    loading="lazy"
                                 />
                             </motion.div>
                         ))}

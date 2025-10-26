@@ -182,6 +182,9 @@ export const ExperienceSection = ({ experiences = fallbackExperiences }: Experie
                                         src={experience.image_url || '/default-company.png'}
                                         alt={experience.company}
                                         className="h-full w-full object-cover"
+                                        width={64}
+                                        height={64}
+                                        loading="lazy"
                                     />
                                 </div>
                                 <div className="flex-1">
