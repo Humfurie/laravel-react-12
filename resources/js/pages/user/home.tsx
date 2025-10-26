@@ -88,7 +88,7 @@ function BlogCard({ blog }: { blog: Blog }) {
         <Card className="h-full cursor-pointer transition-shadow hover:shadow-lg" onClick={handleCardClick}>
             {blog.featured_image && (
                 <div className="aspect-video overflow-hidden rounded-t-lg">
-                    <img src={blog.featured_image} alt={blog.title} className="h-full w-full object-cover" />
+                    <img src={blog.featured_image} alt={blog.title} className="h-full w-full object-cover" width={640} height={360} loading="lazy" />
                 </div>
             )}
             <CardContent className="p-4">
