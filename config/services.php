@@ -40,4 +40,8 @@ return [
         'base_url' => 'https://financialmodelingprep.com/stable',
     ],
 
+    'google_analytics' => [
+        'measurement_id' => env('GOOGLE_ANALYTICS_ID'),
+    ],
+
 ];

@@ -80,6 +80,24 @@
             gtag('set', 'url_passthrough', true);
         </script>
 
+        {{-- Google Analytics 4 --}}
+        @if(config('services.google_analytics.measurement_id'))
+            <script async
+                    src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google_analytics.measurement_id') }}"></script>
+            <script>
+                window.dataLayer = window.dataLayer || [];
+
+                function gtag() {
+                    dataLayer.push(arguments);
+                }
+
+                gtag('js', new Date());
+                gtag('config', '{{ config('services.google_analytics.measurement_id') }}', {
+                    'send_page_view': false  // We'll handle page views manually for Inertia
+                });
+            </script>
+        @endif
+
         @routes
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
