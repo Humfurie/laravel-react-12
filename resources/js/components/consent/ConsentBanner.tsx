@@ -8,12 +8,7 @@ interface ConsentChoice {
     ad_user_data: 'granted' | 'denied';
     ad_personalization: 'granted' | 'denied';
     analytics_storage: 'granted' | 'denied';
-}
-
-declare global {
-    interface Window {
-        gtag: (...args: unknown[]) => void;
-    }
+    [key: string]: 'granted' | 'denied';
 }
 
 /**
