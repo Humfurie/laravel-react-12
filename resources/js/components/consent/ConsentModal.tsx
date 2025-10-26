@@ -7,6 +7,7 @@ interface ConsentChoice {
     ad_user_data: 'granted' | 'denied';
     ad_personalization: 'granted' | 'denied';
     analytics_storage: 'granted' | 'denied';
+    [key: string]: 'granted' | 'denied';
 }
 
 interface ConsentModalProps {
@@ -75,10 +76,13 @@ export default function ConsentModal({ onClose, onSave }: ConsentModalProps) {
     ];
 
     const togglePreference = (id: keyof ConsentChoice) => {
-        setPreferences((prev) => ({
-            ...prev,
-            [id]: prev[id] === 'granted' ? 'denied' : 'granted',
-        }));
+        setPreferences((prev) => {
+            const newValue: 'granted' | 'denied' = prev[id] === 'granted' ? 'denied' : 'granted';
+            return {
+                ...prev,
+                [id]: newValue,
+            };
+        });
     };
 
     const handleAcceptAll = () => {
