@@ -53,8 +53,17 @@
         <meta name="twitter:description" content="Professional portfolio and blog">
         <meta name="twitter:image" content="{{ asset('images/og-default.jpg') }}">
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+        <link rel="dns-prefetch" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600&display=swap" rel="stylesheet" />
+
+        {{-- Preconnect to Google services for faster analytics loading --}}
+        @if(config('services.google_analytics.measurement_id'))
+            <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+            <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+            <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+            <link rel="dns-prefetch" href="https://www.google-analytics.com">
+        @endif
 
         {{-- Google Consent Mode v2 - Must load BEFORE any Google services --}}
         <script>
