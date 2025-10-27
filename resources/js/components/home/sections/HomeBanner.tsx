@@ -20,9 +20,12 @@ const HomeBanner = () => {
                 <img
                     src={bannerData.mobileImgSrc}
                     alt="Humphrey Banner"
+                    width="1920"
+                    height="1080"
                     onLoad={() => setLoaded(true)}
                     className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
                     style={{ opacity: loaded ? 1 : 0 }}
+                    fetchPriority="high"
                 />
             </picture>
 
@@ -40,7 +43,7 @@ const HomeBanner = () => {
                 <div className="align-center hs-bg-white absolute bottom-[70px] flex justify-center gap-6">
                     {/*<ButtonOne text="Projects" type="button" className="btn-orange" icon={<RiArrowRightDoubleLine className="text-[20px]" />} />*/}
 
-                    <a href="resume.pdf" download="Humphrey_Resume.pdf" className="hs-btn align-center flex items-center gap-2 text-center">
+                    <a href="/resume.pdf" download="Humphrey_Resume.pdf" className="hs-btn align-center flex items-center gap-2 text-center">
                         <TbDownload />
                         Resume
                     </a>

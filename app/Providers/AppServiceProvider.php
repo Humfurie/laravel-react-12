@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Blog;
+use App\Observers\BlogObserver;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,5 +26,8 @@ class AppServiceProvider extends ServiceProvider
         if (app()->environment('production') && request()->hasHeader('X-Forwarded-Proto')) {
             URL::forceScheme('https');
         }
+
+        // Register observers
+        Blog::observe(BlogObserver::class);
     }
 }
