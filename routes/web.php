@@ -5,6 +5,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\User\BlogController;
 use App\Models\Experience;
 use App\Models\Expertise;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -14,13 +15,19 @@ Route::get('/', function () {
     $blogController = new BlogController;
     $blogs = $blogController->getPrimaryAndLatest();
 
-    $experiences = Experience::with('image')
-        ->ordered()
-        ->get();
+    // Cache experiences for 30 minutes
+    $experiences = Cache::remember('homepage.experiences', 1800, function () {
+        return Experience::with('image')
+            ->ordered()
+            ->get();
+    });
 
-    $expertises = Expertise::active()
-        ->ordered()
-        ->get();
+    // Cache expertises for 30 minutes
+    $expertises = Cache::remember('homepage.expertises', 1800, function () {
+        return Expertise::active()
+            ->ordered()
+            ->get();
+    });
 
     return Inertia::render('user/home', array_merge($blogs, [
         'experiences' => $experiences,

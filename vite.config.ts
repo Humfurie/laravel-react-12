@@ -24,13 +24,52 @@ export default defineConfig({
         // Optimize chunks
         rollupOptions: {
             output: {
-                manualChunks: {
-                    // Split vendor code into separate chunk
-                    vendor: ['react', 'react-dom', '@inertiajs/react'],
-                    // Split framer-motion into separate chunk (it's large)
-                    framer: ['framer-motion'],
-                    // Split date utilities
-                    'date-utils': ['date-fns'],
+                manualChunks(id, { getModuleInfo }) {
+                    // Skip manual chunking for SSR builds
+                    const moduleInfo = getModuleInfo(id);
+                    if (moduleInfo && moduleInfo.isEntry && id.includes('ssr.')) {
+                        return undefined;
+                    }
+
+                    // Core vendor code
+                    if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/@inertiajs/react')) {
+                        return 'vendor-react';
+                    }
+
+                    // Radix UI components
+                    if (id.includes('node_modules/@radix-ui/')) {
+                        return 'vendor-radix';
+                    }
+
+                    // TipTap editor
+                    if (id.includes('node_modules/@tiptap/')) {
+                        return 'vendor-tiptap';
+                    }
+
+                    // Charts
+                    if (id.includes('node_modules/recharts')) {
+                        return 'vendor-charts';
+                    }
+
+                    // Date utilities
+                    if (id.includes('node_modules/date-fns') || id.includes('node_modules/react-day-picker')) {
+                        return 'vendor-date';
+                    }
+
+                    // DnD kit
+                    if (id.includes('node_modules/@dnd-kit/')) {
+                        return 'vendor-dnd';
+                    }
+
+                    // UI utilities
+                    if (
+                        id.includes('node_modules/lucide-react') ||
+                        id.includes('node_modules/class-variance-authority') ||
+                        id.includes('node_modules/clsx') ||
+                        id.includes('node_modules/tailwind-merge')
+                    ) {
+                        return 'vendor-ui';
+                    }
                 },
             },
         },
@@ -40,6 +79,8 @@ export default defineConfig({
         minify: 'esbuild',
         // Target modern browsers for smaller bundle
         target: 'es2020',
+        // Disable source maps in production
+        sourcemap: false,
     },
     resolve: {
         alias: {

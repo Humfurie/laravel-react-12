@@ -52,26 +52,27 @@ WORKDIR /var/www/html
 
 # Install build dependencies and runtime dependencies
 RUN apk add --no-cache \
-    # Build dependencies (needed for compilation)
+    # Build dependencies (needed for compilation) \
     autoconf \
     gcc \
     g++ \
     make \
     libc-dev \
     linux-headers \
-    # Runtime dependencies
+    # Runtime dependencies \
     postgresql-dev \
     libzip-dev \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
+    libwebp-dev \
     oniguruma-dev \
     icu-dev \
     nginx \
     supervisor \
     nodejs \
     npm \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
         pdo_pgsql \
         opcache \
@@ -85,11 +86,18 @@ RUN apk add --no-cache \
     && apk del autoconf gcc g++ make libc-dev linux-headers \
     && rm -rf /tmp/* /var/cache/apk/*
 
-# Copy PHP configuration
-RUN echo 'opcache.enable=1' >> /usr/local/etc/php/conf.d/opcache.ini \
+# Copy PHP configuration for production
+RUN echo '[PHP]' > /usr/local/etc/php/conf.d/php-production.ini \
+    && echo 'post_max_size = 100M' >> /usr/local/etc/php/conf.d/php-production.ini \
+    && echo 'upload_max_filesize = 100M' >> /usr/local/etc/php/conf.d/php-production.ini \
+    && echo 'variables_order = EGPCS' >> /usr/local/etc/php/conf.d/php-production.ini \
+    && echo 'memory_limit = 512M' >> /usr/local/etc/php/conf.d/php-production.ini \
+    && echo 'opcache.enable=1' >> /usr/local/etc/php/conf.d/opcache.ini \
     && echo 'opcache.memory_consumption=128' >> /usr/local/etc/php/conf.d/opcache.ini \
     && echo 'opcache.max_accelerated_files=10000' >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo 'opcache.validate_timestamps=0' >> /usr/local/etc/php/conf.d/opcache.ini
+    && echo 'opcache.validate_timestamps=0' >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo 'opcache.jit=tracing' >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo 'opcache.jit_buffer_size=100M' >> /usr/local/etc/php/conf.d/opcache.ini
 
 # Copy Composer binary
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
@@ -108,6 +116,11 @@ COPY . .
 # Generate optimized autoloader
 RUN composer dump-autoload --optimize --classmap-authoritative \
     && php artisan package:discover --ansi || true
+
+# Remove any development PHP configurations that may have been copied
+RUN rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && rm -f /usr/local/etc/php/conf.d/docker-php-ext-pcov.ini \
+    && rm -rf docker/
 
 # Create required directories and set permissions
 RUN mkdir -p storage/{logs,framework/{cache,sessions,views},app/public} bootstrap/cache \

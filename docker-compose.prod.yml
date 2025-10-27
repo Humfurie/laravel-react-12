@@ -46,9 +46,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1G
         reservations:
-          memory: 256M
+          memory: 512M
 
   postgres:
     image: postgres:17-alpine  # Alpine = 50% smaller
@@ -80,7 +80,7 @@ services:
   redis:
     image: redis:7-alpine  # Specific version + Alpine
     restart: unless-stopped
-    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
     networks:
       - laravel
     healthcheck:
@@ -91,9 +91,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 384M
         reservations:
-          memory: 128M
+          memory: 256M
 
   ssr:
     image: humfurie-app:latest  # Reuse the same built image!
@@ -120,9 +120,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
-          memory: 128M
+          memory: 256M
 
 networks:
   laravel:
