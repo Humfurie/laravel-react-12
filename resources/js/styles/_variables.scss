@@ -61,18 +61,18 @@
     --tt-gray-dark-800: rgba(224, 224, 225, 1);
     --tt-gray-dark-900: rgba(245, 245, 245, 1);
 
-    /* Brand colors */
-    --tt-brand-color-50: rgba(239, 238, 255, 1);
-    --tt-brand-color-100: rgba(222, 219, 255, 1);
-    --tt-brand-color-200: rgba(195, 189, 255, 1);
-    --tt-brand-color-300: rgba(157, 138, 255, 1);
-    --tt-brand-color-400: rgba(122, 82, 255, 1);
-    --tt-brand-color-500: rgba(98, 41, 255, 1);
-    --tt-brand-color-600: rgba(84, 0, 229, 1);
-    --tt-brand-color-700: rgba(75, 0, 204, 1);
-    --tt-brand-color-800: rgba(56, 0, 153, 1);
-    --tt-brand-color-900: rgba(43, 25, 102, 1);
-    --tt-brand-color-950: hsla(257, 100%, 9%, 1);
+    /* Brand colors - Vibrant Earthy Palette */
+    --tt-brand-color-50: rgba(254, 242, 242, 1); /* Very light rose */
+    --tt-brand-color-100: rgba(252, 231, 235, 1); /* Light vibrant rose */
+    --tt-brand-color-200: rgba(244, 169, 186, 1); /* Soft vibrant rose */
+    --tt-brand-color-300: rgba(232, 93, 117, 1); /* Vibrant dusty rose */
+    --tt-brand-color-400: rgba(217, 93, 57, 1); /* Bold Terracotta */
+    --tt-brand-color-500: rgba(107, 144, 128, 1); /* Rich sage green */
+    --tt-brand-color-600: rgba(85, 115, 102, 1); /* Deeper sage */
+    --tt-brand-color-700: rgba(67, 91, 81, 1); /* Dark sage */
+    --tt-brand-color-800: rgba(139, 111, 71, 1); /* Rich brown */
+    --tt-brand-color-900: rgba(45, 36, 36, 1); /* Deep warm brown */
+    --tt-brand-color-950: hsla(25, 12%, 12%, 1); /* Deep earth tone */
 
     /* Green */
     --tt-color-green-inc-5: hsla(129, 100%, 97%, 1);
@@ -173,15 +173,15 @@
     **************************************************/
 
     /* Global colors - Light mode */
-    --tt-bg-color: var(--white);
+    --tt-bg-color: rgba(255, 248, 231, 1); /* Warm cream background */
     --tt-border-color: var(--tt-gray-light-a-200);
     --tt-border-color-tint: var(--tt-gray-light-a-100);
-    --tt-sidebar-bg-color: var(--tt-gray-light-100);
-    --tt-scrollbar-color: var(--tt-gray-light-a-200);
-    --tt-cursor-color: var(--tt-brand-color-500);
-    --tt-selection-color: rgba(157, 138, 255, 0.2);
+    --tt-sidebar-bg-color: rgba(244, 232, 193, 1); /* Golden cream sidebar */
+    --tt-scrollbar-color: rgba(217, 93, 57, 0.4); /* Bold terracotta scrollbar */
+    --tt-cursor-color: var(--tt-brand-color-400); /* Bold terracotta cursor */
+    --tt-selection-color: rgba(232, 93, 117, 0.3); /* Vibrant rose selection */
     --tt-card-bg-color: var(--white);
-    --tt-card-border-color: var(--tt-gray-light-a-100);
+    --tt-card-border-color: rgba(244, 169, 186, 0.3); /* Vibrant rose border */
 }
 
 /* Global colors - Dark mode */

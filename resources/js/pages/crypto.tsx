@@ -155,14 +155,14 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                 <div className="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6 lg:px-6 lg:py-8">
                     <div className="mb-6 text-center sm:mb-8">
                         <h1 className="text-brand-white mb-2 text-xl font-bold sm:text-2xl lg:text-4xl">Cryptocurrency Market</h1>
-                        <p className="text-muted-white text-xs sm:text-sm lg:text-base">Real-time cryptocurrency prices and market data</p>
+                        <p className="text-brand-offwhite text-xs sm:text-sm lg:text-base">Real-time cryptocurrency prices and market data</p>
                     </div>
                     <div className="flex flex-col gap-4 sm:gap-6">
                         {/* Summary Cards */}
                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
                             <Card className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-2.5 sm:p-4 lg:p-6">
                                 <div className="space-y-0.5 sm:space-y-2">
-                                    <p className="text-muted-white text-[9px] sm:text-xs lg:text-sm">Total Market Cap</p>
+                                    <p className="text-brand-offwhite text-[9px] sm:text-xs lg:text-sm">Total Market Cap</p>
                                     <p className="text-brand-white text-sm font-bold break-all sm:text-lg lg:text-3xl">
                                         {formatCurrency(totalMarketCap)}
                                     </p>
@@ -176,7 +176,7 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                                 }`}
                             >
                                 <div className="space-y-0.5 sm:space-y-2">
-                                    <p className="text-muted-white text-[9px] sm:text-xs lg:text-sm">Avg 24h Change</p>
+                                    <p className="text-brand-offwhite text-[9px] sm:text-xs lg:text-sm">Avg 24h Change</p>
                                     <div className="flex items-center gap-0.5 sm:gap-2">
                                         <p
                                             className={`text-sm font-bold sm:text-lg lg:text-3xl ${avgChange24h >= 0 ? 'text-green-400' : 'text-red-400'}`}
@@ -193,7 +193,7 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                             </Card>
                             <Card className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-2.5 sm:col-span-2 sm:p-4 lg:col-span-1 lg:p-6">
                                 <div className="space-y-0.5 sm:space-y-2">
-                                    <p className="text-muted-white text-[9px] sm:text-xs lg:text-sm">Total 24h Volume</p>
+                                    <p className="text-brand-offwhite text-[9px] sm:text-xs lg:text-sm">Total 24h Volume</p>
                                     <p className="text-brand-white text-sm font-bold break-all sm:text-lg lg:text-3xl">
                                         {formatCurrency(totalVolume)}
                                     </p>
@@ -217,9 +217,9 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                                                     <span className="text-brand-orange font-mono text-[10px] font-bold sm:text-xs lg:text-sm">
                                                         {stock.symbol}
                                                     </span>
-                                                    <span className="text-muted-white text-[8px] sm:text-[10px] lg:text-xs">{stock.exchange}</span>
+                                                    <span className="text-brand-offwhite text-[8px] sm:text-[10px] lg:text-xs">{stock.exchange}</span>
                                                 </div>
-                                                <p className="text-muted-white line-clamp-1 truncate text-[10px] sm:text-xs lg:text-sm">
+                                                <p className="text-brand-offwhite line-clamp-1 truncate text-[10px] sm:text-xs lg:text-sm">
                                                     {stock.name}
                                                 </p>
                                                 <p className="text-brand-white text-xs font-bold sm:text-sm lg:text-lg">
@@ -250,7 +250,7 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                         {/* Table Controls */}
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                             <div className="flex items-center gap-1.5 sm:gap-2">
-                                <span className="text-muted-white text-[10px] sm:text-xs lg:text-sm">Show</span>
+                                <span className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">Show</span>
                                 <Select value={perPage.toString()} onValueChange={(value) => setPerPage(Number(value))}>
                                     <SelectTrigger className="border-brand-orange/20 bg-brand-black text-brand-white h-8 w-[70px] text-xs sm:h-9 sm:w-[80px] sm:text-sm lg:w-[100px]">
                                         <SelectValue />
@@ -261,7 +261,7 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                                         <SelectItem value="1000">1000</SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <span className="text-muted-white text-[10px] sm:text-xs lg:text-sm">entries</span>
+                                <span className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">entries</span>
                             </div>
 
                             <div className="flex items-center justify-center gap-1.5 sm:gap-2">
@@ -274,7 +274,7 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                                 >
                                     Prev
                                 </Button>
-                                <span className="text-muted-white text-[10px] sm:text-xs lg:text-sm">
+                                <span className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">
                                     {currentPage}/{totalPages}
                                 </span>
                                 <Button
@@ -362,7 +362,7 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                                                 className="border-brand-orange/10 hover:bg-brand-orange/5 cursor-pointer transition-colors"
                                                 onClick={() => setSelectedCrypto(crypto)}
                                             >
-                                                <TableCell className="text-muted-white text-[10px] sm:text-xs lg:text-sm">
+                                                <TableCell className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">
                                                     {crypto.market_cap_rank || startIndex + index + 1}
                                                 </TableCell>
                                                 <TableCell className="text-brand-orange font-mono text-[10px] font-bold uppercase sm:text-xs lg:text-sm">
@@ -406,7 +406,7 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                         </Card>
 
                         {/* Table Info */}
-                        <div className="text-muted-white text-[10px] sm:text-xs lg:text-sm">
+                        <div className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">
                             Showing {startIndex + 1} to {Math.min(startIndex + perPage, sortedData.length)} of {sortedData.length} entries
                         </div>
                     </div>
@@ -429,21 +429,21 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                             {/* Price Info */}
                             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                                 <div className="from-brand-orange/10 border-brand-orange/20 rounded-lg border bg-gradient-to-br to-transparent p-4">
-                                    <p className="text-muted-white mb-1 text-sm">Current Price</p>
+                                    <p className="text-brand-offwhite mb-1 text-sm">Current Price</p>
                                     <p className="text-2xl font-bold">{formatCurrency(selectedCrypto.price)}</p>
                                 </div>
                                 <div className="from-brand-orange/10 border-brand-orange/20 rounded-lg border bg-gradient-to-br to-transparent p-4">
-                                    <p className="text-muted-white mb-1 text-sm">24h Change</p>
+                                    <p className="text-brand-offwhite mb-1 text-sm">24h Change</p>
                                     <p className={`text-2xl font-bold ${selectedCrypto.change_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                         {formatPercent(selectedCrypto.change_24h)}
                                     </p>
                                 </div>
                                 <div className="from-brand-orange/10 border-brand-orange/20 rounded-lg border bg-gradient-to-br to-transparent p-4">
-                                    <p className="text-muted-white mb-1 text-sm">Market Cap</p>
+                                    <p className="text-brand-offwhite mb-1 text-sm">Market Cap</p>
                                     <p className="text-xl font-bold">{formatCurrency(selectedCrypto.market_cap)}</p>
                                 </div>
                                 <div className="from-brand-orange/10 border-brand-orange/20 rounded-lg border bg-gradient-to-br to-transparent p-4">
-                                    <p className="text-muted-white mb-1 text-sm">24h Volume</p>
+                                    <p className="text-brand-offwhite mb-1 text-sm">24h Volume</p>
                                     <p className="text-xl font-bold">{formatCurrency(selectedCrypto.total_volume)}</p>
                                 </div>
                             </div>
@@ -452,31 +452,31 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">24h High</span>
+                                        <span className="text-brand-offwhite">24h High</span>
                                         <span className="font-semibold">{formatCurrency(selectedCrypto.high_24h)}</span>
                                     </div>
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">24h Low</span>
+                                        <span className="text-brand-offwhite">24h Low</span>
                                         <span className="font-semibold">{formatCurrency(selectedCrypto.low_24h)}</span>
                                     </div>
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">Market Cap Rank</span>
+                                        <span className="text-brand-offwhite">Market Cap Rank</span>
                                         <span className="font-semibold">#{selectedCrypto.market_cap_rank}</span>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">All Time High</span>
+                                        <span className="text-brand-offwhite">All Time High</span>
                                         <span className="font-semibold">{formatCurrency(selectedCrypto.ath)}</span>
                                     </div>
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">ATH Change</span>
+                                        <span className="text-brand-offwhite">ATH Change</span>
                                         <span className={selectedCrypto.ath_change_percentage >= 0 ? 'text-green-400' : 'text-red-400'}>
                                             {formatPercent(selectedCrypto.ath_change_percentage)}
                                         </span>
                                     </div>
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">Circulating Supply</span>
+                                        <span className="text-brand-offwhite">Circulating Supply</span>
                                         <span className="font-semibold">
                                             {selectedCrypto.circulating_supply.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                         </span>
@@ -509,21 +509,21 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                             {/* Price Info */}
                             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                                 <div className="from-brand-orange/10 border-brand-orange/20 rounded-lg border bg-gradient-to-br to-transparent p-4">
-                                    <p className="text-muted-white mb-1 text-sm">Current Price</p>
+                                    <p className="text-brand-offwhite mb-1 text-sm">Current Price</p>
                                     <p className="text-2xl font-bold">{formatCurrency(selectedStock.price)}</p>
                                 </div>
                                 <div className="from-brand-orange/10 border-brand-orange/20 rounded-lg border bg-gradient-to-br to-transparent p-4">
-                                    <p className="text-muted-white mb-1 text-sm">Change</p>
+                                    <p className="text-brand-offwhite mb-1 text-sm">Change</p>
                                     <p className={`text-2xl font-bold ${selectedStock.changesPercentage >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                         {formatPercent(selectedStock.changesPercentage)}
                                     </p>
                                 </div>
                                 <div className="from-brand-orange/10 border-brand-orange/20 rounded-lg border bg-gradient-to-br to-transparent p-4">
-                                    <p className="text-muted-white mb-1 text-sm">Market Cap</p>
+                                    <p className="text-brand-offwhite mb-1 text-sm">Market Cap</p>
                                     <p className="text-xl font-bold">{formatCurrency(selectedStock.marketCap)}</p>
                                 </div>
                                 <div className="from-brand-orange/10 border-brand-orange/20 rounded-lg border bg-gradient-to-br to-transparent p-4">
-                                    <p className="text-muted-white mb-1 text-sm">Volume</p>
+                                    <p className="text-brand-offwhite mb-1 text-sm">Volume</p>
                                     <p className="text-xl font-bold">{formatCurrency(selectedStock.volume)}</p>
                                 </div>
                             </div>
@@ -532,29 +532,29 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">Day High</span>
+                                        <span className="text-brand-offwhite">Day High</span>
                                         <span className="font-semibold">{formatCurrency(selectedStock.dayHigh)}</span>
                                     </div>
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">Day Low</span>
+                                        <span className="text-brand-offwhite">Day Low</span>
                                         <span className="font-semibold">{formatCurrency(selectedStock.dayLow)}</span>
                                     </div>
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">Exchange</span>
+                                        <span className="text-brand-offwhite">Exchange</span>
                                         <span className="font-semibold">{selectedStock.exchange}</span>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">52 Week High</span>
+                                        <span className="text-brand-offwhite">52 Week High</span>
                                         <span className="font-semibold">{formatCurrency(selectedStock.yearHigh)}</span>
                                     </div>
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">52 Week Low</span>
+                                        <span className="text-brand-offwhite">52 Week Low</span>
                                         <span className="font-semibold">{formatCurrency(selectedStock.yearLow)}</span>
                                     </div>
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">Avg Volume</span>
+                                        <span className="text-brand-offwhite">Avg Volume</span>
                                         <span className="font-semibold">
                                             {selectedStock.avgVolume.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                         </span>

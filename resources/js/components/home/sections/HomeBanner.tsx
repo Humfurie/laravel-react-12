@@ -13,7 +13,7 @@ const HomeBanner = () => {
     const [loaded, setLoaded] = useState(false);
 
     return (
-        <section className="home-banner relative min-h-screen bg-gradient-to-t from-green-300 to-white">
+        <section className="home-banner from-brand-green to-brand-offwhite relative min-h-screen bg-gradient-to-t">
             {/* Responsive Banner Image */}
             <picture>
                 <source srcSet={bannerData.imgSrc} media="(min-width: 768px)" />
@@ -29,7 +29,7 @@ const HomeBanner = () => {
                 />
             </picture>
 
-            <div className="bg-muted-black/70 absolute inset-0 z-10 backdrop-blur-[1.5px]" />
+            <div className="bg-brand-black/60 absolute inset-0 z-10 backdrop-blur-[1.5px]" />
 
             {/* Text Content */}
             <div className="primary-container absolute inset-0 z-20 flex h-full w-full flex-col items-center justify-center text-center">

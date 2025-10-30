@@ -159,7 +159,7 @@ export default function BlogPost({ blog }: Props) {
                 </nav>
                 {/* Hero Section with Featured Image */}
                 <section
-                    className={`relative overflow-hidden ${blog.display_image ? '' : 'from-brand-orange via-brand-gold to-brand-orange bg-gradient-to-br'}`}
+                    className={`relative overflow-hidden ${blog.display_image ? '' : 'from-brand-orange via-brand-orange to-brand-orange bg-gradient-to-br'}`}
                 >
                     {/* Featured Image Background */}
                     {blog.display_image && (
@@ -183,7 +183,7 @@ export default function BlogPost({ blog }: Props) {
                                 <div className="flex flex-wrap items-center gap-2">
                                     <Badge className="border-white/30 bg-white/20 text-white">{blog.status_label}</Badge>
                                     {blog.isPrimary && (
-                                        <Badge className="from-brand-orange to-brand-gold border-0 bg-gradient-to-r text-white">⭐ Featured</Badge>
+                                        <Badge className="from-brand-orange to-brand-orange border-0 bg-gradient-to-r text-white">⭐ Featured</Badge>
                                     )}
                                 </div>
 
@@ -224,7 +224,7 @@ export default function BlogPost({ blog }: Props) {
                 </section>
 
                 {/* Back to Blog */}
-                <section className="from-brand-orange to-brand-gold bg-gradient-to-r py-12">
+                <section className="from-brand-orange to-brand-orange bg-gradient-to-r py-12">
                     <div className="container mx-auto max-w-4xl px-4 text-center">
                         <Link href="/blog">
                             <Button className="text-brand-orange rounded-xl bg-white px-8 py-3 shadow-lg hover:bg-gray-100">

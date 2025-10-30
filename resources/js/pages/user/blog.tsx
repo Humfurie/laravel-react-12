@@ -86,14 +86,14 @@ function EnhancedBlogCard({ blog, size = 'normal', showStats = true }: { blog: B
                     />
                     {blog.isPrimary && (
                         <div className="absolute top-4 left-4">
-                            <Badge className="from-brand-orange to-brand-gold rounded-full bg-gradient-to-r px-4 py-2 text-white shadow-xl">
+                            <Badge className="bg-brand-green hover:bg-brand-green/90 rounded-full px-4 py-2 text-white shadow-xl">
                                 <Star className="mr-1 h-3 w-3" />
                                 Featured
                             </Badge>
                         </div>
                     )}
                     {showStats && (
-                        <div className="from-brand-orange/90 to-brand-gold/90 absolute right-4 bottom-4 flex items-center gap-1 rounded-xl bg-gradient-to-r px-3 py-2 text-xs text-white shadow-lg">
+                        <div className="from-brand-orange/90 to-brand-orange/90 absolute right-4 bottom-4 flex items-center gap-1 rounded-xl bg-gradient-to-r px-3 py-2 text-xs text-white shadow-lg">
                             <Eye className="h-3 w-3" />
                             {viewCount}
                         </div>
@@ -107,7 +107,7 @@ function EnhancedBlogCard({ blog, size = 'normal', showStats = true }: { blog: B
                             {blog.status_label}
                         </Badge>
                         {blog.isPrimary && !blog.display_image && (
-                            <Badge className="from-brand-orange to-brand-gold rounded-full bg-gradient-to-r px-4 py-1 text-white shadow-lg">
+                            <Badge className="bg-brand-green hover:bg-brand-green/90 rounded-full px-4 py-1 text-white shadow-lg">
                                 <Star className="mr-1 h-3 w-3" />
                                 Featured
                             </Badge>
@@ -139,7 +139,7 @@ function EnhancedBlogCard({ blog, size = 'normal', showStats = true }: { blog: B
                                 </span>
                             )}
                         </div>
-                        <span className="text-brand-orange hover:text-brand-gold flex items-center gap-1 font-semibold transition-all group-hover:gap-2">
+                        <span className="text-brand-orange hover:text-brand-orange flex items-center gap-1 font-semibold transition-all group-hover:gap-2">
                             Read more
                             <span className="transform transition-transform group-hover:translate-x-1">→</span>
                         </span>
@@ -278,7 +278,7 @@ export default function BlogIndex({ blogs }: Props) {
                                         onClick={() => setActiveItem(item.id)}
                                         className={`group relative flex items-center space-x-2 rounded-full px-5 py-3 transition-all duration-200 ${
                                             isActive
-                                                ? 'scale-105 bg-orange-500 text-white shadow-md'
+                                                ? 'bg-brand-orange scale-105 text-white shadow-md'
                                                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                         }`}
                                         title={item.label}
@@ -300,7 +300,7 @@ export default function BlogIndex({ blogs }: Props) {
                 </nav>
 
                 {/* Header Section */}
-                <section className="from-brand-orange via-brand-gold to-brand-orange relative overflow-hidden bg-gradient-to-br py-16 text-white">
+                <section className="from-brand-orange via-brand-orange to-brand-orange relative overflow-hidden bg-gradient-to-br pt-28 pb-16 text-white">
                     <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent"></div>
                     <div className="relative z-10">
                         <div className="container mx-auto px-4">
@@ -325,7 +325,7 @@ export default function BlogIndex({ blogs }: Props) {
                                 <div className="mt-6">
                                     <Button
                                         onClick={() => router.visit('/')}
-                                        className="from-brand-orange to-brand-gold rounded-xl bg-gradient-to-r px-6 py-3 text-white"
+                                        className="from-brand-orange to-brand-orange rounded-xl bg-gradient-to-r px-6 py-3 text-white"
                                     >
                                         Back to Home
                                     </Button>
@@ -349,7 +349,7 @@ export default function BlogIndex({ blogs }: Props) {
                                                     onClick={() => router.visit(`/blog?page=${page}`)}
                                                     className={`transform rounded-xl px-4 py-3 font-semibold transition-all duration-300 hover:scale-105 ${
                                                         page === blogs.current_page
-                                                            ? 'from-brand-orange to-brand-gold bg-gradient-to-r text-white shadow-xl'
+                                                            ? 'from-brand-orange to-brand-orange bg-gradient-to-r text-white shadow-xl'
                                                             : 'hover:bg-brand-orange/10 hover:text-brand-orange border border-gray-200 bg-white text-gray-600 shadow-md hover:shadow-lg'
                                                     } `}
                                                 >
@@ -370,7 +370,7 @@ export default function BlogIndex({ blogs }: Props) {
                         <p className="mb-4 text-gray-600">Looking for featured content and highlights?</p>
                         <Button
                             onClick={() => router.visit('/')}
-                            className="from-brand-orange to-brand-gold hover:from-brand-orange/90 hover:to-brand-gold/90 transform rounded-2xl bg-gradient-to-r px-8 py-3 text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                            className="from-brand-orange to-brand-orange hover:from-brand-orange/90 hover:to-brand-orange/90 transform rounded-2xl bg-gradient-to-r px-8 py-3 text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
                         >
                             ← Back to Home
                         </Button>

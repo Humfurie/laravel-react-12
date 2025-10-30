@@ -16,11 +16,11 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, getCate
             {/* Mobile dropdown */}
             <div className="relative mb-4 w-full md:hidden">
                 <button
-                    className="text-brand-black border-muted-black/30 flex w-full cursor-pointer items-center justify-between rounded-[16px] border bg-white px-4 py-2 text-left"
+                    className="text-brand-black border-muted-brown/30 flex w-full cursor-pointer items-center justify-between rounded-[16px] border bg-white px-4 py-2 text-left"
                     onClick={() => setOpen(!open)}
                 >
                     <span>{activeCategory === 'all' ? 'All' : getCategoryName(activeCategory)}</span>
-                    <span className="text-muted-black ml-2">{open ? <MdKeyboardArrowUp /> : <MdOutlineKeyboardArrowDown />}</span>
+                    <span className="text-brand-gray ml-2">{open ? <MdKeyboardArrowUp /> : <MdOutlineKeyboardArrowDown />}</span>
                 </button>
 
                 {open && (
@@ -33,7 +33,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, getCate
                                     setOpen(false);
                                 }}
                                 className={`cursor-pointer px-4 py-2 transition-colors ${
-                                    activeCategory === category ? 'bg-brand-orange text-white' : 'hover:bg-muted-black/5'
+                                    activeCategory === category ? 'bg-brand-orange text-white' : 'hover:bg-muted-orange/20'
                                 }`}
                             >
                                 {category === 'all' ? 'All' : getCategoryName(category)}
@@ -52,7 +52,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, getCate
                         className={`rounded-full border px-4 py-2 transition-all duration-200 ${
                             activeCategory === category
                                 ? 'bg-brand-orange text-white'
-                                : 'text-muted-black border-muted-black/20 hover:bg-muted-black/5 bg-white'
+                                : 'text-brand-gray border-muted-brown/20 hover:bg-muted-orange/20 bg-white'
                         }`}
                     >
                         {category === 'all' ? 'All' : getCategoryName(category)}

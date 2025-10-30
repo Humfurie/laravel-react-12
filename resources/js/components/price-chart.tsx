@@ -91,7 +91,7 @@ export default function PriceChart({ coinId, symbol, type, initialDays = 7, init
         if (active && payload && payload.length) {
             return (
                 <div className="bg-brand-black border-brand-orange/20 rounded-lg border p-3 shadow-lg">
-                    <p className="text-muted-white mb-1 text-sm">{formatDate(payload[0].payload.date)}</p>
+                    <p className="text-brand-offwhite mb-1 text-sm">{formatDate(payload[0].payload.date)}</p>
                     <p className="text-brand-white text-lg font-bold">{formatPrice(payload[0].value)}</p>
                 </div>
             );
@@ -113,7 +113,7 @@ export default function PriceChart({ coinId, symbol, type, initialDays = 7, init
                         className={`rounded-lg px-4 py-2 font-medium transition-colors ${
                             selectedPeriod === period.value
                                 ? 'bg-brand-orange text-white'
-                                : 'bg-brand-black border-brand-orange/20 text-muted-white hover:bg-brand-orange/10 border'
+                                : 'bg-brand-black border-brand-orange/20 text-brand-offwhite hover:bg-brand-orange/10 border'
                         }`}
                     >
                         {period.label}
@@ -128,7 +128,7 @@ export default function PriceChart({ coinId, symbol, type, initialDays = 7, init
                         <div className="border-brand-orange h-12 w-12 animate-spin rounded-full border-b-2"></div>
                     </div>
                 ) : chartData.length === 0 ? (
-                    <div className="text-muted-white flex h-full items-center justify-center">
+                    <div className="text-brand-offwhite flex h-full items-center justify-center">
                         <p>No chart data available</p>
                     </div>
                 ) : (
