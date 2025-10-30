@@ -123,6 +123,7 @@ class User extends Authenticatable implements JWTSubject
             'role',
             'permission',
             'experience',
+            'expertise',
             'skills',
             'technology',
         ];
