@@ -31,7 +31,7 @@ const socialsData: SocialAtt[] = [
         icon: <Github />,
         name: 'GitHub',
         url: 'https://github.com/Humfurie',
-        className: 'text-brand-black hover:text-muted-black',
+        className: 'text-brand-black hover:text-brand-gray',
     },
 ];
 

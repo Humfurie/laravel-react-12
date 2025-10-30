@@ -71,9 +71,9 @@ const HomeAboutMe: React.FC = () => {
                             ) : (
                                 <>
                                     <span className="text-brand-orange text-[40px] font-bold lg:text-[60px]">
-                                        {item.count} <span className="text-muted-black">+</span>
+                                        {item.count} <span className="text-brand-gray">+</span>
                                     </span>
-                                    <span className="text-muted-black">{item.label}</span>
+                                    <span className="text-brand-gray">{item.label}</span>
                                 </>
                             )}
                         </motion.div>

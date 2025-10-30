@@ -124,7 +124,7 @@ export default function ConsentBanner() {
                                     {/* Accept All Button */}
                                     <Button
                                         onClick={handleAcceptAll}
-                                        className="from-brand-orange to-brand-gold w-full transform bg-gradient-to-r text-white shadow-md transition-all hover:scale-105 hover:shadow-lg sm:w-auto"
+                                        className="from-brand-orange to-brand-orange w-full transform bg-gradient-to-r text-white shadow-md transition-all hover:scale-105 hover:shadow-lg sm:w-auto"
                                     >
                                         <Shield className="mr-2 h-4 w-4" />
                                         Accept All

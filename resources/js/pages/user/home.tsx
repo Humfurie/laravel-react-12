@@ -271,7 +271,7 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
                     <div className="text-center">
                         <button
                             onClick={() => router.visit('/blog')}
-                            className="from-brand-orange to-brand-gold hover:from-brand-orange/90 hover:to-brand-gold/90 inline-flex transform items-center rounded-xl bg-gradient-to-r px-6 py-3 text-white shadow-lg transition-all duration-300 hover:scale-105"
+                            className="from-brand-orange to-brand-orange hover:from-brand-orange/90 hover:to-brand-orange/90 inline-flex transform items-center rounded-xl bg-gradient-to-r px-6 py-3 text-white shadow-lg transition-all duration-300 hover:scale-105"
                         >
                             View All Posts
                         </button>

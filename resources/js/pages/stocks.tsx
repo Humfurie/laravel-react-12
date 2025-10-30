@@ -155,7 +155,7 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                 <div className="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6 lg:px-6 lg:py-8">
                     <div className="mb-6 text-center sm:mb-8">
                         <h1 className="text-brand-white mb-2 text-xl font-bold sm:text-2xl lg:text-4xl">Stock Market</h1>
-                        <p className="text-muted-white text-xs sm:text-sm lg:text-base">Real-time stock prices and market data</p>
+                        <p className="text-brand-offwhite text-xs sm:text-sm lg:text-base">Real-time stock prices and market data</p>
                     </div>
                     <div className="flex flex-col gap-4 sm:gap-6">
                         {/* Market Indices */}
@@ -169,7 +169,7 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                                             className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-3 sm:p-4 lg:p-6"
                                         >
                                             <div className="space-y-1 sm:space-y-2">
-                                                <p className="text-muted-white text-[10px] sm:text-xs lg:text-sm">{index.name}</p>
+                                                <p className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">{index.name}</p>
                                                 <p className="text-brand-white text-base font-bold sm:text-lg lg:text-2xl">
                                                     {formatCurrency(index.price)}
                                                 </p>
@@ -210,7 +210,7 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                                                             <p className="text-brand-orange font-mono text-xs font-bold sm:text-sm lg:text-base">
                                                                 {stock.symbol}
                                                             </p>
-                                                            <p className="text-muted-white truncate text-[10px] sm:text-xs lg:text-sm">
+                                                            <p className="text-brand-offwhite truncate text-[10px] sm:text-xs lg:text-sm">
                                                                 {stock.name}
                                                             </p>
                                                         </div>
@@ -244,7 +244,7 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                                                             <p className="text-brand-orange font-mono text-xs font-bold sm:text-sm lg:text-base">
                                                                 {stock.symbol}
                                                             </p>
-                                                            <p className="text-muted-white truncate text-[10px] sm:text-xs lg:text-sm">
+                                                            <p className="text-brand-offwhite truncate text-[10px] sm:text-xs lg:text-sm">
                                                                 {stock.name}
                                                             </p>
                                                         </div>
@@ -269,7 +269,7 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             <Card className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-3 sm:p-4 lg:p-6">
                                 <div className="space-y-1 sm:space-y-2">
-                                    <p className="text-muted-white text-[10px] sm:text-xs lg:text-sm">Total Market Cap</p>
+                                    <p className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">Total Market Cap</p>
                                     <p className="text-brand-white text-base font-bold sm:text-lg lg:text-3xl">{formatLargeNumber(totalMarketCap)}</p>
                                 </div>
                             </Card>
@@ -281,7 +281,7 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                                 }`}
                             >
                                 <div className="space-y-1 sm:space-y-2">
-                                    <p className="text-muted-white text-[10px] sm:text-xs lg:text-sm">Avg Change</p>
+                                    <p className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">Avg Change</p>
                                     <div className="flex items-center gap-1 sm:gap-2">
                                         <p
                                             className={`text-base font-bold sm:text-lg lg:text-3xl ${avgChange >= 0 ? 'text-green-400' : 'text-red-400'}`}
@@ -298,7 +298,7 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                             </Card>
                             <Card className="border-brand-orange/20 from-brand-black to-muted-black bg-gradient-to-br p-3 sm:col-span-2 sm:p-4 lg:col-span-1 lg:p-6">
                                 <div className="space-y-1 sm:space-y-2">
-                                    <p className="text-muted-white text-[10px] sm:text-xs lg:text-sm">Total Volume</p>
+                                    <p className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">Total Volume</p>
                                     <p className="text-brand-white text-base font-bold sm:text-lg lg:text-3xl">{formatLargeNumber(totalVolume)}</p>
                                 </div>
                             </Card>
@@ -310,7 +310,7 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                         {/* Table Controls */}
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                             <div className="flex items-center gap-1.5 sm:gap-2">
-                                <span className="text-muted-white text-[10px] sm:text-xs lg:text-sm">Show</span>
+                                <span className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">Show</span>
                                 <Select value={perPage.toString()} onValueChange={(value) => setPerPage(Number(value))}>
                                     <SelectTrigger className="border-brand-orange/20 bg-brand-black text-brand-white h-8 w-[70px] text-xs sm:h-9 sm:w-[80px] sm:text-sm lg:w-[100px]">
                                         <SelectValue />
@@ -321,7 +321,7 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                                         <SelectItem value="1000">1000</SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <span className="text-muted-white text-[10px] sm:text-xs lg:text-sm">entries</span>
+                                <span className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">entries</span>
                             </div>
 
                             <div className="flex items-center justify-center gap-1.5 sm:gap-2">
@@ -334,7 +334,7 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                                 >
                                     Prev
                                 </Button>
-                                <span className="text-muted-white text-[10px] sm:text-xs lg:text-sm">
+                                <span className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">
                                     {currentPage}/{totalPages}
                                 </span>
                                 <Button
@@ -443,7 +443,9 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                                                 <TableCell className="text-brand-white text-[10px] sm:text-xs lg:text-sm">
                                                     {stock.volume.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                                 </TableCell>
-                                                <TableCell className="text-muted-white text-[10px] sm:text-xs lg:text-sm">{stock.exchange}</TableCell>
+                                                <TableCell className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">
+                                                    {stock.exchange}
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -452,7 +454,7 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                         </Card>
 
                         {/* Table Info */}
-                        <div className="text-muted-white text-[10px] sm:text-xs lg:text-sm">
+                        <div className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">
                             Showing {startIndex + 1} to {Math.min(startIndex + perPage, sortedData.length)} of {sortedData.length} entries
                         </div>
                     </div>
@@ -474,21 +476,21 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                             {/* Price Info */}
                             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                                 <div className="from-brand-orange/10 border-brand-orange/20 rounded-lg border bg-gradient-to-br to-transparent p-4">
-                                    <p className="text-muted-white mb-1 text-sm">Current Price</p>
+                                    <p className="text-brand-offwhite mb-1 text-sm">Current Price</p>
                                     <p className="text-2xl font-bold">{formatCurrency(selectedStock.price)}</p>
                                 </div>
                                 <div className="from-brand-orange/10 border-brand-orange/20 rounded-lg border bg-gradient-to-br to-transparent p-4">
-                                    <p className="text-muted-white mb-1 text-sm">Change</p>
+                                    <p className="text-brand-offwhite mb-1 text-sm">Change</p>
                                     <p className={`text-2xl font-bold ${selectedStock.changesPercentage >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                         {formatPercent(selectedStock.changesPercentage)}
                                     </p>
                                 </div>
                                 <div className="from-brand-orange/10 border-brand-orange/20 rounded-lg border bg-gradient-to-br to-transparent p-4">
-                                    <p className="text-muted-white mb-1 text-sm">Market Cap</p>
+                                    <p className="text-brand-offwhite mb-1 text-sm">Market Cap</p>
                                     <p className="text-xl font-bold">{formatLargeNumber(selectedStock.marketCap)}</p>
                                 </div>
                                 <div className="from-brand-orange/10 border-brand-orange/20 rounded-lg border bg-gradient-to-br to-transparent p-4">
-                                    <p className="text-muted-white mb-1 text-sm">Volume</p>
+                                    <p className="text-brand-offwhite mb-1 text-sm">Volume</p>
                                     <p className="text-xl font-bold">
                                         {selectedStock.volume.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                     </p>
@@ -499,40 +501,40 @@ export default function Stocks({ stockData, indices, gainers, losers, pagination
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">Day High</span>
+                                        <span className="text-brand-offwhite">Day High</span>
                                         <span className="font-semibold">{formatCurrency(selectedStock.dayHigh)}</span>
                                     </div>
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">Day Low</span>
+                                        <span className="text-brand-offwhite">Day Low</span>
                                         <span className="font-semibold">{formatCurrency(selectedStock.dayLow)}</span>
                                     </div>
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">Open</span>
+                                        <span className="text-brand-offwhite">Open</span>
                                         <span className="font-semibold">{formatCurrency(selectedStock.open)}</span>
                                     </div>
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">Previous Close</span>
+                                        <span className="text-brand-offwhite">Previous Close</span>
                                         <span className="font-semibold">{formatCurrency(selectedStock.previousClose)}</span>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">52 Week High</span>
+                                        <span className="text-brand-offwhite">52 Week High</span>
                                         <span className="font-semibold">{formatCurrency(selectedStock.yearHigh)}</span>
                                     </div>
                                     <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                        <span className="text-muted-white">52 Week Low</span>
+                                        <span className="text-brand-offwhite">52 Week Low</span>
                                         <span className="font-semibold">{formatCurrency(selectedStock.yearLow)}</span>
                                     </div>
                                     {selectedStock.pe && (
                                         <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                            <span className="text-muted-white">P/E Ratio</span>
+                                            <span className="text-brand-offwhite">P/E Ratio</span>
                                             <span className="font-semibold">{selectedStock.pe.toFixed(2)}</span>
                                         </div>
                                     )}
                                     {selectedStock.eps && (
                                         <div className="border-brand-orange/10 flex justify-between border-b pb-2">
-                                            <span className="text-muted-white">EPS</span>
+                                            <span className="text-brand-offwhite">EPS</span>
                                             <span className="font-semibold">{formatCurrency(selectedStock.eps)}</span>
                                         </div>
                                     )}

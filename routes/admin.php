@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ExpertiseController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RealEstateController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ExperienceController;
 
@@ -112,7 +113,6 @@ Route::prefix('experiences')->name('admin.experiences.')->group(function () {
     Route::get('/', [ExperienceController::class, 'index'])->name('index');
     Route::get('/create', [ExperienceController::class, 'create'])->name('create');
     Route::post('/', [ExperienceController::class, 'store'])->name('store');
-    Route::get('/{experience}', [ExperienceController::class, 'show'])->name('show');
     Route::get('/{experience}/edit', [ExperienceController::class, 'edit'])->name('edit');
     Route::put('/{experience}', [ExperienceController::class, 'update'])->name('update');
     Route::delete('/{experience}', [ExperienceController::class, 'destroy'])->name('destroy');
@@ -126,4 +126,10 @@ Route::prefix('expertises')->name('admin.expertises.')->group(function () {
     Route::put('/{expertise}', [ExpertiseController::class, 'update'])->name('update');
     Route::delete('/{expertise}', [ExpertiseController::class, 'destroy'])->name('destroy');
     Route::post('/reorder', [ExpertiseController::class, 'reorder'])->name('reorder');
+});
+
+Route::prefix('settings')->name('admin.settings.')->group(function () {
+    Route::get('/', [SettingsController::class, 'index'])->name('index');
+    Route::post('/', [SettingsController::class, 'update'])->name('update');
+    Route::post('/upload/{key}', [SettingsController::class, 'uploadFile'])->name('upload');
 });
