@@ -10,7 +10,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $role = Role::where('slug', 'admin')->first();
+        $role = Role::where('slug', 'super-admin')->first();
 
         $user = User::firstOrCreate(
             ['email' => config('app.user_account_email')],
