@@ -19,9 +19,14 @@ done
 
 echo "Database is ready!"
 
-# Run migrations (safe with --force in production)
-echo "Running migrations..."
-php artisan migrate --force --no-interaction
+# Run migrations only if needed (check if migrations table exists and has pending migrations)
+echo "Checking for pending migrations..."
+if php artisan migrate:status 2>/dev/null | grep -q "Pending"; then
+    echo "Running migrations..."
+    php artisan migrate --force --no-interaction
+else
+    echo "No pending migrations. Skipping..."
+fi
 
 # Create storage symlink (idempotent - safe to run multiple times)
 echo "Creating storage symlink..."
