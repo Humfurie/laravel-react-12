@@ -160,7 +160,7 @@ export const ExperienceSection = ({ experiences = fallbackExperiences }: Experie
             <SectionTitle title={'Experience'} />
 
             <div className="primary-container">
-                <div className="text-muted-black mb-12 w-full text-center">My professional journey in the tech industry.</div>
+                <div className="text-brand-gray mb-12 w-full text-center">My professional journey in the tech industry.</div>
 
                 <div className="relative mx-auto mt-12 mb-12 w-full lg:mt-[80px]">
                     {/* Vertical line */}
@@ -189,12 +189,12 @@ export const ExperienceSection = ({ experiences = fallbackExperiences }: Experie
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-brand-orange mb-1 text-[28px] leading-tight font-semibold">{experience.position}</p>
-                                    <p className="text-muted-black max-md:text-sm">{experience.company}</p>
+                                    <p className="text-brand-gray max-md:text-sm">{experience.company}</p>
                                 </div>
                             </div>
-                            <p className="text-muted-black mb-3 flex items-center">{experience.location}</p>
+                            <p className="text-brand-gray mb-3 flex items-center">{experience.location}</p>
 
-                            <div className="text-muted-black mb-4 flex flex-col rounded-lg bg-gray-50 p-3 max-md:text-sm sm:flex-row sm:justify-between">
+                            <div className="text-brand-gray mb-4 flex flex-col rounded-lg bg-gray-50 p-3 max-md:text-sm sm:flex-row sm:justify-between">
                                 <span className="mb-1 sm:mb-0">
                                     {formatMonthYear(experience.start_month, experience.start_year)} -{' '}
                                     {experience.is_current_position ? 'Present' : formatMonthYear(experience.end_month!, experience.end_year!)}
@@ -210,7 +210,7 @@ export const ExperienceSection = ({ experiences = fallbackExperiences }: Experie
                                 </span>
                             </div>
 
-                            <div className="text-muted-black">
+                            <div className="text-brand-gray">
                                 <ul className="space-y-2">
                                     {experience.description.map((point, i) => (
                                         <li key={i} className="flex items-start leading-relaxed">

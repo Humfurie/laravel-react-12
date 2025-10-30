@@ -118,7 +118,7 @@ export default function ConsentModal({ onClose, onSave }: ConsentModalProps) {
             <div className="animate-in fade-in zoom-in fixed top-1/2 left-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 transform">
                 <div className="m-4 max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900">
                     {/* Header */}
-                    <div className="from-brand-orange to-brand-gold flex items-center justify-between bg-gradient-to-r p-6 text-white">
+                    <div className="from-brand-orange to-brand-orange flex items-center justify-between bg-gradient-to-r p-6 text-white">
                         <div className="flex items-center gap-3">
                             <div className="rounded-full bg-white/20 p-3">
                                 <SettingsIcon className="h-6 w-6" />
@@ -178,7 +178,7 @@ export default function ConsentModal({ onClose, onSave }: ConsentModalProps) {
                                                 <div
                                                     className={`mt-1 rounded-full p-2 ${
                                                         isEnabled
-                                                            ? 'from-brand-orange to-brand-gold bg-gradient-to-r text-white'
+                                                            ? 'from-brand-orange to-brand-orange bg-gradient-to-r text-white'
                                                             : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600'
                                                     }`}
                                                 >
@@ -192,7 +192,7 @@ export default function ConsentModal({ onClose, onSave }: ConsentModalProps) {
                                             <button
                                                 onClick={() => togglePreference(category.id)}
                                                 className={`relative h-10 w-16 shrink-0 rounded-full transition-colors ${
-                                                    isEnabled ? 'from-brand-orange to-brand-gold bg-gradient-to-r' : 'bg-gray-300 dark:bg-gray-700'
+                                                    isEnabled ? 'from-brand-orange to-brand-orange bg-gradient-to-r' : 'bg-gray-300 dark:bg-gray-700'
                                                 }`}
                                                 aria-label={`Toggle ${category.title}`}
                                             >
@@ -216,7 +216,7 @@ export default function ConsentModal({ onClose, onSave }: ConsentModalProps) {
                                 <Button onClick={handleRejectAll} variant="outline" className="w-full sm:w-auto">
                                     Reject All
                                 </Button>
-                                <Button onClick={handleAcceptAll} className="from-brand-orange to-brand-gold w-full bg-gradient-to-r sm:w-auto">
+                                <Button onClick={handleAcceptAll} className="from-brand-orange to-brand-orange w-full bg-gradient-to-r sm:w-auto">
                                     Accept All
                                 </Button>
                             </div>

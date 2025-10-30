@@ -17,7 +17,7 @@ const MyCard: React.FC<Card> = ({ imgUrl, title, excerpt }) => {
                 <div className="flex max-h-[75px] min-h-[75px] w-full items-center">
                     <h3 className="w-full py-2">{title}</h3>
                 </div>
-                <p className="text-muted-black line-clamp-2 pt-2">{excerpt}</p>
+                <p className="text-brand-gray line-clamp-2 pt-2">{excerpt}</p>
                 <ButtonOne text="Read More" type="button" className="btn-orange mt-4 w-full" />
             </div>
         </div>
