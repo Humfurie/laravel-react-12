@@ -31,50 +31,16 @@ export default defineConfig({
                         return undefined;
                     }
 
-                    // Core vendor code
-                    if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/@inertiajs/react')) {
-                        return 'vendor-react';
-                    }
-
-                    // Radix UI components
-                    if (id.includes('node_modules/@radix-ui/')) {
-                        return 'vendor-radix';
-                    }
-
-                    // TipTap editor
-                    if (id.includes('node_modules/@tiptap/')) {
-                        return 'vendor-tiptap';
-                    }
-
-                    // Charts
-                    if (id.includes('node_modules/recharts')) {
-                        return 'vendor-charts';
-                    }
-
-                    // Date utilities
-                    if (id.includes('node_modules/date-fns') || id.includes('node_modules/react-day-picker')) {
-                        return 'vendor-date';
-                    }
-
-                    // DnD kit
-                    if (id.includes('node_modules/@dnd-kit/')) {
-                        return 'vendor-dnd';
-                    }
-
-                    // UI utilities
-                    if (
-                        id.includes('node_modules/lucide-react') ||
-                        id.includes('node_modules/class-variance-authority') ||
-                        id.includes('node_modules/clsx') ||
-                        id.includes('node_modules/tailwind-merge')
-                    ) {
-                        return 'vendor-ui';
+                    // Don't split vendor code at all - put everything in one chunk
+                    // This is the safest approach to avoid dependency loading order issues
+                    if (id.includes('node_modules/')) {
+                        return 'vendor';
                     }
                 },
             },
         },
         // Increase chunk size warning limit
-        chunkSizeWarningLimit: 1000,
+        chunkSizeWarningLimit: 1500,
         // Enable minification
         minify: 'esbuild',
         // Target modern browsers for smaller bundle
