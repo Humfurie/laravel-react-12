@@ -20,6 +20,7 @@ export interface Permissions {
     role: ResourcePermissions;
     permission: ResourcePermissions;
     experience: ResourcePermissions;
+    expertise: ResourcePermissions;
     skills: ResourcePermissions;
     technology: ResourcePermissions;
 }
