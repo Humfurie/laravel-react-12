@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RealEstateController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\TaxonomyController;
+use App\Http\Controllers\Admin\TaxonomyTermController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ExperienceController;
 
@@ -132,4 +134,24 @@ Route::prefix('settings')->name('admin.settings.')->group(function () {
     Route::get('/', [SettingsController::class, 'index'])->name('index');
     Route::post('/', [SettingsController::class, 'update'])->name('update');
     Route::post('/upload/{key}', [SettingsController::class, 'uploadFile'])->name('upload');
+});
+
+Route::prefix('taxonomies')->name('admin.taxonomies.')->group(function () {
+    Route::get('/', [TaxonomyController::class, 'index'])->name('index');
+    Route::get('/create', [TaxonomyController::class, 'create'])->name('create');
+    Route::post('/', [TaxonomyController::class, 'store'])->name('store');
+    Route::get('/{taxonomy}', [TaxonomyController::class, 'show'])->name('show');
+    Route::get('/{taxonomy}/edit', [TaxonomyController::class, 'edit'])->name('edit');
+    Route::put('/{taxonomy}', [TaxonomyController::class, 'update'])->name('update');
+    Route::delete('/{taxonomy}', [TaxonomyController::class, 'destroy'])->name('destroy');
+});
+
+Route::prefix('taxonomy-terms')->name('admin.taxonomy-terms.')->group(function () {
+    Route::get('/', [TaxonomyTermController::class, 'index'])->name('index');
+    Route::get('/create', [TaxonomyTermController::class, 'create'])->name('create');
+    Route::post('/', [TaxonomyTermController::class, 'store'])->name('store');
+    Route::get('/{taxonomyTerm}', [TaxonomyTermController::class, 'show'])->name('show');
+    Route::get('/{taxonomyTerm}/edit', [TaxonomyTermController::class, 'edit'])->name('edit');
+    Route::put('/{taxonomyTerm}', [TaxonomyTermController::class, 'update'])->name('update');
+    Route::delete('/{taxonomyTerm}', [TaxonomyTermController::class, 'destroy'])->name('destroy');
 });

@@ -12,7 +12,11 @@ class ExpertiseFactory extends Factory
     public function definition(): array
     {
         return [
-
+            'name' => fake()->words(2, true),
+            'image' => 'storage/images/techstack/' . fake()->word() . '.png',
+            'category_slug' => fake()->randomElement(['be', 'fe', 'td']),
+            'order' => fake()->numberBetween(0, 100),
+            'is_active' => fake()->boolean(80),
         ];
     }
 }

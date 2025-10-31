@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { Link, usePage } from '@inertiajs/react';
 import React, { useMemo } from 'react';
 import type { Permissions } from '@/types';
-import { BookOpen, Briefcase, Building, Code2, FileText, LayoutGrid, Shield, Users } from 'lucide-react';
+import { BookOpen, Briefcase, Building, Code2, FileText, FolderTree, LayoutGrid, Shield, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 interface NavItem {
@@ -45,6 +45,12 @@ const allNavItems: NavItem[] = [
         href: '/admin/expertises',
         icon: Code2,
         requiredPermission: 'expertise',
+    },
+    {
+        title: 'Taxonomy Management',
+        href: '/admin/taxonomies',
+        icon: FolderTree,
+        requiredPermission: 'taxonomy',
     },
     {
         title: 'User Management',

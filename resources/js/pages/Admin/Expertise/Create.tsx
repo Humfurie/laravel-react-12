@@ -1,3 +1,4 @@
+import { TaxonomySelect } from '@/components/TaxonomySelect';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,8 +15,24 @@ interface Category {
     slug: string;
 }
 
+interface TaxonomyTerm {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+}
+
+interface Taxonomy {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    terms: TaxonomyTerm[];
+}
+
 interface Props {
     categories: Category[];
+    taxonomies: Taxonomy[];
 }
 
 type ExpertiseFormData = {
@@ -24,9 +41,10 @@ type ExpertiseFormData = {
     category_slug: string;
     order: number;
     is_active: boolean;
+    term_ids: number[];
 };
 
-export default function Create({ categories }: Props) {
+export default function Create({ categories, taxonomies }: Props) {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -36,6 +54,7 @@ export default function Create({ categories }: Props) {
         category_slug: categories[0]?.slug || '',
         order: 0,
         is_active: true,
+        term_ids: [],
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -180,6 +199,18 @@ export default function Create({ categories }: Props) {
                                 </div>
                                 <Switch id="is_active" checked={data.is_active} onCheckedChange={(checked) => setData('is_active', checked)} />
                             </div>
+
+                            {/* Taxonomy Terms */}
+                            {taxonomies.length > 0 && (
+                                <div className="space-y-2">
+                                    <TaxonomySelect
+                                        taxonomies={taxonomies}
+                                        selectedTermIds={data.term_ids}
+                                        onChange={(termIds) => setData('term_ids', termIds)}
+                                        error={errors.term_ids as string}
+                                    />
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use InvalidArgumentException;
 
 class ExpertiseController extends Controller
 {
@@ -41,6 +42,8 @@ class ExpertiseController extends Controller
             'category_slug' => ['required', 'string', Rule::in(['be', 'fe', 'td'])],
             'order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
+            'term_ids' => 'nullable|array',
+            'term_ids.*' => 'exists:taxonomy_terms,id',
         ]);
 
         // Handle image upload
@@ -53,7 +56,21 @@ class ExpertiseController extends Controller
             $validated['image'] = 'storage/images/techstack/' . $filename;
         }
 
-        Expertise::create($validated);
+        $expertise = Expertise::create($validated);
+
+        // Sync taxonomy terms
+        if (!empty($validated['term_ids'])) {
+            try {
+                $expertise->syncTerms($validated['term_ids']);
+            } catch (InvalidArgumentException $e) {
+                // Delete the created expertise since term validation failed
+                $expertise->delete();
+
+                return back()->withErrors([
+                    'term_ids' => $e->getMessage()
+                ])->withInput();
+            }
+        }
 
         return redirect()
             ->route('admin.expertises.index')
@@ -67,6 +84,8 @@ class ExpertiseController extends Controller
     {
         $this->authorize('create', Expertise::class);
 
+        $expertise = new Expertise();
+
         $categories = [
             ['name' => 'Backend', 'slug' => 'be'],
             ['name' => 'Frontend', 'slug' => 'fe'],
@@ -75,6 +94,7 @@ class ExpertiseController extends Controller
 
         return Inertia::render('Admin/Expertise/Create', [
             'categories' => $categories,
+            'taxonomies' => $expertise->getConfiguredTaxonomies(),
         ]);
     }
 
@@ -94,6 +114,8 @@ class ExpertiseController extends Controller
         return Inertia::render('Admin/Expertise/Edit', [
             'expertise' => $expertise,
             'categories' => $categories,
+            'taxonomies' => $expertise->getConfiguredTaxonomies(),
+            'selectedTermIds' => $expertise->getAssignedTermIds(),
         ]);
     }
 
@@ -142,6 +164,8 @@ class ExpertiseController extends Controller
             'category_slug' => ['required', 'string', Rule::in(['be', 'fe', 'td'])],
             'order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
+            'term_ids' => 'nullable|array',
+            'term_ids.*' => 'exists:taxonomy_terms,id',
         ]);
 
         // Handle image upload if file is provided
@@ -154,7 +178,24 @@ class ExpertiseController extends Controller
             $validated['image'] = 'storage/images/techstack/' . $filename;
         }
 
+        // Validate taxonomy terms BEFORE updating
+        if (isset($validated['term_ids'])) {
+            try {
+                // Just validate without syncing yet
+                $expertise->validateTermIds($validated['term_ids']);
+            } catch (InvalidArgumentException $e) {
+                return back()->withErrors([
+                    'term_ids' => $e->getMessage()
+                ])->withInput();
+            }
+        }
+
         $expertise->update($validated);
+
+        // Now sync taxonomy terms (validation already passed)
+        if (isset($validated['term_ids'])) {
+            $expertise->syncTerms($validated['term_ids']);
+        }
 
         return redirect()
             ->route('admin.expertises.index')
