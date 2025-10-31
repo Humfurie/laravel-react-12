@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
@@ -52,7 +51,7 @@ class BlogController extends Controller
 
             // Get stats in a single query using aggregates
             $stats = Blog::published()
-                ->selectRaw('COUNT(*) as total_posts, SUM(view_count) as total_views, SUM(CASE WHEN "isPrimary" = true THEN 1 ELSE 0 END) as featured_count')
+                ->selectRaw('COUNT(*) as total_posts, SUM(view_count) as total_views, SUM(CASE WHEN "isPrimary" = ? THEN 1 ELSE 0 END) as featured_count', [true])
                 ->first();
 
             return [
