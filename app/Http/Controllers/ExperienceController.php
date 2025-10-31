@@ -34,7 +34,7 @@ class ExperienceController extends Controller
             ->ordered()
             ->get();
 
-        return Inertia::render('Admin/Experience/Index', [
+        return Inertia::render('admin/experience/index', [
             'experiences' => $experiences,
         ]);
     }
@@ -48,7 +48,7 @@ class ExperienceController extends Controller
 
         $experience->load('image');
 
-        return Inertia::render('Admin/Experience/Edit', [
+        return Inertia::render('admin/experience/edit', [
             'experience' => $experience,
         ]);
     }
@@ -113,7 +113,7 @@ class ExperienceController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/Experience/Create');
+        return Inertia::render('admin/experience/create');
     }
 
     /**
