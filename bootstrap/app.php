@@ -3,6 +3,7 @@
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -35,6 +36,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'permission' => CheckPermission::class,
         ]);
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        // Update raffle statuses based on dates every 5 minutes
+        $schedule->command('raffles:update-statuses')->everyFiveMinutes();
+
+        // Automatically select winners for ended raffles every hour
+        $schedule->command('raffles:select-winners')->hourly();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

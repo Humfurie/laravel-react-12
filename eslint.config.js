@@ -38,7 +38,25 @@ export default [
         },
     },
     {
-        ignores: ['vendor', 'node_modules', 'public', 'bootstrap/ssr', 'tailwind.config.js'],
+        ignores: [
+            // Test storage directories
+            'storage/framework/testing/',
+            // Other storage directories
+            'storage/',
+            // Build directories
+            'public/build/',
+            'public/hot',
+            // Dependencies
+            'node_modules/',
+            'vendor/',
+            // Environment files
+            '.env',
+            '.env.*',
+            // Bootstrap SSR
+            'bootstrap/ssr',
+            // Config files
+            'tailwind.config.js',
+        ],
     },
     prettier, // Turn off all rules that might conflict with Prettier
 ];

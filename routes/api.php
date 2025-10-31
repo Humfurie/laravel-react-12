@@ -77,4 +77,17 @@ Route::prefix('v1')->group(function () {
         Route::delete('expertises/{expertise}', [ExpertiseController::class, 'destroy'])->name('expertises.destroy');
         Route::post('expertises/reorder', [ExpertiseController::class, 'reorder'])->name('expertises.reorder');
     });
+
+    // Raffle public endpoints - higher rate limit (60 requests per minute)
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('raffles', [\App\Http\Controllers\Api\RaffleController::class, 'index'])->name('raffles.index');
+        Route::get('raffles/winners', [\App\Http\Controllers\Api\RaffleController::class, 'winners'])->name('raffles.winners');
+        Route::get('raffles/{raffle:slug}', [\App\Http\Controllers\Api\RaffleController::class, 'show'])->name('raffles.show');
+        Route::post('raffles/{raffle:slug}/check-phone', [\App\Http\Controllers\Api\RaffleController::class, 'checkPhone'])->name('raffles.check-phone');
+    });
+
+    // Raffle entry submission - moderate rate limit (10 requests per minute)
+    Route::middleware('throttle:10,1')->group(function () {
+        Route::post('raffles/{raffle:slug}/enter', [\App\Http\Controllers\Api\RaffleController::class, 'submitEntry'])->name('raffles.enter');
+    });
 });

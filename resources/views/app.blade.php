@@ -5,6 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
+        {{-- Google AdSense Account Verification --}}
+        @if(config('services.adsense.client_id'))
+            <meta name="google-adsense-account" content="{{ config('services.adsense.client_id') }}">
+        @endif
+
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
             (function() {
@@ -105,6 +110,13 @@
                     'send_page_view': false  // We'll handle page views manually for Inertia
                 });
             </script>
+        @endif
+
+        {{-- Google AdSense Script --}}
+        @if(config('services.adsense.client_id'))
+            <script async
+                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config('services.adsense.client_id') }}"
+                    crossorigin="anonymous"></script>
         @endif
 
         @routes

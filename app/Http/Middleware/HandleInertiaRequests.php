@@ -52,6 +52,11 @@ class HandleInertiaRequests extends Middleware
             ],
             'csrf_token' => csrf_token(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'adsense' => [
+                'client_id' => config('services.adsense.client_id'),
+                'enabled' => !empty(config('services.adsense.client_id')),
+                'slots' => config('services.adsense.slots'),
+            ],
         ];
     }
 }

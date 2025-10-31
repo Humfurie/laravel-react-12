@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\SitemapController;
-use App\Http\Controllers\User\BlogController;
 use App\Models\Experience;
 use App\Models\Expertise;
 use Illuminate\Support\Facades\Cache;
@@ -46,6 +46,14 @@ Route::get('/blog/{blog}', [BlogController::class, 'show'])->name('blog.show');
 // Property listing pages
 Route::get('/properties', [App\Http\Controllers\PropertyListingController::class, 'index'])->name('properties.list');
 Route::get('/properties/{property}', [App\Http\Controllers\PropertyListingController::class, 'show'])->name('properties.detail');
+
+// Raffle pages
+Route::get('/raffles', [App\Http\Controllers\RaffleController::class, 'index'])->name('raffles.index');
+Route::get('/raffles/winners', [App\Http\Controllers\RaffleController::class, 'winners'])->name('raffles.winners');
+Route::get('/raffles/{raffle:slug}', [App\Http\Controllers\RaffleController::class, 'show'])->name('raffles.show');
+Route::get('/raffles/{raffle:slug}/entries', [App\Http\Controllers\RaffleController::class, 'entries'])->name('raffles.entries');
+Route::post('/raffles/{raffle:slug}/activate', [App\Http\Controllers\RaffleController::class, 'activateRaffle'])->name('raffles.activate');
+Route::post('/raffles/{raffle:slug}/pick-winner', [App\Http\Controllers\RaffleController::class, 'startRaffle'])->name('raffles.pick-winner');
 
 // Public API for experiences
 Route::get('/api/experiences', [ExperienceController::class, 'public'])->name('experiences.public');

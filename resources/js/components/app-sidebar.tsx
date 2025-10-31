@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { Link, usePage } from '@inertiajs/react';
 import React, { useMemo } from 'react';
 import type { Permissions } from '@/types';
-import { BookOpen, Briefcase, Building, Code2, FileText, LayoutGrid, Shield, Users } from 'lucide-react';
+import { BookOpen, Briefcase, Building, Code2, FileText, LayoutGrid, Shield, Trophy, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 interface NavItem {
@@ -33,6 +33,12 @@ const allNavItems: NavItem[] = [
         href: '/admin/blogs',
         icon: FileText,
         requiredPermission: 'blog',
+    },
+    {
+        title: 'Raffle Management',
+        href: '/admin/raffles',
+        icon: Trophy,
+        requiredPermission: 'raffle',
     },
     {
         title: 'Experience Management',

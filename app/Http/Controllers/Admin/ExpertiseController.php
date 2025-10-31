@@ -23,7 +23,7 @@ class ExpertiseController extends Controller
 
         $expertises = Expertise::ordered()->get();
 
-        return Inertia::render('Admin/Expertise/Index', [
+        return Inertia::render('admin/expertise/index', [
             'expertises' => $expertises,
         ]);
     }
@@ -73,7 +73,7 @@ class ExpertiseController extends Controller
             ['name' => 'Tools & DevOps', 'slug' => 'td'],
         ];
 
-        return Inertia::render('Admin/Expertise/Create', [
+        return Inertia::render('admin/expertise/create', [
             'categories' => $categories,
         ]);
     }
@@ -91,7 +91,7 @@ class ExpertiseController extends Controller
             ['name' => 'Tools & DevOps', 'slug' => 'td'],
         ];
 
-        return Inertia::render('Admin/Expertise/Edit', [
+        return Inertia::render('admin/expertise/edit', [
             'expertise' => $expertise,
             'categories' => $categories,
         ]);
