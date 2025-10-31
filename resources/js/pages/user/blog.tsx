@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { Calendar, Eye, FileText, Home as HomeIcon, Star } from 'lucide-react';
+import { Calendar, Eye, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { publicNavItems } from '@/config/navigation';
 
 interface Blog {
     id: number;
@@ -170,11 +171,6 @@ export default function BlogIndex({ blogs }: Props) {
         return () => window.removeEventListener('scroll', updateScrollDirection);
     }, [isVisible]);
 
-    const navItems = [
-        { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true },
-        { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
-    ];
-
     return (
         <>
             <Head title="Blog">
@@ -267,7 +263,7 @@ export default function BlogIndex({ blogs }: Props) {
                 >
                     <div className="rounded-full border border-white/20 bg-white/80 px-6 py-4 shadow-lg backdrop-blur-md">
                         <div className="flex items-center space-x-3">
-                            {navItems.map((item, index) => {
+                            {publicNavItems.map((item, index) => {
                                 const Icon = item.icon;
                                 const isActive = activeItem === item.id;
 
