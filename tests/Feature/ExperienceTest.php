@@ -20,7 +20,7 @@ test('can list experiences for authenticated user', function () {
         ->get(route('admin.experiences.index'))
         ->assertOk()
         ->assertInertia(fn($page) => $page
-            ->component('Admin/Experience/Index')
+            ->component('admin/experience/index')
             ->has('experiences', 3)
         );
 });
@@ -37,7 +37,7 @@ test('can display create experience form', function () {
     $this->actingAs($this->user)
         ->get(route('admin.experiences.create'))
         ->assertOk()
-        ->assertInertia(fn($page) => $page->component('Admin/Experience/Create'));
+        ->assertInertia(fn($page) => $page->component('admin/experience/create'));
 });
 
 test('can store a new experience', function () {
@@ -126,7 +126,7 @@ test('can display edit experience form', function () {
         ->get(route('admin.experiences.edit', $experience))
         ->assertOk()
         ->assertInertia(fn($page) => $page
-            ->component('Admin/Experience/Edit')
+            ->component('admin/experience/edit')
             ->has('experience')
         );
 });
