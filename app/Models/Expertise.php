@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\HasTaxonomies;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Expertise extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTaxonomies;
+
+    // Uses convention: auto-gets "expertise-categories"
+    // No need to override taxonomies() method!
 
     protected $fillable = [
         'name',

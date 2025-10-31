@@ -1,3 +1,4 @@
+import { TaxonomySelect } from '@/components/TaxonomySelect';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,21 @@ interface Category {
     slug: string;
 }
 
+interface TaxonomyTerm {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+}
+
+interface Taxonomy {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    terms: TaxonomyTerm[];
+}
+
 interface Expertise {
     id: number;
     name: string;
@@ -27,6 +43,8 @@ interface Expertise {
 interface Props {
     expertise: Expertise;
     categories: Category[];
+    taxonomies: Taxonomy[];
+    selectedTermIds: number[];
 }
 
 type ExpertiseFormData = {
@@ -35,9 +53,10 @@ type ExpertiseFormData = {
     category_slug: string;
     order: number;
     is_active: boolean;
+    term_ids: number[];
 };
 
-export default function Edit({ expertise, categories }: Props) {
+export default function Edit({ expertise, categories, taxonomies, selectedTermIds }: Props) {
     const [imagePreview, setImagePreview] = useState<string | null>(expertise.image_url);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -47,6 +66,7 @@ export default function Edit({ expertise, categories }: Props) {
         category_slug: expertise.category_slug,
         order: expertise.order,
         is_active: expertise.is_active,
+        term_ids: selectedTermIds,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -196,6 +216,18 @@ export default function Edit({ expertise, categories }: Props) {
                                 </div>
                                 <Switch id="is_active" checked={data.is_active} onCheckedChange={(checked) => setData('is_active', checked)} />
                             </div>
+
+                            {/* Taxonomy Terms */}
+                            {taxonomies.length > 0 && (
+                                <div className="space-y-2">
+                                    <TaxonomySelect
+                                        taxonomies={taxonomies}
+                                        selectedTermIds={data.term_ids}
+                                        onChange={(termIds) => setData('term_ids', termIds)}
+                                        error={errors.term_ids as string}
+                                    />
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 

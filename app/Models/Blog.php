@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\HasTaxonomies;
+use Database\Factories\BlogFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,12 +23,23 @@ use Illuminate\Support\Carbon;
  */
 class Blog extends Model
 {
-    /** @use HasFactory<\Database\Factories\BlogFactory> */
-    use HasFactory, SoftDeletes;
+    /** @use HasFactory<BlogFactory> */
+    use HasFactory, SoftDeletes, HasTaxonomies;
 
     const STATUS_DRAFT = 'draft';
     const STATUS_PUBLISHED = 'published';
     const STATUS_PRIVATE = 'private';
+
+    /**
+     * Hybrid approach: auto blog-categories + custom blog-tags
+     */
+    public function taxonomies(): array
+    {
+        return array_merge(
+            parent::taxonomies(), // Gets "blog-categories" by convention
+            ['blog-tags']         // Add custom taxonomy
+        );
+    }
 
     protected $fillable = [
         'title',

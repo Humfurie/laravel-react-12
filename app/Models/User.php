@@ -124,6 +124,7 @@ class User extends Authenticatable implements JWTSubject
             'permission',
             'experience',
             'expertise',
+            'taxonomy',
             'skills',
             'technology',
         ];
