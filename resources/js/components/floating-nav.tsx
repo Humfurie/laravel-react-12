@@ -1,25 +1,10 @@
 import { Link } from '@inertiajs/react';
-import { Coins, FileText, Home as HomeIcon, LucideIcon, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
-
-interface NavItem {
-    id: string;
-    label: string;
-    icon: LucideIcon;
-    route: string;
-    showIcon: boolean;
-}
+import { publicNavItems } from '@/config/navigation';
 
 interface FloatingNavProps {
     currentPage?: string;
 }
-
-const navItems: NavItem[] = [
-    { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true },
-    { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
-    { id: 'crypto', label: 'Crypto', icon: Coins, route: '/crypto', showIcon: true },
-    { id: 'stocks', label: 'Stocks', icon: TrendingUp, route: '/stocks', showIcon: true },
-];
 
 export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) {
     const [activeItem, setActiveItem] = useState(currentPage);
@@ -52,7 +37,7 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
         >
             <div className="rounded-full border border-white/20 bg-white/80 px-2 py-2 shadow-lg backdrop-blur-md sm:px-4 lg:px-6 lg:py-4">
                 <div className="flex items-center justify-center gap-1 sm:gap-2 lg:gap-3">
-                    {navItems.map((item, index) => {
+                    {publicNavItems.map((item, index) => {
                         const Icon = item.icon;
                         const isActive = activeItem === item.id;
 

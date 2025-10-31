@@ -8,7 +8,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
 
 import { ExperienceSection } from '@/components/home/sections/ExperienceSection';
-import { FileText, Home as HomeIcon } from 'lucide-react';
+import { publicNavItems } from '@/config/navigation';
 import { JSX, useEffect, useState } from 'react';
 
 interface Blog {
@@ -135,11 +135,6 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
         return () => window.removeEventListener('scroll', updateScrollDirection);
     }, [isVisible]);
 
-    const navItems = [
-        { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true },
-        { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
-    ];
-
     return (
         <>
             <Head title="Portfolio & Blog">
@@ -180,7 +175,7 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
             >
                 <div className="rounded-full border border-white/20 bg-white/80 px-6 py-4 shadow-lg backdrop-blur-md">
                     <div className="flex items-center space-x-3">
-                        {navItems.map((item, index) => {
+                        {publicNavItems.map((item, index) => {
                             const Icon = item.icon;
                             const isActive = activeItem === item.id;
 
