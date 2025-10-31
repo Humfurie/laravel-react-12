@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use InvalidArgumentException;
 use Throwable;
 
 class BlogController extends Controller
@@ -44,7 +45,11 @@ class BlogController extends Controller
     {
         $this->authorize('create', Blog::class);
 
-        return Inertia::render('admin/blog/create');
+        $blog = new Blog();
+
+        return Inertia::render('admin/blog/create', [
+            'taxonomies' => $blog->getConfiguredTaxonomies(),
+        ]);
     }
 
     /**
@@ -97,7 +102,21 @@ class BlogController extends Controller
                 Blog::where('isPrimary', true)->update(['isPrimary' => false]);
             }
 
-            return Blog::create($validated);
+            $blog = Blog::create($validated);
+
+            // Sync taxonomy terms
+            if (!empty($validated['term_ids'])) {
+                try {
+                    $blog->syncTerms($validated['term_ids']);
+                } catch (InvalidArgumentException $e) {
+                    // Delete the created blog since term validation failed
+                    $blog->delete();
+
+                    throw $e; // Re-throw to be caught by DB transaction
+                }
+            }
+
+            return $blog;
         });
 
         return redirect()->route('blogs.index')
@@ -119,6 +138,8 @@ class BlogController extends Controller
 
         return Inertia::render('admin/blog/edit', [
             'blog' => $blog,
+            'taxonomies' => $blog->getConfiguredTaxonomies(),
+            'selectedTermIds' => $blog->taxonomyTerms->pluck('id')->toArray(),
         ]);
     }
 
@@ -172,6 +193,15 @@ class BlogController extends Controller
             }
 
             $blog->update($validated);
+
+            // Sync taxonomy terms
+            if (isset($validated['term_ids'])) {
+                try {
+                    $blog->syncTerms($validated['term_ids']);
+                } catch (InvalidArgumentException $e) {
+                    throw $e; // Re-throw to be caught by DB transaction
+                }
+            }
         });
 
         return redirect()->route('blogs.index')

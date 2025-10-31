@@ -43,6 +43,8 @@ class UpdateBlogRequest extends FormRequest
             'published_at' => ['nullable', 'date'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string', 'max:50'],
+            'term_ids' => ['nullable', 'array'],
+            'term_ids.*' => ['exists:taxonomy_terms,id'],
         ];
     }
 

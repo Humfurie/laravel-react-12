@@ -1,4 +1,5 @@
 import { BlogEditor } from '@/components/blog-editor';
+import { TaxonomySelect } from '@/components/TaxonomySelect';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +15,25 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { ArrowLeft, CalendarIcon, Plus, Upload, X } from 'lucide-react';
 import React, { useRef, useState } from 'react';
+
+interface TaxonomyTerm {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+}
+
+interface Taxonomy {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    terms: TaxonomyTerm[];
+}
+
+interface Props {
+    taxonomies?: Taxonomy[];
+}
 
 type BlogFormData = {
     title: string;
@@ -32,9 +52,10 @@ type BlogFormData = {
     isPrimary: boolean;
     sort_order: number;
     published_at: string;
+    term_ids: number[];
 };
 
-export default function CreateBlog() {
+export default function CreateBlog({ taxonomies = [] }: Props) {
     const [publishedDate, setPublishedDate] = useState<Date>();
     const [tagInput, setTagInput] = useState('');
     const [imageInputType, setImageInputType] = useState<'upload' | 'url'>('url');
@@ -58,6 +79,7 @@ export default function CreateBlog() {
         isPrimary: false,
         sort_order: 0,
         published_at: '',
+        term_ids: [],
     });
 
     const generateSlug = (title: string) => {
@@ -393,6 +415,24 @@ export default function CreateBlog() {
                                 </div>
                             </CardContent>
                         </Card>
+
+                        {/* Taxonomy Terms */}
+                        {taxonomies.length > 0 && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Categories & Tags</CardTitle>
+                                    <CardDescription>Organize your blog post with taxonomy terms</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <TaxonomySelect
+                                        taxonomies={taxonomies}
+                                        selectedTermIds={data.term_ids}
+                                        onChange={(termIds) => setData('term_ids', termIds)}
+                                        error={errors.term_ids as string}
+                                    />
+                                </CardContent>
+                            </Card>
+                        )}
                     </div>
 
                     {/* Sidebar */}
@@ -435,7 +475,7 @@ export default function CreateBlog() {
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar mode="single" selected={publishedDate} onSelect={setPublishedDate} initialFocus />
+                                            <Calendar mode="single" selected={publishedDate} onSelect={setPublishedDate} />
                                         </PopoverContent>
                                     </Popover>
                                 </div>
