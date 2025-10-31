@@ -63,9 +63,9 @@ class BlogController extends Controller
                 'primary' => $primaryBlogs,
                 'latest' => $latestBlogs,
                 'stats' => [
-                    'total_posts' => $stats->total_posts ?? 0,
+                    'total_posts' => (int)($stats->total_posts ?? 0),
                     'total_views' => (int)($stats->total_views ?? 0),
-                    'featured_count' => $stats->featured_count ?? 0,
+                    'featured_count' => (int)($stats->featured_count ?? 0),
                 ]
             ];
         });
