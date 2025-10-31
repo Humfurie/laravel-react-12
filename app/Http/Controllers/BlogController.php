@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Blog;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class BlogController extends Controller
@@ -50,8 +51,12 @@ class BlogController extends Controller
             $latestBlogs = $blogs->take(6)->values();
 
             // Get stats in a single query using aggregates
+            // Use database grammar to properly quote column name for cross-database compatibility
+            $grammar = DB::connection()->getQueryGrammar();
+            $isPrimaryColumn = $grammar->wrap('isPrimary');
+
             $stats = Blog::published()
-                ->selectRaw('COUNT(*) as total_posts, SUM(view_count) as total_views, SUM(CASE WHEN "isPrimary" = ? THEN 1 ELSE 0 END) as featured_count', [true])
+                ->selectRaw("COUNT(*) as total_posts, SUM(view_count) as total_views, SUM(CASE WHEN {$isPrimaryColumn} = ? THEN 1 ELSE 0 END) as featured_count", [true])
                 ->first();
 
             return [
