@@ -1,4 +1,5 @@
 import { BlogEditor } from '@/components/blog-editor';
+import { TaxonomySelect } from '@/components/TaxonomySelect';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +15,21 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
 import { ArrowLeft, CalendarIcon, Plus, Upload, X } from 'lucide-react';
 import React, { useRef, useState } from 'react';
+
+interface TaxonomyTerm {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+}
+
+interface Taxonomy {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    terms: TaxonomyTerm[];
+}
 
 interface Blog {
     id: number;
@@ -36,9 +52,11 @@ interface Blog {
 
 interface Props {
     blog: Blog;
+    taxonomies?: Taxonomy[];
+    selectedTermIds?: number[];
 }
 
-export default function EditBlog({ blog }: Props) {
+export default function EditBlog({ blog, taxonomies = [], selectedTermIds = [] }: Props) {
     const originalSlug = useRef(blog.slug); // Store the original slug for route params
     const [publishedDate, setPublishedDate] = useState<Date | undefined>(blog.published_at ? parseISO(blog.published_at) : undefined);
     const [tagInput, setTagInput] = useState('');
@@ -63,6 +81,7 @@ export default function EditBlog({ blog }: Props) {
         isPrimary: blog.isPrimary,
         sort_order: blog.sort_order,
         published_at: blog.published_at || '',
+        term_ids: selectedTermIds,
     });
 
     const generateSlug = (title: string) => {
@@ -384,6 +403,24 @@ export default function EditBlog({ blog }: Props) {
                                 </div>
                             </CardContent>
                         </Card>
+
+                        {/* Taxonomy Terms */}
+                        {taxonomies.length > 0 && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Categories & Tags</CardTitle>
+                                    <CardDescription>Organize your blog post with taxonomy terms</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <TaxonomySelect
+                                        taxonomies={taxonomies}
+                                        selectedTermIds={data.term_ids}
+                                        onChange={(termIds) => setData('term_ids', termIds)}
+                                        error={errors.term_ids as string}
+                                    />
+                                </CardContent>
+                            </Card>
+                        )}
                     </div>
 
                     {/* Sidebar */}
@@ -426,7 +463,7 @@ export default function EditBlog({ blog }: Props) {
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar mode="single" selected={publishedDate} onSelect={setPublishedDate} initialFocus />
+                                            <Calendar mode="single" selected={publishedDate} onSelect={setPublishedDate} />
                                         </PopoverContent>
                                     </Popover>
                                 </div>
