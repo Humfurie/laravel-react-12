@@ -90,11 +90,17 @@ test('admin can update role', function () {
         'slug' => 'admin',
     ]);
 
-    // Create permissions
-    $userPermission = Permission::factory()->create(['resource' => 'user']);
+    // Create permissions (use firstOrCreate to avoid unique constraint violation)
+    $userPermission = Permission::firstOrCreate(
+        ['resource' => 'user'],
+        ['actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']]
+    );
 
     //Create Role
-    $rolePermissions = Permission::factory()->create(['resource' => 'role']);
+    $rolePermissions = Permission::firstOrCreate(
+        ['resource' => 'role'],
+        ['actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']]
+    );
 
     // Attach permissions to the Admin role with specific actions
     $adminRole->permissions()->attach($userPermission->id, [
@@ -160,11 +166,17 @@ test('admin can delete role', function () {
         'slug' => 'admin',
     ]);
 
-    // Create permissions
-    $userPermission = Permission::factory()->create(['resource' => 'user']);
+    // Create permissions (use firstOrCreate to avoid unique constraint violation)
+    $userPermission = Permission::firstOrCreate(
+        ['resource' => 'user'],
+        ['actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']]
+    );
 
     //Create Role
-    $rolePermissions = Permission::factory()->create(['resource' => 'role']);
+    $rolePermissions = Permission::firstOrCreate(
+        ['resource' => 'role'],
+        ['actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']]
+    );
 
     // Attach permissions to the Admin role with specific actions
     $adminRole->permissions()->attach($userPermission->id, [
@@ -199,11 +211,17 @@ test('admin can restore role', function () {
         'slug' => 'admin',
     ]);
 
-    // Create permissions
-    $userPermission = Permission::factory()->create(['resource' => 'user']);
+    // Create permissions (use firstOrCreate to avoid unique constraint violation)
+    $userPermission = Permission::firstOrCreate(
+        ['resource' => 'user'],
+        ['actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']]
+    );
 
     //Create Role
-    $rolePermissions = Permission::factory()->create(['resource' => 'role']);
+    $rolePermissions = Permission::firstOrCreate(
+        ['resource' => 'role'],
+        ['actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']]
+    );
 
     // Attach permissions to the Admin role with specific actions
     $adminRole->permissions()->attach($userPermission->id, [
@@ -257,11 +275,17 @@ test('admin can force delete role', function () {
         'slug' => 'admin',
     ]);
 
-    // Create permissions
-    $userPermission = Permission::factory()->create(['resource' => 'user']);
+    // Create permissions (use firstOrCreate to avoid unique constraint violation)
+    $userPermission = Permission::firstOrCreate(
+        ['resource' => 'user'],
+        ['actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']]
+    );
 
     //Create Role
-    $rolePermissions = Permission::factory()->create(['resource' => 'role']);
+    $rolePermissions = Permission::firstOrCreate(
+        ['resource' => 'role'],
+        ['actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']]
+    );
 
     // Attach permissions to the Admin role with specific actions
     $adminRole->permissions()->attach($userPermission->id, [
