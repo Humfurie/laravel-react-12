@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class BlogController extends Controller
@@ -51,17 +51,21 @@ class BlogController extends Controller
             $latestBlogs = $blogs->take(6)->values();
 
             // Get stats in a single query using aggregates
+            // Use database grammar to properly quote column name for cross-database compatibility
+            $grammar = DB::connection()->getQueryGrammar();
+            $isPrimaryColumn = $grammar->wrap('isPrimary');
+
             $stats = Blog::published()
-                ->selectRaw('COUNT(*) as total_posts, SUM(view_count) as total_views, SUM(CASE WHEN "isPrimary" = true THEN 1 ELSE 0 END) as featured_count')
+                ->selectRaw("COUNT(*) as total_posts, SUM(view_count) as total_views, SUM(CASE WHEN {$isPrimaryColumn} = ? THEN 1 ELSE 0 END) as featured_count", [true])
                 ->first();
 
             return [
                 'primary' => $primaryBlogs,
                 'latest' => $latestBlogs,
                 'stats' => [
-                    'total_posts' => $stats->total_posts ?? 0,
+                    'total_posts' => (int)($stats->total_posts ?? 0),
                     'total_views' => (int)($stats->total_views ?? 0),
-                    'featured_count' => $stats->featured_count ?? 0,
+                    'featured_count' => (int)($stats->featured_count ?? 0),
                 ]
             ];
         });

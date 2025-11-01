@@ -3,8 +3,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Head, Link } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, FileText, Home as HomeIcon, User } from 'lucide-react';
+import { ArrowLeft, Calendar, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { publicNavItems } from '@/config/navigation';
+import AdBanner from '@/components/ads/AdBanner';
+import StickyAd from '@/components/ads/StickyAd';
+import { usePage } from '@inertiajs/react';
 
 interface Blog {
     id: number;
@@ -32,9 +36,27 @@ interface Blog {
 interface Props {
     blog: Blog;
 }
+
+interface PageProps {
+    adsense?: {
+        client_id?: string;
+        slots?: {
+            blog_post_top?: string;
+            blog_post_bottom?: string;
+            blog_post_sidebar?: string;
+        };
+    };
+}
+
 export default function BlogPost({ blog }: Props) {
+    const { props } = usePage<PageProps>();
+    const adsense = props.adsense;
     const [isVisible, setIsVisible] = useState(true);
     const [activeItem, setActiveItem] = useState('blog');
+
+    // Check if ads are configured
+    const hasAds = adsense?.client_id && (adsense?.slots?.blog_post_top || adsense?.slots?.blog_post_bottom || adsense?.slots?.blog_post_sidebar);
+
     console.log('is string?', typeof blog.display_image === 'string');
     useEffect(() => {
         let lastScrollY = window.scrollY;
@@ -51,11 +73,6 @@ export default function BlogPost({ blog }: Props) {
         window.addEventListener('scroll', updateScrollDirection);
         return () => window.removeEventListener('scroll', updateScrollDirection);
     }, [isVisible]);
-
-    const navItems = [
-        { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true },
-        { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
-    ];
 
     const safeImage = typeof blog.display_image === 'string' ? blog.display_image : '';
     return (
@@ -126,7 +143,7 @@ export default function BlogPost({ blog }: Props) {
                 >
                     <div className="rounded-full border border-white/20 bg-white/80 px-6 py-4 shadow-lg backdrop-blur-md">
                         <div className="flex items-center space-x-3">
-                            {navItems.map((item, index) => {
+                            {publicNavItems.map((item, index) => {
                                 const Icon = item.icon;
                                 const isActive = activeItem === item.id;
 
@@ -213,12 +230,42 @@ export default function BlogPost({ blog }: Props) {
 
                 {/* Blog Content */}
                 <section className="bg-white py-16">
-                    <div className="container mx-auto max-w-4xl px-4">
-                        <div className="prose prose-lg prose-headings:text-brand-black prose-p:text-gray-700 prose-a:text-brand-orange prose-strong:text-brand-black w-full max-w-none">
-                            <div
-                                dangerouslySetInnerHTML={{ __html: blog.content }}
-                                className="blog-content w-full leading-relaxed [&_blockquote]:w-full [&_div]:w-full [&_figure]:w-full [&_img]:h-auto [&_img]:w-full [&_img]:max-w-full [&_p]:w-full [&_table]:w-full [&>*]:w-full"
-                            />
+                    <div className={`container mx-auto px-4 ${hasAds ? 'max-w-7xl' : 'max-w-4xl'}`}>
+                        <div className={`grid grid-cols-1 gap-8 ${hasAds ? 'lg:grid-cols-12' : ''}`}>
+                            {/* Main Content */}
+                            <div className={hasAds ? 'lg:col-span-8' : ''}>
+                                {/* Top Banner Ad */}
+                                <AdBanner
+                                    adClient={adsense?.client_id}
+                                    adSlot={adsense?.slots?.blog_post_top}
+                                    adFormat="horizontal"
+                                    testMode={!adsense?.enabled}
+                                    className="mb-8"
+                                />
+
+                                <div className="prose prose-lg prose-headings:text-brand-black prose-p:text-gray-700 prose-a:text-brand-orange prose-strong:text-brand-black w-full max-w-none">
+                                    <div
+                                        dangerouslySetInnerHTML={{ __html: blog.content }}
+                                        className="blog-content w-full leading-relaxed [&_blockquote]:w-full [&_div]:w-full [&_figure]:w-full [&_img]:h-auto [&_img]:w-full [&_img]:max-w-full [&_p]:w-full [&_table]:w-full [&>*]:w-full"
+                                    />
+                                </div>
+
+                                {/* Bottom Banner Ad */}
+                                <AdBanner
+                                    adClient={adsense?.client_id}
+                                    adSlot={adsense?.slots?.blog_post_bottom}
+                                    adFormat="horizontal"
+                                    testMode={!adsense?.enabled}
+                                    className="mt-8"
+                                />
+                            </div>
+
+                            {/* Sidebar with Sticky Ad - Only show if sidebar ads are configured */}
+                            {adsense?.client_id && adsense?.slots?.blog_post_sidebar && (
+                                <div className="lg:col-span-4">
+                                    <StickyAd adClient={adsense?.client_id} adSlot={adsense?.slots?.blog_post_sidebar} testMode={!adsense?.enabled} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </section>
