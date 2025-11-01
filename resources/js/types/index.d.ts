@@ -16,6 +16,7 @@ export interface Permissions {
     'realestate-project': ResourcePermissions;
     property: ResourcePermissions;
     blog: ResourcePermissions;
+    giveaway: ResourcePermissions;
     user: ResourcePermissions;
     role: ResourcePermissions;
     permission: ResourcePermissions;
