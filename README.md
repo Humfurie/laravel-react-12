@@ -43,11 +43,27 @@ pass:password123
 - Public API for portfolio display
 - Responsive grid layouts
 
+#### 🎁 Giveaway System
+
+- Public giveaway campaigns with entry forms
+- Multi-image upload for prizes (primary + gallery)
+- Random winner selection with animated reveal
+- Phone number normalization (+63 format)
+- Entry validation (unique phone per giveaway)
+- Status workflow (draft → active → ended)
+- Admin winner selection interface
+- Entry list with search and filtering
+- Public winners page
+- AdSense-safe animations (no gambling themes)
+- Permission-based admin access
+
 #### 🔐 Admin Panel
 
 - Role-based access control with policies
 - Blog post management (CRUD)
 - Experience management (CRUD)
+- Giveaway management (CRUD)
+- Winner selection with animations
 - Image upload and management
 - Real-time preview
 - Permission-based features
@@ -169,33 +185,58 @@ humfurie.org/
 │   │   ├── Controllers/
 │   │   │   ├── Admin/          # Admin panel controllers
 │   │   │   │   ├── BlogController.php
-│   │   │   │   └── ExperienceController.php
+│   │   │   │   ├── ExperienceController.php
+│   │   │   │   └── GiveawayController.php
+│   │   │   ├── Api/            # API controllers
+│   │   │   │   └── GiveawayController.php
 │   │   │   ├── User/           # Public controllers
 │   │   │   │   └── BlogController.php
 │   │   │   ├── ExperienceController.php
+│   │   │   ├── GiveawayController.php
 │   │   │   └── SitemapController.php
 │   │   ├── Requests/           # Form validation
 │   │   └── Middleware/
 │   ├── Models/
 │   │   ├── Blog.php
 │   │   ├── Experience.php
+│   │   ├── Giveaway.php
+│   │   ├── GiveawayEntry.php
 │   │   └── User.php
-│   └── Policies/               # Authorization
+│   ├── Policies/               # Authorization
+│   │   ├── BlogPolicy.php
+│   │   ├── ExperiencePolicy.php
+│   │   └── GiveawayPolicy.php
+│   └── Traits/
+│       └── HasDynamicPermissions.php
 │
 ├── resources/
 │   ├── js/
 │   │   ├── components/
 │   │   │   ├── ads/            # Ad integration components
-│   │   │   │   └── AdSlot.tsx
+│   │   │   │   ├── AdSlot.tsx
+│   │   │   │   └── AdBanner.tsx
 │   │   │   ├── consent/        # GDPR consent management
 │   │   │   │   ├── ConsentBanner.tsx
 │   │   │   │   └── ConsentModal.tsx
+│   │   │   ├── giveaway/       # Giveaway components
+│   │   │   │   └── WinnerAnnouncement.tsx
 │   │   │   ├── global/         # Shared components
+│   │   │   │   └── Footer.tsx
 │   │   │   └── ui/             # shadcn/ui components
 │   │   ├── pages/
 │   │   │   ├── admin/          # Admin pages
-│   │   │   │   ├── blog.tsx
+│   │   │   │   ├── blog/
+│   │   │   │   ├── giveaways/
+│   │   │   │   │   ├── index.tsx
+│   │   │   │   │   ├── create.tsx
+│   │   │   │   │   ├── edit.tsx
+│   │   │   │   │   └── winner-selection.tsx
 │   │   │   │   └── dashboard.tsx
+│   │   │   ├── giveaways/      # Public giveaway pages
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── show.tsx
+│   │   │   │   ├── entries.tsx
+│   │   │   │   └── winners.tsx
 │   │   │   └── user/           # Public pages
 │   │   │       ├── home.tsx
 │   │   │       ├── blog.tsx
@@ -543,6 +584,74 @@ images:
   - id, name, path
   - imageable (polymorphic)
 ```
+
+### Giveaway Module
+
+**Models:** `Giveaway`, `GiveawayEntry`, `Image`
+**Controllers:** `GiveawayController`, `Admin\GiveawayController`, `Api\GiveawayController`
+**Routes:** `/giveaways`, `/giveaways/{slug}`, `/admin/giveaways`, `/api/v1/giveaways/{slug}/enter`
+**Policy:** `GiveawayPolicy` (auto-discovered, uses `HasDynamicPermissions` trait)
+
+**Features:**
+
+- Public giveaway listing and detail pages
+- Entry form with validation (name, phone, Facebook URL)
+- Phone number normalization (09XXXXXXXXX → +639XXXXXXXXX)
+- Unique phone per giveaway constraint
+- Random winner selection algorithm
+- Animated winner reveal (AdSense-safe, no gambling themes)
+- Multi-image upload (primary + gallery)
+- Status workflow: draft → active → ended
+- Admin CRUD interface
+- Winner selection page with live animation
+- Entry management (view, search, export)
+- Public winners history page
+- Permission-based access control
+
+**Database Schema:**
+
+```sql
+giveaways
+:
+  - id, title, slug (unique)
+  - description (text)
+  - start_date, end_date
+  - status (draft|active|ended)
+  - winner_id (nullable, FK to giveaway_entries)
+  - prize_claimed (boolean)
+  - prize_claimed_at (timestamp)
+  - rejection_reason (text, nullable)
+  - soft deletes, timestamps
+
+giveaway_entries:
+  - id, giveaway_id (FK)
+  - name, phone (unique per giveaway), facebook_url
+  - status (pending|winner|rejected)
+  - is_winner (boolean)
+  - won_at (timestamp)
+  - timestamps
+
+images:
+  - id, name, path, url
+  - imageable (polymorphic: giveaway)
+  - is_primary (boolean)
+  - order (integer)
+```
+
+**Permissions Required:**
+
+- `giveaway.viewAny` - View giveaway list in admin
+- `giveaway.view` - View single giveaway details
+- `giveaway.create` - Create new giveaways
+- `giveaway.update` - Edit giveaways & select winners
+- `giveaway.delete` - Delete giveaways
+
+**Animation Features:**
+
+- **Selecting State**: Spinning sparkles, floating particles, pulsing borders, progress bar
+- **Winner Announced**: Sparkle particles, bouncing gift icon, animated name reveal
+- **Grand Reveal Modal**: Large trophy with glow rings, fireworks, celebration emojis
+- **AdSense-Safe**: No casino/slot machine themes, uses gift/celebration imagery
 
 ### SEO System
 

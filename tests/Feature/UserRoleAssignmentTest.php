@@ -5,6 +5,18 @@ use App\Models\Role;
 use App\Models\User;
 
 beforeEach(function () {
+    // Clear any existing users in this test's transaction
+    DB::table('users')->delete();
+
+    // Reset auto-increment for PostgreSQL
+    if (DB::getDriverName() === 'pgsql') {
+        DB::statement("SELECT setval('users_id_seq', 1, false)");
+    } elseif (DB::getDriverName() === 'mysql') {
+        DB::statement("ALTER TABLE users AUTO_INCREMENT = 1");
+    } elseif (DB::getDriverName() === 'sqlite') {
+        DB::statement("DELETE FROM sqlite_sequence WHERE name = 'users'");
+    }
+
     // Create a user with permissions to manage users
     $this->adminUser = User::factory()->create();
     $role = Role::factory()->create(['name' => 'User Manager']);

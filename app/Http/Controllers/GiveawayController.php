@@ -67,9 +67,11 @@ class GiveawayController extends Controller
         }, 'winner', 'entries']);
 
         // Determine if giveaway can be started (backend conditions only)
+        // Admin can start anytime between start_date and end_date if there are entries
         $canStartGiveaway = !$giveaway->winner_id
             && $giveaway->entries->count() > 0
-            && $giveaway->end_date < now();
+            && $giveaway->start_date <= now()
+            && $giveaway->status === Giveaway::STATUS_ACTIVE;
 
         return Inertia::render('giveaways/show', [
             'giveaway' => [
