@@ -53,6 +53,10 @@
         <meta name="twitter:description" content="Professional portfolio and blog">
         <meta name="twitter:image" content="{{ asset('images/og-default.jpg') }}">
 
+        {{-- Favicon --}}
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v={{ config('app.version', '1.0') }}">
+        <link rel="icon" type="image/png" href="{{ asset('logo.png') }}?v={{ config('app.version', '1.0') }}">
+
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
         <link rel="dns-prefetch" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600&display=swap" rel="stylesheet" />
