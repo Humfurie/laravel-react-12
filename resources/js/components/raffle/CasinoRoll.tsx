@@ -206,23 +206,63 @@ export default function CasinoRoll({
 
                 {/* Rolling names container */}
                 <div className="relative h-[400px] overflow-hidden">
+                    {/* Particle effects during spinning */}
+                    {isSpinning && (
+                        <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+                            {[...Array(30)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="animate-particle absolute"
+                                    style={{
+                                        left: `${Math.random() * 100}%`,
+                                        top: `${Math.random() * 100}%`,
+                                        animationDelay: `${Math.random() * 2}s`,
+                                        animationDuration: `${1 + Math.random() * 2}s`,
+                                    }}
+                                >
+                                    <div
+                                        className="h-2 w-2 rounded-full blur-sm"
+                                        style={{
+                                            backgroundColor: ['#fbbf24', '#f59e0b', '#ec4899', '#a855f7'][Math.floor(Math.random() * 4)],
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
                     {/* Highlighted Center Spotlight */}
                     <div className="pointer-events-none absolute inset-0 z-10">
-                        {/* Top gradient fade - less aggressive */}
-                        <div className="absolute top-0 right-0 left-0 h-24 bg-gradient-to-b from-black/70 via-black/30 to-transparent"></div>
+                        {/* Top gradient fade */}
+                        <div className="absolute top-0 right-0 left-0 h-32 bg-gradient-to-b from-black/90 via-black/50 to-transparent"></div>
 
-                        {/* Center spotlight window */}
-                        <div className="absolute top-1/2 left-1/2 h-24 w-full -translate-x-1/2 -translate-y-1/2">
+                        {/* Center spotlight window - enhanced when spinning */}
+                        <div
+                            className={`absolute top-1/2 left-1/2 h-24 w-full -translate-x-1/2 -translate-y-1/2 ${isSpinning ? 'animate-pulse' : ''}`}
+                        >
                             {/* Glowing border top */}
-                            <div className="absolute top-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-yellow-400 to-transparent shadow-[0_0_10px_rgba(250,204,21,0.8)]"></div>
+                            <div
+                                className={`absolute top-0 right-0 left-0 h-[3px] bg-gradient-to-r from-transparent ${isSpinning ? 'via-red-500' : 'via-yellow-400'} to-transparent shadow-[0_0_20px_rgba(250,204,21,0.9)]`}
+                            ></div>
                             {/* Glowing border bottom */}
-                            <div className="absolute right-0 bottom-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-yellow-400 to-transparent shadow-[0_0_10px_rgba(250,204,21,0.8)]"></div>
-                            {/* Spotlight glow effect */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/10 to-transparent"></div>
+                            <div
+                                className={`absolute right-0 bottom-0 left-0 h-[3px] bg-gradient-to-r from-transparent ${isSpinning ? 'via-red-500' : 'via-yellow-400'} to-transparent shadow-[0_0_20px_rgba(250,204,21,0.9)]`}
+                            ></div>
+                            {/* Spotlight glow effect - enhanced when spinning */}
+                            <div
+                                className={`absolute inset-0 bg-gradient-to-r from-transparent ${isSpinning ? 'animate-pulse via-red-400/20' : 'via-yellow-400/15'} to-transparent`}
+                            ></div>
+                            {/* Additional side glow bars when spinning */}
+                            {isSpinning && (
+                                <>
+                                    <div className="absolute top-0 bottom-0 left-0 w-[3px] animate-pulse bg-gradient-to-b from-transparent via-red-500 to-transparent shadow-[0_0_20px_rgba(239,68,68,0.9)]"></div>
+                                    <div className="absolute top-0 right-0 bottom-0 w-[3px] animate-pulse bg-gradient-to-b from-transparent via-red-500 to-transparent shadow-[0_0_20px_rgba(239,68,68,0.9)]"></div>
+                                </>
+                            )}
                         </div>
 
-                        {/* Bottom gradient fade - less aggressive */}
-                        <div className="absolute right-0 bottom-0 left-0 h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                        {/* Bottom gradient fade */}
+                        <div className="absolute right-0 bottom-0 left-0 h-32 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
                     </div>
 
                     <div
@@ -240,16 +280,22 @@ export default function CasinoRoll({
                                     key={`${name}-${index}`}
                                     className={`flex items-center justify-center px-6 py-4 transition-all duration-300 ${
                                         isWinner
-                                            ? 'bg-gradient-to-r from-yellow-500/30 via-yellow-400/20 to-yellow-500/30 text-yellow-300'
-                                            : 'bg-gradient-to-r from-purple-900/30 to-indigo-900/30 text-purple-200 hover:bg-purple-800/50'
+                                            ? 'bg-gradient-to-r from-yellow-500/40 via-yellow-400/30 to-yellow-500/40 text-yellow-300'
+                                            : isSpinning
+                                              ? 'bg-gradient-to-r from-red-900/30 to-orange-900/30 text-red-200 blur-[0.5px]'
+                                              : 'bg-gradient-to-r from-purple-900/30 to-indigo-900/30 text-purple-200 hover:bg-purple-800/50'
                                     } `}
                                     style={{
-                                        borderBottom: '1px solid rgba(126, 34, 206, 0.3)',
+                                        borderBottom: isSpinning ? '1px solid rgba(220, 38, 38, 0.4)' : '1px solid rgba(126, 34, 206, 0.3)',
                                     }}
                                 >
                                     <div className="flex items-center gap-3">
                                         {isWinner && <Trophy className="h-5 w-5 animate-bounce text-yellow-400" />}
-                                        <span className={`text-lg font-semibold ${isWinner ? 'animate-pulse' : ''}`}>{name}</span>
+                                        <span
+                                            className={`text-lg font-semibold ${isWinner ? 'animate-pulse text-2xl' : isSpinning ? 'font-bold' : ''}`}
+                                        >
+                                            {name}
+                                        </span>
                                         {isWinner && <Trophy className="h-5 w-5 animate-bounce text-yellow-400" />}
                                     </div>
                                 </div>
@@ -277,12 +323,34 @@ export default function CasinoRoll({
                         }
                     }
 
+                    @keyframes particle {
+                        0% {
+                            transform: translate(0, 0) scale(0) rotate(0deg);
+                            opacity: 0;
+                        }
+                        25% {
+                            opacity: 1;
+                        }
+                        50% {
+                            transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) scale(1.5) rotate(180deg);
+                            opacity: 1;
+                        }
+                        100% {
+                            transform: translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px) scale(0) rotate(360deg);
+                            opacity: 0;
+                        }
+                    }
+
                     .animate-scroll {
                         animation: scroll ${names.length * 2.5}s linear infinite;
                     }
 
                     .animate-rapid-spin {
-                        animation: rapid-spin 0.8s linear infinite;
+                        animation: rapid-spin 0.5s linear infinite;
+                    }
+
+                    .animate-particle {
+                        animation: particle ease-out infinite;
                     }
                 `}</style>
 

@@ -31,7 +31,7 @@ class GiveawayEntry extends Model
     /**
      * Relationship: Entry belongs to a giveaway
      */
-    public function raffle(): BelongsTo
+    public function giveaway(): BelongsTo
     {
         return $this->belongsTo(Giveaway::class);
     }

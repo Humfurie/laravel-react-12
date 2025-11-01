@@ -119,6 +119,7 @@ class User extends Authenticatable implements JWTSubject
             'realestate-project',
             'property',
             'blog',
+            'giveaway',
             'user',
             'role',
             'permission',
@@ -126,7 +127,6 @@ class User extends Authenticatable implements JWTSubject
             'expertise',
             'skills',
             'technology',
-            'raffle',
         ];
         $allPermissions = [];
 
