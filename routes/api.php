@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExpertiseController;
+use App\Http\Controllers\Api\GiveawayController;
 use App\Http\Controllers\Api\InquiryController;
 use App\Http\Controllers\Api\PropertyController;
 use Illuminate\Support\Facades\Route;
@@ -78,16 +79,16 @@ Route::prefix('v1')->group(function () {
         Route::post('expertises/reorder', [ExpertiseController::class, 'reorder'])->name('expertises.reorder');
     });
 
-    // Raffle public endpoints - higher rate limit (60 requests per minute)
+    // Giveaway public endpoints - higher rate limit (60 requests per minute)
     Route::middleware('throttle:60,1')->group(function () {
-        Route::get('raffles', [\App\Http\Controllers\Api\RaffleController::class, 'index'])->name('raffles.index');
-        Route::get('raffles/winners', [\App\Http\Controllers\Api\RaffleController::class, 'winners'])->name('raffles.winners');
-        Route::get('raffles/{raffle:slug}', [\App\Http\Controllers\Api\RaffleController::class, 'show'])->name('raffles.show');
-        Route::post('raffles/{raffle:slug}/check-phone', [\App\Http\Controllers\Api\RaffleController::class, 'checkPhone'])->name('raffles.check-phone');
+        Route::get('giveaways', [GiveawayController::class, 'index'])->name('api.giveaways.index');
+        Route::get('giveaways/winners', [GiveawayController::class, 'winners'])->name('api.giveaways.winners');
+        Route::get('giveaways/{giveaway:slug}', [GiveawayController::class, 'show'])->name('api.giveaways.show');
+        Route::post('giveaways/{giveaway:slug}/check-phone', [GiveawayController::class, 'checkPhone'])->name('api.giveaways.check-phone');
     });
 
-    // Raffle entry submission - moderate rate limit (10 requests per minute)
+    // Giveaway entry submission - moderate rate limit (10 requests per minute)
     Route::middleware('throttle:10,1')->group(function () {
-        Route::post('raffles/{raffle:slug}/enter', [\App\Http\Controllers\Api\RaffleController::class, 'submitEntry'])->name('raffles.enter');
+        Route::post('giveaways/{giveaway:slug}/enter', [GiveawayController::class, 'submitEntry'])->name('api.giveaways.enter');
     });
 });

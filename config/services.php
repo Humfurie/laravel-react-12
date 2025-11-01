@@ -50,8 +50,8 @@ return [
             'blog_post_top' => env('ADSENSE_BLOG_POST_TOP_SLOT'),
             'blog_post_bottom' => env('ADSENSE_BLOG_POST_BOTTOM_SLOT'),
             'blog_post_sidebar' => env('ADSENSE_BLOG_POST_SIDEBAR_SLOT'),
-            'raffle_top' => env('ADSENSE_RAFFLE_TOP_SLOT'),
-            'raffle_sidebar' => env('ADSENSE_RAFFLE_SIDEBAR_SLOT'),
+            'giveaway_top' => env('ADSENSE_GIVEAWAY_TOP_SLOT'),
+            'giveaway_sidebar' => env('ADSENSE_GIVEAWAY_SIDEBAR_SLOT'),
         ],
     ],
 
