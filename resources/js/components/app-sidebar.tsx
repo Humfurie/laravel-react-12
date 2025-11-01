@@ -4,19 +4,21 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link, usePage } from '@inertiajs/react';
 import React, { useMemo } from 'react';
-import type { Permissions } from '@/types';
+import type { Auth, NavItem, Permissions } from '@/types';
 import { BookOpen, Briefcase, Building, Code2, FileText, LayoutGrid, Shield, Trophy, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
-interface NavItem {
-    title: string;
-    href: string;
-    icon: React.ComponentType<{ className?: string }>;
+interface SidebarNavItem extends NavItem {
     requiredPermission?: keyof Permissions;
     requiredPermissions?: (keyof Permissions)[]; // For items requiring any of multiple permissions
 }
 
-const allNavItems: NavItem[] = [
+interface AdminPageProps {
+    auth: Auth;
+    [key: string]: unknown;
+}
+
+const allNavItems: SidebarNavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
@@ -35,10 +37,10 @@ const allNavItems: NavItem[] = [
         requiredPermission: 'blog',
     },
     {
-        title: 'Raffle Management',
-        href: '/admin/raffles',
+        title: 'Giveaway Management',
+        href: '/admin/giveaways',
         icon: Trophy,
-        requiredPermission: 'raffle',
+        requiredPermission: 'giveaway',
     },
     {
         title: 'Experience Management',
@@ -72,7 +74,7 @@ const allNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
+const footerNavItems: SidebarNavItem[] = [
     {
         title: 'About',
         href: '/admin/about',
@@ -81,7 +83,7 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { auth } = usePage().props as { auth: { permissions: Permissions } };
+    const { auth } = usePage<AdminPageProps>().props;
 
     const visibleNavItems = useMemo(() => {
         return allNavItems.filter((item) => {

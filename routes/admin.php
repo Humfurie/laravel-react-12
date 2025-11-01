@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\ExpertiseController;
+use App\Http\Controllers\Admin\GiveawayController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RealEstateController;
 use App\Http\Controllers\Admin\RoleController;
@@ -134,32 +135,32 @@ Route::prefix('settings')->name('admin.settings.')->group(function () {
     Route::post('/upload/{key}', [SettingsController::class, 'uploadFile'])->name('upload');
 });
 
-Route::prefix('raffles')->name('admin.raffles.')->middleware('permission:raffle,viewAny')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Admin\RaffleController::class, 'index'])->name('index');
-    Route::get('/create', [\App\Http\Controllers\Admin\RaffleController::class, 'create'])->name('create')->middleware('permission:raffle,create');
-    Route::post('/', [\App\Http\Controllers\Admin\RaffleController::class, 'store'])->name('store')->middleware('permission:raffle,create');
-    Route::get('/{raffle}/edit', [\App\Http\Controllers\Admin\RaffleController::class, 'edit'])->name('edit')->middleware('permission:raffle,view');
-    Route::put('/{raffle}', [\App\Http\Controllers\Admin\RaffleController::class, 'update'])->name('update')->middleware('permission:raffle,update');
-    Route::delete('/{raffle}', [\App\Http\Controllers\Admin\RaffleController::class, 'destroy'])->name('destroy')->middleware('permission:raffle,delete');
-    Route::patch('/{raffle}/restore', [\App\Http\Controllers\Admin\RaffleController::class, 'restore'])->name('restore')->withTrashed()->middleware('permission:raffle,restore');
-    Route::delete('/{raffle}/force', [\App\Http\Controllers\Admin\RaffleController::class, 'forceDestroy'])->name('force-destroy')->middleware('permission:raffle,forceDelete');
+Route::prefix('giveaways')->name('admin.giveaways.')->middleware('permission:giveaway,viewAny')->group(function () {
+    Route::get('/', [GiveawayController::class, 'index'])->name('index');
+    Route::get('/create', [GiveawayController::class, 'create'])->name('create')->middleware('permission:giveaway,create');
+    Route::post('/', [GiveawayController::class, 'store'])->name('store')->middleware('permission:giveaway,create');
+    Route::get('/{giveaway}/edit', [GiveawayController::class, 'edit'])->name('edit')->middleware('permission:giveaway,view');
+    Route::put('/{giveaway}', [GiveawayController::class, 'update'])->name('update')->middleware('permission:giveaway,update');
+    Route::delete('/{giveaway}', [GiveawayController::class, 'destroy'])->name('destroy')->middleware('permission:giveaway,delete');
+    Route::patch('/{giveaway}/restore', [GiveawayController::class, 'restore'])->name('restore')->withTrashed()->middleware('permission:giveaway,restore');
+    Route::delete('/{giveaway}/force', [GiveawayController::class, 'forceDestroy'])->name('force-destroy')->middleware('permission:giveaway,forceDelete');
 
     // Image management
-    Route::post('/{raffle}/images', [\App\Http\Controllers\Admin\RaffleController::class, 'uploadImage'])->name('images.upload')->middleware('permission:raffle,update');
-    Route::post('/{raffle}/images/reorder', [\App\Http\Controllers\Admin\RaffleController::class, 'reorderImages'])->name('images.reorder')->middleware('permission:raffle,update');
-    Route::patch('/{raffle}/images/{image}/primary', [\App\Http\Controllers\Admin\RaffleController::class, 'setPrimaryImage'])->name('images.set-primary')->middleware('permission:raffle,update');
-    Route::delete('/{raffle}/images/{image}', [\App\Http\Controllers\Admin\RaffleController::class, 'deleteImage'])->name('images.delete')->middleware('permission:raffle,update');
+    Route::post('/{giveaway}/images', [GiveawayController::class, 'uploadImage'])->name('images.upload')->middleware('permission:giveaway,update');
+    Route::post('/{giveaway}/images/reorder', [GiveawayController::class, 'reorderImages'])->name('images.reorder')->middleware('permission:giveaway,update');
+    Route::patch('/{giveaway}/images/{image}/primary', [GiveawayController::class, 'setPrimaryImage'])->name('images.set-primary')->middleware('permission:giveaway,update');
+    Route::delete('/{giveaway}/images/{image}', [GiveawayController::class, 'deleteImage'])->name('images.delete')->middleware('permission:giveaway,update');
 
     // Winner selection
-    Route::get('/{raffle}/winner-selection', [\App\Http\Controllers\Admin\RaffleController::class, 'showWinnerSelection'])->name('winner-selection')->middleware('permission:raffle,view');
-    Route::post('/{raffle}/select-winner', [\App\Http\Controllers\Admin\RaffleController::class, 'selectWinner'])->name('select-winner')->middleware('permission:raffle,update');
+    Route::get('/{giveaway}/winner-selection', [GiveawayController::class, 'showWinnerSelection'])->name('winner-selection')->middleware('permission:giveaway,view');
+    Route::post('/{giveaway}/select-winner', [GiveawayController::class, 'selectWinner'])->name('select-winner')->middleware('permission:giveaway,update');
 
     // Prize claim verification
-    Route::post('/{raffle}/claim-prize', [\App\Http\Controllers\Admin\RaffleController::class, 'claimPrize'])->name('claim-prize')->middleware('permission:raffle,update');
-    Route::post('/{raffle}/reject-winner', [\App\Http\Controllers\Admin\RaffleController::class, 'rejectWinner'])->name('reject-winner')->middleware('permission:raffle,update');
+    Route::post('/{giveaway}/claim-prize', [GiveawayController::class, 'claimPrize'])->name('claim-prize')->middleware('permission:giveaway,update');
+    Route::post('/{giveaway}/reject-winner', [GiveawayController::class, 'rejectWinner'])->name('reject-winner')->middleware('permission:giveaway,update');
 
     // Entry management
-    Route::get('/{raffle}/entries', [\App\Http\Controllers\Admin\RaffleController::class, 'getEntries'])->name('entries')->middleware('permission:raffle,view');
-    Route::patch('/{raffle}/entries/{entry}/status', [\App\Http\Controllers\Admin\RaffleController::class, 'updateEntryStatus'])->name('entries.update-status')->middleware('permission:raffle,update');
-    Route::delete('/{raffle}/entries/{entry}', [\App\Http\Controllers\Admin\RaffleController::class, 'deleteEntry'])->name('entries.delete')->middleware('permission:raffle,delete');
+    Route::get('/{giveaway}/entries', [GiveawayController::class, 'getEntries'])->name('entries')->middleware('permission:giveaway,view');
+    Route::patch('/{giveaway}/entries/{entry}/status', [GiveawayController::class, 'updateEntryStatus'])->name('entries.update-status')->middleware('permission:giveaway,update');
+    Route::delete('/{giveaway}/entries/{entry}', [GiveawayController::class, 'deleteEntry'])->name('entries.delete')->middleware('permission:giveaway,delete');
 });
