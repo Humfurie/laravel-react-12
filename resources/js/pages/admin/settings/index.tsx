@@ -18,7 +18,7 @@ interface Setting {
 }
 
 interface Props {
-    settings: Record<string, Record<string, any>>;
+    settings: Record<string, Record<string, string | number | boolean>>;
     allSettings: Setting[];
 }
 
@@ -29,17 +29,17 @@ const breadcrumbs = [
     },
 ];
 
-export default function Settings({ settings, allSettings }: Props) {
+export default function Settings({ allSettings }: Props) {
     const [uploading, setUploading] = useState<Record<string, boolean>>({});
     const [previews, setPreviews] = useState<Record<string, string>>({});
 
-    const { data, setData, post, processing, errors } = useForm<{ settings: Record<string, any> }>({
+    const { data, setData, post, processing, errors } = useForm<{ settings: Record<string, string> }>({
         settings: allSettings.reduce(
             (acc, setting) => {
                 acc[setting.key] = setting.value || '';
                 return acc;
             },
-            {} as Record<string, any>,
+            {} as Record<string, string>,
         ),
     });
 

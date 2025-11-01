@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\User\BlogController;
+use App\Http\Controllers\BlogController;
 use App\Models\Blog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;

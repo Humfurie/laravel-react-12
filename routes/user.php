@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\User\CryptoController;
-use App\Http\Controllers\User\StockController;
+use App\Http\Controllers\CryptoController;
+use App\Http\Controllers\StockController;
 
 // Crypto routes - accessible to everyone (guests and authenticated users)
 Route::get('/crypto', [CryptoController::class, 'index'])->name('crypto.index');

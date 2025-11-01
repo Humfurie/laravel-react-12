@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\SitemapController;
-use App\Http\Controllers\User\BlogController;
 use App\Models\Experience;
 use App\Models\Expertise;
 use Illuminate\Support\Facades\Cache;
