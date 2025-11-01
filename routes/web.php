@@ -47,13 +47,13 @@ Route::get('/blog/{blog}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/properties', [App\Http\Controllers\PropertyListingController::class, 'index'])->name('properties.list');
 Route::get('/properties/{property}', [App\Http\Controllers\PropertyListingController::class, 'show'])->name('properties.detail');
 
-// Raffle pages
-Route::get('/raffles', [App\Http\Controllers\RaffleController::class, 'index'])->name('raffles.index');
-Route::get('/raffles/winners', [App\Http\Controllers\RaffleController::class, 'winners'])->name('raffles.winners');
-Route::get('/raffles/{raffle:slug}', [App\Http\Controllers\RaffleController::class, 'show'])->name('raffles.show');
-Route::get('/raffles/{raffle:slug}/entries', [App\Http\Controllers\RaffleController::class, 'entries'])->name('raffles.entries');
-Route::post('/raffles/{raffle:slug}/activate', [App\Http\Controllers\RaffleController::class, 'activateRaffle'])->name('raffles.activate');
-Route::post('/raffles/{raffle:slug}/pick-winner', [App\Http\Controllers\RaffleController::class, 'startRaffle'])->name('raffles.pick-winner');
+// Giveaway pages
+Route::get('/giveaways', [App\Http\Controllers\GiveawayController::class, 'index'])->name('giveaways.index');
+Route::get('/giveaways/winners', [App\Http\Controllers\GiveawayController::class, 'winners'])->name('giveaways.winners');
+Route::get('/giveaways/{giveaway:slug}', [App\Http\Controllers\GiveawayController::class, 'show'])->name('giveaways.show');
+Route::get('/giveaways/{giveaway:slug}/entries', [App\Http\Controllers\GiveawayController::class, 'entries'])->name('giveaways.entries');
+Route::post('/giveaways/{giveaway:slug}/activate', [App\Http\Controllers\GiveawayController::class, 'activateGiveaway'])->name('giveaways.activate');
+Route::post('/giveaways/{giveaway:slug}/pick-winner', [App\Http\Controllers\GiveawayController::class, 'startGiveaway'])->name('giveaways.pick-winner');
 
 // Public API for experiences
 Route::get('/api/experiences', [ExperienceController::class, 'public'])->name('experiences.public');
