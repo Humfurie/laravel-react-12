@@ -38,12 +38,12 @@ function formatDate(month: number, year: number): string {
 function ExperienceCard({ experience }: { experience: Experience }) {
     const handleDelete = () => {
         if (confirm('Are you sure you want to delete this experience?')) {
-            router.delete(route('experiences.destroy', experience.id));
+            router.delete(route('admin.experiences.destroy', experience.id));
         }
     };
 
     const handleEdit = () => {
-        router.visit(route('experiences.edit', experience.id));
+        router.visit(route('admin.experiences.edit', experience.id));
     };
 
     return (
@@ -125,7 +125,7 @@ export default function ExperienceIndex({ experiences }: Props) {
                         <h1 className="text-3xl font-bold tracking-tight">Work Experience</h1>
                         <p className="text-muted-foreground">Manage your professional experience timeline</p>
                     </div>
-                    <Link href={route('experiences.create')}>
+                    <Link href={route('admin.experiences.create')}>
                         <Button>
                             <Plus className="mr-2 h-4 w-4" />
                             Add Experience
@@ -142,7 +142,7 @@ export default function ExperienceIndex({ experiences }: Props) {
                         <Card>
                             <CardContent className="py-12 text-center">
                                 <p className="text-muted-foreground">No experiences found.</p>
-                                <Link href={route('experiences.create')} className="mt-4 inline-block">
+                                <Link href={route('admin.experiences.create')} className="mt-4 inline-block">
                                     <Button>Add your first experience</Button>
                                 </Link>
                             </CardContent>

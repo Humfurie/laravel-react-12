@@ -1,6 +1,6 @@
 import AppLogo from '@/components/app-logo';
 import { Button } from '@/components/ui/button';
-import { raffleNavItems } from '@/config/navigation';
+import { giveawayNavItems } from '@/config/navigation';
 import { Link } from '@inertiajs/react';
 import { Trophy } from 'lucide-react';
 import { type ReactNode } from 'react';
@@ -22,7 +22,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
 
                     {/* Navigation Links */}
                     <div className="flex items-center gap-4">
-                        {raffleNavItems.map((item) => {
+                        {giveawayNavItems.map((item) => {
                             const Icon = item.icon;
                             return (
                                 <Link
@@ -35,7 +35,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                                 </Link>
                             );
                         })}
-                        <Link href="/raffles/winners">
+                        <Link href="/giveaways/winners">
                             <Button variant="outline" size="sm" className="gap-2">
                                 <Trophy className="h-4 w-4" />
                                 <span className="hidden sm:inline">Winners</span>

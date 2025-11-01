@@ -9,6 +9,18 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    // Clear any existing users in this test's transaction
+    DB::table('users')->delete();
+
+    // Reset auto-increment for PostgreSQL
+    if (DB::getDriverName() === 'pgsql') {
+        DB::statement("SELECT setval('users_id_seq', 1, false)");
+    } elseif (DB::getDriverName() === 'mysql') {
+        DB::statement("ALTER TABLE users AUTO_INCREMENT = 1");
+    } elseif (DB::getDriverName() === 'sqlite') {
+        DB::statement("DELETE FROM sqlite_sequence WHERE name = 'users'");
+    }
+
     // Create roles using firstOrCreate to avoid duplicates
     $this->adminRole = Role::firstOrCreate(['slug' => 'admin'], ['name' => 'Admin']);
     $this->editorRole = Role::firstOrCreate(['slug' => 'editor'], ['name' => 'Editor']);

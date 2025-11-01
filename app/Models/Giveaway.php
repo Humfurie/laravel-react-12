@@ -198,7 +198,11 @@ class Giveaway extends Model
 
         // If currently active but dates don't match, update accordingly
         if ($this->status === self::STATUS_ACTIVE) {
-            if ($this->start_date > now() || $this->end_date < now()) {
+            // If end date has passed, mark as ended
+            if ($this->end_date < now()) {
+                $this->update(['status' => self::STATUS_ENDED]);
+            } // If start date is in the future, revert to draft
+            elseif ($this->start_date > now()) {
                 $this->update(['status' => self::STATUS_DRAFT]);
             }
         }

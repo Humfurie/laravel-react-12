@@ -51,6 +51,16 @@ interface GiveawayPageProps {
     giveaway: Giveaway;
     auth?: {
         isAdmin?: boolean;
+        permissions?: {
+            giveaway?: {
+                viewAny?: boolean;
+                view?: boolean;
+                create?: boolean;
+                update?: boolean;
+                delete?: boolean;
+            };
+            [key: string]: unknown;
+        };
     };
     adsense?: {
         client_id?: string;
@@ -66,7 +76,8 @@ interface GiveawayPageProps {
 export default function Show({ giveaway }: Props) {
     const { props } = usePage<GiveawayPageProps>();
     const adsense = props.adsense;
-    const isAdmin = props.auth?.isAdmin || false;
+    // Check if user has giveaway update permission (wildcard * or specific update)
+    const canManageGiveaway = props.auth?.permissions?.giveaway?.update ?? false;
 
     const [formData, setFormData] = useState({
         name: '',
@@ -261,38 +272,7 @@ export default function Show({ giveaway }: Props) {
                                 </Card>
                             )}
 
-                            {/* Admin-only Start Giveaway Button */}
-                            {isAdmin && giveaway.can_start_giveaway && (
-                                <Card className="border-orange-200 bg-orange-50">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-orange-900">Admin: Start Giveaway</h3>
-                                                <p className="text-sm text-orange-700">The giveaway has ended. Click to randomly select a winner.</p>
-                                            </div>
-                                            <Button
-                                                onClick={handlePickWinner}
-                                                disabled={startingRaffle}
-                                                className="bg-orange-600 hover:bg-orange-700"
-                                            >
-                                                {startingRaffle ? (
-                                                    <>
-                                                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                                                        Selecting Winner...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Trophy className="mr-2 h-4 w-4" />
-                                                        Start Giveaway
-                                                    </>
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            )}
-
-                            {/* Casino-style Rolling Names */}
+                            {/* Winner Selection Animation */}
                             {giveaway.entries_count > 0 && (
                                 <div>
                                     <WinnerAnnouncement
@@ -301,8 +281,8 @@ export default function Show({ giveaway }: Props) {
                                         winnerAnnounced={!!giveaway.winner && !showGrandReveal}
                                         isSelecting={isSpinning}
                                         onSelectWinner={handlePickWinner}
-                                        canSelectWinner={!giveaway.winner && giveaway.status === 'active'}
-                                        isAdmin={isAdmin}
+                                        canSelectWinner={canManageGiveaway && giveaway.can_start_giveaway}
+                                        isAdmin={canManageGiveaway}
                                     />
                                 </div>
                             )}

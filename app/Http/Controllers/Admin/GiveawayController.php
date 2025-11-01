@@ -82,11 +82,11 @@ class GiveawayController extends Controller
             $giveaway = Giveaway::create($validated);
 
             return redirect()->route('admin.giveaways.edit', $giveaway)
-                ->with('success', 'Raffle created successfully.');
+                ->with('success', 'Giveaway created successfully.');
         } catch (UniqueConstraintViolationException $e) {
             return back()
                 ->withInput()
-                ->with('error', 'A raffle with this title already exists. Please use a different title or modify the slug manually.');
+                ->with('error', 'A giveaway with this title already exists. Please use a different title or modify the slug manually.');
         } catch (Exception $e) {
             return back()
                 ->withInput()
@@ -165,7 +165,7 @@ class GiveawayController extends Controller
         $giveaway->delete();
 
         return redirect()->route('admin.giveaways.index')
-            ->with('success', 'Raffle deleted successfully.');
+            ->with('success', 'Giveaway deleted successfully.');
     }
 
     /**
@@ -176,7 +176,7 @@ class GiveawayController extends Controller
         $giveaway = Giveaway::withTrashed()->findOrFail($id);
         $giveaway->restore();
 
-        return back()->with('success', 'Raffle restored successfully.');
+        return back()->with('success', 'Giveaway restored successfully.');
     }
 
     /**
@@ -188,7 +188,7 @@ class GiveawayController extends Controller
         $giveaway->forceDelete();
 
         return redirect()->route('admin.giveaways.index')
-            ->with('success', 'Raffle permanently deleted.');
+            ->with('success', 'Giveaway permanently deleted.');
     }
 
     /**
@@ -273,11 +273,11 @@ class GiveawayController extends Controller
         try {
             $giveaway->update($validated);
 
-            return back()->with('success', 'Raffle updated successfully.');
+            return back()->with('success', 'Giveaway updated successfully.');
         } catch (UniqueConstraintViolationException $e) {
             return back()
                 ->withInput()
-                ->with('error', 'A raffle with this title already exists. Please use a different title or modify the slug manually.');
+                ->with('error', 'A giveaway with this title already exists. Please use a different title or modify the slug manually.');
         } catch (Exception $e) {
             return back()
                 ->withInput()

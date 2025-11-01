@@ -1,4 +1,4 @@
-import { Coins, FileText, Home as HomeIcon, TrendingUp, Trophy, type LucideIcon } from 'lucide-react';
+import { Coins, FileText, Home as HomeIcon, type LucideIcon, TrendingUp, Trophy } from 'lucide-react';
 
 export interface NavItem {
     id: string;
@@ -12,23 +12,23 @@ export interface NavItem {
 export const publicNavItems: NavItem[] = [
     { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true },
     { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
-    { id: 'raffles', label: 'Raffles', icon: Trophy, route: '/raffles', showIcon: true },
+    { id: 'giveaways', label: 'Giveaways', icon: Trophy, route: '/giveaways', showIcon: true },
     { id: 'crypto', label: 'Crypto', icon: Coins, route: '/crypto', showIcon: true },
     { id: 'stocks', label: 'Stocks', icon: TrendingUp, route: '/stocks', showIcon: true },
 ];
 
-// Raffle-specific navigation
-export const raffleNavItems: NavItem[] = [
+// Giveaway-specific navigation
+export const giveawayNavItems: NavItem[] = [
     { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true },
     { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
-    { id: 'raffles', label: 'Raffles', icon: Trophy, route: '/raffles', showIcon: true },
+    { id: 'giveaways', label: 'Giveaways', icon: Trophy, route: '/giveaways', showIcon: true },
 ];
 
 // Helper function to get navigation by page
 export function getNavItemsForPage(page?: string): NavItem[] {
     switch (page) {
-        case 'raffles':
-            return raffleNavItems;
+        case 'giveaways':
+            return giveawayNavItems;
         default:
             return publicNavItems;
     }

@@ -159,11 +159,17 @@ class GiveawayController extends Controller
             ], 422);
         }
 
+        // Normalize phone number to +639XXXXXXXXX format before storing
+        $normalizedPhone = $validated['phone'];
+        if (str_starts_with($validated['phone'], '09')) {
+            $normalizedPhone = '+63' . substr($validated['phone'], 1);
+        }
+
         DB::beginTransaction();
         try {
             $entry = $giveaway->entries()->create([
                 'name' => $validated['name'],
-                'phone' => $validated['phone'],
+                'phone' => $normalizedPhone,
                 'facebook_url' => $validated['facebook_url'],
                 'status' => GiveawayEntry::STATUS_PENDING,
             ]);
@@ -238,8 +244,14 @@ class GiveawayController extends Controller
             'phone' => 'required|string',
         ]);
 
+        // Normalize phone number for checking
+        $phone = $request->phone;
+        if (str_starts_with($phone, '09')) {
+            $phone = '+63' . substr($phone, 1);
+        }
+
         $exists = GiveawayEntry::where('giveaway_id', $giveaway->id)
-            ->where('phone', $request->phone)
+            ->where('phone', $phone)
             ->exists();
 
         return response()->json([
