@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExpertiseController;
+use App\Http\Controllers\Api\GiveawayController;
 use App\Http\Controllers\Api\InquiryController;
 use App\Http\Controllers\Api\PropertyController;
 use Illuminate\Support\Facades\Route;
@@ -76,5 +77,18 @@ Route::prefix('v1')->group(function () {
         Route::patch('expertises/{expertise}', [ExpertiseController::class, 'update']);
         Route::delete('expertises/{expertise}', [ExpertiseController::class, 'destroy'])->name('expertises.destroy');
         Route::post('expertises/reorder', [ExpertiseController::class, 'reorder'])->name('expertises.reorder');
+    });
+
+    // Giveaway public endpoints - higher rate limit (60 requests per minute)
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('giveaways', [GiveawayController::class, 'index'])->name('api.giveaways.index');
+        Route::get('giveaways/winners', [GiveawayController::class, 'winners'])->name('api.giveaways.winners');
+        Route::get('giveaways/{giveaway:slug}', [GiveawayController::class, 'show'])->name('api.giveaways.show');
+        Route::post('giveaways/{giveaway:slug}/check-phone', [GiveawayController::class, 'checkPhone'])->name('api.giveaways.check-phone');
+    });
+
+    // Giveaway entry submission - moderate rate limit (10 requests per minute)
+    Route::middleware('throttle:10,1')->group(function () {
+        Route::post('giveaways/{giveaway:slug}/enter', [GiveawayController::class, 'submitEntry'])->name('api.giveaways.enter');
     });
 });
