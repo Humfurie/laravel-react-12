@@ -1,3 +1,4 @@
+{{-- Updated: 2025-11-02 01:20:00 UTC --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
     <head>
