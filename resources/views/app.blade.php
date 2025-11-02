@@ -47,8 +47,14 @@
             <meta property="fb:app_id" content="{{ config('services.facebook.app_id') }}">
         @endif
 
-        {{-- Open Graph & Twitter Card Meta Tags (populated by View Composer) --}}
-        <!-- DEBUG: metaTitle={{ $metaTitle ?? 'NOT SET' }}, component={{ $page['component'] ?? 'NO COMPONENT' }} -->
+        {{-- Open Graph & Twitter Card Meta Tags --}}
+        @php
+            $meta = request()->get('_meta', []);
+            $metaTitle = $meta['title'] ?? config('app.name');
+            $metaDescription = $meta['description'] ?? 'Professional portfolio and blog';
+            $metaImage = $meta['image'] ?? asset('images/og-default.jpg');
+        @endphp
+        <!-- DEBUG-{{ time() }}: title={{ $metaTitle }}, hasImage={{ !empty($meta['image']) ? 'YES' : 'NO' }} -->
         <meta property="og:title" content="{{ $metaTitle }}">
         <meta property="og:description" content="{{ $metaDescription }}">
         <meta property="og:image" content="{{ $metaImage }}">
