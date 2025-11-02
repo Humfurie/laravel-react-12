@@ -43,6 +43,9 @@
         <meta property="og:type" content="website">
         <meta property="og:url" content="{{ url()->current() }}">
         <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
+        @if(config('services.facebook.app_id'))
+            <meta property="fb:app_id" content="{{ config('services.facebook.app_id') }}">
+        @endif
 
         {{-- Open Graph & Twitter Card Meta Tags (populated by View Composer) --}}
         <meta property="og:title" content="{{ $metaTitle }}">
