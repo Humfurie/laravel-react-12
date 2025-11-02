@@ -50,12 +50,24 @@
 
         {{-- Open Graph & Twitter Card Meta Tags --}}
         @php
-            $meta = request()->get('_meta', []);
-            $metaTitle = $meta['title'] ?? config('app.name');
-            $metaDescription = $meta['description'] ?? 'Professional portfolio and blog';
-            $metaImage = $meta['image'] ?? asset('images/og-default.jpg');
+            // Direct approach: check if this is a giveaway page and fetch data
+            $currentPath = request()->path();
+            $metaTitle = config('app.name');
+            $metaDescription = 'Professional portfolio and blog';
+            $metaImage = asset('images/og-default.jpg');
+
+            if (preg_match('#^giveaways/([^/]+)$#', $currentPath, $matches)) {
+                $slug = $matches[1];
+                $giveaway = \App\Models\Giveaway::where('slug', $slug)->first();
+
+                if ($giveaway) {
+                    $metaTitle = $giveaway->title;
+                    $metaDescription = substr($giveaway->description, 0, 160);
+                    $metaImage = $giveaway->primary_image_url ?: asset('images/og-default.jpg');
+                }
+            }
         @endphp
-        <!-- DEBUG-{{ time() }}: title={{ $metaTitle }}, hasImage={{ !empty($meta['image']) ? 'YES' : 'NO' }} -->
+        <!-- META-DEBUG: title={{ $metaTitle }}, image={{ $metaImage }} -->
         <meta property="og:title" content="{{ $metaTitle }}">
         <meta property="og:description" content="{{ $metaDescription }}">
         <meta property="og:image" content="{{ $metaImage }}">
