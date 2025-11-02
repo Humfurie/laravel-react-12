@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Models\Blog;
 use App\Observers\BlogObserver;
+use App\View\Composers\MetaComposer;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,5 +31,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Register observers
         Blog::observe(BlogObserver::class);
+
+        // Register view composers for meta tags
+        View::composer('app', MetaComposer::class);
     }
 }
