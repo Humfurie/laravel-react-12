@@ -32,8 +32,8 @@ class Giveaway extends Model
     ];
 
     protected $casts = [
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
+        'start_date' => 'datetime:Y-m-d\TH:i:sP',
+        'end_date' => 'datetime:Y-m-d\TH:i:sP',
         'prize_claimed_at' => 'datetime',
         'prize_claimed' => 'boolean',
     ];
