@@ -45,6 +45,7 @@
         <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
 
         {{-- Default Open Graph values (will be overridden by Inertia pages) --}}
+        {{-- DEBUG: metaTitle={{ $metaTitle ?? 'NOT SET' }}, metaImage={{ $metaImage ?? 'NOT SET' }} --}}
         <meta property="og:title" content="{{ $metaTitle ?? config('app.name', 'Laravel') }}">
         <meta property="og:description" content="{{ $metaDescription ?? 'Professional portfolio and blog' }}">
         <meta property="og:image" content="{{ $metaImage ?? asset('images/og-default.jpg') }}">
