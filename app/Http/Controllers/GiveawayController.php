@@ -73,6 +73,15 @@ class GiveawayController extends Controller
             && $giveaway->start_date <= now()
             && $giveaway->status === Giveaway::STATUS_ACTIVE;
 
+        // Set meta data in request for blade template
+        request()->merge([
+            '_meta' => [
+                'title' => $giveaway->title,
+                'description' => substr($giveaway->description, 0, 160),
+                'image' => $giveaway->primary_image_url,
+            ]
+        ]);
+
         return Inertia::render('giveaways/show', [
             'giveaway' => [
                 'id' => $giveaway->id,
