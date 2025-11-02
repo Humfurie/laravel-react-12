@@ -105,6 +105,11 @@ class GiveawayController extends Controller
                 }),
                 'primary_image_url' => $giveaway->primary_image_url,
             ],
+        ])
+        ->withViewData([
+            'metaTitle' => $giveaway->title,
+            'metaDescription' => substr($giveaway->description, 0, 160),
+            'metaImage' => $giveaway->primary_image_url,
         ]);
     }
 

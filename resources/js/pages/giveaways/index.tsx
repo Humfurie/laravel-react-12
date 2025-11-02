@@ -104,7 +104,28 @@ function GiveawayCard({ giveaway }: { giveaway: Giveaway }) {
 export default function Index({ giveaways }: Props) {
     return (
         <>
-            <Head title="Active Giveaways" />
+            <Head title="Active Giveaways">
+                <meta
+                    name="description"
+                    content="Enter our exciting giveaways for a chance to win amazing prizes! Follow the criteria and submit your entry today."
+                />
+
+                {/* Open Graph / Facebook */}
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content="Active Giveaways" />
+                <meta
+                    property="og:description"
+                    content="Enter our exciting giveaways for a chance to win amazing prizes! Follow the criteria and submit your entry today."
+                />
+
+                {/* Twitter */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Active Giveaways" />
+                <meta
+                    name="twitter:description"
+                    content="Enter our exciting giveaways for a chance to win amazing prizes! Follow the criteria and submit your entry today."
+                />
+            </Head>
             <FloatingNav currentPage="giveaways" />
 
             <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">

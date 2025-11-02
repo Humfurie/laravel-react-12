@@ -45,18 +45,18 @@
         <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
 
         {{-- Default Open Graph values (will be overridden by Inertia pages) --}}
-        <meta property="og:title" content="{{ config('app.name', 'Laravel') }}">
-        <meta property="og:description" content="Professional portfolio and blog">
-        <meta property="og:image" content="{{ asset('images/og-default.jpg') }}">
+        <meta property="og:title" content="{{ $metaTitle ?? config('app.name', 'Laravel') }}">
+        <meta property="og:description" content="{{ $metaDescription ?? 'Professional portfolio and blog' }}">
+        <meta property="og:image" content="{{ $metaImage ?? asset('images/og-default.jpg') }}">
         <meta property="og:image:width" content="1200">
         <meta property="og:image:height" content="630">
-        <meta property="og:image:alt" content="{{ config('app.name', 'Laravel') }} - Portfolio and Blog">
+        <meta property="og:image:alt" content="{{ $metaTitle ?? config('app.name', 'Laravel') }} - Portfolio and Blog">
 
         {{-- Twitter Card Meta Tags --}}
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="{{ config('app.name', 'Laravel') }}">
-        <meta name="twitter:description" content="Professional portfolio and blog">
-        <meta name="twitter:image" content="{{ asset('images/og-default.jpg') }}">
+        <meta name="twitter:title" content="{{ $metaTitle ?? config('app.name', 'Laravel') }}">
+        <meta name="twitter:description" content="{{ $metaDescription ?? 'Professional portfolio and blog' }}">
+        <meta name="twitter:image" content="{{ $metaImage ?? asset('images/og-default.jpg') }}">
 
         {{-- Favicon --}}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v={{ config('app.version', '1.0') }}">
