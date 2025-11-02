@@ -48,6 +48,7 @@
         @endif
 
         {{-- Open Graph & Twitter Card Meta Tags (populated by View Composer) --}}
+        <!-- DEBUG: metaTitle={{ $metaTitle ?? 'NOT SET' }}, component={{ $page['component'] ?? 'NO COMPONENT' }} -->
         <meta property="og:title" content="{{ $metaTitle }}">
         <meta property="og:description" content="{{ $metaDescription }}">
         <meta property="og:image" content="{{ $metaImage }}">
