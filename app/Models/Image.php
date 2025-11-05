@@ -44,11 +44,12 @@ class Image extends Model
     }
 
     /**
-     * Get the full URL of the original image
+     * Get the URL of the original image
+     * Returns relative URL for better compatibility with Inertia/frontend routing
      */
     public function getUrlAttribute(): string
     {
-        return asset(Storage::url($this->path));
+        return Storage::url($this->path);
     }
 
     /**

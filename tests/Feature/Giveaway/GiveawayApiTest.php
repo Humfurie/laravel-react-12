@@ -5,13 +5,14 @@ namespace Tests\Feature\Giveaway;
 use App\Models\Giveaway;
 use App\Models\GiveawayEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class GiveawayApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_can_list_active_giveaways(): void
     {
         Giveaway::factory()->active()->count(3)->create();
@@ -24,7 +25,7 @@ class GiveawayApiTest extends TestCase
             ->assertJsonCount(3, 'data');
     }
 
-    /** @test */
+    #[Test]
     public function it_can_show_a_giveaway(): void
     {
         $giveaway = Giveaway::factory()->active()->create([
@@ -42,7 +43,7 @@ class GiveawayApiTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_cannot_show_draft_giveaway(): void
     {
         $giveaway = Giveaway::factory()->draft()->create();
@@ -52,7 +53,7 @@ class GiveawayApiTest extends TestCase
         $response->assertNotFound();
     }
 
-    /** @test */
+    #[Test]
     public function it_can_submit_entry_to_active_giveaway(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -80,7 +81,7 @@ class GiveawayApiTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_normalizes_phone_number_starting_with_09(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -99,7 +100,7 @@ class GiveawayApiTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_accepts_phone_number_already_in_normalized_format(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -117,7 +118,7 @@ class GiveawayApiTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_prevents_duplicate_phone_number_for_same_giveaway(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -139,7 +140,7 @@ class GiveawayApiTest extends TestCase
             ->assertJsonValidationErrors(['phone']);
     }
 
-    /** @test */
+    #[Test]
     public function it_allows_same_phone_number_for_different_giveaways(): void
     {
         $giveaway1 = Giveaway::factory()->active()->create();
@@ -163,7 +164,7 @@ class GiveawayApiTest extends TestCase
         $response->assertStatus(201);
     }
 
-    /** @test */
+    #[Test]
     public function it_validates_required_fields(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -174,7 +175,7 @@ class GiveawayApiTest extends TestCase
             ->assertJsonValidationErrors(['name', 'phone', 'facebook_url']);
     }
 
-    /** @test */
+    #[Test]
     public function it_validates_phone_format(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -189,7 +190,7 @@ class GiveawayApiTest extends TestCase
             ->assertJsonValidationErrors(['phone']);
     }
 
-    /** @test */
+    #[Test]
     public function it_validates_facebook_url_format(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -204,7 +205,7 @@ class GiveawayApiTest extends TestCase
             ->assertJsonValidationErrors(['facebook_url']);
     }
 
-    /** @test */
+    #[Test]
     public function it_cannot_submit_entry_to_ended_giveaway(): void
     {
         $giveaway = Giveaway::factory()->ended()->create();
@@ -222,7 +223,7 @@ class GiveawayApiTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_cannot_submit_entry_to_upcoming_giveaway(): void
     {
         $giveaway = Giveaway::factory()->upcoming()->create();
@@ -240,7 +241,7 @@ class GiveawayApiTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_check_if_phone_already_entered(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -260,7 +261,7 @@ class GiveawayApiTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_check_if_phone_not_entered(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -275,7 +276,7 @@ class GiveawayApiTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_list_giveaways_with_winners(): void
     {
         Giveaway::factory()->withWinner()->count(2)->create();
@@ -287,7 +288,7 @@ class GiveawayApiTest extends TestCase
             ->assertJsonCount(2, 'data');
     }
 
-    /** @test */
+    #[Test]
     public function it_includes_entries_count_in_giveaway_list(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -299,7 +300,7 @@ class GiveawayApiTest extends TestCase
             ->assertJsonPath('data.0.entries_count', 5);
     }
 
-    /** @test */
+    #[Test]
     public function it_sets_entry_status_to_pending_by_default(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
