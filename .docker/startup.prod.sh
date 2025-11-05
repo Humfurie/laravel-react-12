@@ -36,7 +36,8 @@ php artisan storage:link --force
 echo "Caching configuration..."
 php artisan config:cache
 php artisan route:cache
-# Skip view:cache for Inertia apps (no Blade views)
+php artisan view:cache  # Cache Blade views (includes email templates, error pages)
+php artisan event:cache 2>/dev/null || echo "Event caching not available"  # Laravel 11+
 
 # NOTE: Do NOT clear cache in production - it defeats the purpose!
 # Only clear cache when deploying new code or debugging

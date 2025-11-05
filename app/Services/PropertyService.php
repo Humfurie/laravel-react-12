@@ -208,9 +208,11 @@ class PropertyService
             'sold_properties' => Property::sold()->count(),
             'featured_properties' => Property::featured()->count(),
             'total_views' => Property::sum('view_count'),
-            'average_price' => Property::whereHas('pricing')->get()->avg(function ($property) {
-                return $property->pricing->total_contract_price ?? 0;
-            }),
+            // Use database aggregation instead of loading all properties into memory
+            'average_price' => DB::table('property_pricing')
+                    ->join('properties', 'property_pricing.property_id', '=', 'properties.id')
+                    ->whereNull('properties.deleted_at')
+                    ->avg('property_pricing.total_contract_price') ?? 0,
             'properties_by_type' => Property::select('property_type', DB::raw('count(*) as count'))
                 ->groupBy('property_type')
                 ->pluck('count', 'property_type'),
