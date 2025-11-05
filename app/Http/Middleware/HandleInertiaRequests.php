@@ -40,6 +40,11 @@ class HandleInertiaRequests extends Middleware
 
         $user = $request->user();
 
+        // Eager load relationships to prevent N+1 queries
+        if ($user) {
+            $user->load(['roles.permissions']);
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),

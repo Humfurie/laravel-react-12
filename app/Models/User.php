@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
@@ -113,28 +114,39 @@ class User extends Authenticatable implements JWTSubject
 
     public function getAllPermissions(): array
     {
-        $resources = [
-            'developer',
-            'project',
-            'realestate-project',
-            'property',
-            'blog',
-            'giveaway',
-            'user',
-            'role',
-            'permission',
-            'experience',
-            'expertise',
-            'skills',
-            'technology',
-        ];
-        $allPermissions = [];
+        // Cache permissions for 5 minutes to avoid repeated queries
+        return Cache::remember(
+            'user_permissions_' . $this->id,
+            now()->addMinutes(5),
+            function () {
+                // Eager load relationships to prevent N+1 queries
+                $user = $this->load('roles.permissions');
 
-        foreach ($resources as $resource) {
-            $allPermissions[$resource] = $this->getResourcePermissions($resource);
-        }
+                $resources = [
+                    'developer',
+                    'project',
+                    'realestate-project',
+                    'property',
+                    'blog',
+                    'giveaway',
+                    'user',
+                    'role',
+                    'permission',
+                    'experience',
+                    'expertise',
+                    'skills',
+                    'technology',
+                ];
 
-        return $allPermissions;
+                $allPermissions = [];
+
+                foreach ($resources as $resource) {
+                    $allPermissions[$resource] = $this->getResourcePermissions($resource);
+                }
+
+                return $allPermissions;
+            }
+        );
     }
 
     /**
