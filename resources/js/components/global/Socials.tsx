@@ -30,7 +30,7 @@ const socialsData: SocialAtt[] = [
     {
         icon: <Github />,
         name: 'GitHub',
-        url: 'https://github.com/Humfurie',
+        url: 'https://github.com/Humfurie/laravel-react-12',
         className: 'text-brand-black hover:text-brand-gray',
     },
 ];

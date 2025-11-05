@@ -18,7 +18,7 @@ export const AccountLinks = ({ className }: { className: string }) => {
         },
         {
             title: 'GitHub account',
-            url: 'https://github.com/Humfurie',
+            url: 'https://github.com/Humfurie/laravel-react-12',
             svg: (
                 <svg className={`h-4 w-4 ${className}`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                     <path

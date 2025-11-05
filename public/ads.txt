@@ -3,15 +3,4 @@
 # Learn more: https://support.google.com/adsense/answer/7532444
 
 # Google AdSense
-# Replace pub-0000000000000000 with your actual AdSense publisher ID
-# Format: google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
-google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
-
-# How to find your publisher ID:
-# 1. Log in to Google AdSense
-# 2. Click "Account" in the left sidebar
-# 3. Look for "Publisher ID" (starts with "pub-")
-# 4. Replace pub-0000000000000000 above with your actual ID
-
-# Example:
-# google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0
+google.com, pub-8464970113450424, DIRECT, f08c47fec0942fa0

@@ -169,12 +169,12 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
             {/* Navigation Tabs */}
             {/* Floating Navbar */}
             <nav
-                className={`fixed top-6 left-1/2 z-50 -translate-x-1/2 transform transition-all duration-300 ease-in-out ${
+                className={`fixed top-3 left-1/2 z-50 -translate-x-1/2 transform transition-all duration-300 ease-in-out sm:top-6 ${
                     isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
                 }`}
             >
-                <div className="rounded-full border border-white/20 bg-white/80 px-6 py-4 shadow-lg backdrop-blur-md">
-                    <div className="flex items-center space-x-3">
+                <div className="rounded-full border border-white/20 bg-white/80 px-3 py-2 shadow-lg backdrop-blur-md sm:px-6 sm:py-4">
+                    <div className="flex items-center space-x-1 sm:space-x-3">
                         {publicNavItems.map((item, index) => {
                             const Icon = item.icon;
                             const isActive = activeItem === item.id;
@@ -184,7 +184,7 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
                                     key={`${item.id}-${index}`}
                                     href={item.route}
                                     onClick={() => setActiveItem(item.id)}
-                                    className={`group relative flex items-center space-x-2 rounded-full px-5 py-3 transition-all duration-200 ${
+                                    className={`group relative flex items-center space-x-2 rounded-full px-3 py-2 transition-all duration-200 sm:px-5 sm:py-3 ${
                                         isActive
                                             ? 'scale-105 bg-orange-500 text-white shadow-md'
                                             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
@@ -192,11 +192,11 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
                                     title={item.label}
                                 >
                                     {/* Desktop: Show both icon and text */}
-                                    <Icon size={20} className="transition-transform duration-200 group-hover:scale-110" />
-                                    <span className="hidden text-sm font-medium sm:block">{item.label}</span>
+                                    <Icon size={18} className="transition-transform duration-200 group-hover:scale-110 sm:size-5" />
+                                    <span className="hidden text-xs font-medium sm:text-sm md:block">{item.label}</span>
 
                                     {/* Mobile tooltip - only for icon-only buttons */}
-                                    <div className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 transform opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:hidden">
+                                    <div className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 transform opacity-0 transition-opacity duration-200 group-hover:opacity-100 md:hidden">
                                         <div className="rounded bg-gray-900 px-2 py-1 text-xs whitespace-nowrap text-white">{item.label}</div>
                                         <div className="absolute top-0 left-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1 transform border-r-2 border-b-2 border-l-2 border-transparent border-b-gray-900"></div>
                                     </div>
@@ -229,20 +229,20 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
             {/*<HomeCTA />*/}
 
             {/* Blog Section */}
-            <section className="bg-muted/30 py-16">
+            <section className="bg-muted/30 py-12 sm:py-16">
                 <div className="container mx-auto px-4">
-                    <div className="mb-12 text-center">
-                        <h2 className="mb-4 text-3xl font-bold">From Our Blog</h2>
-                        <p className="text-muted-foreground mx-auto max-w-2xl">
+                    <div className="mb-8 text-center sm:mb-12">
+                        <h2 className="mb-3 text-2xl font-bold sm:mb-4 sm:text-3xl">From Our Blog</h2>
+                        <p className="text-muted-foreground mx-auto max-w-2xl px-4 text-sm sm:text-base">
                             Discover insights, tutorials, and stories. Stay updated with the latest trends and best practices.
                         </p>
                     </div>
 
                     {/* Primary/Featured Posts */}
                     {primary.length > 0 && (
-                        <div className="mb-12">
-                            <h3 className="mb-6 text-center text-xl font-semibold">Featured Posts</h3>
-                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="mb-8 sm:mb-12">
+                            <h3 className="mb-4 text-center text-lg font-semibold sm:mb-6 sm:text-xl">Featured Posts</h3>
+                            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
                                 {primary.map((blog) => (
                                     <BlogCard key={String(blog.id)} blog={blog} />
                                 ))}
@@ -252,9 +252,9 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
 
                     {/* Latest Posts */}
                     {latest.length > 0 && (
-                        <div className="mb-8">
-                            <h3 className="mb-6 text-center text-xl font-semibold">Latest Posts</h3>
-                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="mb-6 sm:mb-8">
+                            <h3 className="mb-4 text-center text-lg font-semibold sm:mb-6 sm:text-xl">Latest Posts</h3>
+                            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
                                 {latest.slice(0, 6).map((blog) => (
                                     <BlogCard key={String(blog.id)} blog={blog} />
                                 ))}
@@ -266,7 +266,7 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
                     <div className="text-center">
                         <button
                             onClick={() => router.visit('/blog')}
-                            className="from-brand-orange to-brand-orange hover:from-brand-orange/90 hover:to-brand-orange/90 inline-flex transform items-center rounded-xl bg-gradient-to-r px-6 py-3 text-white shadow-lg transition-all duration-300 hover:scale-105"
+                            className="from-brand-orange to-brand-orange hover:from-brand-orange/90 hover:to-brand-orange/90 inline-flex transform items-center rounded-xl bg-gradient-to-r px-5 py-2.5 text-sm text-white shadow-lg transition-all duration-300 hover:scale-105 sm:px-6 sm:py-3 sm:text-base"
                         >
                             View All Posts
                         </button>
