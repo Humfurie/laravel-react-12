@@ -1,6 +1,4 @@
-@php use App\Models\Giveaway; @endphp
-{{-- Updated: 2025-11-02 01:20:00 UTC --}}
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
 <head>
     <meta charset="utf-8">
@@ -40,47 +38,47 @@
 
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-    {{-- Open Graph Meta Tags for Social Media --}}
-    <meta property="og:site_name" content="{{ config('app.name', 'Laravel') }}">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
-    @if(config('services.facebook.app_id'))
-        <meta property="fb:app_id" content="{{ config('services.facebook.app_id') }}">
-    @endif
+        {{-- Open Graph Meta Tags for Social Media --}}
+        <meta property="og:site_name" content="{{ config('app.name', 'Laravel') }}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
+        @if(config('services.facebook.app_id'))
+            <meta property="fb:app_id" content="{{ config('services.facebook.app_id') }}">
+        @endif
 
-    {{-- Open Graph & Twitter Card Meta Tags --}}
-    @php
-        // Direct approach: check if this is a giveaway page and fetch data
-        $currentPath = request()->path();
-        $metaTitle = config('app.name');
-        $metaDescription = 'Professional portfolio and blog';
-        $metaImage = asset('images/og-default.jpg');
+        {{-- Open Graph & Twitter Card Meta Tags --}}
+        @php
+            // Direct approach: check if this is a giveaway page and fetch data
+            $currentPath = request()->path();
+            $metaTitle = config('app.name');
+            $metaDescription = 'Professional portfolio and blog';
+            $metaImage = asset('images/og-default.jpg');
 
-        if (preg_match('#^giveaways/([^/]+)$#', $currentPath, $matches)) {
-            $slug = $matches[1];
-            $giveaway = Giveaway::where('slug', $slug)->first();
+            if (preg_match('#^giveaways/([^/]+)$#', $currentPath, $matches)) {
+                $slug = $matches[1];
+                $giveaway = \App\Models\Giveaway::where('slug', $slug)->first();
 
-            if ($giveaway) {
-                $metaTitle = $giveaway->title;
-                $metaDescription = substr($giveaway->description, 0, 160);
-                $metaImage = $giveaway->primary_image_url ?: asset('images/og-default.jpg');
+                if ($giveaway) {
+                    $metaTitle = $giveaway->title;
+                    $metaDescription = substr($giveaway->description, 0, 160);
+                    $metaImage = $giveaway->primary_image_url ?: asset('images/og-default.jpg');
+                }
             }
-        }
-    @endphp
+        @endphp
         <!-- META-DEBUG: title={{ $metaTitle }}, image={{ $metaImage }} -->
-    <meta property="og:title" content="{{ $metaTitle }}">
-    <meta property="og:description" content="{{ $metaDescription }}">
-    <meta property="og:image" content="{{ $metaImage }}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="{{ $metaTitle }}">
+        <meta property="og:title" content="{{ $metaTitle }}">
+        <meta property="og:description" content="{{ $metaDescription }}">
+        <meta property="og:image" content="{{ $metaImage }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="{{ $metaTitle }}">
 
-    {{-- Twitter Card Meta Tags --}}
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $metaTitle }}">
-    <meta name="twitter:description" content="{{ $metaDescription }}">
-    <meta name="twitter:image" content="{{ $metaImage }}">
+        {{-- Twitter Card Meta Tags --}}
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $metaTitle }}">
+        <meta name="twitter:description" content="{{ $metaDescription }}">
+        <meta name="twitter:image" content="{{ $metaImage }}">
 
     {{-- Favicon --}}
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v={{ config('app.version', '1.0') }}">
