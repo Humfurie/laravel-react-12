@@ -166,7 +166,24 @@ export default function Show({ giveaway }: Props) {
 
     return (
         <>
-            <Head title={giveaway.title} />
+            <Head title={giveaway.title}>
+                <meta name="description" content={giveaway.description.slice(0, 160)} />
+
+                {/* Open Graph / Facebook */}
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content={window.location.href} />
+                <meta property="og:title" content={giveaway.title} />
+                <meta property="og:description" content={giveaway.description.slice(0, 160)} />
+                {giveaway.primary_image_url && <meta property="og:image" content={giveaway.primary_image_url} />}
+                {giveaway.primary_image_url && <meta property="og:image:width" content="1200" />}
+                {giveaway.primary_image_url && <meta property="og:image:height" content="630" />}
+
+                {/* Twitter */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={giveaway.title} />
+                <meta name="twitter:description" content={giveaway.description.slice(0, 160)} />
+                {giveaway.primary_image_url && <meta name="twitter:image" content={giveaway.primary_image_url} />}
+            </Head>
             <FloatingNav currentPage="giveaways" />
 
             <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
