@@ -5,13 +5,14 @@ namespace Tests\Unit\Giveaway;
 use App\Models\Giveaway;
 use App\Models\GiveawayEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class GiveawayModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_can_create_a_giveaway(): void
     {
         $giveaway = Giveaway::factory()->create([
@@ -25,7 +26,7 @@ class GiveawayModelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_automatically_generates_slug_from_title(): void
     {
         $giveaway = Giveaway::factory()->create([
@@ -35,7 +36,7 @@ class GiveawayModelTest extends TestCase
         $this->assertEquals('amazing-iphone-giveaway', $giveaway->slug);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_check_if_giveaway_is_active(): void
     {
         $activeGiveaway = Giveaway::factory()->active()->create();
@@ -47,7 +48,7 @@ class GiveawayModelTest extends TestCase
         $this->assertFalse($endedGiveaway->isActive());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_check_if_giveaway_has_ended(): void
     {
         $activeGiveaway = Giveaway::factory()->active()->create();
@@ -57,7 +58,7 @@ class GiveawayModelTest extends TestCase
         $this->assertTrue($endedGiveaway->hasEnded());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_check_if_giveaway_can_accept_entries(): void
     {
         $activeGiveaway = Giveaway::factory()->active()->create();
@@ -69,7 +70,7 @@ class GiveawayModelTest extends TestCase
         $this->assertFalse($upcomingGiveaway->canAcceptEntries());
     }
 
-    /** @test */
+    #[Test]
     public function it_has_many_entries(): void
     {
         $giveaway = Giveaway::factory()->create();
@@ -78,7 +79,7 @@ class GiveawayModelTest extends TestCase
         $this->assertCount(5, $giveaway->entries);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_select_a_random_winner(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -92,7 +93,7 @@ class GiveawayModelTest extends TestCase
         $this->assertEquals(Giveaway::STATUS_ENDED, $giveaway->fresh()->status);
     }
 
-    /** @test */
+    #[Test]
     public function it_does_not_select_rejected_entries_as_winner(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -114,7 +115,7 @@ class GiveawayModelTest extends TestCase
         $this->assertEquals(GiveawayEntry::STATUS_WINNER, $winner->status);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_reject_winner_and_select_new_one(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -133,7 +134,7 @@ class GiveawayModelTest extends TestCase
         $this->assertEquals(GiveawayEntry::STATUS_WINNER, $newWinner->status);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_mark_prize_as_claimed(): void
     {
         $giveaway = Giveaway::factory()->withWinner()->create();
@@ -147,7 +148,7 @@ class GiveawayModelTest extends TestCase
         $this->assertNotNull($giveaway->fresh()->prize_claimed_at);
     }
 
-    /** @test */
+    #[Test]
     public function it_updates_status_to_ended_when_end_date_passes(): void
     {
         $giveaway = Giveaway::factory()->create([
@@ -161,7 +162,7 @@ class GiveawayModelTest extends TestCase
         $this->assertEquals(Giveaway::STATUS_ENDED, $giveaway->fresh()->status);
     }
 
-    /** @test */
+    #[Test]
     public function it_updates_status_to_draft_when_start_date_is_future(): void
     {
         $giveaway = Giveaway::factory()->create([
@@ -175,7 +176,7 @@ class GiveawayModelTest extends TestCase
         $this->assertEquals(Giveaway::STATUS_DRAFT, $giveaway->fresh()->status);
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_active_giveaways_correctly(): void
     {
         Giveaway::factory()->active()->create();
@@ -187,7 +188,7 @@ class GiveawayModelTest extends TestCase
         $this->assertCount(1, $activeGiveaways);
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_ended_giveaways_correctly(): void
     {
         Giveaway::factory()->active()->create();
@@ -198,7 +199,7 @@ class GiveawayModelTest extends TestCase
         $this->assertCount(2, $endedGiveaways);
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_draft_giveaways_correctly(): void
     {
         Giveaway::factory()->active()->create();
@@ -209,7 +210,7 @@ class GiveawayModelTest extends TestCase
         $this->assertCount(3, $draftGiveaways);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_null_when_no_eligible_entries_for_winner_selection(): void
     {
         $giveaway = Giveaway::factory()->active()->create();
@@ -225,7 +226,7 @@ class GiveawayModelTest extends TestCase
         $this->assertNull($giveaway->fresh()->winner_id);
     }
 
-    /** @test */
+    #[Test]
     public function it_does_not_select_new_winner_if_winner_already_exists(): void
     {
         $giveaway = Giveaway::factory()->withWinner()->create();

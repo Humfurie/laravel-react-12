@@ -5,13 +5,14 @@ namespace Tests\Unit\Giveaway;
 use App\Models\Giveaway;
 use App\Models\GiveawayEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class GiveawayEntryModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_can_create_an_entry(): void
     {
         $giveaway = Giveaway::factory()->create();
@@ -28,7 +29,7 @@ class GiveawayEntryModelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_a_giveaway(): void
     {
         $giveaway = Giveaway::factory()->create();
@@ -38,7 +39,7 @@ class GiveawayEntryModelTest extends TestCase
         $this->assertEquals($giveaway->id, $entry->giveaway->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_mark_entry_as_winner(): void
     {
         $entry = GiveawayEntry::factory()->create();
@@ -49,7 +50,7 @@ class GiveawayEntryModelTest extends TestCase
         $this->assertTrue($entry->fresh()->isWinner());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_mark_entry_as_verified(): void
     {
         $entry = GiveawayEntry::factory()->create();
@@ -60,7 +61,7 @@ class GiveawayEntryModelTest extends TestCase
         $this->assertTrue($entry->fresh()->isVerified());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_mark_entry_as_rejected(): void
     {
         $entry = GiveawayEntry::factory()->create();
@@ -71,7 +72,7 @@ class GiveawayEntryModelTest extends TestCase
         $this->assertTrue($entry->fresh()->isRejected());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_check_if_entry_is_winner(): void
     {
         $winner = GiveawayEntry::factory()->winner()->create();
@@ -81,7 +82,7 @@ class GiveawayEntryModelTest extends TestCase
         $this->assertFalse($pending->isWinner());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_check_if_entry_is_rejected(): void
     {
         $rejected = GiveawayEntry::factory()->rejected()->create();
@@ -91,7 +92,7 @@ class GiveawayEntryModelTest extends TestCase
         $this->assertFalse($pending->isRejected());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_check_if_entry_is_verified(): void
     {
         $verified = GiveawayEntry::factory()->verified()->create();
@@ -101,7 +102,7 @@ class GiveawayEntryModelTest extends TestCase
         $this->assertFalse($pending->isVerified());
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_winners_correctly(): void
     {
         GiveawayEntry::factory()->winner()->count(2)->create();
@@ -116,7 +117,7 @@ class GiveawayEntryModelTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_verified_correctly(): void
     {
         GiveawayEntry::factory()->verified()->count(3)->create();
@@ -127,7 +128,7 @@ class GiveawayEntryModelTest extends TestCase
         $this->assertCount(3, $verified);
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_pending_correctly(): void
     {
         GiveawayEntry::factory()->pending()->count(4)->create();
@@ -138,7 +139,7 @@ class GiveawayEntryModelTest extends TestCase
         $this->assertCount(4, $pending);
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_rejected_correctly(): void
     {
         GiveawayEntry::factory()->rejected()->count(2)->create();
@@ -149,7 +150,7 @@ class GiveawayEntryModelTest extends TestCase
         $this->assertCount(2, $rejected);
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_eligible_entries_correctly(): void
     {
         // Eligible: pending and verified
@@ -172,7 +173,7 @@ class GiveawayEntryModelTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function it_excludes_rejected_entries_from_eligible_scope(): void
     {
         $giveaway = Giveaway::factory()->create();
