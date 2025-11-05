@@ -172,12 +172,12 @@ export const ExperienceSection = ({ experiences = fallbackExperiences }: Experie
                             initial={{ opacity: 0, x: index % 2 === 0 ? 100 : -100 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.6, delay: index * 0.2 }}
-                            className={`hs-shadow relative mb-12 w-full cursor-pointer rounded-xl p-6 transition-all duration-300 ${
+                            className={`hs-shadow relative mb-8 w-full cursor-pointer rounded-xl p-4 transition-all duration-300 sm:p-6 lg:mb-12 ${
                                 index % 2 === 0 ? 'lg:mr-8 lg:ml-auto' : 'lg:mr-auto lg:ml-8'
                             } mx-auto lg:mx-0 lg:w-5/12`}
                         >
                             <div className="mb-4 flex items-center">
-                                <div className="mr-4 h-16 w-16 flex-shrink-0 overflow-hidden rounded-full border-2 border-gray-200 bg-gray-100">
+                                <div className="mr-3 h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border-2 border-gray-200 bg-gray-100 sm:mr-4 sm:h-16 sm:w-16">
                                     <img
                                         src={experience.image_url || '/default-company.png'}
                                         alt={experience.company}
@@ -187,14 +187,16 @@ export const ExperienceSection = ({ experiences = fallbackExperiences }: Experie
                                         loading="lazy"
                                     />
                                 </div>
-                                <div className="flex-1">
-                                    <p className="text-brand-orange mb-1 text-[28px] leading-tight font-semibold">{experience.position}</p>
-                                    <p className="text-brand-gray max-md:text-sm">{experience.company}</p>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-brand-orange mb-1 text-lg leading-tight font-semibold sm:text-xl md:text-[28px]">
+                                        {experience.position}
+                                    </p>
+                                    <p className="text-brand-gray text-xs sm:text-sm">{experience.company}</p>
                                 </div>
                             </div>
-                            <p className="text-brand-gray mb-3 flex items-center">{experience.location}</p>
+                            <p className="text-brand-gray mb-3 flex items-center text-xs sm:text-sm">{experience.location}</p>
 
-                            <div className="text-brand-gray mb-4 flex flex-col rounded-lg bg-gray-50 p-3 max-md:text-sm sm:flex-row sm:justify-between">
+                            <div className="text-brand-gray mb-4 flex flex-col gap-1 rounded-lg bg-gray-50 p-2 text-xs sm:flex-row sm:justify-between sm:p-3 sm:text-sm">
                                 <span className="mb-1 sm:mb-0">
                                     {formatMonthYear(experience.start_month, experience.start_year)} -{' '}
                                     {experience.is_current_position ? 'Present' : formatMonthYear(experience.end_month!, experience.end_year!)}
@@ -210,12 +212,12 @@ export const ExperienceSection = ({ experiences = fallbackExperiences }: Experie
                                 </span>
                             </div>
 
-                            <div className="text-brand-gray">
+                            <div className="text-brand-gray text-sm sm:text-base">
                                 <ul className="space-y-2">
                                     {experience.description.map((point, i) => (
                                         <li key={i} className="flex items-start leading-relaxed">
-                                            <span className="bg-brand-orange mt-2 mr-3 h-2 w-2 flex-shrink-0 rounded-full" />
-                                            {point}
+                                            <span className="bg-brand-orange mt-2 mr-2 h-1.5 w-1.5 flex-shrink-0 rounded-full sm:mr-3 sm:h-2 sm:w-2" />
+                                            <span className="flex-1">{point}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -223,7 +225,7 @@ export const ExperienceSection = ({ experiences = fallbackExperiences }: Experie
 
                             {/* Timeline dot */}
                             <div
-                                className={`bg-brand-orange absolute top-[13%] hidden h-6 w-6 rounded-full border-4 border-white transition-all duration-300 md:block ${
+                                className={`bg-brand-orange absolute top-[13%] hidden h-6 w-6 rounded-full border-4 border-white transition-all duration-300 lg:block ${
                                     index % 2 === 0 ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'
                                 } `}
                             />

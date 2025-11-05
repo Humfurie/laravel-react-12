@@ -48,7 +48,7 @@ class Image extends Model
      */
     public function getUrlAttribute(): string
     {
-        return Storage::url($this->path);
+        return asset(Storage::url($this->path));
     }
 
     /**

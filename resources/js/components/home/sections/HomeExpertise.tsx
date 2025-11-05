@@ -83,7 +83,7 @@ const HomeExpertise: React.FC<HomeExpertiseProps> = ({ expertises = [] }) => {
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={key}
-                        className={`grid grid-cols-3 justify-center gap-6 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6`}
+                        className={`grid grid-cols-3 justify-center gap-3 sm:grid-cols-4 sm:gap-4 md:grid-cols-5 md:gap-6 lg:grid-cols-6`}
                         variants={containerVariants}
                         initial="hidden"
                         animate="show"
@@ -98,7 +98,7 @@ const HomeExpertise: React.FC<HomeExpertiseProps> = ({ expertises = [] }) => {
                                 <img
                                     src={item.image_url}
                                     alt={item.name}
-                                    className="bg-brand-white hs-shadow mb-2 h-[60px] w-[60px] rounded-[18px] object-contain p-2 sm:h-[80px] sm:w-[80px] md:h-[100px] md:w-[100px]"
+                                    className="bg-brand-white hs-shadow mb-2 h-[50px] w-[50px] rounded-[14px] object-contain p-1.5 sm:h-[80px] sm:w-[80px] sm:rounded-[18px] sm:p-2 md:h-[100px] md:w-[100px]"
                                     width={100}
                                     height={100}
                                     loading="lazy"

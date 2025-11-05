@@ -32,19 +32,23 @@ const HomeBanner = () => {
             <div className="bg-brand-black/60 absolute inset-0 z-10 backdrop-blur-[1.5px]" />
 
             {/* Text Content */}
-            <div className="primary-container absolute inset-0 z-20 flex h-full w-full flex-col items-center justify-center text-center">
+            <div className="primary-container absolute inset-0 z-20 flex h-full w-full flex-col items-center justify-center px-4 text-center">
                 <h1
                     dangerouslySetInnerHTML={{ __html: bannerData.title }}
-                    className="text-brand-white text-[50px] font-[700] sm:text-[60px] md:text-[70px] md:tracking-[16px] lg:text-[80px] xl:text-[100px]"
+                    className="text-brand-white text-[40px] font-[700] tracking-[4px] sm:text-[60px] sm:tracking-[8px] md:text-[70px] md:tracking-[16px] lg:text-[80px] xl:text-[100px]"
                 />
-                <p className="text-[20px] text-white sm:text-[24px] md:text-[28px] lg:text-[32px]">{bannerData.subTitle}</p>
+                <p className="mt-2 text-[16px] text-white sm:text-[20px] md:text-[24px] lg:text-[28px] xl:text-[32px]">{bannerData.subTitle}</p>
                 <Socials className="mb-[16px] py-[16px]" />
-                TEMPORARY WEBSITE | SELF-HOSTED IN LOCAL SERVER
-                <div className="align-center hs-bg-white absolute bottom-[70px] flex justify-center gap-6">
+                <p className="mb-4 text-xs text-white sm:text-sm">TEMPORARY WEBSITE | SELF-HOSTED IN LOCAL SERVER</p>
+                <div className="align-center hs-bg-white absolute bottom-[40px] flex justify-center gap-6 sm:bottom-[70px]">
                     {/*<ButtonOne text="Projects" type="button" className="btn-orange" icon={<RiArrowRightDoubleLine className="text-[20px]" />} />*/}
 
-                    <a href="/resume.pdf" download="Humphrey_Resume.pdf" className="hs-btn align-center flex items-center gap-2 text-center">
-                        <TbDownload />
+                    <a
+                        href="/resume.pdf"
+                        download="Humphrey_Resume.pdf"
+                        className="hs-btn align-center flex items-center gap-2 text-center text-sm sm:text-base"
+                    >
+                        <TbDownload className="text-base sm:text-lg" />
                         Resume
                     </a>
                 </div>
