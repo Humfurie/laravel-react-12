@@ -17,6 +17,7 @@ export interface Permissions {
     property: ResourcePermissions;
     blog: ResourcePermissions;
     giveaway: ResourcePermissions;
+    goal: ResourcePermissions;
     user: ResourcePermissions;
     role: ResourcePermissions;
     permission: ResourcePermissions;
@@ -68,4 +69,23 @@ export interface User {
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface Goal {
+    id: number;
+    user_id: number;
+    user?: {
+        id: number;
+        name: string;
+    };
+    title: string;
+    notes?: string;
+    completed: boolean;
+    completed_at?: string;
+    is_public: boolean;
+    order: number;
+    priority: 'none' | 'low' | 'medium' | 'high';
+    due_date?: string;
+    created_at: string;
+    updated_at: string;
 }

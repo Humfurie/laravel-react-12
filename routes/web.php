@@ -58,6 +58,16 @@ Route::post('/giveaways/{giveaway:slug}/pick-winner', [App\Http\Controllers\Give
 // Public API for experiences
 Route::get('/api/experiences', [ExperienceController::class, 'public'])->name('experiences.public');
 
+// Goal API routes
+Route::get('/api/goals', [App\Http\Controllers\GoalController::class, 'index'])->name('goals.index');
+Route::middleware(['auth'])->group(function () {
+    Route::post('/api/goals', [App\Http\Controllers\GoalController::class, 'store'])->name('goals.store');
+    Route::patch('/api/goals/{goal}/toggle', [App\Http\Controllers\GoalController::class, 'toggle'])->name('goals.toggle');
+    Route::patch('/api/goals/{goal}', [App\Http\Controllers\GoalController::class, 'update'])->name('goals.update');
+    Route::delete('/api/goals/{goal}', [App\Http\Controllers\GoalController::class, 'destroy'])->name('goals.destroy');
+    Route::post('/api/goals/reorder', [App\Http\Controllers\GoalController::class, 'reorder'])->name('goals.reorder');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     // Debug route to check experience data
     Route::get('/debug-experiences', function () {

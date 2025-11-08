@@ -129,6 +129,7 @@ class User extends Authenticatable implements JWTSubject
                     'property',
                     'blog',
                     'giveaway',
+                    'goal',
                     'user',
                     'role',
                     'permission',

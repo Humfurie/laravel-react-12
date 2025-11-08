@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\ExpertiseController;
 use App\Http\Controllers\Admin\GiveawayController;
+use App\Http\Controllers\Admin\GoalController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RealEstateController;
 use App\Http\Controllers\Admin\RoleController;
@@ -163,4 +164,8 @@ Route::prefix('giveaways')->name('admin.giveaways.')->middleware('permission:giv
     Route::get('/{giveaway}/entries', [GiveawayController::class, 'getEntries'])->name('entries')->middleware('permission:giveaway,view');
     Route::patch('/{giveaway}/entries/{entry}/status', [GiveawayController::class, 'updateEntryStatus'])->name('entries.update-status')->middleware('permission:giveaway,update');
     Route::delete('/{giveaway}/entries/{entry}', [GiveawayController::class, 'deleteEntry'])->name('entries.delete')->middleware('permission:giveaway,delete');
+});
+
+Route::prefix('goals')->name('admin.goals.')->middleware('permission:goal,viewAny')->group(function () {
+    Route::get('/', [GoalController::class, 'index'])->name('index');
 });
