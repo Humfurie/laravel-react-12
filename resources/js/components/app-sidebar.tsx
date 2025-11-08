@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { Link, usePage } from '@inertiajs/react';
 import React, { useMemo } from 'react';
 import type { Auth, NavItem, Permissions } from '@/types';
-import { BookOpen, Briefcase, Building, Code2, FileText, LayoutGrid, Shield, Trophy, Users } from 'lucide-react';
+import { BookOpen, Briefcase, Building, CheckSquare, Code2, FileText, LayoutGrid, Shield, Trophy, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 interface SidebarNavItem extends NavItem {
@@ -41,6 +41,12 @@ const allNavItems: SidebarNavItem[] = [
         href: '/admin/giveaways',
         icon: Trophy,
         requiredPermission: 'giveaway',
+    },
+    {
+        title: 'Goal Management',
+        href: '/admin/goals',
+        icon: CheckSquare,
+        requiredPermission: 'goal',
     },
     {
         title: 'Experience Management',
