@@ -3,6 +3,8 @@
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Jobs\RefreshCryptoCache;
+use App\Jobs\RefreshStockCache;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -43,6 +45,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Automatically select winners for ended raffles every hour
         $schedule->command('raffles:select-winners')->hourly();
+
+        // Refresh crypto data cache every 15 minutes
+        $schedule->job(new RefreshCryptoCache)->everyFifteenMinutes();
+
+        // Refresh stock data cache every 15 minutes
+        $schedule->job(new RefreshStockCache)->everyFifteenMinutes();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

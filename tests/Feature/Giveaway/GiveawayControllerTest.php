@@ -1,317 +1,258 @@
 <?php
 
-namespace Tests\Feature\Giveaway;
-
 use App\Models\Giveaway;
 use App\Models\GiveawayEntry;
 use App\Models\User;
-use DB;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
+use Illuminate\Support\Facades\DB;
 
-class GiveawayControllerTest extends TestCase
-{
-    use RefreshDatabase;
+beforeEach(function () {
+    // Clear any existing users in this test's transaction
+    DB::table('users')->delete();
 
-    private User $admin;
-    private User $regularUser;
-
-    #[Test]
-    public function it_can_list_active_giveaways(): void
-    {
-        Giveaway::factory()->active()->count(3)->create();
-        Giveaway::factory()->draft()->create(); // Should not appear
-        Giveaway::factory()->ended()->create(); // Should not appear
-
-        $response = $this->get(route('giveaways.index'));
-
-        $response->assertOk();
-        // Inertia responses contain giveaways in props
-        $this->assertEquals(3, count($response->viewData('page')['props']['giveaways']));
+    // Reset auto-increment for PostgreSQL
+    if (DB::getDriverName() === 'pgsql') {
+        DB::statement("SELECT setval('users_id_seq', 1, false)");
+    } elseif (DB::getDriverName() === 'mysql') {
+        DB::statement("ALTER TABLE users AUTO_INCREMENT = 1");
+    } elseif (DB::getDriverName() === 'sqlite') {
+        DB::statement("DELETE FROM sqlite_sequence WHERE name = 'users'");
     }
 
-    #[Test]
-    public function it_can_show_active_giveaway(): void
-    {
-        $giveaway = Giveaway::factory()->active()->create();
+    // Create admin user (will have id = 1)
+    $this->admin = User::factory()->create();
 
-        $response = $this->get(route('giveaways.show', $giveaway));
-
-        $response->assertOk();
+    // Verify admin has id=1
+    if ($this->admin->id !== 1) {
+        throw new Exception('Admin user must have id=1 for isAdmin() to work');
     }
 
-    #[Test]
-    public function it_cannot_show_draft_giveaway_to_public(): void
-    {
-        $giveaway = Giveaway::factory()->draft()->create();
+    // Create regular user
+    $this->regularUser = User::factory()->create();
+});
 
-        $response = $this->get(route('giveaways.show', $giveaway));
+test('it can list active giveaways', function () {
+    Giveaway::factory()->active()->count(3)->create();
+    Giveaway::factory()->draft()->create(); // Should not appear
+    Giveaway::factory()->ended()->create(); // Should not appear
 
-        $response->assertNotFound();
-    }
-
-    #[Test]
-    public function it_can_show_ended_giveaway(): void
-    {
-        $giveaway = Giveaway::factory()->ended()->create();
+    $response = $this->get(route('giveaways.index'));
 
-        $response = $this->get(route('giveaways.show', $giveaway));
+    $response->assertOk();
+    // Inertia responses contain giveaways in props
+    expect($response->viewData('page')['props']['giveaways'])->toHaveCount(3);
+});
 
-        $response->assertOk();
-    }
+test('it can show active giveaway', function () {
+    $giveaway = Giveaway::factory()->active()->create();
 
-    #[Test]
-    public function it_can_list_giveaways_with_winners(): void
-    {
-        Giveaway::factory()->withWinner()->count(2)->create();
-        Giveaway::factory()->active()->create(); // No winner
-
-        $response = $this->get(route('giveaways.winners'));
+    $response = $this->get(route('giveaways.show', $giveaway));
 
-        $response->assertOk();
-        $this->assertEquals(2, count($response->viewData('page')['props']['giveaways']));
-    }
+    $response->assertOk();
+});
 
-    #[Test]
-    public function it_can_show_entries_list(): void
-    {
-        $giveaway = Giveaway::factory()->active()->create();
-        GiveawayEntry::factory(10)->create(['giveaway_id' => $giveaway->id]);
-
-        $response = $this->get(route('giveaways.entries', $giveaway));
-
-        $response->assertOk();
-        $this->assertEquals(10, count($response->viewData('page')['props']['entries']));
-    }
-
-    #[Test]
-    public function it_excludes_rejected_entries_from_public_view(): void
-    {
-        $giveaway = Giveaway::factory()->active()->create();
-        GiveawayEntry::factory(5)->create(['giveaway_id' => $giveaway->id]);
-        GiveawayEntry::factory(3)->rejected()->create(['giveaway_id' => $giveaway->id]);
-
-        $response = $this->get(route('giveaways.entries', $giveaway));
-
-        $response->assertOk();
-        // Should only show 5 eligible entries, not the 3 rejected ones
-        $this->assertEquals(5, count($response->viewData('page')['props']['entries']));
-    }
-
-    #[Test]
-    public function admin_can_activate_draft_giveaway(): void
-    {
-        $giveaway = Giveaway::factory()->draft()->create();
-
-        $response = $this->actingAs($this->admin)
-            ->post(route('giveaways.activate', $giveaway));
-
-        $response->assertRedirect(route('giveaways.show', $giveaway));
-        $this->assertEquals(Giveaway::STATUS_ACTIVE, $giveaway->fresh()->status);
-    }
-
-    #[Test]
-    public function regular_user_cannot_activate_giveaway(): void
-    {
-        $giveaway = Giveaway::factory()->draft()->create();
-
-        $response = $this->actingAs($this->regularUser)
-            ->post(route('giveaways.activate', $giveaway));
-
-        $response->assertForbidden();
-    }
-
-    #[Test]
-    public function guest_cannot_activate_giveaway(): void
-    {
-        $giveaway = Giveaway::factory()->draft()->create();
-
-        $response = $this->post(route('giveaways.activate', $giveaway));
-
-        $response->assertForbidden();
-    }
-
-    #[Test]
-    public function admin_can_select_winner(): void
-    {
-        $giveaway = Giveaway::factory()->active()->create();
-        GiveawayEntry::factory(10)->create(['giveaway_id' => $giveaway->id]);
-
-        $response = $this->actingAs($this->admin)
-            ->post(route('giveaways.pick-winner', $giveaway));
-
-        $response->assertRedirect();
-        $this->assertNotNull($giveaway->fresh()->winner_id);
-    }
-
-    #[Test]
-    public function it_prevents_selecting_winner_twice(): void
-    {
-        $giveaway = Giveaway::factory()->withWinner()->create();
-        $originalWinnerId = $giveaway->winner_id;
-
-        $response = $this->actingAs($this->admin)
-            ->post(route('giveaways.pick-winner', $giveaway));
-
-        $response->assertRedirect();
-        // Winner should not change
-        $this->assertEquals($originalWinnerId, $giveaway->fresh()->winner_id);
-    }
-
-    #[Test]
-    public function it_prevents_selecting_winner_without_entries(): void
-    {
-        $giveaway = Giveaway::factory()->active()->create();
-        // No entries created
-
-        $response = $this->actingAs($this->admin)
-            ->post(route('giveaways.pick-winner', $giveaway));
-
-        $response->assertRedirect();
-        $this->assertNull($giveaway->fresh()->winner_id);
-    }
-
-    #[Test]
-    public function it_updates_giveaway_status_when_showing(): void
-    {
-        // Create giveaway that ended yesterday but status is still active
-        $giveaway = Giveaway::factory()->create([
-            'status' => Giveaway::STATUS_ACTIVE,
-            'start_date' => now()->subWeek(),
-            'end_date' => now()->subDay(),
-        ]);
-
-        $this->get(route('giveaways.show', $giveaway));
-
-        // Status should be updated to ended
-        $this->assertEquals(Giveaway::STATUS_ENDED, $giveaway->fresh()->status);
-    }
-
-    #[Test]
-    public function it_shows_can_start_giveaway_flag_for_admin(): void
-    {
-        $giveaway = Giveaway::factory()->active()->create();
-        GiveawayEntry::factory(5)->create(['giveaway_id' => $giveaway->id]);
-
-        $response = $this->actingAs($this->admin)
-            ->get(route('giveaways.show', $giveaway));
-
-        $response->assertOk();
-        $props = $response->viewData('page')['props'];
-
-        // Admin should be able to start giveaway
-        $this->assertTrue($props['giveaway']['can_start_giveaway']);
-    }
-
-    #[Test]
-    public function it_hides_can_start_giveaway_when_no_entries(): void
-    {
-        $giveaway = Giveaway::factory()->active()->create();
-        // No entries
-
-        $response = $this->actingAs($this->admin)
-            ->get(route('giveaways.show', $giveaway));
-
-        $response->assertOk();
-        $props = $response->viewData('page')['props'];
-
-        $this->assertFalse($props['giveaway']['can_start_giveaway']);
-    }
-
-    #[Test]
-    public function it_hides_can_start_giveaway_when_giveaway_not_started(): void
-    {
-        $giveaway = Giveaway::factory()->upcoming()->create();
-        GiveawayEntry::factory(5)->create(['giveaway_id' => $giveaway->id]);
-
-        $response = $this->actingAs($this->admin)
-            ->get(route('giveaways.show', $giveaway));
-
-        $response->assertOk();
-        $props = $response->viewData('page')['props'];
-
-        $this->assertFalse($props['giveaway']['can_start_giveaway']);
-    }
-
-    #[Test]
-    public function it_shows_winner_information_when_selected(): void
-    {
-        $giveaway = Giveaway::factory()->withWinner()->create();
-
-        $response = $this->get(route('giveaways.show', $giveaway));
-
-        $response->assertOk();
-        $props = $response->viewData('page')['props'];
-
-        $this->assertNotNull($props['giveaway']['winner']);
-        $this->assertEquals($giveaway->winner->name, $props['giveaway']['winner']['name']);
-    }
-
-    #[Test]
-    public function it_includes_eligible_entry_names_in_show_page(): void
-    {
-        $giveaway = Giveaway::factory()->active()->create();
-
-        // Create eligible entries
-        GiveawayEntry::factory()->create([
-            'giveaway_id' => $giveaway->id,
-            'name' => 'Juan Dela Cruz',
-        ]);
-        GiveawayEntry::factory()->create([
-            'giveaway_id' => $giveaway->id,
-            'name' => 'Maria Santos',
-        ]);
-
-        // Create rejected entry (should not appear)
-        GiveawayEntry::factory()->rejected()->create([
-            'giveaway_id' => $giveaway->id,
-            'name' => 'Rejected Person',
-        ]);
-
-        $response = $this->get(route('giveaways.show', $giveaway));
-
-        $response->assertOk();
-        $props = $response->viewData('page')['props'];
-
-        $entryNames = $props['giveaway']['entry_names'];
-
-        $this->assertCount(2, $entryNames);
-        $this->assertContains('Juan Dela Cruz', $entryNames);
-        $this->assertContains('Maria Santos', $entryNames);
-        $this->assertNotContains('Rejected Person', $entryNames);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Create admin user
-        // Note: User::isAdmin() checks if id === 1
-        // We need to ensure this user gets id=1 by creating it first
-        // and using a custom factory state that forces id=1
-
-        // Clear any existing users in this test's transaction
-        DB::table('users')->delete();
-
-        // Reset auto-increment for PostgreSQL
-        if (DB::getDriverName() === 'pgsql') {
-            DB::statement("SELECT setval('users_id_seq', 1, false)");
-        } elseif (DB::getDriverName() === 'mysql') {
-            DB::statement("ALTER TABLE users AUTO_INCREMENT = 1");
-        } elseif (DB::getDriverName() === 'sqlite') {
-            DB::statement("DELETE FROM sqlite_sequence WHERE name = 'users'");
-        }
-
-        // Create admin user (will have id = 1)
-        $this->admin = User::factory()->create();
-
-        // Verify admin has id=1
-        if ($this->admin->id !== 1) {
-            $this->fail('Admin user must have id=1 for isAdmin() to work');
-        }
-
-        // Create regular user
-        $this->regularUser = User::factory()->create();
-    }
-}
+test('it cannot show draft giveaway to public', function () {
+    $giveaway = Giveaway::factory()->draft()->create();
+
+    $response = $this->get(route('giveaways.show', $giveaway));
+
+    $response->assertNotFound();
+});
+
+test('it can show ended giveaway', function () {
+    $giveaway = Giveaway::factory()->ended()->create();
+
+    $response = $this->get(route('giveaways.show', $giveaway));
+
+    $response->assertOk();
+});
+
+test('it can list giveaways with winners', function () {
+    Giveaway::factory()->withWinner()->count(2)->create();
+    Giveaway::factory()->active()->create(); // No winner
+
+    $response = $this->get(route('giveaways.winners'));
+
+    $response->assertOk();
+    expect($response->viewData('page')['props']['giveaways'])->toHaveCount(2);
+});
+
+test('it can show entries list', function () {
+    $giveaway = Giveaway::factory()->active()->create();
+    GiveawayEntry::factory(10)->create(['giveaway_id' => $giveaway->id]);
+
+    $response = $this->get(route('giveaways.entries', $giveaway));
+
+    $response->assertOk();
+    expect($response->viewData('page')['props']['entries'])->toHaveCount(10);
+});
+
+test('it excludes rejected entries from public view', function () {
+    $giveaway = Giveaway::factory()->active()->create();
+    GiveawayEntry::factory(5)->create(['giveaway_id' => $giveaway->id]);
+    GiveawayEntry::factory(3)->rejected()->create(['giveaway_id' => $giveaway->id]);
+
+    $response = $this->get(route('giveaways.entries', $giveaway));
+
+    $response->assertOk();
+    // Should only show 5 eligible entries, not the 3 rejected ones
+    expect($response->viewData('page')['props']['entries'])->toHaveCount(5);
+});
+
+test('admin can activate draft giveaway', function () {
+    $giveaway = Giveaway::factory()->draft()->create();
+
+    $response = $this->actingAs($this->admin)
+        ->post(route('giveaways.activate', $giveaway));
+
+    $response->assertRedirect(route('giveaways.show', $giveaway));
+    expect($giveaway->fresh()->status)->toBe(Giveaway::STATUS_ACTIVE);
+});
+
+test('regular user cannot activate giveaway', function () {
+    $giveaway = Giveaway::factory()->draft()->create();
+
+    $response = $this->actingAs($this->regularUser)
+        ->post(route('giveaways.activate', $giveaway));
+
+    $response->assertForbidden();
+});
+
+test('guest cannot activate giveaway', function () {
+    $giveaway = Giveaway::factory()->draft()->create();
+
+    $response = $this->post(route('giveaways.activate', $giveaway));
+
+    $response->assertForbidden();
+});
+
+test('admin can select winner', function () {
+    $giveaway = Giveaway::factory()->active()->create();
+    GiveawayEntry::factory(10)->create(['giveaway_id' => $giveaway->id]);
+
+    $response = $this->actingAs($this->admin)
+        ->post(route('giveaways.pick-winner', $giveaway));
+
+    $response->assertRedirect();
+    expect($giveaway->fresh()->winner_id)->not->toBeNull();
+});
+
+test('it prevents selecting winner twice', function () {
+    $giveaway = Giveaway::factory()->withWinner()->create();
+    $originalWinnerId = $giveaway->winner_id;
+
+    $response = $this->actingAs($this->admin)
+        ->post(route('giveaways.pick-winner', $giveaway));
+
+    $response->assertRedirect();
+    // Winner should not change
+    expect($giveaway->fresh()->winner_id)->toBe($originalWinnerId);
+});
+
+test('it prevents selecting winner without entries', function () {
+    $giveaway = Giveaway::factory()->active()->create();
+    // No entries created
+
+    $response = $this->actingAs($this->admin)
+        ->post(route('giveaways.pick-winner', $giveaway));
+
+    $response->assertRedirect();
+    expect($giveaway->fresh()->winner_id)->toBeNull();
+});
+
+test('it updates giveaway status when showing', function () {
+    // Create giveaway that ended yesterday but status is still active
+    $giveaway = Giveaway::factory()->create([
+        'status' => Giveaway::STATUS_ACTIVE,
+        'start_date' => now()->subWeek(),
+        'end_date' => now()->subDay(),
+    ]);
+
+    $this->get(route('giveaways.show', $giveaway));
+
+    // Status should be updated to ended
+    expect($giveaway->fresh()->status)->toBe(Giveaway::STATUS_ENDED);
+});
+
+test('it shows can start giveaway flag for admin', function () {
+    $giveaway = Giveaway::factory()->active()->create();
+    GiveawayEntry::factory(5)->create(['giveaway_id' => $giveaway->id]);
+
+    $response = $this->actingAs($this->admin)
+        ->get(route('giveaways.show', $giveaway));
+
+    $response->assertOk();
+    $props = $response->viewData('page')['props'];
+
+    // Admin should be able to start giveaway
+    expect($props['giveaway']['can_start_giveaway'])->toBeTrue();
+});
+
+test('it hides can start giveaway when no entries', function () {
+    $giveaway = Giveaway::factory()->active()->create();
+    // No entries
+
+    $response = $this->actingAs($this->admin)
+        ->get(route('giveaways.show', $giveaway));
+
+    $response->assertOk();
+    $props = $response->viewData('page')['props'];
+
+    expect($props['giveaway']['can_start_giveaway'])->toBeFalse();
+});
+
+test('it hides can start giveaway when giveaway not started', function () {
+    $giveaway = Giveaway::factory()->upcoming()->create();
+    GiveawayEntry::factory(5)->create(['giveaway_id' => $giveaway->id]);
+
+    $response = $this->actingAs($this->admin)
+        ->get(route('giveaways.show', $giveaway));
+
+    $response->assertOk();
+    $props = $response->viewData('page')['props'];
+
+    expect($props['giveaway']['can_start_giveaway'])->toBeFalse();
+});
+
+test('it shows winner information when selected', function () {
+    $giveaway = Giveaway::factory()->withWinner()->create();
+
+    $response = $this->get(route('giveaways.show', $giveaway));
+
+    $response->assertOk();
+    $props = $response->viewData('page')['props'];
+
+    expect($props['giveaway']['winner'])->not->toBeNull();
+    expect($props['giveaway']['winner']['name'])->toBe($giveaway->winner->name);
+});
+
+test('it includes eligible entry names in show page', function () {
+    $giveaway = Giveaway::factory()->active()->create();
+
+    // Create eligible entries
+    GiveawayEntry::factory()->create([
+        'giveaway_id' => $giveaway->id,
+        'name' => 'Juan Dela Cruz',
+    ]);
+    GiveawayEntry::factory()->create([
+        'giveaway_id' => $giveaway->id,
+        'name' => 'Maria Santos',
+    ]);
+
+    // Create rejected entry (should not appear)
+    GiveawayEntry::factory()->rejected()->create([
+        'giveaway_id' => $giveaway->id,
+        'name' => 'Rejected Person',
+    ]);
+
+    $response = $this->get(route('giveaways.show', $giveaway));
+
+    $response->assertOk();
+    $props = $response->viewData('page')['props'];
+
+    $entryNames = $props['giveaway']['entry_names'];
+
+    expect($entryNames)->toHaveCount(2);
+    expect($entryNames)->toContain('Juan Dela Cruz');
+    expect($entryNames)->toContain('Maria Santos');
+    expect($entryNames)->not->toContain('Rejected Person');
+});

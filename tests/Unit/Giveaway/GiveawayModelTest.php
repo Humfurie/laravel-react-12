@@ -1,242 +1,198 @@
 <?php
 
-namespace Tests\Unit\Giveaway;
-
 use App\Models\Giveaway;
 use App\Models\GiveawayEntry;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
 
-class GiveawayModelTest extends TestCase
-{
-    use RefreshDatabase;
+test('it can create a giveaway', function () {
+    $giveaway = Giveaway::factory()->create([
+        'title' => 'Test Giveaway',
+        'description' => 'Test description',
+    ]);
 
-    #[Test]
-    public function it_can_create_a_giveaway(): void
-    {
-        $giveaway = Giveaway::factory()->create([
-            'title' => 'Test Giveaway',
-            'description' => 'Test description',
-        ]);
+    $this->assertDatabaseHas('giveaways', [
+        'title' => 'Test Giveaway',
+        'description' => 'Test description',
+    ]);
+});
 
-        $this->assertDatabaseHas('giveaways', [
-            'title' => 'Test Giveaway',
-            'description' => 'Test description',
-        ]);
-    }
+test('it automatically generates slug from title', function () {
+    $giveaway = Giveaway::factory()->create([
+        'title' => 'Amazing iPhone Giveaway',
+    ]);
 
-    #[Test]
-    public function it_automatically_generates_slug_from_title(): void
-    {
-        $giveaway = Giveaway::factory()->create([
-            'title' => 'Amazing iPhone Giveaway',
-        ]);
+    expect($giveaway->slug)->toBe('amazing-iphone-giveaway');
+});
 
-        $this->assertEquals('amazing-iphone-giveaway', $giveaway->slug);
-    }
+test('it can check if giveaway is active', function () {
+    $activeGiveaway = Giveaway::factory()->active()->create();
+    $draftGiveaway = Giveaway::factory()->draft()->create();
+    $endedGiveaway = Giveaway::factory()->ended()->create();
 
-    #[Test]
-    public function it_can_check_if_giveaway_is_active(): void
-    {
-        $activeGiveaway = Giveaway::factory()->active()->create();
-        $draftGiveaway = Giveaway::factory()->draft()->create();
-        $endedGiveaway = Giveaway::factory()->ended()->create();
+    expect($activeGiveaway->isActive())->toBeTrue();
+    expect($draftGiveaway->isActive())->toBeFalse();
+    expect($endedGiveaway->isActive())->toBeFalse();
+});
 
-        $this->assertTrue($activeGiveaway->isActive());
-        $this->assertFalse($draftGiveaway->isActive());
-        $this->assertFalse($endedGiveaway->isActive());
-    }
+test('it can check if giveaway has ended', function () {
+    $activeGiveaway = Giveaway::factory()->active()->create();
+    $endedGiveaway = Giveaway::factory()->ended()->create();
 
-    #[Test]
-    public function it_can_check_if_giveaway_has_ended(): void
-    {
-        $activeGiveaway = Giveaway::factory()->active()->create();
-        $endedGiveaway = Giveaway::factory()->ended()->create();
+    expect($activeGiveaway->hasEnded())->toBeFalse();
+    expect($endedGiveaway->hasEnded())->toBeTrue();
+});
 
-        $this->assertFalse($activeGiveaway->hasEnded());
-        $this->assertTrue($endedGiveaway->hasEnded());
-    }
+test('it can check if giveaway can accept entries', function () {
+    $activeGiveaway = Giveaway::factory()->active()->create();
+    $endedGiveaway = Giveaway::factory()->ended()->create();
+    $upcomingGiveaway = Giveaway::factory()->upcoming()->create();
 
-    #[Test]
-    public function it_can_check_if_giveaway_can_accept_entries(): void
-    {
-        $activeGiveaway = Giveaway::factory()->active()->create();
-        $endedGiveaway = Giveaway::factory()->ended()->create();
-        $upcomingGiveaway = Giveaway::factory()->upcoming()->create();
+    expect($activeGiveaway->canAcceptEntries())->toBeTrue();
+    expect($endedGiveaway->canAcceptEntries())->toBeFalse();
+    expect($upcomingGiveaway->canAcceptEntries())->toBeFalse();
+});
 
-        $this->assertTrue($activeGiveaway->canAcceptEntries());
-        $this->assertFalse($endedGiveaway->canAcceptEntries());
-        $this->assertFalse($upcomingGiveaway->canAcceptEntries());
-    }
+test('it has many entries', function () {
+    $giveaway = Giveaway::factory()->create();
+    GiveawayEntry::factory(5)->create(['giveaway_id' => $giveaway->id]);
 
-    #[Test]
-    public function it_has_many_entries(): void
-    {
-        $giveaway = Giveaway::factory()->create();
-        GiveawayEntry::factory(5)->create(['giveaway_id' => $giveaway->id]);
+    expect($giveaway->entries)->toHaveCount(5);
+});
 
-        $this->assertCount(5, $giveaway->entries);
-    }
+test('it can select a random winner', function () {
+    $giveaway = Giveaway::factory()->active()->create();
+    GiveawayEntry::factory(10)->create(['giveaway_id' => $giveaway->id]);
 
-    #[Test]
-    public function it_can_select_a_random_winner(): void
-    {
-        $giveaway = Giveaway::factory()->active()->create();
-        GiveawayEntry::factory(10)->create(['giveaway_id' => $giveaway->id]);
+    $winner = $giveaway->selectWinner();
 
-        $winner = $giveaway->selectWinner();
+    expect($winner)->not->toBeNull();
+    expect($winner->status)->toBe(GiveawayEntry::STATUS_WINNER);
+    expect($giveaway->fresh()->winner_id)->toBe($winner->id);
+    expect($giveaway->fresh()->status)->toBe(Giveaway::STATUS_ENDED);
+});
 
-        $this->assertNotNull($winner);
-        $this->assertEquals(GiveawayEntry::STATUS_WINNER, $winner->status);
-        $this->assertEquals($winner->id, $giveaway->fresh()->winner_id);
-        $this->assertEquals(Giveaway::STATUS_ENDED, $giveaway->fresh()->status);
-    }
+test('it does not select rejected entries as winner', function () {
+    $giveaway = Giveaway::factory()->active()->create();
 
-    #[Test]
-    public function it_does_not_select_rejected_entries_as_winner(): void
-    {
-        $giveaway = Giveaway::factory()->active()->create();
+    // Create 5 eligible entries
+    $eligibleEntries = GiveawayEntry::factory(5)
+        ->create(['giveaway_id' => $giveaway->id]);
 
-        // Create 5 eligible entries
-        $eligibleEntries = GiveawayEntry::factory(5)
-            ->create(['giveaway_id' => $giveaway->id]);
+    // Create 5 rejected entries
+    GiveawayEntry::factory(5)
+        ->rejected()
+        ->create(['giveaway_id' => $giveaway->id]);
 
-        // Create 5 rejected entries
-        GiveawayEntry::factory(5)
-            ->rejected()
-            ->create(['giveaway_id' => $giveaway->id]);
+    $winner = $giveaway->selectWinner();
 
-        $winner = $giveaway->selectWinner();
+    // Winner should be one of the eligible entries, not rejected
+    expect($winner)->not->toBeNull();
+    expect($eligibleEntries->pluck('id')->contains($winner->id))->toBeTrue();
+    expect($winner->status)->toBe(GiveawayEntry::STATUS_WINNER);
+});
 
-        // Winner should be one of the eligible entries, not rejected
-        $this->assertNotNull($winner);
-        $this->assertContains($winner->id, $eligibleEntries->pluck('id'));
-        $this->assertEquals(GiveawayEntry::STATUS_WINNER, $winner->status);
-    }
+test('it can reject winner and select new one', function () {
+    $giveaway = Giveaway::factory()->active()->create();
+    GiveawayEntry::factory(10)->create(['giveaway_id' => $giveaway->id]);
 
-    #[Test]
-    public function it_can_reject_winner_and_select_new_one(): void
-    {
-        $giveaway = Giveaway::factory()->active()->create();
-        GiveawayEntry::factory(10)->create(['giveaway_id' => $giveaway->id]);
+    // Select first winner
+    $firstWinner = $giveaway->selectWinner();
+    $firstWinnerId = $firstWinner->id;
 
-        // Select first winner
-        $firstWinner = $giveaway->selectWinner();
-        $firstWinnerId = $firstWinner->id;
+    // Reject first winner and select new one
+    $newWinner = $giveaway->fresh()->rejectWinner('Did not respond');
 
-        // Reject first winner and select new one
-        $newWinner = $giveaway->fresh()->rejectWinner('Did not respond');
+    expect($newWinner)->not->toBeNull();
+    expect($newWinner->id)->not->toBe($firstWinnerId);
+    expect($firstWinner->fresh()->status)->toBe(GiveawayEntry::STATUS_REJECTED);
+    expect($newWinner->status)->toBe(GiveawayEntry::STATUS_WINNER);
+});
 
-        $this->assertNotNull($newWinner);
-        $this->assertNotEquals($firstWinnerId, $newWinner->id);
-        $this->assertEquals(GiveawayEntry::STATUS_REJECTED, $firstWinner->fresh()->status);
-        $this->assertEquals(GiveawayEntry::STATUS_WINNER, $newWinner->status);
-    }
+test('it can mark prize as claimed', function () {
+    $giveaway = Giveaway::factory()->withWinner()->create();
 
-    #[Test]
-    public function it_can_mark_prize_as_claimed(): void
-    {
-        $giveaway = Giveaway::factory()->withWinner()->create();
+    expect($giveaway->prize_claimed)->toBeFalse();
+    expect($giveaway->prize_claimed_at)->toBeNull();
 
-        $this->assertFalse($giveaway->prize_claimed);
-        $this->assertNull($giveaway->prize_claimed_at);
+    $giveaway->markPrizeAsClaimed();
 
-        $giveaway->markPrizeAsClaimed();
+    expect($giveaway->fresh()->prize_claimed)->toBeTrue();
+    expect($giveaway->fresh()->prize_claimed_at)->not->toBeNull();
+});
 
-        $this->assertTrue($giveaway->fresh()->prize_claimed);
-        $this->assertNotNull($giveaway->fresh()->prize_claimed_at);
-    }
+test('it updates status to ended when end date passes', function () {
+    $giveaway = Giveaway::factory()->create([
+        'status' => Giveaway::STATUS_ACTIVE,
+        'start_date' => now()->subWeek(),
+        'end_date' => now()->subDay(),
+    ]);
 
-    #[Test]
-    public function it_updates_status_to_ended_when_end_date_passes(): void
-    {
-        $giveaway = Giveaway::factory()->create([
-            'status' => Giveaway::STATUS_ACTIVE,
-            'start_date' => now()->subWeek(),
-            'end_date' => now()->subDay(),
-        ]);
+    $giveaway->updateStatusIfNeeded();
 
-        $giveaway->updateStatusIfNeeded();
+    expect($giveaway->fresh()->status)->toBe(Giveaway::STATUS_ENDED);
+});
 
-        $this->assertEquals(Giveaway::STATUS_ENDED, $giveaway->fresh()->status);
-    }
+test('it updates status to draft when start date is future', function () {
+    $giveaway = Giveaway::factory()->create([
+        'status' => Giveaway::STATUS_ACTIVE,
+        'start_date' => now()->addWeek(),
+        'end_date' => now()->addMonth(),
+    ]);
 
-    #[Test]
-    public function it_updates_status_to_draft_when_start_date_is_future(): void
-    {
-        $giveaway = Giveaway::factory()->create([
-            'status' => Giveaway::STATUS_ACTIVE,
-            'start_date' => now()->addWeek(),
-            'end_date' => now()->addMonth(),
-        ]);
+    $giveaway->updateStatusIfNeeded();
 
-        $giveaway->updateStatusIfNeeded();
+    expect($giveaway->fresh()->status)->toBe(Giveaway::STATUS_DRAFT);
+});
 
-        $this->assertEquals(Giveaway::STATUS_DRAFT, $giveaway->fresh()->status);
-    }
+test('it scopes active giveaways correctly', function () {
+    Giveaway::factory()->active()->create();
+    Giveaway::factory()->draft()->create();
+    Giveaway::factory()->ended()->create();
 
-    #[Test]
-    public function it_scopes_active_giveaways_correctly(): void
-    {
-        Giveaway::factory()->active()->create();
-        Giveaway::factory()->draft()->create();
-        Giveaway::factory()->ended()->create();
+    $activeGiveaways = Giveaway::active()->get();
 
-        $activeGiveaways = Giveaway::active()->get();
+    expect($activeGiveaways)->toHaveCount(1);
+});
 
-        $this->assertCount(1, $activeGiveaways);
-    }
+test('it scopes ended giveaways correctly', function () {
+    Giveaway::factory()->active()->create();
+    Giveaway::factory()->ended()->count(2)->create();
 
-    #[Test]
-    public function it_scopes_ended_giveaways_correctly(): void
-    {
-        Giveaway::factory()->active()->create();
-        Giveaway::factory()->ended()->count(2)->create();
+    $endedGiveaways = Giveaway::ended()->get();
 
-        $endedGiveaways = Giveaway::ended()->get();
+    expect($endedGiveaways)->toHaveCount(2);
+});
 
-        $this->assertCount(2, $endedGiveaways);
-    }
+test('it scopes draft giveaways correctly', function () {
+    Giveaway::factory()->active()->create();
+    Giveaway::factory()->draft()->count(3)->create();
 
-    #[Test]
-    public function it_scopes_draft_giveaways_correctly(): void
-    {
-        Giveaway::factory()->active()->create();
-        Giveaway::factory()->draft()->count(3)->create();
+    $draftGiveaways = Giveaway::draft()->get();
 
-        $draftGiveaways = Giveaway::draft()->get();
+    expect($draftGiveaways)->toHaveCount(3);
+});
 
-        $this->assertCount(3, $draftGiveaways);
-    }
+test('it returns null when no eligible entries for winner selection', function () {
+    $giveaway = Giveaway::factory()->active()->create();
 
-    #[Test]
-    public function it_returns_null_when_no_eligible_entries_for_winner_selection(): void
-    {
-        $giveaway = Giveaway::factory()->active()->create();
+    // Only create rejected entries
+    GiveawayEntry::factory(5)
+        ->rejected()
+        ->create(['giveaway_id' => $giveaway->id]);
 
-        // Only create rejected entries
-        GiveawayEntry::factory(5)
-            ->rejected()
-            ->create(['giveaway_id' => $giveaway->id]);
+    $winner = $giveaway->selectWinner();
 
-        $winner = $giveaway->selectWinner();
+    expect($winner)->toBeNull();
+    expect($giveaway->fresh()->winner_id)->toBeNull();
+});
 
-        $this->assertNull($winner);
-        $this->assertNull($giveaway->fresh()->winner_id);
-    }
+test('it does not select new winner if winner already exists', function () {
+    $giveaway = Giveaway::factory()->withWinner()->create();
+    $originalWinnerId = $giveaway->winner_id;
 
-    #[Test]
-    public function it_does_not_select_new_winner_if_winner_already_exists(): void
-    {
-        $giveaway = Giveaway::factory()->withWinner()->create();
-        $originalWinnerId = $giveaway->winner_id;
+    // Try to select winner again
+    $winner = $giveaway->selectWinner();
 
-        // Try to select winner again
-        $winner = $giveaway->selectWinner();
-
-        // Should return existing winner
-        $this->assertEquals($originalWinnerId, $winner->id);
-        $this->assertEquals($originalWinnerId, $giveaway->fresh()->winner_id);
-    }
-}
+    // Should return existing winner
+    expect($winner->id)->toBe($originalWinnerId);
+    expect($giveaway->fresh()->winner_id)->toBe($originalWinnerId);
+});
