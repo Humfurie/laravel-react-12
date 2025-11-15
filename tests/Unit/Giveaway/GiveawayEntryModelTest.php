@@ -1,191 +1,153 @@
 <?php
 
-namespace Tests\Unit\Giveaway;
-
 use App\Models\Giveaway;
 use App\Models\GiveawayEntry;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
 
-class GiveawayEntryModelTest extends TestCase
-{
-    use RefreshDatabase;
+test('it can create an entry', function () {
+    $giveaway = Giveaway::factory()->create();
+    $entry = GiveawayEntry::factory()->create([
+        'giveaway_id' => $giveaway->id,
+        'name' => 'Juan Dela Cruz',
+        'phone' => '+639123456789',
+    ]);
 
-    #[Test]
-    public function it_can_create_an_entry(): void
-    {
-        $giveaway = Giveaway::factory()->create();
-        $entry = GiveawayEntry::factory()->create([
-            'giveaway_id' => $giveaway->id,
-            'name' => 'Juan Dela Cruz',
-            'phone' => '+639123456789',
+    $this->assertDatabaseHas('giveaway_entries', [
+        'name' => 'Juan Dela Cruz',
+        'phone' => '+639123456789',
+        'giveaway_id' => $giveaway->id,
+    ]);
+});
+
+test('it belongs to a giveaway', function () {
+    $giveaway = Giveaway::factory()->create();
+    $entry = GiveawayEntry::factory()->create(['giveaway_id' => $giveaway->id]);
+
+    expect($entry->giveaway)->toBeInstanceOf(Giveaway::class);
+    expect($entry->giveaway->id)->toBe($giveaway->id);
+});
+
+test('it can mark entry as winner', function () {
+    $entry = GiveawayEntry::factory()->create();
+
+    $entry->markAsWinner();
+
+    expect($entry->fresh()->status)->toBe(GiveawayEntry::STATUS_WINNER);
+    expect($entry->fresh()->isWinner())->toBeTrue();
+});
+
+test('it can mark entry as verified', function () {
+    $entry = GiveawayEntry::factory()->create();
+
+    $entry->markAsVerified();
+
+    expect($entry->fresh()->status)->toBe(GiveawayEntry::STATUS_VERIFIED);
+    expect($entry->fresh()->isVerified())->toBeTrue();
+});
+
+test('it can mark entry as rejected', function () {
+    $entry = GiveawayEntry::factory()->create();
+
+    $entry->markAsRejected();
+
+    expect($entry->fresh()->status)->toBe(GiveawayEntry::STATUS_REJECTED);
+    expect($entry->fresh()->isRejected())->toBeTrue();
+});
+
+test('it can check if entry is winner', function () {
+    $winner = GiveawayEntry::factory()->winner()->create();
+    $pending = GiveawayEntry::factory()->pending()->create();
+
+    expect($winner->isWinner())->toBeTrue();
+    expect($pending->isWinner())->toBeFalse();
+});
+
+test('it can check if entry is rejected', function () {
+    $rejected = GiveawayEntry::factory()->rejected()->create();
+    $pending = GiveawayEntry::factory()->pending()->create();
+
+    expect($rejected->isRejected())->toBeTrue();
+    expect($pending->isRejected())->toBeFalse();
+});
+
+test('it can check if entry is verified', function () {
+    $verified = GiveawayEntry::factory()->verified()->create();
+    $pending = GiveawayEntry::factory()->pending()->create();
+
+    expect($verified->isVerified())->toBeTrue();
+    expect($pending->isVerified())->toBeFalse();
+});
+
+test('it scopes winners correctly', function () {
+    GiveawayEntry::factory()->winner()->count(2)->create();
+    GiveawayEntry::factory()->pending()->create();
+    GiveawayEntry::factory()->rejected()->create();
+
+    $winners = GiveawayEntry::winners()->get();
+
+    expect($winners)->toHaveCount(2);
+    foreach ($winners as $winner) {
+        expect($winner->status)->toBe(GiveawayEntry::STATUS_WINNER);
+    }
+});
+
+test('it scopes verified correctly', function () {
+    GiveawayEntry::factory()->verified()->count(3)->create();
+    GiveawayEntry::factory()->pending()->create();
+
+    $verified = GiveawayEntry::verified()->get();
+
+    expect($verified)->toHaveCount(3);
+});
+
+test('it scopes pending correctly', function () {
+    GiveawayEntry::factory()->pending()->count(4)->create();
+    GiveawayEntry::factory()->verified()->create();
+
+    $pending = GiveawayEntry::pending()->get();
+
+    expect($pending)->toHaveCount(4);
+});
+
+test('it scopes rejected correctly', function () {
+    GiveawayEntry::factory()->rejected()->count(2)->create();
+    GiveawayEntry::factory()->pending()->create();
+
+    $rejected = GiveawayEntry::rejected()->get();
+
+    expect($rejected)->toHaveCount(2);
+});
+
+test('it scopes eligible entries correctly', function () {
+    // Eligible: pending and verified
+    GiveawayEntry::factory()->pending()->count(3)->create();
+    GiveawayEntry::factory()->verified()->count(2)->create();
+
+    // Not eligible: winners and rejected
+    GiveawayEntry::factory()->winner()->create();
+    GiveawayEntry::factory()->rejected()->create();
+
+    $eligible = GiveawayEntry::eligible()->get();
+
+    // Should only return pending + verified = 5
+    expect($eligible)->toHaveCount(5);
+    foreach ($eligible as $entry) {
+        expect($entry->status)->toBeIn([
+            GiveawayEntry::STATUS_PENDING,
+            GiveawayEntry::STATUS_VERIFIED,
         ]);
-
-        $this->assertDatabaseHas('giveaway_entries', [
-            'name' => 'Juan Dela Cruz',
-            'phone' => '+639123456789',
-            'giveaway_id' => $giveaway->id,
-        ]);
     }
+});
 
-    #[Test]
-    public function it_belongs_to_a_giveaway(): void
-    {
-        $giveaway = Giveaway::factory()->create();
-        $entry = GiveawayEntry::factory()->create(['giveaway_id' => $giveaway->id]);
+test('it excludes rejected entries from eligible scope', function () {
+    $giveaway = Giveaway::factory()->create();
 
-        $this->assertInstanceOf(Giveaway::class, $entry->giveaway);
-        $this->assertEquals($giveaway->id, $entry->giveaway->id);
-    }
+    // Create eligible and rejected entries
+    GiveawayEntry::factory()->pending()->create(['giveaway_id' => $giveaway->id]);
+    GiveawayEntry::factory()->verified()->create(['giveaway_id' => $giveaway->id]);
+    $rejectedEntry = GiveawayEntry::factory()->rejected()->create(['giveaway_id' => $giveaway->id]);
 
-    #[Test]
-    public function it_can_mark_entry_as_winner(): void
-    {
-        $entry = GiveawayEntry::factory()->create();
+    $eligible = $giveaway->entries()->eligible()->get();
 
-        $entry->markAsWinner();
-
-        $this->assertEquals(GiveawayEntry::STATUS_WINNER, $entry->fresh()->status);
-        $this->assertTrue($entry->fresh()->isWinner());
-    }
-
-    #[Test]
-    public function it_can_mark_entry_as_verified(): void
-    {
-        $entry = GiveawayEntry::factory()->create();
-
-        $entry->markAsVerified();
-
-        $this->assertEquals(GiveawayEntry::STATUS_VERIFIED, $entry->fresh()->status);
-        $this->assertTrue($entry->fresh()->isVerified());
-    }
-
-    #[Test]
-    public function it_can_mark_entry_as_rejected(): void
-    {
-        $entry = GiveawayEntry::factory()->create();
-
-        $entry->markAsRejected();
-
-        $this->assertEquals(GiveawayEntry::STATUS_REJECTED, $entry->fresh()->status);
-        $this->assertTrue($entry->fresh()->isRejected());
-    }
-
-    #[Test]
-    public function it_can_check_if_entry_is_winner(): void
-    {
-        $winner = GiveawayEntry::factory()->winner()->create();
-        $pending = GiveawayEntry::factory()->pending()->create();
-
-        $this->assertTrue($winner->isWinner());
-        $this->assertFalse($pending->isWinner());
-    }
-
-    #[Test]
-    public function it_can_check_if_entry_is_rejected(): void
-    {
-        $rejected = GiveawayEntry::factory()->rejected()->create();
-        $pending = GiveawayEntry::factory()->pending()->create();
-
-        $this->assertTrue($rejected->isRejected());
-        $this->assertFalse($pending->isRejected());
-    }
-
-    #[Test]
-    public function it_can_check_if_entry_is_verified(): void
-    {
-        $verified = GiveawayEntry::factory()->verified()->create();
-        $pending = GiveawayEntry::factory()->pending()->create();
-
-        $this->assertTrue($verified->isVerified());
-        $this->assertFalse($pending->isVerified());
-    }
-
-    #[Test]
-    public function it_scopes_winners_correctly(): void
-    {
-        GiveawayEntry::factory()->winner()->count(2)->create();
-        GiveawayEntry::factory()->pending()->create();
-        GiveawayEntry::factory()->rejected()->create();
-
-        $winners = GiveawayEntry::winners()->get();
-
-        $this->assertCount(2, $winners);
-        foreach ($winners as $winner) {
-            $this->assertEquals(GiveawayEntry::STATUS_WINNER, $winner->status);
-        }
-    }
-
-    #[Test]
-    public function it_scopes_verified_correctly(): void
-    {
-        GiveawayEntry::factory()->verified()->count(3)->create();
-        GiveawayEntry::factory()->pending()->create();
-
-        $verified = GiveawayEntry::verified()->get();
-
-        $this->assertCount(3, $verified);
-    }
-
-    #[Test]
-    public function it_scopes_pending_correctly(): void
-    {
-        GiveawayEntry::factory()->pending()->count(4)->create();
-        GiveawayEntry::factory()->verified()->create();
-
-        $pending = GiveawayEntry::pending()->get();
-
-        $this->assertCount(4, $pending);
-    }
-
-    #[Test]
-    public function it_scopes_rejected_correctly(): void
-    {
-        GiveawayEntry::factory()->rejected()->count(2)->create();
-        GiveawayEntry::factory()->pending()->create();
-
-        $rejected = GiveawayEntry::rejected()->get();
-
-        $this->assertCount(2, $rejected);
-    }
-
-    #[Test]
-    public function it_scopes_eligible_entries_correctly(): void
-    {
-        // Eligible: pending and verified
-        GiveawayEntry::factory()->pending()->count(3)->create();
-        GiveawayEntry::factory()->verified()->count(2)->create();
-
-        // Not eligible: winners and rejected
-        GiveawayEntry::factory()->winner()->create();
-        GiveawayEntry::factory()->rejected()->create();
-
-        $eligible = GiveawayEntry::eligible()->get();
-
-        // Should only return pending + verified = 5
-        $this->assertCount(5, $eligible);
-        foreach ($eligible as $entry) {
-            $this->assertContains($entry->status, [
-                GiveawayEntry::STATUS_PENDING,
-                GiveawayEntry::STATUS_VERIFIED,
-            ]);
-        }
-    }
-
-    #[Test]
-    public function it_excludes_rejected_entries_from_eligible_scope(): void
-    {
-        $giveaway = Giveaway::factory()->create();
-
-        // Create eligible and rejected entries
-        GiveawayEntry::factory()->pending()->create(['giveaway_id' => $giveaway->id]);
-        GiveawayEntry::factory()->verified()->create(['giveaway_id' => $giveaway->id]);
-        $rejectedEntry = GiveawayEntry::factory()->rejected()->create(['giveaway_id' => $giveaway->id]);
-
-        $eligible = $giveaway->entries()->eligible()->get();
-
-        $this->assertCount(2, $eligible);
-        $this->assertFalse($eligible->contains('id', $rejectedEntry->id));
-    }
-}
+    expect($eligible)->toHaveCount(2);
+    expect($eligible->contains('id', $rejectedEntry->id))->toBeFalse();
+});
