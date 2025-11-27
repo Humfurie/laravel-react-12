@@ -32,7 +32,7 @@ class BlogController extends Controller
         $blog->increment('view_count');
 
         return Inertia::render('user/blog-post', [
-            'blog' => $blog->fresh() // Get fresh instance with updated view count
+            'blog' => $blog->fresh()->load(['locations.images']), // Get fresh instance with locations
         ]);
     }
 
