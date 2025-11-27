@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -55,6 +56,7 @@ class Blog extends Model
         'status_label',
         'display_image',
         'image_url',
+        'has_locations',
     ];
 
     public function getRouteKeyName(): string
@@ -68,6 +70,39 @@ class Blog extends Model
     public function image(): MorphOne
     {
         return $this->morphOne(Image::class, 'imageable');
+    }
+
+    /**
+     * Get the blog's travel locations.
+     */
+    public function locations(): HasMany
+    {
+        return $this->hasMany(BlogLocation::class)->ordered();
+    }
+
+    /**
+     * Check if blog has travel locations.
+     */
+    public function getHasLocationsAttribute(): bool
+    {
+        return $this->locations()->exists();
+    }
+
+    /**
+     * Get map bounds for all locations.
+     */
+    public function getMapBoundsAttribute(): ?array
+    {
+        if (!$this->relationLoaded('locations') || $this->locations->isEmpty()) {
+            return null;
+        }
+
+        return [
+            'north' => (float) $this->locations->max('latitude'),
+            'south' => (float) $this->locations->min('latitude'),
+            'east' => (float) $this->locations->max('longitude'),
+            'west' => (float) $this->locations->min('longitude'),
+        ];
     }
 
     /**

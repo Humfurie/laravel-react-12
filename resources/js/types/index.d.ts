@@ -69,3 +69,33 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface LocationImage {
+    id: number;
+    url: string;
+    thumbnail_urls: Record<string, string>;
+    is_primary: boolean;
+    order: number;
+}
+
+export interface BlogLocation {
+    id: number;
+    blog_id: number;
+    latitude: number;
+    longitude: number;
+    title: string;
+    description: string | null;
+    address: string | null;
+    order: number;
+    images: LocationImage[];
+    primary_image_url: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface MapBounds {
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+}

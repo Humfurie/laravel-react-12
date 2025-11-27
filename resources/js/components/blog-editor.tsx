@@ -27,6 +27,8 @@ import '@/components/tiptap-node/image-node/image-node.scss';
 import { ImageUploadNode } from '@/components/tiptap-node/image-upload-node/image-upload-node-extension';
 import '@/components/tiptap-node/list-node/list-node.scss';
 import '@/components/tiptap-node/paragraph-node/paragraph-node.scss';
+import { TravelMapNode } from '@/components/tiptap-node/travel-map-node/travel-map-node-extension';
+import '@/components/tiptap-node/travel-map-node/travel-map-node.scss';
 
 // --- Tiptap UI ---
 import { BlockquoteButton } from '@/components/tiptap-ui/blockquote-button';
@@ -34,6 +36,7 @@ import { CodeBlockButton } from '@/components/tiptap-ui/code-block-button';
 import { ColorHighlightPopover, ColorHighlightPopoverButton, ColorHighlightPopoverContent } from '@/components/tiptap-ui/color-highlight-popover';
 import { HeadingDropdownMenu } from '@/components/tiptap-ui/heading-dropdown-menu';
 import { ImageUploadButton } from '@/components/tiptap-ui/image-upload-button';
+import { TravelMapButton } from '@/components/tiptap-ui/travel-map-button';
 import { LinkButton, LinkContent, LinkPopover } from '@/components/tiptap-ui/link-popover';
 import { ListDropdownMenu } from '@/components/tiptap-ui/list-dropdown-menu';
 import { MarkButton } from '@/components/tiptap-ui/mark-button';
@@ -53,21 +56,28 @@ import { useWindowSize } from '@/hooks/use-window-size';
 // --- Lib ---
 import { handleImageUpload, MAX_FILE_SIZE } from '@/lib/tiptap-utils';
 
+// --- Types ---
+import type { BlogLocation } from '@/types';
+
 interface BlogEditorProps {
     content?: string;
     onChange?: (content: string) => void;
     placeholder?: string;
     className?: string;
+    /** Locations for the travel map feature */
+    locations?: BlogLocation[];
 }
 
 const BlogToolbarContent = ({
     onHighlighterClick,
     onLinkClick,
     isMobile,
+    locationCount,
 }: {
     onHighlighterClick: () => void;
     onLinkClick: () => void;
     isMobile: boolean;
+    locationCount: number;
 }) => {
     return (
         <>
@@ -119,6 +129,7 @@ const BlogToolbarContent = ({
 
             <ToolbarGroup>
                 <ImageUploadButton text="Add Image" />
+                <TravelMapButton text="Map" locationCount={locationCount} />
             </ToolbarGroup>
 
             <Spacer />
@@ -141,7 +152,7 @@ const MobileToolbarContent = ({ type, onBack }: { type: 'highlighter' | 'link'; 
     </>
 );
 
-export function BlogEditor({ content = '', onChange, placeholder = 'Start writing your blog post...', className }: BlogEditorProps) {
+export function BlogEditor({ content = '', onChange, placeholder = 'Start writing your blog post...', className, locations = [] }: BlogEditorProps) {
     const isMobile = useIsMobile();
     const windowSize = useWindowSize();
     const [mobileView, setMobileView] = React.useState<'main' | 'highlighter' | 'link'>('main');
@@ -184,6 +195,9 @@ export function BlogEditor({ content = '', onChange, placeholder = 'Start writin
                 limit: 5,
                 upload: handleImageUpload,
                 onError: (error) => console.error('Upload failed:', error),
+            }),
+            TravelMapNode.configure({
+                locations: locations,
             }),
         ],
         content: content || {
@@ -233,6 +247,7 @@ export function BlogEditor({ content = '', onChange, placeholder = 'Start writin
                             onHighlighterClick={() => setMobileView('highlighter')}
                             onLinkClick={() => setMobileView('link')}
                             isMobile={isMobile}
+                            locationCount={locations.length}
                         />
                     ) : (
                         <MobileToolbarContent type={mobileView === 'highlighter' ? 'highlighter' : 'link'} onBack={() => setMobileView('main')} />
