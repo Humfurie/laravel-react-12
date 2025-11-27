@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Expertise;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class ExpertiseSeeder extends Seeder
 {
@@ -134,10 +136,38 @@ class ExpertiseSeeder extends Seeder
             ],
         ];
 
-        foreach ($expertises as $expertise) {
+        foreach ($expertises as $expertiseData) {
+            // All environments now use MinIO
+            $localImagePath = public_path($expertiseData['image']);
+
+            if (File::exists($localImagePath)) {
+                $filename = basename($expertiseData['image']);
+                $minioPath = 'images/techstack/' . $filename;
+
+                // Check if already uploaded to MinIO
+                if (!Storage::disk('minio')->exists($minioPath)) {
+                    // Upload to MinIO
+                    $imageContent = File::get($localImagePath);
+                    Storage::disk('minio')->put($minioPath, $imageContent);
+                    $this->command->info("Uploaded {$filename} to MinIO");
+                } else {
+                    $this->command->info("Image already exists in MinIO: {$filename}");
+                }
+
+                // Store MinIO URL
+                // This will automatically use the correct URL based on MINIO_URL env var:
+                // - Local/Testing: http://localhost:9200
+                // - Production: https://cdn.humfurie.org
+                $expertiseData['image'] = Storage::disk('minio')->url($minioPath);
+            } else {
+                if (!str_starts_with($expertiseData['image'], 'http')) {
+                    $this->command->warn("Image not found: {$expertiseData['image']}");
+                }
+            }
+
             Expertise::updateOrCreate(
-                ['name' => $expertise['name']], // Find by name
-                $expertise // Update or create with these values
+                ['name' => $expertiseData['name']], // Find by name
+                $expertiseData // Update or create with these values
             );
         }
 

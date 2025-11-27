@@ -15,7 +15,7 @@ class PermissionSeeder extends Seeder
         // Option 1: Use the automatic permission generation command
         // This will scan all models and create permissions automatically
         $this->command->info('Generating permissions from models...');
-        Artisan::call('permissions:generate', ['--fresh' => true]);
+        Artisan::call('permissions:generate', ['--fresh' => true, '--no-interaction' => true]);
         $this->command->info(Artisan::output());
 
         // Option 2: Manual permission creation (commented out)

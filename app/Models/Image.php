@@ -48,7 +48,7 @@ class Image extends Model
      */
     public function getUrlAttribute(): string
     {
-        return asset(Storage::url($this->path));
+        return Storage::disk('minio')->url($this->path);
     }
 
     /**
@@ -62,7 +62,7 @@ class Image extends Model
 
         $urls = [];
         foreach ($this->sizes as $size => $path) {
-            $urls[$size] = Storage::url($path);
+            $urls[$size] = Storage::disk('minio')->url($path);
         }
 
         return $urls;
@@ -77,7 +77,7 @@ class Image extends Model
             return null;
         }
 
-        return Storage::url($this->sizes[$size]);
+        return Storage::disk('minio')->url($this->sizes[$size]);
     }
 
     /**
@@ -140,16 +140,16 @@ class Image extends Model
         parent::boot();
 
         static::deleting(function ($image) {
-            // Delete the main image file
-            if (Storage::disk('public')->exists($image->path)) {
-                Storage::disk('public')->delete($image->path);
+            // Delete the main image file from MinIO
+            if (Storage::disk('minio')->exists($image->path)) {
+                Storage::disk('minio')->delete($image->path);
             }
 
             // Delete all thumbnail files
             if ($image->sizes) {
                 foreach ($image->sizes as $path) {
-                    if (Storage::disk('public')->exists($path)) {
-                        Storage::disk('public')->delete($path);
+                    if (Storage::disk('minio')->exists($path)) {
+                        Storage::disk('minio')->delete($path);
                     }
                 }
             }

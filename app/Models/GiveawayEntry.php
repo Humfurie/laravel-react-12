@@ -20,6 +20,7 @@ class GiveawayEntry extends Model
         'name',
         'phone',
         'facebook_url',
+        'screenshot_path',
         'status',
         'entry_date',
     ];

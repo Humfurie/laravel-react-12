@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
  */
 class StockService
 {
-    private const CACHE_DURATION = 300; // 5 minutes cache
+    public const CACHE_DURATION = 300; // 5 minutes cache
 
     private string $apiKey;
     private string $baseUrl;
@@ -267,6 +267,83 @@ class StockService
                 Log::error('Error fetching stock chart', [
                     'symbol' => $symbol,
                     'range' => $range,
+                    'message' => $e->getMessage()
+                ]);
+
+                return [];
+            }
+        });
+    }
+
+    /**
+     * Get stock list (alias for getPopularStocks)
+     *
+     * @return array
+     */
+    public function getStockList(): array
+    {
+        return $this->getPopularStocks();
+    }
+
+    /**
+     * Get company profile for a stock
+     *
+     * @param string $symbol Stock symbol
+     * @return array|null
+     */
+    public function getStockProfile(string $symbol): ?array
+    {
+        $cacheKey = "stock_profile_{$symbol}";
+
+        return Cache::remember($cacheKey, self::CACHE_DURATION, function () use ($symbol) {
+            try {
+                $response = Http::timeout(10)
+                    ->get($this->baseUrl . "/profile/{$symbol}", [
+                        'apikey' => $this->apiKey,
+                    ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    return is_array($data) ? ($data[0] ?? null) : $data;
+                }
+
+                return null;
+            } catch (Exception $e) {
+                Log::error('Error fetching stock profile', [
+                    'symbol' => $symbol,
+                    'message' => $e->getMessage()
+                ]);
+
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Get market news
+     *
+     * @return array
+     */
+    public function getMarketNews(): array
+    {
+        $cacheKey = 'market_news';
+
+        return Cache::remember($cacheKey, self::CACHE_DURATION, function () {
+            try {
+                $response = Http::timeout(10)
+                    ->get($this->baseUrl . "/stock_news", [
+                        'tickers' => 'AAPL,MSFT,GOOGL,AMZN,TSLA',
+                        'limit' => 10,
+                        'apikey' => $this->apiKey,
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json();
+                }
+
+                return [];
+            } catch (Exception $e) {
+                Log::error('Error fetching market news', [
                     'message' => $e->getMessage()
                 ]);
 

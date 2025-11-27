@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 class CryptoService
 {
     private const BASE_URL = 'https://api.coingecko.com/api/v3';
-    private const CACHE_DURATION = 300; // 5 minutes cache
+    public const CACHE_DURATION = 300; // 5 minutes cache
 
     /**
      * Get list of cryptocurrencies with market data
@@ -241,6 +241,51 @@ class CryptoService
                 return [];
             }
         });
+    }
+
+    /**
+     * Get crypto detail by ID (alias for getCryptoById)
+     *
+     * @param string $coinId CoinGecko coin ID
+     * @return array|null
+     */
+    public function getCryptoDetail(string $coinId): ?array
+    {
+        return $this->getCryptoById($coinId);
+    }
+
+    /**
+     * Get crypto prices (alias for getSimplePrice)
+     *
+     * @param array $coinIds Array of coin IDs
+     * @param string $vsCurrency Currency to compare against
+     * @return array
+     */
+    public function getCryptoPrices(array $coinIds, string $vsCurrency = 'usd'): array
+    {
+        return $this->getSimplePrice($coinIds, $vsCurrency);
+    }
+
+    /**
+     * Get trending cryptos (alias for getTrending)
+     *
+     * @return array
+     */
+    public function getTrendingCryptos(): array
+    {
+        return $this->getTrending();
+    }
+
+    /**
+     * Get crypto chart (alias for getMarketChart)
+     *
+     * @param string $coinId CoinGecko coin ID
+     * @param int $days Number of days
+     * @return array
+     */
+    public function getCryptoChart(string $coinId, int $days = 7): array
+    {
+        return $this->getMarketChart($coinId, $days);
     }
 
     /**
