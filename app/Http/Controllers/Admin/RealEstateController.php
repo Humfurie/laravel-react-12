@@ -680,8 +680,8 @@ class RealEstateController extends Controller
             // Otherwise, upload temporarily (for forms before model is created)
             // Store to temp directory - will be properly processed with ImageService later
             $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs($directory . '/temp', $filename, 'public');
-            $url = Storage::url($path);
+            $path = $file->storeAs($directory . '/temp', $filename, 'minio');
+            $url = Storage::disk('minio')->url($path);
 
             return response()->json([
                 'success' => true,

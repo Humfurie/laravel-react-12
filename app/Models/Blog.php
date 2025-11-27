@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -53,11 +54,28 @@ class Blog extends Model
     protected $appends = [
         'status_label',
         'display_image',
+        'image_url',
     ];
 
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    /**
+     * Get the blog's image (polymorphic relationship).
+     */
+    public function image(): MorphOne
+    {
+        return $this->morphOne(Image::class, 'imageable');
+    }
+
+    /**
+     * Get the image URL attribute.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image?->url;
     }
 
     public function scopePublished($query)
@@ -106,12 +124,17 @@ class Blog extends Model
 
     public function getDisplayImageAttribute(): string|null
     {
-        // Return featured image if it exists
+        // First priority: polymorphic image relationship (MinIO)
+        if ($this->image?->url) {
+            return $this->image->url;
+        }
+
+        // Second priority: featured_image field (legacy)
         if ($this->featured_image) {
             return $this->featured_image;
         }
 
-        // Extract first image from content if no featured image
+        // Third priority: Extract first image from content
         if ($this->content) {
             // Try multiple regex patterns to handle various HTML formats
             $patterns = [

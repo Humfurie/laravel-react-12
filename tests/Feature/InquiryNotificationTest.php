@@ -23,7 +23,7 @@ it('sends email notification when inquiry is created', function () {
         'preferred_contact_time' => 'Morning',
     ])->assertCreated();
 
-    Mail::assertSent(NewInquiryNotification::class, function ($mail) {
+    Mail::assertQueued(NewInquiryNotification::class, function ($mail) {
         return $mail->inquiry->customer_name === 'John Doe';
     });
 });

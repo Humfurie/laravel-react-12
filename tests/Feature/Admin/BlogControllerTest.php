@@ -11,7 +11,7 @@ beforeEach(function () {
     // Create admin user with blog permissions
     $this->user = createAdminUser('blog');
 
-    Storage::fake('public');
+    Storage::fake('minio');
 });
 
 test('get primary and latest returns correct structure', function () {

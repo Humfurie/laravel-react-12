@@ -63,11 +63,11 @@ class BlogController extends Controller
             // Create unique filename
             $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
 
-            // Store in public/blog-images directory
-            $path = $image->storeAs('blog-images', $filename, 'public');
+            // Store in MinIO/blog-images directory
+            $path = $image->storeAs('blog-images', $filename, 'minio');
 
             // Set the URL
-            $validated['featured_image'] = Storage::url($path);
+            $validated['featured_image'] = Storage::disk('minio')->url($path);
         }
 
         // Generate slug if not provided
@@ -144,11 +144,11 @@ class BlogController extends Controller
             // Create unique filename
             $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
 
-            // Store in public/blog-images directory
-            $path = $image->storeAs('blog-images', $filename, 'public');
+            // Store in MinIO/blog-images directory
+            $path = $image->storeAs('blog-images', $filename, 'minio');
 
             // Set the URL
-            $validated['featured_image'] = Storage::url($path);
+            $validated['featured_image'] = Storage::disk('minio')->url($path);
         }
 
         // Generate slug if not provided
@@ -222,11 +222,11 @@ class BlogController extends Controller
             // Create unique filename
             $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
 
-            // Store in public/blog-images directory
-            $path = $image->storeAs('blog-images', $filename, 'public');
+            // Store in MinIO/blog-images directory
+            $path = $image->storeAs('blog-images', $filename, 'minio');
 
             // Return the full URL
-            $url = Storage::url($path);
+            $url = Storage::disk('minio')->url($path);
 
             return response()->json([
                 'success' => true,

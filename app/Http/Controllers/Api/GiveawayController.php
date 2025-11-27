@@ -31,6 +31,7 @@ class GiveawayController extends Controller
                     'description' => $giveaway->description,
                     'start_date' => $giveaway->start_date,
                     'end_date' => $giveaway->end_date,
+                    'number_of_winners' => $giveaway->number_of_winners,
                     'is_active' => $giveaway->is_active,
                     'can_accept_entries' => $giveaway->can_accept_entries,
                     'entries_count' => $giveaway->entries_count,
@@ -67,7 +68,7 @@ class GiveawayController extends Controller
 
         $giveaway->load(['images' => function ($query) {
             $query->ordered();
-        }, 'winner']);
+        }, 'winner', 'winners']);
 
         return response()->json([
             'success' => true,
@@ -78,6 +79,7 @@ class GiveawayController extends Controller
                 'description' => $giveaway->description,
                 'start_date' => $giveaway->start_date,
                 'end_date' => $giveaway->end_date,
+                'number_of_winners' => $giveaway->number_of_winners,
                 'status' => $giveaway->status,
                 'is_active' => $giveaway->is_active,
                 'has_ended' => $giveaway->has_ended,
@@ -86,6 +88,12 @@ class GiveawayController extends Controller
                 'winner' => $giveaway->winner ? [
                     'name' => $giveaway->winner->name,
                 ] : null,
+                'winners' => $giveaway->winners->map(function ($winner) {
+                    return [
+                        'name' => $winner->name,
+                    ];
+                }),
+                'winners_count' => $giveaway->winners->count(),
                 'images' => $giveaway->images->map(function ($image) {
                     return [
                         'id' => $image->id,
@@ -148,8 +156,13 @@ class GiveawayController extends Controller
                     },
                 ],
                 'facebook_url' => 'required|url|max:500',
+                'screenshot' => 'required|image|mimes:jpeg,jpg,png|max:5120',
             ], [
                 'phone.regex' => 'Phone number must be in format 09XXXXXXXXX or +639XXXXXXXXX',
+                'screenshot.required' => 'Screenshot is required.',
+                'screenshot.image' => 'Screenshot must be an image.',
+                'screenshot.mimes' => 'Screenshot must be a JPEG, JPG, or PNG file.',
+                'screenshot.max' => 'Screenshot must not be larger than 5MB.',
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -165,12 +178,22 @@ class GiveawayController extends Controller
             $normalizedPhone = '+63' . substr($validated['phone'], 1);
         }
 
+        // Handle screenshot upload
+        $screenshotPath = null;
+        if ($request->hasFile('screenshot')) {
+            $screenshot = $request->file('screenshot');
+            $phoneHash = md5($normalizedPhone);
+            $filename = "giveaway_{$giveaway->id}_{$phoneHash}." . $screenshot->getClientOriginalExtension();
+            $screenshotPath = $screenshot->storeAs('screenshots', $filename, 'minio');
+        }
+
         DB::beginTransaction();
         try {
             $entry = $giveaway->entries()->create([
                 'name' => $validated['name'],
                 'phone' => $normalizedPhone,
                 'facebook_url' => $validated['facebook_url'],
+                'screenshot_path' => $screenshotPath,
                 'status' => GiveawayEntry::STATUS_PENDING,
             ]);
 
@@ -210,7 +233,7 @@ class GiveawayController extends Controller
     {
         $giveaways = Giveaway::ended()
             ->whereNotNull('winner_id')
-            ->with(['winner', 'images' => function ($query) {
+            ->with(['winner', 'winners', 'images' => function ($query) {
                 $query->primary();
             }])
             ->orderBy('end_date', 'desc')
@@ -221,9 +244,16 @@ class GiveawayController extends Controller
                     'title' => $giveaway->title,
                     'slug' => $giveaway->slug,
                     'end_date' => $giveaway->end_date,
+                    'number_of_winners' => $giveaway->number_of_winners,
                     'winner' => [
                         'name' => $giveaway->winner->name,
                     ],
+                    'winners' => $giveaway->winners->map(function ($winner) {
+                        return [
+                            'name' => $winner->name,
+                        ];
+                    }),
+                    'winners_count' => $giveaway->winners->count(),
                     'primary_image_url' => $giveaway->primary_image_url,
                     'entries_count' => $giveaway->entries->count(),
                 ];

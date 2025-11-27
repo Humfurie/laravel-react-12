@@ -41,6 +41,7 @@ class GiveawayFactory extends Factory
             ]),
             'start_date' => $startDate,
             'end_date' => $endDate,
+            'number_of_winners' => 1,
             'status' => Giveaway::STATUS_ACTIVE,
             'winner_id' => null,
             'prize_claimed' => false,

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -11,20 +9,21 @@ services:
     environment:
       - APP_ENV=testing
     depends_on:
-      mysql:
+      pgsql:
         condition: service_healthy
 
-  mysql:
-    image: mysql:8.0
-    container_name: laravel_mysql_ci
+  pgsql:
+    image: postgres:17
+    container_name: laravel_pgsql_ci
     environment:
-      MYSQL_DATABASE: laravel_test
-      MYSQL_ROOT_PASSWORD: password
+      POSTGRES_DB: testing
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     ports:
-      - "3306:3306"
+      - "5432:5432"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       timeout: 20s
       retries: 10
       interval: 10s
-      start_period: 40s
+      start_period: 10s

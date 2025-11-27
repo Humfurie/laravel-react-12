@@ -24,6 +24,7 @@ class Giveaway extends Model
         'description',
         'start_date',
         'end_date',
+        'number_of_winners',
         'status',
         'winner_id',
         'prize_claimed',
@@ -36,6 +37,7 @@ class Giveaway extends Model
         'end_date' => 'datetime:Y-m-d\TH:i:sP',
         'prize_claimed_at' => 'datetime',
         'prize_claimed' => 'boolean',
+        'number_of_winners' => 'integer',
     ];
 
     protected $appends = [
@@ -73,6 +75,14 @@ class Giveaway extends Model
     public function winner(): BelongsTo
     {
         return $this->belongsTo(GiveawayEntry::class, 'winner_id');
+    }
+
+    /**
+     * Relationship: Giveaway has many winners
+     */
+    public function winners(): HasMany
+    {
+        return $this->hasMany(GiveawayEntry::class)->where('status', 'winner');
     }
 
     /**
@@ -184,8 +194,13 @@ class Giveaway extends Model
      */
     public function updateStatusIfNeeded(): void
     {
-        // If a winner has been selected, ensure status is ended
-        if ($this->winner_id && $this->status !== self::STATUS_ENDED) {
+        // Check if all winners have been selected
+        $requiredWinners = $this->number_of_winners ?? 1;
+        $currentWinnersCount = $this->winners()->count();
+        $hasAllWinners = $currentWinnersCount >= $requiredWinners;
+
+        // If all winners have been selected, ensure status is ended
+        if ($hasAllWinners && $this->status !== self::STATUS_ENDED) {
             $this->update(['status' => self::STATUS_ENDED]);
             return;
         }
@@ -270,29 +285,50 @@ class Giveaway extends Model
     }
 
     /**
-     * Select a random winner from entries
+     * Select random winner(s) from entries
+     * Supports multiple winners based on number_of_winners setting
      */
     public function selectWinner(): ?GiveawayEntry
     {
-        if ($this->winner_id) {
+        // Check if we already have all winners selected
+        $currentWinnersCount = $this->winners()->count();
+        $requiredWinners = $this->number_of_winners ?? 1;
+
+        if ($currentWinnersCount >= $requiredWinners) {
             return $this->winner;
         }
 
-        // Get all eligible entries (excludes rejected and already-winner entries)
-        $randomEntry = $this->entries()
+        // Calculate how many more winners we need
+        $winnersToSelect = $requiredWinners - $currentWinnersCount;
+
+        // Get eligible entries (excludes rejected and already-winner entries)
+        $eligibleEntries = $this->entries()
             ->eligible()
             ->inRandomOrder()
-            ->first();
+            ->limit($winnersToSelect)
+            ->get();
 
-        if ($randomEntry) {
-            $randomEntry->markAsWinner();
-            $this->update([
-                'winner_id' => $randomEntry->id,
-                'status' => self::STATUS_ENDED,
-            ]);
-            return $randomEntry;
+        if ($eligibleEntries->isEmpty()) {
+            return null;
         }
 
-        return null;
+        $lastWinner = null;
+
+        // Mark each selected entry as a winner
+        foreach ($eligibleEntries as $entry) {
+            $entry->markAsWinner();
+            $lastWinner = $entry;
+        }
+
+        // Update the primary winner_id to the last selected winner
+        // and mark the giveaway as ended
+        if ($lastWinner) {
+            $this->update([
+                'winner_id' => $lastWinner->id,
+                'status' => self::STATUS_ENDED,
+            ]);
+        }
+
+        return $lastWinner;
     }
 }

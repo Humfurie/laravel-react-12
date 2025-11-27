@@ -27,10 +27,10 @@ class DatabaseSeeder extends Seeder
         if (app()->environment('local')) {
             $this->call([
                 BlogSeeder::class,
-                // Add other demo data seeders here when created
-                // AboutSeeder::class,
-                // SkillsSeeder::class,
-                // ExperienceSeeder::class,
+                AboutSeeder::class,
+                SkillsSeeder::class,
+                ExperienceSeeder::class,
+                ExpertiseSeeder::class,
             ]);
         }
     }

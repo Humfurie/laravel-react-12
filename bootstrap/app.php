@@ -40,11 +40,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withSchedule(function (Schedule $schedule) {
-        // Update raffle statuses based on dates every 5 minutes
-        $schedule->command('raffles:update-statuses')->everyFiveMinutes();
+        // Update giveaway statuses based on dates every 5 minutes
+        $schedule->command('giveaways:update-statuses')->everyFiveMinutes();
 
-        // Automatically select winners for ended raffles every hour
-        $schedule->command('raffles:select-winners')->hourly();
+        // Automatically select winners for ended giveaways every hour
+        $schedule->command('giveaways:select-winners')->hourly();
 
         // Refresh crypto data cache every 15 minutes
         $schedule->job(new RefreshCryptoCache)->everyFifteenMinutes();
