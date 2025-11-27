@@ -3,12 +3,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Head, Link } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, User } from 'lucide-react';
+import { ArrowLeft, Calendar, User, MapPin, ImageIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { publicNavItems } from '@/config/navigation';
 import AdBanner from '@/components/ads/AdBanner';
 import StickyAd from '@/components/ads/StickyAd';
 import { usePage } from '@inertiajs/react';
+import { TravelMap, BlogContentWithMaps } from '@/components/map';
+import type { BlogLocation } from '@/types';
 
 interface Blog {
     id: number;
@@ -31,6 +33,7 @@ interface Blog {
     created_at: string;
     updated_at: string;
     status_label: string;
+    locations?: BlogLocation[];
 }
 
 interface Props {
@@ -228,6 +231,74 @@ export default function BlogPost({ blog }: Props) {
                     </div>
                 </section>
 
+                {/* Travel Map Section - Auto-shows when locations exist */}
+                {blog.locations && blog.locations.length > 0 && (
+                    <section className="bg-gray-50 py-12">
+                        <div className="container mx-auto max-w-6xl px-4">
+                            <div className="mb-6 flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white">
+                                    <MapPin className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900">Trip Itinerary</h2>
+                                    <p className="text-gray-500 text-sm">{blog.locations.length} location{blog.locations.length !== 1 ? 's' : ''} visited</p>
+                                </div>
+                            </div>
+
+                            {/* Interactive Map */}
+                            <div className="rounded-xl overflow-hidden shadow-lg mb-8">
+                                <TravelMap
+                                    locations={blog.locations}
+                                    height="450px"
+                                    interactive={true}
+                                    showRoute={true}
+                                />
+                            </div>
+
+                            {/* Location Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {blog.locations.map((location, index) => (
+                                    <div
+                                        key={location.id}
+                                        className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                                    >
+                                        {/* Location Image */}
+                                        {location.primary_image_url ? (
+                                            <img
+                                                src={location.primary_image_url}
+                                                alt={location.title}
+                                                className="w-full h-32 object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-32 bg-gray-100 flex items-center justify-center">
+                                                <ImageIcon className="h-8 w-8 text-gray-300" />
+                                            </div>
+                                        )}
+
+                                        {/* Location Info */}
+                                        <div className="p-4">
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-500 text-white text-sm font-bold flex-shrink-0">
+                                                    {index + 1}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-semibold text-gray-900 truncate">{location.title}</h3>
+                                                    {location.address && (
+                                                        <p className="text-xs text-gray-500 truncate mt-0.5">{location.address}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            {location.description && (
+                                                <p className="mt-2 text-sm text-gray-600 line-clamp-2">{location.description}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                )}
+
                 {/* Blog Content */}
                 <section className="bg-white py-16">
                     <div className={`container mx-auto px-4 ${hasAds ? 'max-w-7xl' : 'max-w-4xl'}`}>
@@ -244,8 +315,9 @@ export default function BlogPost({ blog }: Props) {
                                 />
 
                                 <div className="prose prose-lg prose-headings:text-brand-black prose-p:text-gray-700 prose-a:text-brand-orange prose-strong:text-brand-black w-full max-w-none">
-                                    <div
-                                        dangerouslySetInnerHTML={{ __html: blog.content }}
+                                    <BlogContentWithMaps
+                                        content={blog.content}
+                                        locations={blog.locations || []}
                                         className="blog-content w-full leading-relaxed [&_blockquote]:w-full [&_div]:w-full [&_figure]:w-full [&_img]:h-auto [&_img]:w-full [&_img]:max-w-full [&_p]:w-full [&_table]:w-full [&>*]:w-full"
                                     />
                                 </div>
