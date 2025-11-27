@@ -14,6 +14,8 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
 import { ArrowLeft, CalendarIcon, Plus, Upload, X } from 'lucide-react';
 import React, { useRef, useState } from 'react';
+import { LocationManager } from './components/LocationManager';
+import type { BlogLocation } from '@/types';
 
 interface Blog {
     id: number;
@@ -32,6 +34,7 @@ interface Blog {
     isPrimary: boolean;
     sort_order: number;
     published_at: string | null;
+    locations?: BlogLocation[];
 }
 
 interface Props {
@@ -45,6 +48,7 @@ export default function EditBlog({ blog }: Props) {
     const [imageInputType, setImageInputType] = useState<'upload' | 'url'>('url');
     const [imagePreview, setImagePreview] = useState<string>(blog.featured_image || '');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [locations, setLocations] = useState<BlogLocation[]>(blog.locations || []);
 
     const { data, setData, post, processing, errors, transform } = useForm({
         title: blog.title,
@@ -273,6 +277,7 @@ export default function EditBlog({ blog }: Props) {
                                         content={data.content}
                                         onChange={(content) => setData('content', content)}
                                         placeholder="Start writing your blog post..."
+                                        locations={locations}
                                     />
                                     {errors.content && <p className="text-sm text-red-500">{errors.content}</p>}
                                 </div>
@@ -384,6 +389,14 @@ export default function EditBlog({ blog }: Props) {
                                 </div>
                             </CardContent>
                         </Card>
+
+                        {/* Travel Locations */}
+                        <LocationManager
+                            blogId={blog.id}
+                            blogSlug={originalSlug.current}
+                            locations={locations}
+                            onLocationsChange={setLocations}
+                        />
                     </div>
 
                     {/* Sidebar */}
