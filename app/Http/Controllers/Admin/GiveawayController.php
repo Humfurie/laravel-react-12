@@ -35,7 +35,7 @@ class GiveawayController extends Controller
             });
         }
 
-        $giveaways = $query->withCount('entries')
+        $giveaways = $query->withCount(['entries', 'winners'])
             ->latest()
             ->paginate(10)
             ->through(function ($giveaway) {
@@ -51,7 +51,7 @@ class GiveawayController extends Controller
                     'is_active' => $giveaway->is_active,
                     'has_ended' => $giveaway->has_ended,
                     'entries_count' => $giveaway->entries_count,
-                    'winners_count' => $giveaway->winners->count(),
+                    'winners_count' => $giveaway->winners_count,
                     'winner' => $giveaway->winner ? [
                         'id' => $giveaway->winner->id,
                         'name' => $giveaway->winner->name,
@@ -115,7 +115,7 @@ class GiveawayController extends Controller
      */
     public function edit(Giveaway $giveaway)
     {
-        $giveaway->load(['images' => function ($query) {
+        $giveaway->loadCount(['entries', 'winners'])->load(['images' => function ($query) {
             $query->ordered();
         }, 'entries', 'winner', 'winners']);
 
@@ -151,7 +151,7 @@ class GiveawayController extends Controller
                         'entry_date' => $winner->entry_date,
                     ];
                 }),
-                'winners_count' => $giveaway->winners->count(),
+                'winners_count' => $giveaway->winners_count,
                 'images' => $giveaway->images->map(function ($image) {
                     return [
                         'id' => $image->id,
@@ -161,7 +161,7 @@ class GiveawayController extends Controller
                         'order' => $image->order,
                     ];
                 }),
-                'entries_count' => $giveaway->entries->count(),
+                'entries_count' => $giveaway->entries_count,
                 'entries' => $giveaway->entries->map(function ($entry) {
                     return [
                         'id' => $entry->id,

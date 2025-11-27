@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Services\CryptoService;
 use App\Services\StockService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -34,15 +34,18 @@ class CryptoController extends Controller
         $sortBy = $request->input('sort_by', 'market_cap');
         $sortOrder = $request->input('sort_order', 'desc');
 
-        // Fetch crypto data from CoinGecko
-        $cryptoData = $this->cryptoService->getCryptoList([
-            'vs_currency' => 'usd',
-            'order' => "{$sortBy}_{$sortOrder}",
-            'per_page' => min($perPage, 250), // CoinGecko max per_page is 250
-            'page' => $page,
+        // Fetch crypto and stock data in parallel
+        [$cryptoData, $stocks] = Concurrency::run([
+            fn() => $this->cryptoService->getCryptoList([
+                'vs_currency' => 'usd',
+                'order' => "{$sortBy}_{$sortOrder}",
+                'per_page' => min($perPage, 250), // CoinGecko max per_page is 250
+                'page' => $page,
+            ]),
+            fn() => $this->stockService->getPopularStocks(),
         ]);
 
-        // Transform data for frontend
+        // Transform crypto data for frontend
         $transformedData = collect($cryptoData)->map(function ($crypto) {
             return [
                 'id' => $crypto['id'],
@@ -69,8 +72,7 @@ class CryptoController extends Controller
             ];
         })->toArray();
 
-        // Fetch stock market data
-        $stocks = $this->stockService->getPopularStocks();
+        // Transform stock data for frontend
         $transformedStocks = collect($stocks)->map(function ($stock) {
             return [
                 'symbol' => $stock['symbol'] ?? '',

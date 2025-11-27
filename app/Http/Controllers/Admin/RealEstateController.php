@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Developer;
+use App\Models\FinancingOption;
 use App\Models\Image;
 use App\Models\Inquiry;
 use App\Models\Property;
@@ -12,9 +13,11 @@ use App\Models\RealEstateProject;
 use App\Services\ImageService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Concurrency;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use Log;
 
 class RealEstateController extends Controller
 {
@@ -34,10 +37,13 @@ class RealEstateController extends Controller
             abort(403, 'You do not have permission to access this page.');
         }
 
-        $developers = Developer::with(['realEstateProjects.properties'])->get();
-        $projects = RealEstateProject::with(['developer', 'properties'])->get();
-        $properties = Property::with(['project.developer', 'pricing', 'contacts'])->get();
-        $inquiries = Inquiry::with(['property.project'])->latest()->get();
+        // Fetch all data in parallel
+        [$developers, $projects, $properties, $inquiries] = Concurrency::run([
+            fn() => Developer::with(['realEstateProjects.properties'])->get(),
+            fn() => RealEstateProject::with(['developer', 'properties'])->get(),
+            fn() => Property::with(['project.developer', 'pricing', 'contacts'])->get(),
+            fn() => Inquiry::with(['property.project'])->latest()->get(),
+        ]);
 
         return Inertia::render('admin/real-estate', [
             'developers' => $developers,
@@ -563,7 +569,7 @@ class RealEstateController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $financingOption = \App\Models\FinancingOption::create($validated);
+        $financingOption = FinancingOption::create($validated);
 
         return response()->json([
             'success' => true,
@@ -572,7 +578,7 @@ class RealEstateController extends Controller
         ]);
     }
 
-    public function updateFinancingOption(Request $request, \App\Models\FinancingOption $financingOption)
+    public function updateFinancingOption(Request $request, FinancingOption $financingOption)
     {
         $validated = $request->validate([
             'property_pricing_id' => 'required|exists:property_pricing,id',
@@ -595,7 +601,7 @@ class RealEstateController extends Controller
         ]);
     }
 
-    public function destroyFinancingOption(\App\Models\FinancingOption $financingOption)
+    public function destroyFinancingOption(FinancingOption $financingOption)
     {
         $financingOption->delete();
 
