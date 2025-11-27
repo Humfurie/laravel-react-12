@@ -66,7 +66,7 @@ class GiveawayController extends Controller
             ], 404);
         }
 
-        $giveaway->load(['images' => function ($query) {
+        $giveaway->loadCount(['entries', 'winners'])->load(['images' => function ($query) {
             $query->ordered();
         }, 'winner', 'winners']);
 
@@ -84,7 +84,7 @@ class GiveawayController extends Controller
                 'is_active' => $giveaway->is_active,
                 'has_ended' => $giveaway->has_ended,
                 'can_accept_entries' => $giveaway->can_accept_entries,
-                'entries_count' => $giveaway->entries->count(),
+                'entries_count' => $giveaway->entries_count,
                 'winner' => $giveaway->winner ? [
                     'name' => $giveaway->winner->name,
                 ] : null,
@@ -93,7 +93,7 @@ class GiveawayController extends Controller
                         'name' => $winner->name,
                     ];
                 }),
-                'winners_count' => $giveaway->winners->count(),
+                'winners_count' => $giveaway->winners_count,
                 'images' => $giveaway->images->map(function ($image) {
                     return [
                         'id' => $image->id,
@@ -236,6 +236,7 @@ class GiveawayController extends Controller
             ->with(['winner', 'winners', 'images' => function ($query) {
                 $query->primary();
             }])
+            ->withCount(['entries', 'winners'])
             ->orderBy('end_date', 'desc')
             ->get()
             ->map(function ($giveaway) {
@@ -253,9 +254,9 @@ class GiveawayController extends Controller
                             'name' => $winner->name,
                         ];
                     }),
-                    'winners_count' => $giveaway->winners->count(),
+                    'winners_count' => $giveaway->winners_count,
                     'primary_image_url' => $giveaway->primary_image_url,
-                    'entries_count' => $giveaway->entries->count(),
+                    'entries_count' => $giveaway->entries_count,
                 ];
             });
 
