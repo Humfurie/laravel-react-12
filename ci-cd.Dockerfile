@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y \
 RUN pecl install redis && docker-php-ext-enable redis
 
 # Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs
 
 # Install Composer
