@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\StockService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Concurrency;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -28,14 +29,12 @@ class StockController extends Controller
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
 
-        // Fetch stock data
-        $stocks = $this->stockService->getPopularStocks();
-
-        // Get market indices
-        $indices = $this->stockService->getMarketIndices();
-
-        // Get gainers and losers
-        $gainersLosers = $this->stockService->getGainersLosers();
+        // Fetch all stock data in parallel
+        [$stocks, $indices, $gainersLosers] = Concurrency::run([
+            fn() => $this->stockService->getPopularStocks(),
+            fn() => $this->stockService->getMarketIndices(),
+            fn() => $this->stockService->getGainersLosers(),
+        ]);
 
         // Transform stock data for frontend
         $transformedStocks = collect($stocks)->map(function ($stock) {

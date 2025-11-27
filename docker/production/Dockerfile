@@ -1,7 +1,10 @@
 # ================================
 # Stage 1: PHP Dependencies (MUST BE FIRST - needed by Node build)
 # ================================
-FROM composer:2 AS composer-builder
+FROM composer:2.8 AS composer-builder
+
+# Use PHP 8.4 platform to ensure compatible packages
+ENV COMPOSER_PLATFORM_PHP=8.4
 
 WORKDIR /app
 

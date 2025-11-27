@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
+use App\Models\Experience;
 use App\Models\Giveaway;
 use App\Models\GiveawayEntry;
 use App\Models\Inquiry;
 use App\Models\Property;
 use App\Models\RealEstateProject;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -37,54 +39,59 @@ class DashboardController extends Controller
         $thirtyDaysAgo = $now->copy()->subDays(30);
         $sixtyDaysAgo = $now->copy()->subDays(60);
 
-        // Blog stats
-        $currentBlogCount = Blog::where('status', 'published')
-            ->where('created_at', '>=', $thirtyDaysAgo)
-            ->count();
-        $previousBlogCount = Blog::where('status', 'published')
-            ->whereBetween('created_at', [$sixtyDaysAgo, $thirtyDaysAgo])
-            ->count();
-        $blogTrend = $this->calculateTrend($currentBlogCount, $previousBlogCount);
-
-        // Property stats
-        $currentPropertyCount = Property::where('listing_status', 'available')->count();
-        $previousPropertyCount = Property::where('listing_status', 'available')
-            ->where('created_at', '<', $thirtyDaysAgo)
-            ->count();
-        $propertyTrend = $this->calculateTrend($currentPropertyCount, $previousPropertyCount);
-
-        // Giveaway stats
-        $currentGiveawayCount = Giveaway::where('status', 'active')->count();
-        $previousGiveawayCount = Giveaway::where('status', 'active')
-            ->where('created_at', '<', $thirtyDaysAgo)
-            ->count();
-        $giveawayTrend = $this->calculateTrend($currentGiveawayCount, $previousGiveawayCount);
-
-        // Inquiry stats
-        $currentInquiryCount = Inquiry::where('status', 'new')
-            ->where('created_at', '>=', $thirtyDaysAgo)
-            ->count();
-        $previousInquiryCount = Inquiry::where('status', 'new')
-            ->whereBetween('created_at', [$sixtyDaysAgo, $thirtyDaysAgo])
-            ->count();
-        $inquiryTrend = $this->calculateTrend($currentInquiryCount, $previousInquiryCount);
+        // Run all count queries in parallel using Concurrency
+        [
+            $currentBlogCount,
+            $previousBlogCount,
+            $totalPublishedBlogs,
+            $currentPropertyCount,
+            $previousPropertyCount,
+            $currentGiveawayCount,
+            $previousGiveawayCount,
+            $currentInquiryCount,
+            $previousInquiryCount,
+            $totalNewInquiries,
+        ] = Concurrency::run([
+            fn() => Blog::where('status', 'published')
+                ->where('created_at', '>=', $thirtyDaysAgo)
+                ->count(),
+            fn() => Blog::where('status', 'published')
+                ->whereBetween('created_at', [$sixtyDaysAgo, $thirtyDaysAgo])
+                ->count(),
+            fn() => Blog::where('status', 'published')->count(),
+            fn() => Property::where('listing_status', 'available')->count(),
+            fn() => Property::where('listing_status', 'available')
+                ->where('created_at', '<', $thirtyDaysAgo)
+                ->count(),
+            fn() => Giveaway::where('status', 'active')->count(),
+            fn() => Giveaway::where('status', 'active')
+                ->where('created_at', '<', $thirtyDaysAgo)
+                ->count(),
+            fn() => Inquiry::where('status', 'new')
+                ->where('created_at', '>=', $thirtyDaysAgo)
+                ->count(),
+            fn() => Inquiry::where('status', 'new')
+                ->whereBetween('created_at', [$sixtyDaysAgo, $thirtyDaysAgo])
+                ->count(),
+            fn() => Inquiry::where('status', 'new')->count(),
+        ]);
 
         return [
             'blogPosts' => [
-                'count' => Blog::where('status', 'published')->count(),
-                'trend' => $blogTrend,
+                'count' => $totalPublishedBlogs,
+                'trend' => $this->calculateTrend($currentBlogCount, $previousBlogCount),
             ],
             'properties' => [
                 'count' => $currentPropertyCount,
-                'trend' => $propertyTrend,
+                'trend' => $this->calculateTrend($currentPropertyCount, $previousPropertyCount),
             ],
             'giveaways' => [
                 'count' => $currentGiveawayCount,
-                'trend' => $giveawayTrend,
+                'trend' => $this->calculateTrend($currentGiveawayCount, $previousGiveawayCount),
             ],
             'inquiries' => [
-                'count' => Inquiry::where('status', 'new')->count(),
-                'trend' => $inquiryTrend,
+                'count' => $totalNewInquiries,
+                'trend' => $this->calculateTrend($currentInquiryCount, $previousInquiryCount),
             ],
         ];
     }
@@ -93,22 +100,36 @@ class DashboardController extends Controller
     {
         $now = Carbon::now();
         $twoDaysAgo = $now->copy()->subDays(2);
+        $fortyEightHoursFromNow = $now->copy()->addHours(48);
 
-        return [
-            'inquiriesNeedingFollowUp' => Inquiry::whereIn('status', ['new', 'in_progress'])
+        // Run all action item counts in parallel
+        [
+            $inquiriesNeedingFollowUp,
+            $giveawaysEndingSoon,
+            $pendingScreenshots,
+            $draftBlogs,
+        ] = Concurrency::run([
+            fn() => Inquiry::whereIn('status', ['new', 'in_progress'])
                 ->where(function ($query) use ($twoDaysAgo) {
                     $query->whereNull('followed_up_at')
                         ->orWhere('followed_up_at', '<=', $twoDaysAgo);
                 })
                 ->count(),
-            'giveawaysEndingSoon' => Giveaway::where('status', 'active')
-                ->where('end_date', '<=', $now->copy()->addHours(48))
+            fn() => Giveaway::where('status', 'active')
+                ->where('end_date', '<=', $fortyEightHoursFromNow)
                 ->where('end_date', '>=', $now)
                 ->count(),
-            'pendingScreenshots' => GiveawayEntry::where('status', 'pending')
+            fn() => GiveawayEntry::where('status', 'pending')
                 ->whereNotNull('screenshot_path')
                 ->count(),
-            'draftBlogs' => Blog::where('status', 'draft')->count(),
+            fn() => Blog::where('status', 'draft')->count(),
+        ]);
+
+        return [
+            'inquiriesNeedingFollowUp' => $inquiriesNeedingFollowUp,
+            'giveawaysEndingSoon' => $giveawaysEndingSoon,
+            'pendingScreenshots' => $pendingScreenshots,
+            'draftBlogs' => $draftBlogs,
         ];
     }
 
@@ -116,92 +137,88 @@ class DashboardController extends Controller
     {
         $thirtyDaysAgo = Carbon::now()->subDays(30);
 
-        // Giveaway entries over last 30 days
-        $giveawayEntries = GiveawayEntry::where('created_at', '>=', $thirtyDaysAgo)
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->map(fn($item) => [
-                'date' => $item->date,
-                'count' => $item->count,
-            ])
-            ->toArray();
-
-        // Fill in missing dates with zero counts
-        $filledEntries = $this->fillMissingDates($giveawayEntries, 30);
-
-        // Properties by status
-        $propertiesByStatus = Property::select('listing_status', DB::raw('COUNT(*) as count'))
-            ->groupBy('listing_status')
-            ->get()
-            ->map(fn($item) => [
-                'status' => ucfirst(str_replace('_', ' ', $item->listing_status)),
-                'count' => $item->count,
-            ])
-            ->toArray();
+        // Run chart data queries in parallel
+        [$giveawayEntries, $propertiesByStatus] = Concurrency::run([
+            fn() => GiveawayEntry::where('created_at', '>=', $thirtyDaysAgo)
+                ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get()
+                ->map(fn($item) => [
+                    'date' => $item->date,
+                    'count' => $item->count,
+                ])
+                ->toArray(),
+            fn() => Property::select('listing_status', DB::raw('COUNT(*) as count'))
+                ->groupBy('listing_status')
+                ->get()
+                ->map(fn($item) => [
+                    'status' => ucfirst(str_replace('_', ' ', $item->listing_status)),
+                    'count' => $item->count,
+                ])
+                ->toArray(),
+        ]);
 
         return [
-            'giveawayEntries' => $filledEntries,
+            'giveawayEntries' => $this->fillMissingDates($giveawayEntries, 30),
             'propertiesByStatus' => $propertiesByStatus,
         ];
     }
 
     private function getRecentActivity(): array
     {
-        $activities = [];
-
-        // Recent giveaway entries
-        $recentEntries = GiveawayEntry::with(['giveaway'])
-            ->latest()
-            ->limit(5)
-            ->get()
-            ->map(fn($entry) => [
-                'type' => 'giveaway_entry',
-                'message' => "New entry for {$entry->giveaway->title}",
-                'time' => $entry->created_at->diffForHumans(),
-                'timestamp' => $entry->created_at->toIso8601String(),
-            ]);
-
-        // Recent inquiries
-        $recentInquiries = Inquiry::with(['property'])
-            ->latest()
-            ->limit(5)
-            ->get()
-            ->map(fn($inquiry) => [
-                'type' => 'inquiry',
-                'message' => "New inquiry for {$inquiry->property->title}",
-                'time' => $inquiry->created_at->diffForHumans(),
-                'timestamp' => $inquiry->created_at->toIso8601String(),
-            ]);
-
-        // Recent winners
-        $recentWinners = GiveawayEntry::with(['giveaway'])
-            ->where('status', 'winner')
-            ->latest('updated_at')
-            ->limit(5)
-            ->get()
-            ->map(fn($entry) => [
-                'type' => 'winner',
-                'message' => "Winner selected for {$entry->giveaway->title}",
-                'time' => $entry->updated_at->diffForHumans(),
-                'timestamp' => $entry->updated_at->toIso8601String(),
-            ]);
-
-        // Recent blog posts
-        $recentBlogs = Blog::where('status', 'published')
-            ->latest()
-            ->limit(5)
-            ->get()
-            ->map(fn($blog) => [
-                'type' => 'blog',
-                'message' => "Published: {$blog->title}",
-                'time' => $blog->created_at->diffForHumans(),
-                'timestamp' => $blog->created_at->toIso8601String(),
-            ]);
+        // Run all recent activity queries in parallel
+        [
+            $recentEntries,
+            $recentInquiries,
+            $recentWinners,
+            $recentBlogs,
+        ] = Concurrency::run([
+            fn() => GiveawayEntry::with(['giveaway'])
+                ->latest()
+                ->limit(5)
+                ->get()
+                ->map(fn($entry) => [
+                    'type' => 'giveaway_entry',
+                    'message' => "New entry for {$entry->giveaway->title}",
+                    'time' => $entry->created_at->diffForHumans(),
+                    'timestamp' => $entry->created_at->toIso8601String(),
+                ]),
+            fn() => Inquiry::with(['property'])
+                ->latest()
+                ->limit(5)
+                ->get()
+                ->map(fn($inquiry) => [
+                    'type' => 'inquiry',
+                    'message' => "New inquiry for {$inquiry->property->title}",
+                    'time' => $inquiry->created_at->diffForHumans(),
+                    'timestamp' => $inquiry->created_at->toIso8601String(),
+                ]),
+            fn() => GiveawayEntry::with(['giveaway'])
+                ->where('status', 'winner')
+                ->latest('updated_at')
+                ->limit(5)
+                ->get()
+                ->map(fn($entry) => [
+                    'type' => 'winner',
+                    'message' => "Winner selected for {$entry->giveaway->title}",
+                    'time' => $entry->updated_at->diffForHumans(),
+                    'timestamp' => $entry->updated_at->toIso8601String(),
+                ]),
+            fn() => Blog::where('status', 'published')
+                ->latest()
+                ->limit(5)
+                ->get()
+                ->map(fn($blog) => [
+                    'type' => 'blog',
+                    'message' => "Published: {$blog->title}",
+                    'time' => $blog->created_at->diffForHumans(),
+                    'timestamp' => $blog->created_at->toIso8601String(),
+                ]),
+        ]);
 
         // Merge and sort by timestamp
-        $activities = collect([])
+        return collect([])
             ->merge($recentEntries)
             ->merge($recentInquiries)
             ->merge($recentWinners)
@@ -210,8 +227,6 @@ class DashboardController extends Controller
             ->take(10)
             ->values()
             ->toArray();
-
-        return $activities;
     }
 
     private function getTopContent(): array
@@ -264,7 +279,7 @@ class DashboardController extends Controller
         return [
             'inquiriesByType' => $inquiriesByType,
             'totalBlogs' => Blog::count(),
-            'totalExperiences' => \App\Models\Experience::count(),
+            'totalExperiences' => Experience::count(),
             'totalProjects' => RealEstateProject::count(),
         ];
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AddRequestContext;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -30,9 +31,14 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $middleware->web(append: [
+            AddRequestContext::class,
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+        ]);
+
+        $middleware->api(append: [
+            AddRequestContext::class,
         ]);
 
         $middleware->alias([

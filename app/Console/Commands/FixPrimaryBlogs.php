@@ -31,13 +31,13 @@ class FixPrimaryBlogs extends Command
         // Get all primary blogs
         $primaryBlogs = Blog::where('isPrimary', true)->get();
 
-        if ($primaryBlogs->count() === 0) {
+        if ($primaryBlogs->isEmpty()) {
             $this->info('No primary blogs found.');
 
             return self::SUCCESS;
         }
 
-        if ($primaryBlogs->count() === 1) {
+        if ($primaryBlogs->containsOneItem()) {
             $this->info('Only one primary blog found. Everything is correct!');
             $this->line('Primary blog: ' . $primaryBlogs->first()->title);
 
