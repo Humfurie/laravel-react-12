@@ -85,7 +85,7 @@ export function ActionItemsWidget({ inquiriesNeedingFollowUp, giveawaysEndingSoo
                                             <p className="text-sm font-medium">{item.title}</p>
                                         </div>
                                     </div>
-                                    <Badge variant={item.variant as any} className="ml-2">
+                                    <Badge variant={item.variant} className="ml-2">
                                         {item.count}
                                     </Badge>
                                 </Link>
