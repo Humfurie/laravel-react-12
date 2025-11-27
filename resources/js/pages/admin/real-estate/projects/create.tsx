@@ -87,10 +87,16 @@ export default function CreateProject({ developers }: CreateProjectProps) {
 
     const handleFeaturedImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (!file) return;
+        if (!file) {
+            console.log('No file selected');
+            return;
+        }
+
+        console.log('Featured image selected:', file.name, file.type, file.size);
 
         // Create preview URL for display
         const previewUrl = URL.createObjectURL(file);
+        console.log('Preview URL created:', previewUrl);
         setFeaturedImagePreview(previewUrl);
         // Set the file directly in form data
         form.setData('featured_image', file);
@@ -98,10 +104,17 @@ export default function CreateProject({ developers }: CreateProjectProps) {
 
     const handleAdditionalImagesSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(event.target.files || []);
-        if (files.length === 0) return;
+        if (files.length === 0) {
+            console.log('No additional images selected');
+            return;
+        }
+
+        console.log('Additional images selected:', files.length, 'files');
+        files.forEach((file, i) => console.log(`File ${i + 1}:`, file.name, file.type));
 
         // Create preview URLs for display
         const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
+        console.log('Preview URLs created:', newPreviewUrls);
         setAdditionalImagePreviews((prev) => [...prev, ...newPreviewUrls]);
         // Set the files directly in form data
         form.setData('additional_images', [...form.data.additional_images, ...files]);

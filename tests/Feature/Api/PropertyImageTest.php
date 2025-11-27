@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    Storage::fake('public');
+    Storage::fake('minio');
 
     // Create admin user with property permissions
     $this->user = createAdminUser('property');
@@ -40,7 +40,7 @@ describe('Property Image Management', function () {
 
         // Verify file was stored
         $imagePath = $response->json('image.path');
-        Storage::disk('public')->assertExists($imagePath);
+        Storage::disk('minio')->assertExists($imagePath);
 
         // Verify database record
         $this->assertDatabaseHas('images', [
@@ -135,7 +135,7 @@ describe('Property Image Management', function () {
         ]);
 
         // Create fake file to simulate stored image
-        Storage::disk('public')->put($image->path, 'fake image content');
+        Storage::disk('minio')->put($image->path, 'fake image content');
 
         $response = $this->deleteJson("/api/v1/properties/{$property->slug}/images/{$image->id}");
 
@@ -146,7 +146,7 @@ describe('Property Image Management', function () {
         $this->assertSoftDeleted('images', ['id' => $image->id]);
 
         // Verify file was deleted
-        Storage::disk('public')->assertMissing($image->path);
+        Storage::disk('minio')->assertMissing($image->path);
     });
 
     test('prevents deleting image from wrong property', function () {

@@ -107,11 +107,29 @@ class ExperienceSeeder extends Seeder
                 ...$experienceData,
             ]);
 
+            // Upload image to MinIO if it exists locally
+            $localImagePath = storage_path('app/public/experiences/' . $imageName);
+            $minioPath = 'experiences/' . $imageName;
+
+            if (\Illuminate\Support\Facades\File::exists($localImagePath)) {
+                // Check if already uploaded to MinIO
+                if (!\Illuminate\Support\Facades\Storage::disk('minio')->exists($minioPath)) {
+                    // Upload to MinIO
+                    $imageContent = \Illuminate\Support\Facades\File::get($localImagePath);
+                    \Illuminate\Support\Facades\Storage::disk('minio')->put($minioPath, $imageContent);
+                    $this->command->info("Uploaded {$imageName} to MinIO");
+                } else {
+                    $this->command->info("Image already exists in MinIO: {$imageName}");
+                }
+            } else {
+                $this->command->warn("Local image not found: {$localImagePath}");
+            }
+
             // Create the associated image using polymorphic relationship
-            // Images are stored in storage/app/public/experiences/
+            // Path will be used by Image model to generate MinIO URL
             $experience->image()->create([
                 'name' => $imageName,
-                'path' => 'experiences/' . $imageName, // Will resolve to /storage/experiences/imageName
+                'path' => $minioPath,
             ]);
 
             $this->command->info("Created experience: {$experience->position} at {$experience->company}");

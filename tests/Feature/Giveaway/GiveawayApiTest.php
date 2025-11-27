@@ -2,6 +2,8 @@
 
 use App\Models\Giveaway;
 use App\Models\GiveawayEntry;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 test('it can list active giveaways', function () {
     Giveaway::factory()->active()->count(3)->create();
@@ -39,12 +41,14 @@ test('it cannot show draft giveaway', function () {
 });
 
 test('it can submit entry to active giveaway', function () {
+    Storage::fake('minio');
     $giveaway = Giveaway::factory()->active()->create();
 
     $entryData = [
         'name' => 'Juan Dela Cruz',
         'phone' => '09123456789',
         'facebook_url' => 'https://facebook.com/juan.delacruz',
+        'screenshot' => UploadedFile::fake()->image('screenshot.jpg'),
     ];
 
     $response = $this->postJson("/api/v1/giveaways/{$giveaway->slug}/enter", $entryData);
@@ -65,12 +69,14 @@ test('it can submit entry to active giveaway', function () {
 });
 
 test('it normalizes phone number starting with 09', function () {
+    Storage::fake('minio');
     $giveaway = Giveaway::factory()->active()->create();
 
     $response = $this->postJson("/api/v1/giveaways/{$giveaway->slug}/enter", [
         'name' => 'Maria Santos',
         'phone' => '09987654321',
         'facebook_url' => 'https://facebook.com/maria',
+        'screenshot' => UploadedFile::fake()->image('screenshot.jpg'),
     ]);
 
     $response->assertStatus(201);
@@ -82,12 +88,14 @@ test('it normalizes phone number starting with 09', function () {
 });
 
 test('it accepts phone number already in normalized format', function () {
+    Storage::fake('minio');
     $giveaway = Giveaway::factory()->active()->create();
 
     $response = $this->postJson("/api/v1/giveaways/{$giveaway->slug}/enter", [
         'name' => 'Pedro Ramos',
         'phone' => '+639111222333',
         'facebook_url' => 'https://facebook.com/pedro',
+        'screenshot' => UploadedFile::fake()->image('screenshot.jpg'),
     ]);
 
     $response->assertStatus(201);
@@ -118,6 +126,7 @@ test('it prevents duplicate phone number for same giveaway', function () {
 });
 
 test('it allows same phone number for different giveaways', function () {
+    Storage::fake('minio');
     $giveaway1 = Giveaway::factory()->active()->create();
     $giveaway2 = Giveaway::factory()->active()->create();
 
@@ -134,18 +143,20 @@ test('it allows same phone number for different giveaways', function () {
         'name' => 'Juan Dela Cruz',
         'phone' => '09123456789',
         'facebook_url' => 'https://facebook.com/juan',
+        'screenshot' => UploadedFile::fake()->image('screenshot.jpg'),
     ]);
 
     $response->assertStatus(201);
 });
 
 test('it validates required fields', function () {
+    Storage::fake('minio');
     $giveaway = Giveaway::factory()->active()->create();
 
     $response = $this->postJson("/api/v1/giveaways/{$giveaway->slug}/enter", []);
 
     $response->assertStatus(422)
-        ->assertJsonValidationErrors(['name', 'phone', 'facebook_url']);
+        ->assertJsonValidationErrors(['name', 'phone', 'facebook_url', 'screenshot']);
 });
 
 test('it validates phone format', function () {
@@ -258,12 +269,14 @@ test('it includes entries count in giveaway list', function () {
 });
 
 test('it sets entry status to pending by default', function () {
+    Storage::fake('minio');
     $giveaway = Giveaway::factory()->active()->create();
 
     $this->postJson("/api/v1/giveaways/{$giveaway->slug}/enter", [
         'name' => 'Test User',
         'phone' => '09123456789',
         'facebook_url' => 'https://facebook.com/test',
+        'screenshot' => UploadedFile::fake()->image('screenshot.jpg'),
     ]);
 
     $this->assertDatabaseHas('giveaway_entries', [

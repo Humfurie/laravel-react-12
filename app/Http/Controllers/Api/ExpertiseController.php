@@ -58,9 +58,9 @@ class ExpertiseController extends Controller
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
 
-            // Store in public/images/techstack directory
-            $path = $file->storeAs('images/techstack', $filename, 'public');
-            $validated['image'] = 'storage/' . $path;
+            // Store in MinIO images/techstack directory
+            $path = $file->storeAs('images/techstack', $filename, 'minio');
+            $validated['image'] = Storage::disk('minio')->url($path);
         } elseif ($request->filled('image_path')) {
             // Use manually provided path
             $validated['image'] = $request->image_path;
@@ -155,9 +155,9 @@ class ExpertiseController extends Controller
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
 
-            // Store in public/images/techstack directory
-            $path = $file->storeAs('images/techstack', $filename, 'public');
-            $validated['image'] = 'storage/' . $path;
+            // Store in MinIO images/techstack directory
+            $path = $file->storeAs('images/techstack', $filename, 'minio');
+            $validated['image'] = Storage::disk('minio')->url($path);
         } elseif ($request->filled('image_path')) {
             $validated['image'] = $request->image_path;
         }

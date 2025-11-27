@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\SitemapController;
@@ -69,9 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'experiences' => $experiences,
         ]);
     });
-    Route::get('dashboard', function () {
-        return Inertia::render('admin/dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('admin')->group(function () {
         require __DIR__ . '/admin.php';

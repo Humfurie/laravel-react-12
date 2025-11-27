@@ -9,7 +9,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->user = createAdminUser('blog');
-    Storage::fake('public');
+    Storage::fake('minio');
 });
 
 test('authenticated user can view blog index', function () {
@@ -143,7 +143,7 @@ test('authenticated user can upload blog image', function () {
         ]);
 
     $responseData = $response->json();
-    Storage::disk('public')->assertExists($responseData['path']);
+    Storage::disk('minio')->assertExists($responseData['path']);
 });
 
 test('blog post view count increments when viewed', function () {

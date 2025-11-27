@@ -20,7 +20,7 @@ class GiveawayController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Giveaway::query()->with(['images', 'winner']);
+        $query = Giveaway::query()->with(['images', 'winner', 'winners']);
 
         // Filter by status
         if ($request->has('status') && $request->status !== 'all') {
@@ -46,10 +46,12 @@ class GiveawayController extends Controller
                     'description' => Str::limit($giveaway->description, 100),
                     'start_date' => $giveaway->start_date,
                     'end_date' => $giveaway->end_date,
+                    'number_of_winners' => $giveaway->number_of_winners,
                     'status' => $giveaway->status,
                     'is_active' => $giveaway->is_active,
                     'has_ended' => $giveaway->has_ended,
                     'entries_count' => $giveaway->entries_count,
+                    'winners_count' => $giveaway->winners->count(),
                     'winner' => $giveaway->winner ? [
                         'id' => $giveaway->winner->id,
                         'name' => $giveaway->winner->name,
@@ -75,8 +77,14 @@ class GiveawayController extends Controller
             'description' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
+            'number_of_winners' => 'nullable|integer|min:1|max:100',
             'status' => 'required|in:draft,active,ended',
         ]);
+
+        // Set default number of winners if not provided
+        if (!isset($validated['number_of_winners'])) {
+            $validated['number_of_winners'] = 1;
+        }
 
         try {
             $giveaway = Giveaway::create($validated);
@@ -90,7 +98,7 @@ class GiveawayController extends Controller
         } catch (Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Failed to create raffle: ' . $e->getMessage());
+                ->with('error', 'Failed to create giveaway: ' . $e->getMessage());
         }
     }
 
@@ -109,7 +117,7 @@ class GiveawayController extends Controller
     {
         $giveaway->load(['images' => function ($query) {
             $query->ordered();
-        }, 'entries', 'winner']);
+        }, 'entries', 'winner', 'winners']);
 
         return Inertia::render('admin/giveaways/edit', [
             'giveaway' => [
@@ -119,6 +127,7 @@ class GiveawayController extends Controller
                 'description' => $giveaway->description,
                 'start_date' => $giveaway->start_date,
                 'end_date' => $giveaway->end_date,
+                'number_of_winners' => $giveaway->number_of_winners,
                 'status' => $giveaway->status,
                 'is_active' => $giveaway->is_active,
                 'has_ended' => $giveaway->has_ended,
@@ -133,6 +142,16 @@ class GiveawayController extends Controller
                     'phone' => $giveaway->winner->phone,
                     'facebook_url' => $giveaway->winner->facebook_url,
                 ] : null,
+                'winners' => $giveaway->winners->map(function ($winner) {
+                    return [
+                        'id' => $winner->id,
+                        'name' => $winner->name,
+                        'phone' => $winner->phone,
+                        'facebook_url' => $winner->facebook_url,
+                        'entry_date' => $winner->entry_date,
+                    ];
+                }),
+                'winners_count' => $giveaway->winners->count(),
                 'images' => $giveaway->images->map(function ($image) {
                     return [
                         'id' => $image->id,
@@ -204,7 +223,7 @@ class GiveawayController extends Controller
         try {
             $file = $request->file('image');
             $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('raffles', $filename, 'public');
+            $path = $file->storeAs('giveaways', $filename, 'minio');
 
             // Get the next order number
             $maxOrder = $giveaway->images()->max('order') ?? 0;
@@ -267,6 +286,7 @@ class GiveawayController extends Controller
             'description' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
+            'number_of_winners' => 'nullable|integer|min:1|max:100',
             'status' => 'required|in:draft,active,ended',
         ]);
 
@@ -281,7 +301,7 @@ class GiveawayController extends Controller
         } catch (Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Failed to update raffle: ' . $e->getMessage());
+                ->with('error', 'Failed to update giveaway: ' . $e->getMessage());
         }
     }
 
@@ -291,7 +311,7 @@ class GiveawayController extends Controller
     public function setPrimaryImage(Giveaway $giveaway, Image $image)
     {
         if ($image->imageable_id !== $giveaway->id || $image->imageable_type !== Giveaway::class) {
-            return back()->with('error', 'Image does not belong to this raffle.');
+            return back()->with('error', 'Image does not belong to this giveaway.');
         }
 
         $image->setPrimary();
@@ -305,7 +325,7 @@ class GiveawayController extends Controller
     public function deleteImage(Giveaway $giveaway, Image $image)
     {
         if ($image->imageable_id !== $giveaway->id || $image->imageable_type !== Giveaway::class) {
-            return back()->with('error', 'Image does not belong to this raffle.');
+            return back()->with('error', 'Image does not belong to this giveaway.');
         }
 
         $image->delete();
@@ -341,7 +361,7 @@ class GiveawayController extends Controller
      */
     public function showWinnerSelection(Giveaway $giveaway)
     {
-        $giveaway->load(['entries', 'winner']);
+        $giveaway->load(['entries', 'winner', 'winners']);
 
         return Inertia::render('admin/giveaways/winner-selection', [
             'giveaway' => [
@@ -349,6 +369,7 @@ class GiveawayController extends Controller
                 'title' => $giveaway->title,
                 'slug' => $giveaway->slug,
                 'status' => $giveaway->status,
+                'number_of_winners' => $giveaway->number_of_winners,
                 'winner_id' => $giveaway->winner_id,
                 'winner' => $giveaway->winner ? [
                     'id' => $giveaway->winner->id,
@@ -356,6 +377,16 @@ class GiveawayController extends Controller
                     'phone' => $giveaway->winner->phone,
                     'facebook_url' => $giveaway->winner->facebook_url,
                 ] : null,
+                'winners' => $giveaway->winners->map(function ($winner) {
+                    return [
+                        'id' => $winner->id,
+                        'name' => $winner->name,
+                        'phone' => $winner->phone,
+                        'facebook_url' => $winner->facebook_url,
+                        'entry_date' => $winner->entry_date,
+                    ];
+                }),
+                'winners_count' => $giveaway->winners->count(),
                 'entries' => $giveaway->entries->map(function ($entry) {
                     return [
                         'id' => $entry->id,
@@ -371,25 +402,33 @@ class GiveawayController extends Controller
     }
 
     /**
-     * Select a random winner
+     * Select random winner(s)
      */
     public function selectWinner(Giveaway $giveaway)
     {
-        if ($giveaway->winner_id) {
-            return back()->with('error', 'A winner has already been selected for this raffle.');
+        $requiredWinners = $giveaway->number_of_winners ?? 1;
+        $currentWinnersCount = $giveaway->winners()->count();
+
+        if ($currentWinnersCount >= $requiredWinners) {
+            return back()->with('error', 'All winners have already been selected for this giveaway.');
         }
 
         if ($giveaway->entries()->count() === 0) {
-            return back()->with('error', 'No entries found for this raffle.');
+            return back()->with('error', 'No entries found for this giveaway.');
         }
 
         $winner = $giveaway->selectWinner();
 
         if (!$winner) {
-            return back()->with('error', 'Failed to select a winner.');
+            return back()->with('error', 'Failed to select winner(s). No eligible entries found.');
         }
 
-        return back()->with('success', "Winner selected: {$winner->name}");
+        $totalWinners = $giveaway->winners()->count();
+        $message = $totalWinners === $requiredWinners
+            ? "All {$totalWinners} winner(s) selected successfully!"
+            : "Winner(s) selected! Total: {$totalWinners}/{$requiredWinners}";
+
+        return back()->with('success', $message);
     }
 
     /**
@@ -402,7 +441,7 @@ class GiveawayController extends Controller
         ]);
 
         if ($entry->giveaway_id !== $giveaway->id) {
-            return back()->with('error', 'Entry does not belong to this raffle.');
+            return back()->with('error', 'Entry does not belong to this giveaway.');
         }
 
         $entry->update(['status' => $request->status]);
@@ -416,7 +455,7 @@ class GiveawayController extends Controller
     public function deleteEntry(Giveaway $giveaway, GiveawayEntry $entry)
     {
         if ($entry->giveaway_id !== $giveaway->id) {
-            return back()->with('error', 'Entry does not belong to this raffle.');
+            return back()->with('error', 'Entry does not belong to this giveaway.');
         }
 
         $entry->delete();
@@ -430,7 +469,7 @@ class GiveawayController extends Controller
     public function claimPrize(Giveaway $giveaway)
     {
         if (!$giveaway->winner_id) {
-            return back()->with('error', 'No winner selected for this raffle.');
+            return back()->with('error', 'No winner selected for this giveaway.');
         }
 
         if ($giveaway->prize_claimed) {
@@ -452,7 +491,7 @@ class GiveawayController extends Controller
         ]);
 
         if (!$giveaway->winner_id) {
-            return back()->with('error', 'No winner selected for this raffle.');
+            return back()->with('error', 'No winner selected for this giveaway.');
         }
 
         if ($giveaway->prize_claimed) {

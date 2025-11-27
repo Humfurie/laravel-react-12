@@ -43,7 +43,7 @@ class SettingsController extends Controller
                 }
 
                 // Store new file
-                $path = $file->store('settings', 'public');
+                $path = $file->store('settings', 'minio');
                 $value = $path;
             }
 
@@ -79,7 +79,7 @@ class SettingsController extends Controller
         }
 
         // Store new file
-        $path = $request->file('file')->store('settings', 'public');
+        $path = $request->file('file')->store('settings', 'minio');
 
         Setting::set($key, $path, 'file', $setting->group, $setting->description);
 
