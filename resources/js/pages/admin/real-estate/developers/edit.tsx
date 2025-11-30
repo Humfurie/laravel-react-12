@@ -2,6 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save, Upload, X } from 'lucide-react';
 import { FormEvent, useRef, useState } from 'react';
+import type { BreadcrumbItem } from '@/types';
 
 interface Developer {
     id: number;
@@ -12,11 +13,6 @@ interface Developer {
     contact_phone?: string;
     website?: string;
     created_at: string;
-}
-
-interface BreadcrumbItem {
-    label: string;
-    href?: string;
 }
 
 interface EditDeveloperProps {
@@ -39,9 +35,9 @@ export default function EditDeveloper({ developer }: EditDeveloperProps) {
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { label: 'Real Estate', href: '/admin/real-estate' },
-        { label: 'Developers', href: '/admin/real-estate' },
-        { label: 'Edit' },
+        { title: 'Real Estate', href: '/admin/real-estate' },
+        { title: 'Developers', href: '/admin/real-estate' },
+        { title: 'Edit', href: '' },
     ];
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {

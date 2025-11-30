@@ -1,31 +1,15 @@
 import { useState } from 'react';
-import { router } from '@inertiajs/react';
-import {
-    DndContext,
-    DragEndEvent,
-    KeyboardSensor,
-    PointerSensor,
-    closestCenter,
-    useSensor,
-    useSensors,
-} from '@dnd-kit/core';
-import {
-    SortableContext,
-    arrayMove,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { closestCenter, DndContext, DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { GripVertical, MapPin, Pencil, Plus, Trash2, ImageIcon } from 'lucide-react';
+import { GripVertical, ImageIcon, MapPin, Pencil, Plus, Trash2 } from 'lucide-react';
 import { TravelMap } from '@/components/map';
 import type { BlogLocation } from '@/types';
 import { LocationFormDialog } from './LocationFormDialog';
 
 interface LocationManagerProps {
-    blogId: number;
     blogSlug: string;
     locations: BlogLocation[];
     onLocationsChange: (locations: BlogLocation[]) => void;
@@ -50,43 +34,29 @@ function SortableLocationItem({ location, index, onEdit, onDelete }: SortableLoc
     };
 
     return (
-        <div
-            ref={setNodeRef}
-            style={style}
-            className="flex items-center gap-3 rounded-lg border bg-white dark:bg-gray-900 p-3"
-        >
-            <button
-                {...attributes}
-                {...listeners}
-                className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-            >
+        <div ref={setNodeRef} style={style} className="flex items-center gap-3 rounded-lg border bg-white p-3 dark:bg-gray-900">
+            <button {...attributes} {...listeners} className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                 <GripVertical className="h-5 w-5" />
             </button>
 
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-500 text-white text-sm font-bold flex-shrink-0">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-bold text-white">
                 {index + 1}
             </div>
 
             {location.primary_image_url ? (
-                <img
-                    src={location.primary_image_url}
-                    alt={location.title}
-                    className="h-12 w-12 rounded-lg object-cover flex-shrink-0"
-                />
+                <img src={location.primary_image_url} alt={location.title} className="h-12 w-12 flex-shrink-0 rounded-lg object-cover" />
             ) : (
-                <div className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
                     <ImageIcon className="h-5 w-5 text-gray-400" />
                 </div>
             )}
 
-            <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-sm truncate">{location.title}</h4>
-                {location.address && (
-                    <p className="text-xs text-gray-500 truncate">{location.address}</p>
-                )}
+            <div className="min-w-0 flex-1">
+                <h4 className="truncate text-sm font-medium">{location.title}</h4>
+                {location.address && <p className="truncate text-xs text-gray-500">{location.address}</p>}
             </div>
 
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex flex-shrink-0 items-center gap-1">
                 <Button variant="ghost" size="sm" onClick={onEdit}>
                     <Pencil className="h-4 w-4" />
                 </Button>
@@ -98,7 +68,7 @@ function SortableLocationItem({ location, index, onEdit, onDelete }: SortableLoc
     );
 }
 
-export function LocationManager({ blogId, blogSlug, locations, onLocationsChange }: LocationManagerProps) {
+export function LocationManager({ blogSlug, locations, onLocationsChange }: LocationManagerProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingLocation, setEditingLocation] = useState<BlogLocation | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -107,7 +77,7 @@ export function LocationManager({ blogId, blogSlug, locations, onLocationsChange
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
-        })
+        }),
     );
 
     const handleDragEnd = async (event: DragEndEvent) => {
@@ -171,19 +141,11 @@ export function LocationManager({ blogId, blogSlug, locations, onLocationsChange
         }
     };
 
-    const handleFormSubmit = async (data: {
-        title: string;
-        description: string;
-        address: string;
-        latitude: number;
-        longitude: number;
-    }) => {
+    const handleFormSubmit = async (data: { title: string; description: string; address: string; latitude: number; longitude: number }) => {
         setIsSubmitting(true);
 
         try {
-            const url = editingLocation
-                ? route('blogs.locations.update', [blogSlug, editingLocation.id])
-                : route('blogs.locations.store', blogSlug);
+            const url = editingLocation ? route('blogs.locations.update', [blogSlug, editingLocation.id]) : route('blogs.locations.store', blogSlug);
 
             const response = await fetch(url, {
                 method: editingLocation ? 'PUT' : 'POST',
@@ -198,11 +160,7 @@ export function LocationManager({ blogId, blogSlug, locations, onLocationsChange
 
             if (result.success) {
                 if (editingLocation) {
-                    onLocationsChange(
-                        locations.map((loc) =>
-                            loc.id === editingLocation.id ? result.location : loc
-                        )
-                    );
+                    onLocationsChange(locations.map((loc) => (loc.id === editingLocation.id ? result.location : loc)));
                 } else {
                     onLocationsChange([...locations, result.location]);
                 }
@@ -230,22 +188,15 @@ export function LocationManager({ blogId, blogSlug, locations, onLocationsChange
             <CardContent className="space-y-4">
                 {/* Map Preview */}
                 {locations.length > 0 && (
-                    <div className="rounded-lg overflow-hidden border">
+                    <div className="overflow-hidden rounded-lg border">
                         <TravelMap locations={locations} height="250px" interactive={true} showRoute={true} />
                     </div>
                 )}
 
                 {/* Location List */}
                 {locations.length > 0 ? (
-                    <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleDragEnd}
-                    >
-                        <SortableContext
-                            items={locations.map((loc) => loc.id)}
-                            strategy={verticalListSortingStrategy}
-                        >
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                        <SortableContext items={locations.map((loc) => loc.id)} strategy={verticalListSortingStrategy}>
                             <div className="space-y-2">
                                 {locations.map((location, index) => (
                                     <SortableLocationItem
@@ -260,12 +211,10 @@ export function LocationManager({ blogId, blogSlug, locations, onLocationsChange
                         </SortableContext>
                     </DndContext>
                 ) : (
-                    <div className="rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 p-8 text-center">
+                    <div className="rounded-lg border-2 border-dashed border-gray-200 p-8 text-center dark:border-gray-700">
                         <MapPin className="mx-auto h-12 w-12 text-gray-400" />
                         <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No locations yet</h3>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Add travel locations to show a map on your blog post.
-                        </p>
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Add travel locations to show a map on your blog post.</p>
                     </div>
                 )}
 

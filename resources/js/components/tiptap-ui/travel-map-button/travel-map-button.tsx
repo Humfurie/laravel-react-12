@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { MapPin } from 'lucide-react';
+import type { Editor } from '@tiptap/react';
 
 // --- Hooks ---
 import { useTiptapEditor } from '@/hooks/use-tiptap-editor';
@@ -9,6 +10,10 @@ import type { ButtonProps } from '@/components/tiptap-ui-primitive/button';
 import { Button } from '@/components/tiptap-ui-primitive/button';
 
 export interface TravelMapButtonProps extends Omit<ButtonProps, 'type'> {
+    /**
+     * Optional editor instance to use.
+     */
+    editor?: Editor | null;
     /**
      * Optional text to display alongside the icon.
      */
@@ -52,9 +57,7 @@ export const TravelMapButton = React.forwardRef<HTMLButtonElement, TravelMapButt
             return null;
         }
 
-        const label = locationCount > 0
-            ? `Insert Travel Map (${locationCount} location${locationCount !== 1 ? 's' : ''})`
-            : 'Insert Travel Map';
+        const label = locationCount > 0 ? `Insert Travel Map (${locationCount} location${locationCount !== 1 ? 's' : ''})` : 'Insert Travel Map';
 
         return (
             <Button

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
-import type { BlogLocation } from '@/types';
+import type { BlogLocation, LocationImage } from '@/types';
 
 interface LocationPopupProps {
     location: BlogLocation;
@@ -31,7 +31,7 @@ export function LocationPopup({ location, number }: LocationPopupProps) {
                     <img
                         src={images[currentImageIndex].url}
                         alt={`${location.title} - Image ${currentImageIndex + 1}`}
-                        className="w-full h-40 object-cover"
+                        className="h-40 w-full object-cover"
                     />
 
                     {/* Image navigation */}
@@ -39,32 +39,30 @@ export function LocationPopup({ location, number }: LocationPopupProps) {
                         <>
                             <button
                                 onClick={prevImage}
-                                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
+                                className="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-black/50 p-1 text-white transition-colors hover:bg-black/70"
                                 aria-label="Previous image"
                             >
-                                <ChevronLeft className="w-4 h-4" />
+                                <ChevronLeft className="h-4 w-4" />
                             </button>
                             <button
                                 onClick={nextImage}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
+                                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-black/50 p-1 text-white transition-colors hover:bg-black/70"
                                 aria-label="Next image"
                             >
-                                <ChevronRight className="w-4 h-4" />
+                                <ChevronRight className="h-4 w-4" />
                             </button>
 
                             {/* Image indicators */}
-                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                                {images.map((_, idx) => (
+                            <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
+                                {images.map((_: LocationImage, idx: number) => (
                                     <button
                                         key={idx}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setCurrentImageIndex(idx);
                                         }}
-                                        className={`w-2 h-2 rounded-full transition-colors ${
-                                            idx === currentImageIndex
-                                                ? 'bg-white'
-                                                : 'bg-white/50 hover:bg-white/75'
+                                        className={`h-2 w-2 rounded-full transition-colors ${
+                                            idx === currentImageIndex ? 'bg-white' : 'bg-white/50 hover:bg-white/75'
                                         }`}
                                         aria-label={`Go to image ${idx + 1}`}
                                     />
@@ -74,7 +72,7 @@ export function LocationPopup({ location, number }: LocationPopupProps) {
                     )}
 
                     {/* Location number badge */}
-                    <div className="absolute top-2 left-2 bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold shadow">
+                    <div className="absolute top-2 left-2 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-sm font-bold text-white shadow">
                         {number}
                     </div>
                 </div>
@@ -85,29 +83,23 @@ export function LocationPopup({ location, number }: LocationPopupProps) {
                 {/* Title with number if no image */}
                 <div className="flex items-start gap-2">
                     {!hasImages && (
-                        <div className="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-bold text-white">
                             {number}
                         </div>
                     )}
-                    <h3 className="font-semibold text-gray-900 text-base leading-tight">
-                        {location.title}
-                    </h3>
+                    <h3 className="text-base leading-tight font-semibold text-gray-900">{location.title}</h3>
                 </div>
 
                 {/* Address */}
                 {location.address && (
-                    <div className="flex items-center gap-1 mt-1 text-gray-500 text-xs">
-                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                    <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+                        <MapPin className="h-3 w-3 flex-shrink-0" />
                         <span className="truncate">{location.address}</span>
                     </div>
                 )}
 
                 {/* Description */}
-                {location.description && (
-                    <p className="mt-2 text-gray-600 text-sm leading-relaxed">
-                        {location.description}
-                    </p>
-                )}
+                {location.description && <p className="mt-2 text-sm leading-relaxed text-gray-600">{location.description}</p>}
             </div>
         </div>
     );

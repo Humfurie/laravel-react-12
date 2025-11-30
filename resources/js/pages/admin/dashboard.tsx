@@ -7,8 +7,23 @@ import { QuickActionsWidget } from '@/components/dashboard/QuickActionsWidget';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { TopContentList } from '@/components/dashboard/TopContentList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileTextIcon, HomeIcon, GiftIcon, InboxIcon } from 'lucide-react';
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { FileTextIcon, GiftIcon, HomeIcon, InboxIcon } from 'lucide-react';
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Legend,
+    Line,
+    LineChart,
+    Pie,
+    PieChart,
+    type PieLabelRenderProps,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -194,7 +209,10 @@ export default function Dashboard({ dashboardData }: DashboardProps) {
                                         cx="50%"
                                         cy="50%"
                                         labelLine={false}
-                                        label={({ type, percent }) => `${type}: ${(percent * 100).toFixed(0)}%`}
+                                        label={(props: PieLabelRenderProps) => {
+                                            const { name, percent } = props;
+                                            return `${name}: ${((percent as number) * 100).toFixed(0)}%`;
+                                        }}
                                         outerRadius={80}
                                         fill="#8884d8"
                                         dataKey="count"

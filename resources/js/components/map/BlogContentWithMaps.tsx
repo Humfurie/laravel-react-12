@@ -30,10 +30,7 @@ export function BlogContentWithMaps({ content, locations, className }: BlogConte
             const height = container.getAttribute('data-height') || '300px';
 
             // Filter locations based on IDs (empty = show all)
-            const displayLocations =
-                locationIds.length > 0
-                    ? locations.filter((loc) => locationIds.includes(loc.id))
-                    : locations;
+            const displayLocations = locationIds.length > 0 ? locations.filter((loc) => locationIds.includes(loc.id)) : locations;
 
             // Skip if no locations to display
             if (displayLocations.length === 0) {
@@ -54,31 +51,21 @@ export function BlogContentWithMaps({ content, locations, className }: BlogConte
             // Render the map
             const root = rootsRef.current.get(container)!;
             root.render(
-                <div className="travel-map-embed rounded-lg overflow-hidden shadow-md my-4">
-                    <TravelMap
-                        locations={displayLocations}
-                        height={height}
-                        interactive={true}
-                        showRoute={true}
-                    />
-                </div>
+                <div className="travel-map-embed my-4 overflow-hidden rounded-lg shadow-md">
+                    <TravelMap locations={displayLocations} height={height} interactive={true} showRoute={true} />
+                </div>,
             );
         });
 
-        // Cleanup function
+        // Cleanup function - capture ref value to avoid stale closure
+        const roots = rootsRef.current;
         return () => {
-            rootsRef.current.forEach((root) => {
+            roots.forEach((root) => {
                 root.unmount();
             });
-            rootsRef.current.clear();
+            roots.clear();
         };
     }, [content, locations]);
 
-    return (
-        <div
-            ref={containerRef}
-            className={className}
-            dangerouslySetInnerHTML={{ __html: content }}
-        />
-    );
+    return <div ref={containerRef} className={className} dangerouslySetInnerHTML={{ __html: content }} />;
 }

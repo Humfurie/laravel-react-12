@@ -1,11 +1,9 @@
-import Head from 'next/head';
+import { Head } from '@inertiajs/react';
 
 function IndexPage() {
     return (
         <div>
-            <Head>
-                <title>My page title</title>
-            </Head>
+            <Head title="My page title" />
             <p>Hello world!</p>
         </div>
     );

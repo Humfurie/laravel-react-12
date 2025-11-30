@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+// @ts-expect-error - react-leaflet types are installed separately
+import { MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from 'react-leaflet';
+// @ts-expect-error - leaflet types are installed separately
 import L from 'leaflet';
 import type { BlogLocation } from '@/types';
 import { LocationPopup } from './LocationPopup';
@@ -45,9 +47,7 @@ function MapBoundsHandler({ locations }: { locations: BlogLocation[] }) {
     useEffect(() => {
         if (locations.length === 0 || hasSetBounds.current) return;
 
-        const bounds = L.latLngBounds(
-            locations.map((loc) => [loc.latitude, loc.longitude] as [number, number])
-        );
+        const bounds = L.latLngBounds(locations.map((loc) => [loc.latitude, loc.longitude] as [number, number]));
 
         // Add padding and limit max zoom
         map.fitBounds(bounds, {
@@ -70,13 +70,10 @@ export function TravelMapInner({
     onLocationClick,
 }: TravelMapInnerProps) {
     // Default center (will be overridden by bounds)
-    const defaultCenter: [number, number] =
-        locations.length > 0 ? [locations[0].latitude, locations[0].longitude] : [0, 0];
+    const defaultCenter: [number, number] = locations.length > 0 ? [locations[0].latitude, locations[0].longitude] : [0, 0];
 
     // Create route line coordinates (ordered by location.order)
-    const routeCoordinates: [number, number][] = [...locations]
-        .sort((a, b) => a.order - b.order)
-        .map((loc) => [loc.latitude, loc.longitude]);
+    const routeCoordinates: [number, number][] = [...locations].sort((a, b) => a.order - b.order).map((loc) => [loc.latitude, loc.longitude]);
 
     return (
         <>

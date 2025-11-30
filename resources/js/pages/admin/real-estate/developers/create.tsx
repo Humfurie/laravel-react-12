@@ -2,11 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save, Upload, X } from 'lucide-react';
 import { FormEvent, useRef, useState } from 'react';
-
-interface BreadcrumbItem {
-    label: string;
-    href?: string;
-}
+import type { BreadcrumbItem } from '@/types';
 
 export default function CreateDeveloper() {
     const [logoInputType, setLogoInputType] = useState<'upload' | 'url'>('upload');
@@ -24,9 +20,9 @@ export default function CreateDeveloper() {
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { label: 'Real Estate', href: '/admin/real-estate' },
-        { label: 'Developers', href: '/admin/real-estate' },
-        { label: 'Create' },
+        { title: 'Real Estate', href: '/admin/real-estate' },
+        { title: 'Developers', href: '/admin/real-estate' },
+        { title: 'Create', href: '' },
     ];
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
