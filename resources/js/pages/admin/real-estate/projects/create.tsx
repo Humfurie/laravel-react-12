@@ -2,15 +2,11 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Camera, CloudUpload, Image as ImageIcon, Loader, Plus, Save, Star, X } from 'lucide-react';
 import { FormEvent, useRef, useState } from 'react';
+import type { BreadcrumbItem } from '@/types';
 
 interface Developer {
     id: number;
     company_name: string;
-}
-
-interface BreadcrumbItem {
-    label: string;
-    href?: string;
 }
 
 interface CreateProjectProps {
@@ -57,9 +53,9 @@ export default function CreateProject({ developers }: CreateProjectProps) {
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { label: 'Real Estate', href: '/admin/real-estate' },
-        { label: 'Projects', href: '/admin/real-estate' },
-        { label: 'Create' },
+        { title: 'Real Estate', href: '/admin/real-estate' },
+        { title: 'Projects', href: '/admin/real-estate' },
+        { title: 'Create', href: '' },
     ];
 
     const projectTypes = ['condominium', 'subdivision', 'townhouse', 'commercial', 'mixed-use', 'office', 'industrial'];

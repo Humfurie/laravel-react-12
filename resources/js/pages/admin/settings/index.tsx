@@ -151,7 +151,7 @@ export default function Settings({ allSettings }: Props) {
                         <input
                             type="checkbox"
                             id={setting.key}
-                            checked={value === 'true' || value === true}
+                            checked={value === 'true'}
                             onChange={(e) => setData('settings', { ...data.settings, [setting.key]: e.target.checked.toString() })}
                             className="text-brand-orange focus:ring-brand-orange h-4 w-4 rounded border-gray-300"
                         />
