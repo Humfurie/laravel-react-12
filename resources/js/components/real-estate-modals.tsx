@@ -905,9 +905,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
         <div className="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600">
             <div className="relative top-10 mx-auto max-h-[90vh] w-11/12 overflow-y-auto rounded-xl border border-gray-200 bg-white p-6 shadow-xl md:w-3/4 lg:w-2/3">
                 <div className="mb-6 flex items-center justify-between">
-                    <h3 className="text-xl font-semibold text-gray-900">
-                        {pricing ? 'Edit Pricing Scheme' : 'Add Pricing Scheme'}
-                    </h3>
+                    <h3 className="text-xl font-semibold text-gray-900">{pricing ? 'Edit Pricing Scheme' : 'Add Pricing Scheme'}</h3>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                         <X className="h-6 w-6" />
                     </button>
@@ -927,7 +925,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 value={data.payment_scheme_name}
                                 onChange={(e) => setData('payment_scheme_name', e.target.value)}
                                 placeholder="e.g., Cash Payment, Bank Financing"
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                             {errors.payment_scheme_name && <div className="mt-1 text-sm text-red-600">{errors.payment_scheme_name}</div>}
                         </div>
@@ -940,7 +938,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 value={data.total_contract_price}
                                 onChange={(e) => setData('total_contract_price', e.target.value)}
                                 required
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                             {errors.total_contract_price && <div className="mt-1 text-sm text-red-600">{errors.total_contract_price}</div>}
                         </div>
@@ -950,7 +948,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                             <select
                                 value={data.currency}
                                 onChange={(e) => setData('currency', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             >
                                 <option value="PHP">PHP</option>
                                 <option value="USD">USD</option>
@@ -964,7 +962,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 step="0.01"
                                 value={data.net_selling_price}
                                 onChange={(e) => setData('net_selling_price', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -975,13 +973,13 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 step="0.01"
                                 value={data.reservation_fee}
                                 onChange={(e) => setData('reservation_fee', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
                         {/* Downpayment */}
                         <div className="lg:col-span-3">
-                            <h4 className="mb-4 mt-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Downpayment</h4>
+                            <h4 className="mt-4 mb-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Downpayment</h4>
                         </div>
 
                         <div>
@@ -991,7 +989,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 step="0.01"
                                 value={data.downpayment_percentage}
                                 onChange={(e) => setData('downpayment_percentage', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1002,7 +1000,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 step="0.01"
                                 value={data.downpayment_amount}
                                 onChange={(e) => setData('downpayment_amount', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1012,7 +1010,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 type="number"
                                 value={data.equity_terms_months}
                                 onChange={(e) => setData('equity_terms_months', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1023,13 +1021,13 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 step="0.01"
                                 value={data.monthly_equity}
                                 onChange={(e) => setData('monthly_equity', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
                         {/* Balloon Payment */}
                         <div className="lg:col-span-3">
-                            <h4 className="mb-4 mt-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Balloon Payment</h4>
+                            <h4 className="mt-4 mb-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Balloon Payment</h4>
                         </div>
 
                         <div>
@@ -1039,7 +1037,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 step="0.01"
                                 value={data.balloon_payment}
                                 onChange={(e) => setData('balloon_payment', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1049,13 +1047,13 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 type="number"
                                 value={data.balloon_payment_month}
                                 onChange={(e) => setData('balloon_payment_month', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
                         {/* Bank Financing */}
                         <div className="lg:col-span-3">
-                            <h4 className="mb-4 mt-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Bank Financing</h4>
+                            <h4 className="mt-4 mb-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Bank Financing</h4>
                         </div>
 
                         <div>
@@ -1065,7 +1063,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 step="0.01"
                                 value={data.bank_financing_amount}
                                 onChange={(e) => setData('bank_financing_amount', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1076,13 +1074,13 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 step="0.01"
                                 value={data.bank_financing_percentage}
                                 onChange={(e) => setData('bank_financing_percentage', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
                         {/* Additional Fees */}
                         <div className="lg:col-span-3">
-                            <h4 className="mb-4 mt-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Additional Fees</h4>
+                            <h4 className="mt-4 mb-4 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">Additional Fees</h4>
                         </div>
 
                         <div>
@@ -1092,7 +1090,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 step="0.01"
                                 value={data.transfer_fee_percentage}
                                 onChange={(e) => setData('transfer_fee_percentage', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1103,7 +1101,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 step="0.01"
                                 value={data.move_in_fee_percentage}
                                 onChange={(e) => setData('move_in_fee_percentage', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1114,7 +1112,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 step="0.01"
                                 value={data.association_dues_monthly}
                                 onChange={(e) => setData('association_dues_monthly', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1125,7 +1123,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 step="0.01"
                                 value={data.parking_slot_price}
                                 onChange={(e) => setData('parking_slot_price', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1147,7 +1145,7 @@ export function PropertyPricingModal({ show, onClose, pricing, propertyId, onSuc
                                 value={data.payment_notes}
                                 onChange={(e) => setData('payment_notes', e.target.value)}
                                 rows={3}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
                     </div>
@@ -1205,7 +1203,7 @@ export function FinancingOptionModal({ show, onClose, financingOption, pricingId
         monthly_amortization: financingOption?.monthly_amortization?.toString() || '',
         processing_fee: financingOption?.processing_fee?.toString() || '',
         requirements: financingOption?.requirements?.join('\n') || '',
-        is_active: financingOption?.is_active || true,
+        is_active: financingOption?.is_active ?? true,
     });
 
     const handleSubmit = (e: FormEvent) => {
@@ -1214,7 +1212,7 @@ export function FinancingOptionModal({ show, onClose, financingOption, pricingId
         // Convert requirements from textarea to array
         const formData = {
             ...data,
-            requirements: data.requirements.split('\n').filter(r => r.trim() !== ''),
+            requirements: data.requirements.split('\n').filter((r) => r.trim() !== ''),
         };
 
         if (financingOption) {
@@ -1241,9 +1239,7 @@ export function FinancingOptionModal({ show, onClose, financingOption, pricingId
         <div className="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600">
             <div className="relative top-20 mx-auto w-11/12 rounded-xl border border-gray-200 bg-white p-6 shadow-xl md:w-3/4 lg:w-1/2">
                 <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-xl font-semibold text-gray-900">
-                        {financingOption ? 'Edit Financing Option' : 'Add Financing Option'}
-                    </h3>
+                    <h3 className="text-xl font-semibold text-gray-900">{financingOption ? 'Edit Financing Option' : 'Add Financing Option'}</h3>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                         <X className="h-6 w-6" />
                     </button>
@@ -1258,7 +1254,7 @@ export function FinancingOptionModal({ show, onClose, financingOption, pricingId
                                 value={data.bank_name}
                                 onChange={(e) => setData('bank_name', e.target.value)}
                                 required
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                             {errors.bank_name && <div className="mt-1 text-sm text-red-600">{errors.bank_name}</div>}
                         </div>
@@ -1271,7 +1267,7 @@ export function FinancingOptionModal({ show, onClose, financingOption, pricingId
                                 value={data.loan_to_value_ratio}
                                 onChange={(e) => setData('loan_to_value_ratio', e.target.value)}
                                 placeholder="e.g., 80"
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1283,7 +1279,7 @@ export function FinancingOptionModal({ show, onClose, financingOption, pricingId
                                 value={data.interest_rate}
                                 onChange={(e) => setData('interest_rate', e.target.value)}
                                 placeholder="e.g., 5.5"
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1295,7 +1291,7 @@ export function FinancingOptionModal({ show, onClose, financingOption, pricingId
                                 onChange={(e) => setData('loan_term_years', e.target.value)}
                                 required
                                 placeholder="e.g., 20"
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                             {errors.loan_term_years && <div className="mt-1 text-sm text-red-600">{errors.loan_term_years}</div>}
                         </div>
@@ -1307,7 +1303,7 @@ export function FinancingOptionModal({ show, onClose, financingOption, pricingId
                                 step="0.01"
                                 value={data.monthly_amortization}
                                 onChange={(e) => setData('monthly_amortization', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1318,7 +1314,7 @@ export function FinancingOptionModal({ show, onClose, financingOption, pricingId
                                 step="0.01"
                                 value={data.processing_fee}
                                 onChange={(e) => setData('processing_fee', e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                         </div>
 
@@ -1329,7 +1325,7 @@ export function FinancingOptionModal({ show, onClose, financingOption, pricingId
                                 onChange={(e) => setData('requirements', e.target.value)}
                                 rows={4}
                                 placeholder="e.g.,&#10;Valid ID&#10;Proof of Income&#10;ITR for past 2 years"
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                             />
                             <p className="mt-1 text-xs text-gray-500">Enter each requirement on a new line</p>
                         </div>

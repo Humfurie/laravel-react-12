@@ -118,7 +118,7 @@ class BlogController extends Controller
         $this->authorize('update', $blog);
 
         return Inertia::render('admin/blog/edit', [
-            'blog' => $blog->load(['locations.images']),
+            'blog' => $blog,
         ]);
     }
 

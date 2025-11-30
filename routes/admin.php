@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\BlogController;
-use App\Http\Controllers\Admin\BlogLocationController;
 use App\Http\Controllers\Admin\ExpertiseController;
 use App\Http\Controllers\Admin\GiveawayController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -61,17 +60,6 @@ Route::prefix('blogs')->middleware('permission:blog,viewAny')->group(function ()
     Route::patch('/{blog}/restore', [BlogController::class, 'restore'])->name('blogs.restore')->withTrashed()->middleware('permission:blog,restore');
     Route::delete('/{blog}/force', [BlogController::class, 'forceDestroy'])->name('blogs.force-destroy')->middleware('permission:blog,forceDelete');
     Route::post('/upload-image', [BlogController::class, 'uploadImage'])->name('blogs.upload-image')->middleware('permission:blog,create');
-
-    // Blog location routes (travel maps)
-    Route::prefix('{blog}/locations')->middleware('permission:blog,update')->group(function () {
-        Route::post('/', [BlogLocationController::class, 'store'])->name('blogs.locations.store');
-        Route::put('/{location}', [BlogLocationController::class, 'update'])->name('blogs.locations.update');
-        Route::delete('/{location}', [BlogLocationController::class, 'destroy'])->name('blogs.locations.destroy');
-        Route::post('/reorder', [BlogLocationController::class, 'reorder'])->name('blogs.locations.reorder');
-        Route::post('/{location}/images', [BlogLocationController::class, 'uploadImage'])->name('blogs.locations.images.upload');
-        Route::delete('/{location}/images/{image}', [BlogLocationController::class, 'deleteImage'])->name('blogs.locations.images.delete');
-        Route::patch('/{location}/images/{image}/primary', [BlogLocationController::class, 'setPrimaryImage'])->name('blogs.locations.images.primary');
-    });
 });
 
 Route::prefix('real-estate')->group(function () {
