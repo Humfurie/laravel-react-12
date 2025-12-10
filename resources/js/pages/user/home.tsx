@@ -2,10 +2,12 @@ import Footer from '@/components/global/Footer';
 import HomeAboutMe from '@/components/home/sections/HomeAboutMe';
 import HomeBanner from '@/components/home/sections/HomeBanner';
 import HomeExpertise from '@/components/home/sections/HomeExpertise';
+import HomeProjects from '@/components/home/sections/HomeProjects';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import type { Project } from '@/types/project';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
+import { ArrowRight } from 'lucide-react';
 
 import { ExperienceSection } from '@/components/home/sections/ExperienceSection';
 import { publicNavItems } from '@/config/navigation';
@@ -72,50 +74,83 @@ interface Props {
         created_at: string;
         updated_at: string;
     }[];
+    projects: Project[];
+    projectStats: {
+        total_projects: number;
+        live_projects: number;
+    };
 }
 
-const truncateText = (text: string, maxLength: number = 100) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-};
-
-function BlogCard({ blog }: { blog: Blog }) {
+// Untitled UI style Blog Card - Clean, minimal design
+function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }) {
     const handleCardClick = () => {
         router.visit(`/blog/${blog.slug}`);
     };
 
     return (
-        <Card className="h-full cursor-pointer transition-shadow hover:shadow-lg" onClick={handleCardClick}>
-            {blog.featured_image && (
-                <div className="aspect-video overflow-hidden rounded-t-lg">
-                    <img src={blog.featured_image} alt={blog.title} className="h-full w-full object-cover" width={640} height={360} loading="lazy" />
-                </div>
-            )}
-            <CardContent className="p-4">
-                <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                        {blog.isPrimary && (
-                            <Badge variant="secondary" className="text-xs">
-                                Featured
-                            </Badge>
-                        )}
+        <article
+            onClick={handleCardClick}
+            className={`group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900 ${
+                featured ? 'md:col-span-2 md:grid md:grid-cols-2' : ''
+            }`}
+        >
+            {/* Thumbnail */}
+            <div
+                className={`relative overflow-hidden bg-gray-50 dark:bg-gray-800 ${featured ? 'aspect-[16/10] md:aspect-auto md:h-full' : 'aspect-[16/10]'}`}
+            >
+                {blog.featured_image ? (
+                    <img
+                        src={blog.featured_image}
+                        alt={blog.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                    />
+                ) : (
+                    <div className="flex h-full min-h-[200px] items-center justify-center bg-linear-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900">
+                        <span className="text-5xl font-bold text-gray-300 dark:text-gray-600">{blog.title.charAt(0).toUpperCase()}</span>
                     </div>
+                )}
 
-                    <h3 className="line-clamp-2 text-sm font-semibold">{blog.title}</h3>
+                {/* Featured badge */}
+                {blog.isPrimary && <Badge className="absolute top-3 left-3 bg-orange-500 text-white hover:bg-orange-600">Featured</Badge>}
+            </div>
 
-                    {blog.excerpt && <p className="text-muted-foreground line-clamp-2 text-xs">{truncateText(blog.excerpt, 80)}</p>}
+            {/* Content */}
+            <div className={`p-5 ${featured ? 'flex flex-col justify-center md:p-8' : ''}`}>
+                {/* Date */}
+                {blog.published_at && (
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        {formatDistanceToNow(new Date(blog.published_at), { addSuffix: true })}
+                    </span>
+                )}
 
-                    <div className="text-muted-foreground flex items-center justify-between pt-1 text-xs">
-                        {blog.published_at && <span>{formatDistanceToNow(new Date(blog.published_at), { addSuffix: true })}</span>}
-                        <span className="text-primary hover:underline">Read →</span>
-                    </div>
+                {/* Title */}
+                <h3
+                    className={`mt-2 font-semibold text-gray-900 transition-colors group-hover:text-orange-600 dark:text-white dark:group-hover:text-orange-400 ${
+                        featured ? 'text-xl md:text-2xl' : 'line-clamp-2 text-lg'
+                    }`}
+                >
+                    {blog.title}
+                </h3>
+
+                {/* Excerpt */}
+                {blog.excerpt && (
+                    <p className={`mt-2 text-gray-600 dark:text-gray-400 ${featured ? 'line-clamp-3 text-base' : 'line-clamp-2 text-sm'}`}>
+                        {blog.excerpt}
+                    </p>
+                )}
+
+                {/* Read more link */}
+                <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-orange-600 transition-colors group-hover:text-orange-700 dark:text-orange-400 dark:group-hover:text-orange-300">
+                    Read article
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </article>
     );
 }
 
-export default function Home({ primary = [], latest = [], experiences = [], expertises = [] }: Props): JSX.Element {
+export default function Home({ primary = [], latest = [], experiences = [], expertises = [], projects = [], projectStats }: Props): JSX.Element {
     const [isVisible, setIsVisible] = useState(true);
     const [activeItem, setActiveItem] = useState('home');
 
@@ -134,6 +169,11 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
         window.addEventListener('scroll', updateScrollDirection);
         return () => window.removeEventListener('scroll', updateScrollDirection);
     }, [isVisible]);
+
+    // Combine and dedupe blogs for display
+    const allBlogs = [...primary, ...latest.filter((b) => !primary.find((p) => p.id === b.id))];
+    const featuredBlog = primary[0];
+    const otherBlogs = allBlogs.filter((b) => b.id !== featuredBlog?.id).slice(0, 5);
 
     return (
         <>
@@ -166,7 +206,6 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
                 <meta name="twitter:image" content="/images/og-default.jpg" />
             </Head>
 
-            {/* Navigation Tabs */}
             {/* Floating Navbar */}
             <nav
                 className={`fixed top-3 left-1/2 z-50 -translate-x-1/2 transform transition-all duration-300 ease-in-out sm:top-6 ${
@@ -209,7 +248,10 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
 
             <HomeBanner />
             <HomeAboutMe />
-            {/*<HomeProjects />*/}
+
+            {/* Projects Section */}
+            {projects.length > 0 && <HomeProjects projects={projects} stats={projectStats} />}
+
             <HomeExpertise expertises={expertises} />
             <ExperienceSection
                 experiences={experiences.map((exp) => ({
@@ -226,50 +268,41 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
                     is_current_position: exp.is_current_position,
                 }))}
             />
-            {/*<HomeCTA />*/}
 
-            {/* Blog Section */}
-            <section className="bg-muted/30 py-12 sm:py-16">
+            {/* Blog Section - Untitled UI Style */}
+            <section className="bg-gray-50 py-16 sm:py-24 dark:bg-gray-900">
                 <div className="container mx-auto px-4">
-                    <div className="mb-8 text-center sm:mb-12">
-                        <h2 className="mb-3 text-2xl font-bold sm:mb-4 sm:text-3xl">From Our Blog</h2>
-                        <p className="text-muted-foreground mx-auto max-w-2xl px-4 text-sm sm:text-base">
-                            Discover insights, tutorials, and stories. Stay updated with the latest trends and best practices.
+                    {/* Header */}
+                    <div className="mb-12 text-center">
+                        <span className="text-sm font-semibold tracking-wider text-orange-600 uppercase dark:text-orange-400">Blog</span>
+                        <h2 className="mt-3 text-3xl font-bold text-gray-900 sm:text-4xl dark:text-white">Latest Articles</h2>
+                        <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
+                            Insights, tutorials, and stories about software development, design, and technology.
                         </p>
                     </div>
 
-                    {/* Primary/Featured Posts */}
-                    {primary.length > 0 && (
-                        <div className="mb-8 sm:mb-12">
-                            <h3 className="mb-4 text-center text-lg font-semibold sm:mb-6 sm:text-xl">Featured Posts</h3>
-                            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                {primary.map((blog) => (
-                                    <BlogCard key={String(blog.id)} blog={blog} />
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                    {/* Blog Grid - Untitled UI Layout */}
+                    {allBlogs.length > 0 && (
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            {/* Featured post - spans 2 columns on medium+ screens */}
+                            {featuredBlog && <BlogCard blog={featuredBlog} featured />}
 
-                    {/* Latest Posts */}
-                    {latest.length > 0 && (
-                        <div className="mb-6 sm:mb-8">
-                            <h3 className="mb-4 text-center text-lg font-semibold sm:mb-6 sm:text-xl">Latest Posts</h3>
-                            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                {latest.slice(0, 6).map((blog) => (
-                                    <BlogCard key={String(blog.id)} blog={blog} />
-                                ))}
-                            </div>
+                            {/* Other posts */}
+                            {otherBlogs.map((blog) => (
+                                <BlogCard key={String(blog.id)} blog={blog} />
+                            ))}
                         </div>
                     )}
 
                     {/* View All Button */}
-                    <div className="text-center">
-                        <button
-                            onClick={() => router.visit('/blog')}
-                            className="from-brand-orange to-brand-orange hover:from-brand-orange/90 hover:to-brand-orange/90 inline-flex transform items-center rounded-xl bg-gradient-to-r px-5 py-2.5 text-sm text-white shadow-lg transition-all duration-300 hover:scale-105 sm:px-6 sm:py-3 sm:text-base"
+                    <div className="mt-12 text-center">
+                        <Link
+                            href="/blog"
+                            className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
                         >
-                            View All Posts
-                        </button>
+                            View All Articles
+                            <ArrowRight className="h-4 w-4" />
+                        </Link>
                     </div>
                 </div>
             </section>
