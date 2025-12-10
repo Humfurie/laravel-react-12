@@ -7,6 +7,9 @@ use App\Http\Controllers\Api\InquiryController;
 use App\Http\Controllers\Api\PropertyController;
 use Illuminate\Support\Facades\Route;
 
+// Health check endpoint
+Route::get('health', fn () => response()->json(['statusCode' => 200]));
+
 // Authentication routes (public)
 Route::prefix('v1/auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
