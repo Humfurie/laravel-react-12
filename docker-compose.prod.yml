@@ -43,8 +43,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      minio:
-        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -97,6 +95,7 @@ services:
         reservations:
           memory: 256M
 
+<<<<<<< Updated upstream
   minio:
     image: minio/minio:latest
     restart: unless-stopped
@@ -140,6 +139,8 @@ services:
         reservations:
           memory: 256M
 
+=======
+>>>>>>> Stashed changes
   ssr:
     image: humfurie-app:latest  # Reuse the same built image!
     restart: unless-stopped
@@ -180,6 +181,4 @@ volumes:
   postgres-data:
     driver: local
   laravel-storage:
-    driver: local
-  minio-data:
     driver: local
