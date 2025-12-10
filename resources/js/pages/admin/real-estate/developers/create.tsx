@@ -1,8 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save, Upload, X } from 'lucide-react';
 import { FormEvent, useRef, useState } from 'react';
-import type { BreadcrumbItem } from '@/types';
 
 export default function CreateDeveloper() {
     const [logoInputType, setLogoInputType] = useState<'upload' | 'url'>('upload');

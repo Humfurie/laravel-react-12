@@ -17,7 +17,6 @@ interface Permission {
     resource: string;
     actions: string[];
     created_at: string;
-    [key: string]: unknown;
 }
 
 interface PermissionProps {
