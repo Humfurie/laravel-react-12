@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save, Upload, X } from 'lucide-react';
 import { FormEvent, useRef, useState } from 'react';

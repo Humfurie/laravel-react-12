@@ -17,6 +17,8 @@ export interface Permissions {
     property: ResourcePermissions;
     blog: ResourcePermissions;
     giveaway: ResourcePermissions;
+    project: ResourcePermissions;
+    inquiry: ResourcePermissions;
     user: ResourcePermissions;
     role: ResourcePermissions;
     permission: ResourcePermissions;
@@ -68,4 +70,23 @@ export interface User {
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface LocationImage {
+    id: number;
+    url: string;
+    is_primary: boolean;
+    caption?: string;
+}
+
+export interface BlogLocation {
+    id: number;
+    title: string;
+    description?: string;
+    address?: string;
+    latitude: number;
+    longitude: number;
+    order: number;
+    images: LocationImage[];
+    primary_image_url?: string;
 }
