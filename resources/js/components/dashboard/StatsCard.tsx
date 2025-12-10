@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 
 interface StatsCardProps {
@@ -12,17 +12,27 @@ export function StatsCard({ title, count, trend, icon }: StatsCardProps) {
     const isPositive = trend >= 0;
 
     return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                {icon}
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{count.toLocaleString()}</div>
-                <div className="text-muted-foreground mt-1 flex items-center text-xs">
-                    {isPositive ? <ArrowUpIcon className="mr-1 h-4 w-4 text-green-500" /> : <ArrowDownIcon className="mr-1 h-4 w-4 text-red-500" />}
-                    <span className={isPositive ? 'text-green-500' : 'text-red-500'}>{Math.abs(trend)}%</span>
-                    <span className="ml-1">from last 30 days</span>
+        <Card className="border-gray-100 dark:border-gray-800">
+            <CardContent className="pt-6">
+                <div className="flex items-start justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
+                        <div className="mt-2 text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{count.toLocaleString()}</div>
+                        <div className="mt-2 flex items-center text-sm">
+                            <span
+                                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                                    isPositive
+                                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400'
+                                        : 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400'
+                                }`}
+                            >
+                                {isPositive ? <ArrowUpIcon className="mr-0.5 h-3 w-3" /> : <ArrowDownIcon className="mr-0.5 h-3 w-3" />}
+                                {Math.abs(trend)}%
+                            </span>
+                            <span className="ml-2 text-gray-500 dark:text-gray-400">vs last 30 days</span>
+                        </div>
+                    </div>
+                    {icon && <div className="rounded-lg bg-gray-50 p-2.5 dark:bg-gray-800">{icon}</div>}
                 </div>
             </CardContent>
         </Card>

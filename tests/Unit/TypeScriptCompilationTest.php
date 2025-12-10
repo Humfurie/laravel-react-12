@@ -183,6 +183,7 @@ describe('React Components Type Safety', function () {
             resource_path('js/pages/admin/real-estate/developers/create.tsx'),
             resource_path('js/pages/admin/real-estate/developers/edit.tsx'),
             resource_path('js/pages/admin/real-estate/projects/create.tsx'),
+            resource_path('js/pages/admin/real-estate/projects/edit.tsx'),
         ];
 
         foreach ($files as $file) {
@@ -193,10 +194,27 @@ describe('React Components Type Safety', function () {
             // Should import BreadcrumbItem from @/types
             expect($content)->toContain("import type { BreadcrumbItem } from '@/types'");
 
-            // Should use 'title' not 'label'
-            expect($content)->toContain("title: 'Real Estate'");
+            // Should NOT have local BreadcrumbItem interface definition
+            expect($content)->not->toMatch('/^interface BreadcrumbItem\s*\{/m');
+
+            // Should use 'title' not 'label' in breadcrumb items
+            expect($content)->toContain("title:");
             expect($content)->not->toContain("label: 'Real Estate'");
+            expect($content)->not->toContain("label: 'Developers'");
+            expect($content)->not->toContain("label: 'Projects'");
+            expect($content)->not->toContain("label: 'Create'");
+            expect($content)->not->toContain("label: 'Edit'");
         }
+    });
+
+    it('has BreadcrumbItem type with required title and href properties', function () {
+        $typesPath = resource_path('js/types/index.d.ts');
+        $content = file_get_contents($typesPath);
+
+        // Check BreadcrumbItem has required fields
+        expect($content)->toContain('interface BreadcrumbItem');
+        expect($content)->toMatch('/BreadcrumbItem\s*\{[^}]*title:\s*string/s');
+        expect($content)->toMatch('/BreadcrumbItem\s*\{[^}]*href:\s*string/s');
     });
 
     it('has valid map components with ts-expect-error for leaflet', function () {

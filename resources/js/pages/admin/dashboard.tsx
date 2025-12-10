@@ -8,7 +8,22 @@ import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { TopContentList } from '@/components/dashboard/TopContentList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileTextIcon, GiftIcon, HomeIcon, InboxIcon } from 'lucide-react';
-import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Legend,
+    Line,
+    LineChart,
+    Pie,
+    PieChart,
+    PieLabelRenderProps,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -16,6 +31,15 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/dashboard',
     },
 ];
+
+// Bress-style color palette
+const CHART_COLORS = {
+    primary: '#0891b2', // Cyan-600
+    secondary: '#10b981', // Emerald-500
+    tertiary: '#8b5cf6', // Violet-500
+    quaternary: '#f59e0b', // Amber-500
+    quinary: '#ef4444', // Red-500
+};
 
 interface DashboardStats {
     blogPosts: { count: number; trend: number };
@@ -69,7 +93,7 @@ interface DashboardProps {
     dashboardData: DashboardData;
 }
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+const COLORS = [CHART_COLORS.primary, CHART_COLORS.secondary, CHART_COLORS.quaternary, CHART_COLORS.quinary, CHART_COLORS.tertiary];
 
 export default function Dashboard({ dashboardData }: DashboardProps) {
     const data = dashboardData;
@@ -118,48 +142,74 @@ export default function Dashboard({ dashboardData }: DashboardProps) {
 
                 {/* Row 3: Charts */}
                 <div className="grid gap-4 md:grid-cols-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Giveaway Entries (Last 30 Days)</CardTitle>
+                    <Card className="border-gray-100 dark:border-gray-800">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                                Giveaway Entries (Last 30 Days)
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
                                 <LineChart data={data.charts.giveawayEntries}>
-                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                                     <XAxis
                                         dataKey="date"
                                         tickFormatter={(value) => {
                                             const date = new Date(value);
                                             return `${date.getMonth() + 1}/${date.getDate()}`;
                                         }}
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#6b7280', fontSize: 12 }}
                                     />
-                                    <YAxis />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
                                     <Tooltip
                                         labelFormatter={(value) => {
                                             const date = new Date(value);
                                             return date.toLocaleDateString();
                                         }}
+                                        contentStyle={{
+                                            backgroundColor: 'white',
+                                            border: '1px solid #e5e7eb',
+                                            borderRadius: '8px',
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                                        }}
                                     />
                                     <Legend />
-                                    <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} name="Entries" />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="count"
+                                        stroke={CHART_COLORS.primary}
+                                        strokeWidth={2.5}
+                                        dot={false}
+                                        activeDot={{ r: 6, fill: CHART_COLORS.primary }}
+                                        name="Entries"
+                                    />
                                 </LineChart>
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Properties by Status</CardTitle>
+                    <Card className="border-gray-100 dark:border-gray-800">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Properties by Status</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={data.charts.propertiesByStatus}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="status" />
-                                    <YAxis />
-                                    <Tooltip />
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                                    <XAxis dataKey="status" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'white',
+                                            border: '1px solid #e5e7eb',
+                                            borderRadius: '8px',
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                                        }}
+                                    />
                                     <Legend />
-                                    <Bar dataKey="count" fill="#3b82f6" name="Properties" />
+                                    <Bar dataKey="count" fill={CHART_COLORS.secondary} name="Properties" radius={[4, 4, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </CardContent>
@@ -182,9 +232,9 @@ export default function Dashboard({ dashboardData }: DashboardProps) {
 
                 {/* Row 6: Additional Insights */}
                 <div className="grid gap-4 md:grid-cols-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Inquiries by Type</CardTitle>
+                    <Card className="border-gray-100 dark:border-gray-800">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Inquiries by Type</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
@@ -194,38 +244,64 @@ export default function Dashboard({ dashboardData }: DashboardProps) {
                                         cx="50%"
                                         cy="50%"
                                         labelLine={false}
-                                        label={({ type, percent }) => `${type}: ${(percent * 100).toFixed(0)}%`}
-                                        outerRadius={80}
+                                        label={(props: PieLabelRenderProps) =>
+                                            `${props.name}: ${(((props.percent as number) ?? 0) * 100).toFixed(0)}%`
+                                        }
+                                        outerRadius={90}
+                                        innerRadius={50}
                                         fill="#8884d8"
                                         dataKey="count"
+                                        paddingAngle={2}
                                     >
                                         {data.insights.inquiriesByType.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
-                                    <Tooltip />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'white',
+                                            border: '1px solid #e5e7eb',
+                                            borderRadius: '8px',
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                                        }}
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Content Overview</CardTitle>
+                    <Card className="border-gray-100 dark:border-gray-800">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Content Overview</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between rounded-lg border p-4">
-                                    <span className="text-sm font-medium">Total Blogs</span>
-                                    <span className="text-2xl font-bold">{data.insights.totalBlogs}</span>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between rounded-xl bg-blue-50 p-4 dark:bg-blue-950/50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900">
+                                            <FileTextIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" strokeWidth={1.5} />
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Blogs</span>
+                                    </div>
+                                    <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">{data.insights.totalBlogs}</span>
                                 </div>
-                                <div className="flex items-center justify-between rounded-lg border p-4">
-                                    <span className="text-sm font-medium">Experiences</span>
-                                    <span className="text-2xl font-bold">{data.insights.totalExperiences}</span>
+                                <div className="flex items-center justify-between rounded-xl bg-emerald-50 p-4 dark:bg-emerald-950/50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900">
+                                            <GiftIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" strokeWidth={1.5} />
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Experiences</span>
+                                    </div>
+                                    <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">{data.insights.totalExperiences}</span>
                                 </div>
-                                <div className="flex items-center justify-between rounded-lg border p-4">
-                                    <span className="text-sm font-medium">Real Estate Projects</span>
-                                    <span className="text-2xl font-bold">{data.insights.totalProjects}</span>
+                                <div className="flex items-center justify-between rounded-xl bg-purple-50 p-4 dark:bg-purple-950/50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="rounded-lg bg-purple-100 p-2 dark:bg-purple-900">
+                                            <HomeIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" strokeWidth={1.5} />
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Real Estate Projects</span>
+                                    </div>
+                                    <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">{data.insights.totalProjects}</span>
                                 </div>
                             </div>
                         </CardContent>

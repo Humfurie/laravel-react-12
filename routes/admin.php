@@ -4,7 +4,9 @@ use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\ExpertiseController;
 use App\Http\Controllers\Admin\GiveawayController;
+use App\Http\Controllers\Admin\InquiryController;
 use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\RealEstateController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -163,4 +165,27 @@ Route::prefix('giveaways')->name('admin.giveaways.')->middleware('permission:giv
     Route::get('/{giveaway}/entries', [GiveawayController::class, 'getEntries'])->name('entries')->middleware('permission:giveaway,view');
     Route::patch('/{giveaway}/entries/{entry}/status', [GiveawayController::class, 'updateEntryStatus'])->name('entries.update-status')->middleware('permission:giveaway,update');
     Route::delete('/{giveaway}/entries/{entry}', [GiveawayController::class, 'deleteEntry'])->name('entries.delete')->middleware('permission:giveaway,delete');
+});
+
+Route::prefix('projects')->name('admin.projects.')->middleware('permission:project,viewAny')->group(function () {
+    Route::get('/', [ProjectController::class, 'index'])->name('index');
+    Route::get('/create', [ProjectController::class, 'create'])->name('create')->middleware('permission:project,create');
+    Route::post('/', [ProjectController::class, 'store'])->name('store')->middleware('permission:project,create');
+    Route::get('/{project}/edit', [ProjectController::class, 'edit'])->name('edit')->middleware('permission:project,view');
+    Route::put('/{project}', [ProjectController::class, 'update'])->name('update')->middleware('permission:project,update');
+    Route::delete('/{project}', [ProjectController::class, 'destroy'])->name('destroy')->middleware('permission:project,delete');
+    Route::patch('/{project}/restore', [ProjectController::class, 'restore'])->name('restore')->withTrashed()->middleware('permission:project,restore');
+    Route::delete('/{project}/force', [ProjectController::class, 'forceDestroy'])->name('force-destroy')->middleware('permission:project,forceDelete');
+
+    // Image management
+    Route::post('/{project}/images', [ProjectController::class, 'uploadImage'])->name('images.upload')->middleware('permission:project,update');
+    Route::delete('/{project}/images/{image}', [ProjectController::class, 'deleteImage'])->name('images.delete')->middleware('permission:project,update');
+    Route::patch('/{project}/images/{image}/primary', [ProjectController::class, 'setPrimaryImage'])->name('images.set-primary')->middleware('permission:project,update');
+});
+
+Route::prefix('inquiries')->name('inquiries.')->middleware('permission:inquiry,viewAny')->group(function () {
+    Route::get('/', [InquiryController::class, 'index'])->name('index');
+    Route::get('/{inquiry}', [InquiryController::class, 'show'])->name('show')->middleware('permission:inquiry,view');
+    Route::patch('/{inquiry}/status', [InquiryController::class, 'updateStatus'])->name('update-status')->middleware('permission:inquiry,update');
+    Route::delete('/{inquiry}', [InquiryController::class, 'destroy'])->name('destroy')->middleware('permission:inquiry,delete');
 });

@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EyeIcon, UsersIcon } from 'lucide-react';
 
@@ -20,13 +19,13 @@ export function TopContentList({ title, items, type }: TopContentListProps) {
     const isEmpty = items.length === 0;
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="text-lg">{title}</CardTitle>
+        <Card className="border-gray-100 dark:border-gray-800">
+            <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">{title}</CardTitle>
             </CardHeader>
             <CardContent>
                 {!isEmpty ? (
-                    <div className="space-y-3">
+                    <div className="divide-y divide-gray-100 dark:divide-gray-800">
                         {items.map((item, index) => {
                             const displayTitle = item.title || item.name || 'Untitled';
                             const count = type === 'views' ? item.views : item.entries;
@@ -34,16 +33,20 @@ export function TopContentList({ title, items, type }: TopContentListProps) {
                             return (
                                 <div
                                     key={item.id}
-                                    className="hover:bg-accent flex items-center justify-between rounded-lg border p-3 transition-colors"
+                                    className="-mx-6 flex items-center justify-between px-6 py-3 transition-colors first:pt-0 last:pb-0 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                                 >
-                                    <div className="flex min-w-0 flex-1 items-center space-x-3">
-                                        <Badge variant="outline" className="flex-shrink-0">
-                                            #{index + 1}
-                                        </Badge>
-                                        <p className="truncate text-sm font-medium">{displayTitle}</p>
+                                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                                        <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                                            {index + 1}
+                                        </span>
+                                        <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-300">{displayTitle}</p>
                                     </div>
-                                    <div className="text-muted-foreground ml-2 flex flex-shrink-0 items-center space-x-1">
-                                        {type === 'views' ? <EyeIcon className="h-4 w-4" /> : <UsersIcon className="h-4 w-4" />}
+                                    <div className="ml-2 flex flex-shrink-0 items-center gap-1.5 text-gray-500 dark:text-gray-400">
+                                        {type === 'views' ? (
+                                            <EyeIcon className="h-4 w-4" strokeWidth={1.5} />
+                                        ) : (
+                                            <UsersIcon className="h-4 w-4" strokeWidth={1.5} />
+                                        )}
                                         <span className="text-sm font-medium">{count?.toLocaleString() || 0}</span>
                                     </div>
                                 </div>
@@ -51,8 +54,8 @@ export function TopContentList({ title, items, type }: TopContentListProps) {
                         })}
                     </div>
                 ) : (
-                    <div className="text-muted-foreground py-8 text-center">
-                        <p>No content available</p>
+                    <div className="py-8 text-center">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">No content available</p>
                     </div>
                 )}
             </CardContent>

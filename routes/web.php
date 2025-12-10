@@ -3,9 +3,11 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SitemapController;
 use App\Models\Experience;
 use App\Models\Expertise;
+use App\Models\Project;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
@@ -30,9 +32,33 @@ Route::get('/', function () {
             ->get();
     });
 
+    // Cache featured projects for 10 minutes
+    $projectsData = Cache::remember('homepage.projects', 600, function () {
+        $featured = Project::query()
+            ->public()
+            ->with(['primaryImage'])
+            ->orderByDesc('is_featured')
+            ->orderBy('featured_at', 'desc')
+            ->orderBy('sort_order')
+            ->take(6)
+            ->get();
+
+        $stats = [
+            'total_projects' => Project::public()->count(),
+            'live_projects' => Project::public()->live()->count(),
+        ];
+
+        return [
+            'featured' => $featured,
+            'stats' => $stats,
+        ];
+    });
+
     return Inertia::render('user/home', array_merge($blogs, [
         'experiences' => $experiences,
         'expertises' => $expertises,
+        'projects' => $projectsData['featured'],
+        'projectStats' => $projectsData['stats'],
     ]));
 })->name('home');
 
@@ -55,6 +81,10 @@ Route::get('/giveaways/{giveaway:slug}', [App\Http\Controllers\GiveawayControlle
 Route::get('/giveaways/{giveaway:slug}/entries', [App\Http\Controllers\GiveawayController::class, 'entries'])->name('giveaways.entries');
 Route::post('/giveaways/{giveaway:slug}/activate', [App\Http\Controllers\GiveawayController::class, 'activateGiveaway'])->name('giveaways.activate');
 Route::post('/giveaways/{giveaway:slug}/pick-winner', [App\Http\Controllers\GiveawayController::class, 'startGiveaway'])->name('giveaways.pick-winner');
+
+// Projects showcase
+Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+Route::get('/api/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 
 // Public API for experiences
 Route::get('/api/experiences', [ExperienceController::class, 'public'])->name('experiences.public');

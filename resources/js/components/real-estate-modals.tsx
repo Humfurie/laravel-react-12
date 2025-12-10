@@ -1203,7 +1203,7 @@ export function FinancingOptionModal({ show, onClose, financingOption, pricingId
         monthly_amortization: financingOption?.monthly_amortization?.toString() || '',
         processing_fee: financingOption?.processing_fee?.toString() || '',
         requirements: financingOption?.requirements?.join('\n') || '',
-        is_active: financingOption?.is_active || true,
+        is_active: financingOption?.is_active ?? true,
     });
 
     const handleSubmit = (e: FormEvent) => {

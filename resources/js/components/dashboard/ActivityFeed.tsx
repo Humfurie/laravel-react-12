@@ -17,26 +17,39 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
     const getActivityIcon = (type: Activity['type']) => {
         switch (type) {
             case 'giveaway_entry':
-                return <GiftIcon className="h-4 w-4" />;
+                return <GiftIcon className="h-4 w-4" strokeWidth={1.5} />;
             case 'inquiry':
-                return <InboxIcon className="h-4 w-4" />;
+                return <InboxIcon className="h-4 w-4" strokeWidth={1.5} />;
             case 'winner':
-                return <TrophyIcon className="h-4 w-4" />;
+                return <TrophyIcon className="h-4 w-4" strokeWidth={1.5} />;
             case 'blog':
-                return <FileTextIcon className="h-4 w-4" />;
+                return <FileTextIcon className="h-4 w-4" strokeWidth={1.5} />;
         }
     };
 
     const getActivityColor = (type: Activity['type']) => {
         switch (type) {
             case 'giveaway_entry':
-                return 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400';
+                return 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400';
             case 'inquiry':
-                return 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400';
+                return 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400';
             case 'winner':
-                return 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400';
+                return 'bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400';
             case 'blog':
-                return 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400';
+                return 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400';
+        }
+    };
+
+    const getActivityBadgeVariant = (type: Activity['type']) => {
+        switch (type) {
+            case 'giveaway_entry':
+                return 'info';
+            case 'inquiry':
+                return 'progress';
+            case 'winner':
+                return 'warning';
+            case 'blog':
+                return 'success';
         }
     };
 
@@ -54,31 +67,31 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
     };
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="text-lg">Recent Activity</CardTitle>
+        <Card className="border-gray-100 dark:border-gray-800">
+            <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Recent Activity</CardTitle>
             </CardHeader>
             <CardContent>
                 {activities.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="divide-y divide-gray-100 dark:divide-gray-800">
                         {activities.map((activity, index) => (
-                            <div key={index} className="flex items-start space-x-3 border-b pb-3 last:border-b-0 last:pb-0">
-                                <div className={`rounded-md p-2 ${getActivityColor(activity.type)}`}>{getActivityIcon(activity.type)}</div>
+                            <div key={index} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+                                <div className={`rounded-lg p-2 ${getActivityColor(activity.type)}`}>{getActivityIcon(activity.type)}</div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-medium">{activity.message}</p>
-                                    <div className="mt-1 flex items-center space-x-2">
-                                        <Badge variant="outline" className="text-xs">
+                                    <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-300">{activity.message}</p>
+                                    <div className="mt-1.5 flex items-center gap-2">
+                                        <Badge variant={getActivityBadgeVariant(activity.type) as 'info' | 'progress' | 'warning' | 'success'}>
                                             {getActivityLabel(activity.type)}
                                         </Badge>
-                                        <span className="text-muted-foreground text-xs">{activity.time}</span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">{activity.time}</span>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="text-muted-foreground py-8 text-center">
-                        <p>No recent activity</p>
+                    <div className="py-8 text-center">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">No recent activity</p>
                     </div>
                 )}
             </CardContent>

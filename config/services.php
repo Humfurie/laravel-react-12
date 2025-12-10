@@ -59,4 +59,8 @@ return [
         'app_id' => env('FACEBOOK_APP_ID'),
     ],
 
+    'github' => [
+        'token' => env('GITHUB_TOKEN'),
+    ],
+
 ];

@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Blog;
+use App\Models\Project;
 use App\Observers\BlogObserver;
+use App\Observers\ProjectObserver;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,5 +31,6 @@ class AppServiceProvider extends ServiceProvider
 
         // Register observers
         Blog::observe(BlogObserver::class);
+        Project::observe(ProjectObserver::class);
     }
 }

@@ -1,12 +1,12 @@
 import Footer from '@/components/global/Footer';
-import { Head, Link, router } from '@inertiajs/react';
+import AppLogo from '@/components/app-logo';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { formatDistanceToNow } from 'date-fns';
-import { Calendar, Eye, Star } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { publicNavItems } from '@/config/navigation';
+import { Head, Link, router } from '@inertiajs/react';
+import { formatDistanceToNow } from 'date-fns';
+import { ArrowRight, ArrowUpRight, BookOpen, Calendar, Eye, Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Blog {
     id: number;
@@ -41,119 +41,158 @@ interface Props {
     };
 }
 
-const getStatusColor = (status: string) => {
-    switch (status) {
-        case 'published':
-            return 'bg-green-100 text-green-800';
-        case 'draft':
-            return 'bg-yellow-100 text-yellow-800';
-        case 'private':
-            return 'bg-gray-100 text-gray-800';
-        default:
-            return 'bg-gray-100 text-gray-800';
-    }
-};
-
 const truncateText = (text: string, maxLength: number = 150) => {
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
 };
 
-// Enhanced BlogCard with view counts and better design
-function EnhancedBlogCard({ blog, size = 'normal', showStats = true }: { blog: Blog; size?: 'normal' | 'large' | 'small'; showStats?: boolean }) {
+// Magazine-style Blog Card
+function BlogCard({ blog, size = 'normal' }: { blog: Blog; size?: 'normal' | 'large' | 'featured' }) {
     const viewCount = blog.view_count || 0;
 
     const handleCardClick = () => {
         router.visit(`/blog/${blog.slug}`);
     };
 
-    const cardClasses = {
-        normal: 'h-full',
-        large: 'h-full lg:col-span-2',
-        small: 'h-full',
-    };
+    const isLarge = size === 'large';
+    const isFeatured = size === 'featured';
 
-    return (
-        <Card
-            className={`${cardClasses[size]} group hover:shadow-brand-orange/20 cursor-pointer rounded-2xl border-0 bg-white shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl`}
-            onClick={handleCardClick}
-        >
-            {blog.display_image && (
-                <div className={`${size === 'large' ? 'aspect-[2/1]' : 'aspect-video'} relative overflow-hidden rounded-t-2xl`}>
-                    <img
-                        src={blog.display_image}
-                        alt={blog.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+    if (isFeatured) {
+        return (
+            <article className="group cursor-pointer lg:col-span-2" onClick={handleCardClick}>
+                <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-[#E8E4DC]">
+                    {blog.display_image ? (
+                        <img
+                            src={blog.display_image}
+                            alt={blog.title}
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                    ) : (
+                        <div className="flex h-full items-center justify-center">
+                            <BookOpen className="h-24 w-24 text-gray-400" />
+                        </div>
+                    )}
+
+                    {/* Date Badge */}
+                    {blog.published_at && (
+                        <div className="absolute top-6 left-6 rounded-full bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-sm">
+                            {new Date(blog.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </div>
+                    )}
+
+                    {/* Featured Badge */}
                     {blog.isPrimary && (
-                        <div className="absolute top-4 left-4">
-                            <Badge className="bg-brand-green hover:bg-brand-green/90 rounded-full px-4 py-2 text-white shadow-xl">
-                                <Star className="mr-1 h-3 w-3" />
+                        <div className="absolute top-6 right-6">
+                            <Badge className="rounded-full border-0 bg-[#88C0A8] px-4 py-1.5 text-white">
+                                <Sparkles className="mr-1 h-3 w-3" />
                                 Featured
                             </Badge>
                         </div>
                     )}
-                    {showStats && (
-                        <div className="from-brand-orange/90 to-brand-orange/90 absolute right-4 bottom-4 flex items-center gap-1 rounded-xl bg-gradient-to-r px-3 py-2 text-xs text-white shadow-lg">
-                            <Eye className="h-3 w-3" />
-                            {viewCount}
-                        </div>
-                    )}
-                </div>
-            )}
-            <CardContent className={`${size === 'large' ? 'p-8' : 'p-6'}`}>
-                <div className="space-y-4">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Badge className={getStatusColor(blog.status)} variant="secondary">
-                            {blog.status_label}
-                        </Badge>
-                        {blog.isPrimary && !blog.display_image && (
-                            <Badge className="bg-brand-green hover:bg-brand-green/90 rounded-full px-4 py-1 text-white shadow-lg">
-                                <Star className="mr-1 h-3 w-3" />
-                                Featured
-                            </Badge>
+
+                    {/* Content Overlay */}
+                    <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
+                        <h2 className="mb-2 line-clamp-2 text-2xl font-bold text-white md:text-3xl">{blog.title}</h2>
+                        {blog.excerpt && (
+                            <p className="line-clamp-2 max-w-xl text-sm text-white/80 md:text-base">{truncateText(blog.excerpt, 150)}</p>
                         )}
                     </div>
 
-                    <h2
-                        className={`${size === 'large' ? 'text-2xl' : 'text-xl'} group-hover:text-brand-orange text-brand-black line-clamp-2 leading-tight font-bold transition-colors`}
-                    >
-                        {blog.title}
-                    </h2>
+                    {/* View Count */}
+                    <div className="absolute bottom-6 left-6 flex items-center gap-1 text-xs text-white/70">
+                        <Eye className="h-3 w-3" />
+                        {viewCount} views
+                    </div>
 
-                    {blog.excerpt && (
-                        <p className="line-clamp-3 leading-relaxed text-gray-600">{truncateText(blog.excerpt, size === 'large' ? 200 : 120)}</p>
-                    )}
-
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-2 text-sm text-gray-500">
-                        <div className="flex items-center gap-4">
-                            {blog.published_at && (
-                                <span className="flex items-center gap-1">
-                                    <Calendar className="h-3 w-3" />
-                                    {formatDistanceToNow(new Date(blog.published_at), { addSuffix: true })}
-                                </span>
-                            )}
-                            {showStats && (
-                                <span className="flex items-center gap-1">
-                                    <Eye className="h-3 w-3" />
-                                    {viewCount}
-                                </span>
-                            )}
-                        </div>
-                        <span className="text-brand-orange hover:text-brand-orange flex items-center gap-1 font-semibold transition-all group-hover:gap-2">
-                            Read more
-                            <span className="transform transition-transform group-hover:translate-x-1">→</span>
-                        </span>
+                    {/* Arrow Link */}
+                    <div className="absolute right-6 bottom-6 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg transition-transform group-hover:scale-110">
+                        <ArrowUpRight className="h-5 w-5 text-gray-900" />
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+            </article>
+        );
+    }
+
+    return (
+        <article className={`group cursor-pointer ${isLarge ? 'md:col-span-2' : ''}`} onClick={handleCardClick}>
+            {/* Image Container */}
+            <div className={`relative overflow-hidden rounded-2xl bg-[#F5F5F3] ${isLarge ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}>
+                {blog.display_image ? (
+                    <img
+                        src={blog.display_image}
+                        alt={blog.title}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        loading="lazy"
+                    />
+                ) : (
+                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50">
+                        <span className="font-serif text-6xl font-bold text-gray-300">{blog.title.charAt(0).toUpperCase()}</span>
+                    </div>
+                )}
+
+                {/* Featured badge */}
+                {blog.isPrimary && (
+                    <Badge className="absolute top-4 left-4 rounded-full border-0 bg-[#88C0A8] px-3 py-1 text-white">
+                        <Sparkles className="mr-1 h-3 w-3" />
+                        Featured
+                    </Badge>
+                )}
+
+                {/* Date badge */}
+                {blog.published_at && (
+                    <div className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-700 backdrop-blur-sm">
+                        {new Date(blog.published_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                    </div>
+                )}
+
+                {/* View count badge */}
+                <div className="absolute right-4 bottom-4 flex items-center gap-1 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
+                    <Eye className="h-3 w-3" />
+                    {viewCount}
+                </div>
+
+                {/* Arrow Link - appears on hover */}
+                <div className="absolute top-4 right-4 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full bg-white opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                    <ArrowUpRight className="h-4 w-4 text-gray-900" />
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className={`mt-4 ${isLarge ? 'md:mt-6' : ''}`}>
+                {/* Title */}
+                <h3
+                    className={`line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-gray-600 ${isLarge ? 'text-2xl md:text-3xl' : 'text-lg'}`}
+                >
+                    {blog.title}
+                </h3>
+
+                {/* Excerpt */}
+                {blog.excerpt && (
+                    <p className={`mt-2 line-clamp-2 text-gray-500 ${isLarge ? 'text-base' : 'text-sm'}`}>
+                        {truncateText(blog.excerpt, isLarge ? 200 : 100)}
+                    </p>
+                )}
+
+                {/* Meta */}
+                <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
+                    {blog.published_at && (
+                        <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {formatDistanceToNow(new Date(blog.published_at), { addSuffix: true })}
+                        </span>
+                    )}
+                    <span className="flex items-center gap-1">
+                        <Eye className="h-3 w-3" />
+                        {viewCount} views
+                    </span>
+                </div>
+            </div>
+        </article>
     );
 }
 
 export default function BlogIndex({ blogs }: Props) {
     const [isVisible, setIsVisible] = useState(true);
-    const [activeItem, setActiveItem] = useState('blog');
 
     useEffect(() => {
         let lastScrollY = window.scrollY;
@@ -170,6 +209,10 @@ export default function BlogIndex({ blogs }: Props) {
         window.addEventListener('scroll', updateScrollDirection);
         return () => window.removeEventListener('scroll', updateScrollDirection);
     }, [isVisible]);
+
+    // Get featured post and rest
+    const featuredPost = blogs.data.find((blog) => blog.isPrimary) || blogs.data[0];
+    const otherPosts = blogs.data.filter((blog) => blog.id !== featuredPost?.id);
 
     return (
         <>
@@ -254,127 +297,223 @@ export default function BlogIndex({ blogs }: Props) {
                 <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href.split('?')[0] : ''} />
             </Head>
 
-            <div className="bg-muted-white min-h-screen">
-                {/* Floating Navbar */}
-                <nav
-                    className={`fixed top-6 left-1/2 z-50 -translate-x-1/2 transform transition-all duration-300 ease-in-out ${
-                        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-                    }`}
-                >
-                    <div className="rounded-full border border-white/20 bg-white/80 px-6 py-4 shadow-lg backdrop-blur-md">
-                        <div className="flex items-center space-x-3">
-                            {publicNavItems.map((item, index) => {
+            <div className="min-h-screen bg-[#FAFAF8]">
+                {/* Magazine-style Navbar */}
+                <nav className="sticky top-0 z-50 border-b border-gray-100 bg-[#FAFAF8]/95 backdrop-blur-md">
+                    <div className="container mx-auto flex h-16 items-center justify-between px-4">
+                        <Link href="/" className="flex items-center gap-2">
+                            <AppLogo />
+                        </Link>
+                        {/* Pill Navigation */}
+                        <div className="hidden items-center gap-1 rounded-full border border-gray-100 bg-white px-2 py-1.5 shadow-sm md:flex">
+                            {publicNavItems.map((item) => {
                                 const Icon = item.icon;
-                                const isActive = activeItem === item.id;
-
+                                const isActive = item.id === 'blog';
                                 return (
                                     <Link
-                                        key={`${item.id}-${index}`}
+                                        key={item.id}
                                         href={item.route}
                                         onClick={() => setActiveItem(item.id)}
-                                        className={`group relative flex items-center space-x-2 rounded-full px-5 py-3 transition-all duration-200 ${
-                                            isActive
-                                                ? 'bg-brand-orange scale-105 text-white shadow-md'
-                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                        className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                                            isActive ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
                                         }`}
-                                        title={item.label}
                                     >
-                                        {/* Desktop: Show both icon and text */}
-                                        <Icon size={20} className="transition-transform duration-200 group-hover:scale-110" />
-                                        <span className="hidden text-sm font-medium sm:block">{item.label}</span>
-
-                                        {/* Mobile tooltip - only for icon-only buttons */}
-                                        <div className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 transform opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:hidden">
-                                            <div className="rounded bg-gray-900 px-2 py-1 text-xs whitespace-nowrap text-white">{item.label}</div>
-                                            <div className="absolute top-0 left-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1 transform border-r-2 border-b-2 border-l-2 border-transparent border-b-gray-900"></div>
-                                        </div>
+                                        {item.showIcon && <Icon className="h-4 w-4" />}
+                                        <span>{item.label}</span>
                                     </Link>
                                 );
                             })}
                         </div>
+                        ;{/* Mobile menu */}
+                        <div className="flex items-center gap-2 md:hidden">
+                            {publicNavItems.map((item) => {
+                                const Icon = item.icon;
+                                return (
+                                    <Link key={item.id} href={item.route} className="p-2 text-gray-600 hover:text-gray-900">
+                                        <Icon className="h-5 w-5" />
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                        ; ;
                     </div>
                 </nav>
 
-                {/* Header Section */}
-                <section className="from-brand-orange via-brand-orange to-brand-orange relative overflow-hidden bg-gradient-to-br pt-28 pb-16 text-white">
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent"></div>
-                    <div className="relative z-10">
-                        <div className="container mx-auto px-4">
-                            <div className="space-y-4 text-center">
-                                <h1 className="text-4xl font-bold tracking-tight md:text-5xl">All Blog Posts</h1>
-                                <p className="mx-auto max-w-xl text-lg text-orange-100">Browse through all our articles, tutorials, and insights</p>
-                                <div className="text-sm text-orange-200">
-                                    {blogs.total} post{blogs.total !== 1 ? 's' : ''} found
+                <main>
+                    {/* Magazine Hero Section */}
+                    <section className="container mx-auto px-4 py-8 md:py-12">
+                        {/* Section Header */}
+                        <div className="mb-8 flex items-end justify-between">
+                            <div>
+                                <h1 className="font-serif text-5xl font-bold tracking-tight text-gray-900 md:text-6xl lg:text-7xl">
+                                    Best of the
+                                    <br />
+                                    <span className="relative">
+                                        week
+                                        <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 8" fill="none">
+                                            <path
+                                                d="M1 5.5C47.5 2 154.5 1 199 5.5"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                className="text-gray-300"
+                                            />
+                                        </svg>
+                                    </span>
+                                </h1>
+                            </div>
+                            <Link
+                                href="#all-posts"
+                                className="hidden items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 md:flex"
+                            >
+                                See all posts
+                                <ArrowRight className="h-4 w-4" />
+                            </Link>
+                        </div>
+
+                        {/* Featured Grid - Magazine Layout */}
+                        {featuredPost && (
+                            <div className="grid gap-6 lg:grid-cols-3">
+                                {/* Main Featured Card */}
+                                <BlogCard blog={featuredPost} size="featured" />
+
+                                {/* Sidebar Cards */}
+                                <div className="flex flex-col gap-6">
+                                    {/* Info Card */}
+                                    <div className="flex flex-col justify-between rounded-3xl bg-[#C5E8D5] p-6">
+                                        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-gray-600">
+                                            <Sparkles className="h-4 w-4" />
+                                            <span>ARTICLES</span>
+                                        </div>
+                                        <div>
+                                            <p className="mb-2 text-sm text-gray-600">Become a</p>
+                                            <h3 className="mb-4 text-2xl font-bold text-gray-900">
+                                                Regular
+                                                <br />
+                                                Reader
+                                            </h3>
+                                            <p className="text-sm text-gray-600">Stay updated with the latest insights and tutorials</p>
+                                        </div>
+                                        <div className="mt-6 font-serif text-3xl font-bold text-gray-900">{blogs.total} posts</div>
+                                    </div>
+
+                                    {/* Second Featured Post */}
+                                    {otherPosts[0] && (
+                                        <div
+                                            className="group relative aspect-square cursor-pointer overflow-hidden rounded-3xl"
+                                            onClick={() => router.visit(`/blog/${otherPosts[0].slug}`)}
+                                        >
+                                            {otherPosts[0].display_image ? (
+                                                <img
+                                                    src={otherPosts[0].display_image}
+                                                    alt={otherPosts[0].title}
+                                                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                                />
+                                            ) : (
+                                                <div className="flex h-full items-center justify-center bg-[#F5E6D3]">
+                                                    <BookOpen className="h-16 w-16 text-gray-400" />
+                                                </div>
+                                            )}
+
+                                            {/* View count */}
+                                            <div className="absolute top-4 right-4 flex items-center gap-1 rounded-full bg-black/50 px-2 py-1 text-xs text-white backdrop-blur-sm">
+                                                <Eye className="h-3 w-3" />
+                                                {otherPosts[0].view_count || 0}
+                                            </div>
+
+                                            <div className="absolute right-4 bottom-4 left-4">
+                                                <h3 className="line-clamp-2 text-lg font-bold text-white drop-shadow-lg">{otherPosts[0].title}</h3>
+                                            </div>
+
+                                            {/* Arrow */}
+                                            <div className="absolute right-4 bottom-4 flex h-10 w-10 items-center justify-center rounded-full bg-white opacity-0 transition-opacity group-hover:opacity-100">
+                                                <ArrowUpRight className="h-4 w-4 text-gray-900" />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </section>
+                        )}
+                    </section>
 
-                {/* Blog Posts List */}
-                <section className="bg-white py-16">
-                    <div className="container mx-auto px-4">
-                        {blogs.data.length === 0 ? (
-                            <div className="py-12 text-center">
-                                <h3 className="text-brand-black mb-4 text-2xl font-semibold">No posts found</h3>
-                                <p className="text-gray-600">We're working on some great content. Check back soon!</p>
-                                <div className="mt-6">
-                                    <Button
-                                        onClick={() => router.visit('/')}
-                                        className="from-brand-orange to-brand-orange rounded-xl bg-gradient-to-r px-6 py-3 text-white"
-                                    >
+                    {/* All Posts Section */}
+                    <section id="all-posts" className="bg-white py-16">
+                        <div className="container mx-auto px-4">
+                            {/* Section Header */}
+                            <div className="mb-8">
+                                <div className="mb-4 flex items-center gap-3">
+                                    <div className="h-px flex-1 bg-gray-200" />
+                                    <h2 className="font-serif text-3xl font-bold text-gray-900">All Articles</h2>
+                                    <div className="h-px flex-1 bg-gray-200" />
+                                </div>
+                                <p className="text-center text-gray-500">
+                                    Browse through {blogs.total} article{blogs.total !== 1 ? 's' : ''}
+                                </p>
+                            </div>
+
+                            {blogs.data.length === 0 ? (
+                                <div className="py-16 text-center">
+                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                                        <BookOpen className="h-8 w-8 text-gray-400" />
+                                    </div>
+                                    <h3 className="mb-2 text-2xl font-semibold text-gray-900">No posts found</h3>
+                                    <p className="mb-6 text-gray-500">We're working on some great content. Check back soon!</p>
+                                    <Button onClick={() => router.visit('/')} className="rounded-full bg-gray-900 px-8 text-white hover:bg-gray-800">
                                         Back to Home
                                     </Button>
                                 </div>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                                    {blogs.data.map((blog) => (
-                                        <EnhancedBlogCard key={String(blog.id)} blog={blog} showStats={true} />
-                                    ))}
-                                </div>
-
-                                {/* Pagination */}
-                                {blogs.last_page > 1 && (
-                                    <div className="mt-16 flex justify-center">
-                                        <div className="flex gap-2">
-                                            {Array.from({ length: blogs.last_page }, (_, i) => i + 1).map((page) => (
-                                                <button
-                                                    key={page}
-                                                    onClick={() => router.visit(`/blog?page=${page}`)}
-                                                    className={`transform rounded-xl px-4 py-3 font-semibold transition-all duration-300 hover:scale-105 ${
-                                                        page === blogs.current_page
-                                                            ? 'from-brand-orange to-brand-orange bg-gradient-to-r text-white shadow-xl'
-                                                            : 'hover:bg-brand-orange/10 hover:text-brand-orange border border-gray-200 bg-white text-gray-600 shadow-md hover:shadow-lg'
-                                                    } `}
-                                                >
-                                                    {page}
-                                                </button>
-                                            ))}
-                                        </div>
+                            ) : (
+                                <>
+                                    {/* Blog Grid - Magazine Style */}
+                                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                                        {blogs.data.map((blog, index) => (
+                                            <BlogCard key={blog.id} blog={blog} size={index === 0 ? 'large' : 'normal'} />
+                                        ))}
                                     </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </section>
 
-                {/* Back to Home CTA */}
-                <section className="bg-gray-50 py-12">
-                    <div className="container mx-auto px-4 text-center">
-                        <p className="mb-4 text-gray-600">Looking for featured content and highlights?</p>
-                        <Button
-                            onClick={() => router.visit('/')}
-                            className="from-brand-orange to-brand-orange hover:from-brand-orange/90 hover:to-brand-orange/90 transform rounded-2xl bg-gradient-to-r px-8 py-3 text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
-                        >
-                            ← Back to Home
-                        </Button>
-                    </div>
-                </section>
+                                    {/* Pagination - Magazine Style */}
+                                    {blogs.last_page > 1 && (
+                                        <div className="mt-16 flex justify-center">
+                                            <div className="flex items-center gap-2">
+                                                {Array.from({ length: blogs.last_page }, (_, i) => i + 1).map((page) => (
+                                                    <button
+                                                        key={page}
+                                                        onClick={() => router.visit(`/blog?page=${page}`)}
+                                                        className={`h-10 w-10 rounded-full font-medium transition-all ${
+                                                            page === blogs.current_page
+                                                                ? 'bg-gray-900 text-white'
+                                                                : 'border border-gray-200 bg-white text-gray-600 hover:border-gray-900 hover:text-gray-900'
+                                                        }`}
+                                                    >
+                                                        {page}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </section>
+
+                    {/* CTA Section */}
+                    <section className="bg-gray-900 py-16">
+                        <div className="container mx-auto px-4 text-center">
+                            <h2 className="mb-4 font-serif text-3xl font-bold text-white md:text-4xl">Stay in the loop</h2>
+                            <p className="mx-auto mb-8 max-w-md text-gray-400">
+                                Get notified about new articles and insights. No spam, just quality content.
+                            </p>
+                            <div className="flex flex-wrap justify-center gap-4">
+                                <Button className="rounded-full bg-white px-8 text-gray-900 hover:bg-gray-100" onClick={() => router.visit('/')}>
+                                    Back to Home
+                                </Button>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+
+                <Footer />
             </div>
-
-            <Footer />
         </>
     );
 }
