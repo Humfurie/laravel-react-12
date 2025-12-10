@@ -9,7 +9,6 @@ interface Permission {
     id?: number;
     resource: string;
     actions: string[];
-    [key: string]: unknown;
 }
 
 interface PermissionFormModalProps {
@@ -62,14 +61,8 @@ export default function PermissionFormModal({ isOpen, onClose, permission, allAc
             id: permission?.id,
         };
 
-        const payload = {
-            resource: permData.resource,
-            actions: permData.actions,
-            id: permData.id,
-        };
-
         if (isEditing && permission?.id) {
-            router.put(route('permissions.update', permission.id), payload, {
+            router.put(route('permissions.update', permission.id), permData, {
                 onSuccess: () => {
                     if (onSave) {
                         onSave(permData);
@@ -82,7 +75,7 @@ export default function PermissionFormModal({ isOpen, onClose, permission, allAc
                 },
             });
         } else {
-            router.post(route('permissions.store'), payload, {
+            router.post(route('permissions.store'), permData, {
                 onSuccess: () => {
                     if (onSave) {
                         onSave(permData);

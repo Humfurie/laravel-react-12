@@ -38,7 +38,6 @@ interface Props {
 
 interface PageProps {
     adsense?: {
-        enabled?: boolean;
         client_id?: string;
         slots?: {
             blog_post_top?: string;
@@ -46,7 +45,6 @@ interface PageProps {
             blog_post_sidebar?: string;
         };
     };
-    [key: string]: unknown;
 }
 
 export default function BlogPost({ blog }: Props) {

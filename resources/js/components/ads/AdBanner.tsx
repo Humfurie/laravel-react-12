@@ -65,8 +65,10 @@ export default function AdBanner({
         if (!testMode && adClient && adSlot) {
             try {
                 // Push ad to AdSense
-                const win = window as Window & { adsbygoogle?: Array<Record<string, unknown>> };
-                (win.adsbygoogle = win.adsbygoogle || []).push({});
+                interface WindowWithAdsbygoogle extends Window {
+                    adsbygoogle?: Array<Record<string, unknown>>;
+                }
+                ((window as WindowWithAdsbygoogle).adsbygoogle = (window as WindowWithAdsbygoogle).adsbygoogle || []).push({});
             } catch (error) {
                 console.error('AdSense error:', error);
             }
