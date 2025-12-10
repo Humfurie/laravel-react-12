@@ -137,7 +137,7 @@ export default function Settings({ allSettings }: Props) {
                 return (
                     <Textarea
                         id={setting.key}
-                        value={typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
+                        value={value}
                         onChange={(e) => setData('settings', { ...data.settings, [setting.key]: e.target.value })}
                         rows={6}
                         className="font-mono text-sm"

@@ -40,7 +40,8 @@ jobs:
 
       - name: Install dependencies and setup
         run: |
-          docker compose -f docker-compose.ci.yml exec -T app composer install --optimize-autoloader --dev
+          docker compose -f docker-compose.ci.yml exec -T -e GIT_DISCOVERY_ACROSS_FILESYSTEM=1 app git config --global --add safe.directory /var/www/html
+          docker compose -f docker-compose.ci.yml exec -T app composer install --optimize-autoloader
           docker compose -f docker-compose.ci.yml exec -T app npm install
           docker compose -f docker-compose.ci.yml exec -T app npm run build
           docker compose -f docker-compose.ci.yml exec -T app php artisan key:generate --ansi
