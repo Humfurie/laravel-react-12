@@ -11,7 +11,7 @@ describe('Real Estate Developer Pages', function () {
         $user = createAdminUser('developer');
 
         $response = $this->actingAs($user)
-            ->get(route('admin.real-estate.developers.create'));
+            ->get(route('real-estate.developers.create'));
 
         $response->assertStatus(200);
         $response->assertInertia(fn(Assert $page) => $page
@@ -24,7 +24,7 @@ describe('Real Estate Developer Pages', function () {
         $developer = Developer::factory()->create();
 
         $response = $this->actingAs($user)
-            ->get(route('admin.real-estate.developers.edit', $developer));
+            ->get(route('real-estate.developers.edit', $developer));
 
         $response->assertStatus(200);
         $response->assertInertia(fn(Assert $page) => $page
@@ -45,7 +45,7 @@ describe('Real Estate Developer Pages', function () {
         ];
 
         $response = $this->actingAs($user)
-            ->post(route('admin.real-estate.developers.store'), $developerData);
+            ->post(route('real-estate.developers.store'), $developerData);
 
         $response->assertRedirect();
 
@@ -62,7 +62,7 @@ describe('Real Estate Developer Pages', function () {
         ]);
 
         $response = $this->actingAs($user)
-            ->put(route('admin.real-estate.developers.update', $developer), [
+            ->put(route('real-estate.developers.update', $developer), [
                 'company_name' => 'Updated Developer Name',
                 'description' => 'Updated description',
             ]);
@@ -82,7 +82,7 @@ describe('Real Estate Project Pages', function () {
         Developer::factory()->create(); // Need at least one developer
 
         $response = $this->actingAs($user)
-            ->get(route('admin.real-estate.projects.create'));
+            ->get(route('real-estate.projects.create'));
 
         $response->assertStatus(200);
         $response->assertInertia(fn(Assert $page) => $page
@@ -99,7 +99,7 @@ describe('Real Estate Project Pages', function () {
         ]);
 
         $response = $this->actingAs($user)
-            ->get(route('admin.real-estate.projects.edit', $project));
+            ->get(route('real-estate.projects.edit', $project));
 
         $response->assertStatus(200);
         $response->assertInertia(fn(Assert $page) => $page
@@ -125,7 +125,7 @@ describe('Real Estate Project Pages', function () {
         ];
 
         $response = $this->actingAs($user)
-            ->post(route('admin.real-estate.projects.store'), $projectData);
+            ->post(route('real-estate.projects.store'), $projectData);
 
         $response->assertRedirect();
 
@@ -144,7 +144,7 @@ describe('Real Estate Project Pages', function () {
         ]);
 
         $response = $this->actingAs($user)
-            ->put(route('admin.real-estate.projects.update', $project), [
+            ->put(route('real-estate.projects.update', $project), [
                 'developer_id' => $developer->id,
                 'name' => 'Updated Project Name',
                 'description' => 'Updated description',
@@ -169,7 +169,7 @@ describe('Real Estate Authorization', function () {
         $user = createUserWithRole('Viewer', 'viewer', 'developer', ['viewAny', 'view']);
 
         $response = $this->actingAs($user)
-            ->get(route('admin.real-estate.developers.create'));
+            ->get(route('real-estate.developers.create'));
 
         $response->assertStatus(403);
     });
@@ -179,7 +179,7 @@ describe('Real Estate Authorization', function () {
         Developer::factory()->create();
 
         $response = $this->actingAs($user)
-            ->get(route('admin.real-estate.projects.create'));
+            ->get(route('real-estate.projects.create'));
 
         $response->assertStatus(403);
     });
