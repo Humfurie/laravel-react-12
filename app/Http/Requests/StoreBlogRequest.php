@@ -37,6 +37,7 @@ class StoreBlogRequest extends FormRequest
             'meta_data.meta_description' => ['nullable', 'string', 'max:160'],
             'meta_data.meta_keywords' => ['nullable', 'string', 'max:255'],
             'isPrimary' => ['boolean'],
+            'featured_until' => ['nullable', 'date'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'published_at' => ['nullable', 'date'],
             'tags' => ['nullable', 'array'],

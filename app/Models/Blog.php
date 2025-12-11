@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use Database\Factories\BlogFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -20,6 +22,7 @@ use Illuminate\Support\Carbon;
  * @property array|null $meta_data
  * @property int $sort_order
  * @property Carbon|null $published_at
+ * @property Carbon|null $featured_until
  */
 class Blog extends Model
 {
@@ -40,6 +43,7 @@ class Blog extends Model
         'meta_data',
         'tags',
         'isPrimary',
+        'featured_until',
         'sort_order',
         'view_count',
         'published_at',
@@ -50,6 +54,7 @@ class Blog extends Model
         'tags' => 'array',
         'isPrimary' => 'boolean',
         'published_at' => 'datetime',
+        'featured_until' => 'datetime',
     ];
 
     protected $appends = [
@@ -153,5 +158,131 @@ class Blog extends Model
 
         // Return null if no image found
         return null;
+    }
+
+    /**
+     * Get the daily view records for this blog.
+     */
+    public function dailyViews(): HasMany
+    {
+        return $this->hasMany(BlogView::class);
+    }
+
+    /**
+     * Get views in the last N days.
+     */
+    public function getViewsInLastDays(int $days = 30): int
+    {
+        return BlogView::getViewsInLastDays($this->id, $days);
+    }
+
+    /**
+     * Check if this blog is currently manually featured.
+     * Returns true if isPrimary is set AND featured_until is either null (forever) or in the future.
+     */
+    public function isManuallyFeatured(): bool
+    {
+        if (!$this->isPrimary) {
+            return false;
+        }
+
+        // If no expiration set, it's featured forever
+        if ($this->featured_until === null) {
+            return true;
+        }
+
+        // Check if featured_until is still in the future
+        return $this->featured_until->isFuture();
+    }
+
+    /**
+     * Scope to get manually featured blogs (isPrimary with valid featured_until).
+     */
+    public function scopeManuallyFeatured($query)
+    {
+        return $query->where('isPrimary', true)
+            ->where(function ($q) {
+                $q->whereNull('featured_until')
+                    ->orWhere('featured_until', '>', now());
+            });
+    }
+
+    /**
+     * Get the featured blog - either manually featured or auto-featured by views.
+     * Returns the manually featured blog if exists and valid, otherwise the most viewed in last 30 days.
+     */
+    public static function getFeaturedBlog(): ?self
+    {
+        // First, try to get a manually featured blog
+        $manualFeatured = static::published()
+            ->manuallyFeatured()
+            ->orderBy('sort_order', 'asc')
+            ->first();
+
+        if ($manualFeatured) {
+            return $manualFeatured;
+        }
+
+        // Fall back to most viewed in last 30 days
+        $mostViewedIds = BlogView::getMostViewedBlogIds(30, 1);
+
+        if (empty($mostViewedIds)) {
+            // If no views tracked yet, return the most recent post
+            return static::published()
+                ->orderBy('published_at', 'desc')
+                ->first();
+        }
+
+        return static::published()
+            ->whereIn('id', $mostViewedIds)
+            ->first();
+    }
+
+    /**
+     * Get featured blogs for display (manual featured + top trending).
+     */
+    public static function getFeaturedBlogs(int $limit = 3): Collection
+    {
+        // Get manually featured blogs
+        $manualFeatured = static::published()
+            ->manuallyFeatured()
+            ->orderBy('sort_order', 'asc')
+            ->get();
+
+        $remaining = $limit - $manualFeatured->count();
+
+        if ($remaining <= 0) {
+            return $manualFeatured->take($limit);
+        }
+
+        // Get auto-featured by views (excluding manual featured)
+        $excludeIds = $manualFeatured->pluck('id')->toArray();
+        $mostViewedIds = BlogView::getMostViewedBlogIds(30, $remaining + 5); // Get extra in case of overlap
+
+        $autoFeatured = static::published()
+            ->whereIn('id', $mostViewedIds)
+            ->whereNotIn('id', $excludeIds)
+            ->limit($remaining)
+            ->get()
+            ->sortBy(function ($blog) use ($mostViewedIds) {
+                return array_search($blog->id, $mostViewedIds);
+            })
+            ->values();
+
+        // If still not enough, fill with recent posts
+        if ($autoFeatured->count() < $remaining) {
+            $stillNeeded = $remaining - $autoFeatured->count();
+            $excludeIds = array_merge($excludeIds, $autoFeatured->pluck('id')->toArray());
+
+            $recentPosts = static::published()
+                ->whereNotIn('id', $excludeIds)
+                ->orderBy('published_at', 'desc')
+                ->limit($stillNeeded)
+                ->get();
+
+            $autoFeatured = $autoFeatured->concat($recentPosts);
+        }
+
+        return $manualFeatured->concat($autoFeatured)->take($limit);
     }
 }

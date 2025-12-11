@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
+use App\Models\BlogView;
 use App\Models\Experience;
 use App\Models\Giveaway;
 use App\Models\GiveawayEntry;
@@ -231,17 +232,49 @@ class DashboardController extends Controller
 
     private function getTopContent(): array
     {
-        return [
-            'topBlogs' => Blog::where('status', 'published')
+        // Get trending blog IDs (most viewed in last 30 days)
+        $trendingBlogIds = BlogView::getMostViewedBlogIds(30, 5);
+
+        // Get trending blogs with their recent views
+        $trendingBlogs = [];
+        if (!empty($trendingBlogIds)) {
+            $blogs = Blog::published()
+                ->whereIn('id', $trendingBlogIds)
+                ->get(['id', 'title', 'view_count']);
+
+            // Sort by the trending order and add recent views
+            foreach ($trendingBlogIds as $blogId) {
+                $blog = $blogs->firstWhere('id', $blogId);
+                if ($blog) {
+                    $trendingBlogs[] = [
+                        'id' => $blog->id,
+                        'title' => $blog->title,
+                        'views' => BlogView::getViewsInLastDays($blog->id, 30),
+                    ];
+                }
+            }
+        }
+
+        // If not enough trending blogs, fill with top all-time
+        if (count($trendingBlogs) < 5) {
+            $existingIds = array_column($trendingBlogs, 'id');
+            $additionalBlogs = Blog::where('status', 'published')
+                ->whereNotIn('id', $existingIds)
                 ->orderBy('view_count', 'desc')
-                ->limit(5)
+                ->limit(5 - count($trendingBlogs))
                 ->get(['id', 'title', 'view_count'])
                 ->map(fn($blog) => [
                     'id' => $blog->id,
                     'title' => $blog->title,
                     'views' => $blog->view_count ?? 0,
                 ])
-                ->toArray(),
+                ->toArray();
+
+            $trendingBlogs = array_merge($trendingBlogs, $additionalBlogs);
+        }
+
+        return [
+            'topBlogs' => $trendingBlogs,
             'topProperties' => Property::orderBy('view_count', 'desc')
                 ->limit(5)
                 ->get(['id', 'title', 'view_count'])
@@ -276,9 +309,18 @@ class DashboardController extends Controller
             ])
             ->toArray();
 
+        // Count manually featured blogs (active featured)
+        $featuredBlogsCount = Blog::published()->manuallyFeatured()->count();
+
+        // Get total views in last 30 days
+        $totalViewsLast30Days = BlogView::where('view_date', '>=', now()->subDays(30)->toDateString())
+            ->sum('view_count');
+
         return [
             'inquiriesByType' => $inquiriesByType,
             'totalBlogs' => Blog::count(),
+            'featuredBlogs' => $featuredBlogsCount,
+            'totalViewsLast30Days' => (int)$totalViewsLast30Days,
             'totalExperiences' => Experience::count(),
             'totalProjects' => RealEstateProject::count(),
         ];

@@ -1,3 +1,4 @@
+import FloatingNav from '@/components/floating-nav';
 import Footer from '@/components/global/Footer';
 import HomeAboutMe from '@/components/home/sections/HomeAboutMe';
 import HomeBanner from '@/components/home/sections/HomeBanner';
@@ -10,8 +11,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ArrowRight } from 'lucide-react';
 
 import { ExperienceSection } from '@/components/home/sections/ExperienceSection';
-import { publicNavItems } from '@/config/navigation';
-import { JSX, useEffect, useState } from 'react';
+import { JSX } from 'react';
 
 interface Blog {
     id: number;
@@ -151,25 +151,6 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
 }
 
 export default function Home({ primary = [], latest = [], experiences = [], expertises = [], projects = [], projectStats }: Props): JSX.Element {
-    const [isVisible, setIsVisible] = useState(true);
-    const [activeItem, setActiveItem] = useState('home');
-
-    useEffect(() => {
-        let lastScrollY = window.scrollY;
-
-        const updateScrollDirection = () => {
-            const scrollY = window.scrollY;
-            const direction = scrollY > lastScrollY ? 'down' : 'up';
-            if (direction !== (isVisible ? 'up' : 'down')) {
-                setIsVisible(direction === 'up' || scrollY < 50);
-            }
-            lastScrollY = scrollY > 0 ? scrollY : 0;
-        };
-
-        window.addEventListener('scroll', updateScrollDirection);
-        return () => window.removeEventListener('scroll', updateScrollDirection);
-    }, [isVisible]);
-
     // Combine and dedupe blogs for display
     const allBlogs = [...primary, ...latest.filter((b) => !primary.find((p) => p.id === b.id))];
     const featuredBlog = primary[0];
@@ -206,45 +187,7 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
                 <meta name="twitter:image" content="/images/og-default.jpg" />
             </Head>
 
-            {/* Floating Navbar */}
-            <nav
-                className={`fixed top-3 left-1/2 z-50 -translate-x-1/2 transform transition-all duration-300 ease-in-out sm:top-6 ${
-                    isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-                }`}
-            >
-                <div className="rounded-full border border-white/20 bg-white/80 px-3 py-2 shadow-lg backdrop-blur-md sm:px-6 sm:py-4">
-                    <div className="flex items-center space-x-1 sm:space-x-3">
-                        {publicNavItems.map((item, index) => {
-                            const Icon = item.icon;
-                            const isActive = activeItem === item.id;
-
-                            return (
-                                <Link
-                                    key={`${item.id}-${index}`}
-                                    href={item.route}
-                                    onClick={() => setActiveItem(item.id)}
-                                    className={`group relative flex items-center space-x-2 rounded-full px-3 py-2 transition-all duration-200 sm:px-5 sm:py-3 ${
-                                        isActive
-                                            ? 'scale-105 bg-orange-500 text-white shadow-md'
-                                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                                    }`}
-                                    title={item.label}
-                                >
-                                    {/* Desktop: Show both icon and text */}
-                                    <Icon size={18} className="transition-transform duration-200 group-hover:scale-110 sm:size-5" />
-                                    <span className="hidden text-xs font-medium sm:text-sm md:block">{item.label}</span>
-
-                                    {/* Mobile tooltip - only for icon-only buttons */}
-                                    <div className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 transform opacity-0 transition-opacity duration-200 group-hover:opacity-100 md:hidden">
-                                        <div className="rounded bg-gray-900 px-2 py-1 text-xs whitespace-nowrap text-white">{item.label}</div>
-                                        <div className="absolute top-0 left-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1 transform border-r-2 border-b-2 border-l-2 border-transparent border-b-gray-900"></div>
-                                    </div>
-                                </Link>
-                            );
-                        })}
-                    </div>
-                </div>
-            </nav>
+            <FloatingNav currentPage="home" />
 
             <HomeBanner />
             <HomeAboutMe />

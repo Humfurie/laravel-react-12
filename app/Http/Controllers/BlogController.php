@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
+use App\Models\BlogView;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -28,8 +29,11 @@ class BlogController extends Controller
             abort(404);
         }
 
-        // Increment view count
+        // Increment total view count (legacy)
         $blog->increment('view_count');
+
+        // Record daily view for trending calculation
+        BlogView::recordView($blog->id);
 
         return Inertia::render('user/blog-post', [
             'blog' => $blog->fresh() // Get fresh instance with updated view count
@@ -40,18 +44,16 @@ class BlogController extends Controller
     {
         // Cache homepage blog data for 10 minutes
         return Cache::remember('homepage.blogs', 600, function () {
-            // Single optimized query to get all published blogs we need
-            $blogs = Blog::published()
+            // Get featured blogs (manual featured + auto by views)
+            $featuredBlogs = Blog::getFeaturedBlogs(3);
+
+            // Get latest blogs
+            $latestBlogs = Blog::published()
                 ->orderBy('published_at', 'desc')
                 ->limit(6)
                 ->get();
 
-            // Separate primary and latest from the same collection
-            $primaryBlogs = $blogs->where('isPrimary', true)->take(3)->values();
-            $latestBlogs = $blogs->take(6)->values();
-
-            // Get stats in a single query using aggregates
-            // Use database grammar to properly quote column name for cross-database compatibility
+            // Get stats
             $grammar = DB::connection()->getQueryGrammar();
             $isPrimaryColumn = $grammar->wrap('isPrimary');
 
@@ -59,15 +61,41 @@ class BlogController extends Controller
                 ->selectRaw("COUNT(*) as total_posts, SUM(view_count) as total_views, SUM(CASE WHEN {$isPrimaryColumn} = ? THEN 1 ELSE 0 END) as featured_count", [true])
                 ->first();
 
+            // Count manually featured (with valid featured_until)
+            $manualFeaturedCount = Blog::published()->manuallyFeatured()->count();
+
             return [
-                'primary' => $primaryBlogs,
+                'primary' => $featuredBlogs->values(),
                 'latest' => $latestBlogs,
                 'stats' => [
                     'total_posts' => (int)($stats->total_posts ?? 0),
                     'total_views' => (int)($stats->total_views ?? 0),
-                    'featured_count' => (int)($stats->featured_count ?? 0),
+                    'featured_count' => $manualFeaturedCount,
                 ]
             ];
         });
+    }
+
+    /**
+     * Get trending blogs based on views in the last 30 days.
+     */
+    public function getTrending(int $limit = 5)
+    {
+        $mostViewedIds = BlogView::getMostViewedBlogIds(30, $limit);
+
+        if (empty($mostViewedIds)) {
+            return Blog::published()
+                ->orderBy('view_count', 'desc')
+                ->limit($limit)
+                ->get();
+        }
+
+        return Blog::published()
+            ->whereIn('id', $mostViewedIds)
+            ->get()
+            ->sortBy(function ($blog) use ($mostViewedIds) {
+                return array_search($blog->id, $mostViewedIds);
+            })
+            ->values();
     }
 }

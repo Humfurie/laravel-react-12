@@ -1,11 +1,10 @@
-import AppLogo from '@/components/app-logo';
+import FloatingNav from '@/components/floating-nav';
 import Footer from '@/components/global/Footer';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectFilters } from '@/components/projects/ProjectFilters';
 import { ProjectModal } from '@/components/projects/ProjectModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { publicNavItems } from '@/config/navigation';
 import type { Project, ProjectCategory } from '@/types/project';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowRight, ArrowUpRight, Code2, Github, Sparkles } from 'lucide-react';
@@ -60,48 +59,9 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
             </Head>
 
             <div className="min-h-screen bg-[#FAFAF8]">
-                {/* Magazine-style Navbar */}
-                <nav className="sticky top-0 z-50 border-b border-gray-100 bg-[#FAFAF8]/95 backdrop-blur-md">
-                    <div className="container mx-auto flex h-16 items-center justify-between px-4">
-                        <Link href="/" className="flex items-center gap-2">
-                            <AppLogo />
-                        </Link>
+                <FloatingNav currentPage="projects" />
 
-                        {/* Pill Navigation */}
-                        <div className="hidden items-center gap-1 rounded-full border border-gray-100 bg-white px-2 py-1.5 shadow-sm md:flex">
-                            {publicNavItems.map((item) => {
-                                const Icon = item.icon;
-                                const isActive = item.id === 'projects';
-                                return (
-                                    <Link
-                                        key={item.id}
-                                        href={item.route}
-                                        className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                                            isActive ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
-                                        }`}
-                                    >
-                                        {item.showIcon && <Icon className="h-4 w-4" />}
-                                        <span>{item.label}</span>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-
-                        {/* Mobile menu */}
-                        <div className="flex items-center gap-2 md:hidden">
-                            {publicNavItems.map((item) => {
-                                const Icon = item.icon;
-                                return (
-                                    <Link key={item.id} href={item.route} className="p-2 text-gray-600 hover:text-gray-900">
-                                        <Icon className="h-5 w-5" />
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </nav>
-
-                <main>
+                <main className="pt-20">
                     {/* Magazine Hero Section */}
                     <section className="container mx-auto px-4 py-8 md:py-12">
                         {/* Section Header */}
