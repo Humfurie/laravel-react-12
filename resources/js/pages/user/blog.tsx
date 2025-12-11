@@ -313,7 +313,6 @@ export default function BlogIndex({ blogs }: Props) {
                                     <Link
                                         key={item.id}
                                         href={item.route}
-                                        onClick={() => setActiveItem(item.id)}
                                         className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
                                             isActive ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
                                         }`}
@@ -324,7 +323,7 @@ export default function BlogIndex({ blogs }: Props) {
                                 );
                             })}
                         </div>
-                        ;{/* Mobile menu */}
+                        {/* Mobile menu */}
                         <div className="flex items-center gap-2 md:hidden">
                             {publicNavItems.map((item) => {
                                 const Icon = item.icon;
@@ -335,7 +334,6 @@ export default function BlogIndex({ blogs }: Props) {
                                 );
                             })}
                         </div>
-                        ; ;
                     </div>
                 </nav>
 
