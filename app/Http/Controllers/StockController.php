@@ -26,12 +26,23 @@ class StockController extends Controller
     public function index(Request $request): Response
     {
         // Get query parameters for pagination and sorting
-        $perPage = $request->input('per_page', 10);
-        $page = $request->input('page', 1);
+        $perPage = (int)$request->input('per_page', 10);
+        $page = (int)$request->input('page', 1);
+
+        // Validate perPage - only allow specific values
+        $allowedPerPage = [10, 100, 1000];
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
+
+        // Determine which method to use based on perPage
+        $stockFetcher = $perPage >= 1000
+            ? fn() => $this->stockService->getLargeStockList($perPage)
+            : fn() => $this->stockService->getPopularStocks($perPage);
 
         // Fetch all stock data in parallel
         [$stocks, $indices, $gainersLosers] = Concurrency::run([
-            fn() => $this->stockService->getPopularStocks(),
+            $stockFetcher,
             fn() => $this->stockService->getMarketIndices(),
             fn() => $this->stockService->getGainersLosers(),
         ]);

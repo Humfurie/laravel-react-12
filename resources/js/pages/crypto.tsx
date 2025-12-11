@@ -6,8 +6,8 @@ import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Head } from '@inertiajs/react';
-import { ArrowDown, ArrowUp, ArrowUpDown, TrendingDown, TrendingUp } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Loader2, TrendingDown, TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 type SortField = 'name' | 'symbol' | 'price' | 'market_cap' | 'change_24h' | 'total_volume';
@@ -74,6 +74,24 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
     const [currentPage, setCurrentPage] = useState<number>(pagination.current_page || 1);
     const [selectedCrypto, setSelectedCrypto] = useState<CryptoData | null>(null);
     const [selectedStock, setSelectedStock] = useState<StockData | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Handler to fetch more crypto from server
+    const handlePerPageChange = (value: string) => {
+        const newPerPage = Number(value);
+        setIsLoading(true);
+        setCurrentPage(1); // Reset to first page
+
+        router.visit('/crypto', {
+            data: { per_page: newPerPage },
+            preserveState: true,
+            preserveScroll: true,
+            onFinish: () => {
+                setPerPage(newPerPage);
+                setIsLoading(false);
+            },
+        });
+    };
 
     // Memoized sorted data
     const sortedData = useMemo(() => {
@@ -251,14 +269,14 @@ export default function Crypto({ cryptoData, stockData, pagination, filters }: C
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                             <div className="flex items-center gap-1.5 sm:gap-2">
                                 <span className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">Show</span>
-                                <Select value={perPage.toString()} onValueChange={(value) => setPerPage(Number(value))}>
+                                <Select value={perPage.toString()} onValueChange={handlePerPageChange} disabled={isLoading}>
                                     <SelectTrigger className="border-brand-orange/20 bg-brand-black text-brand-white h-8 w-[70px] text-xs sm:h-9 sm:w-[80px] sm:text-sm lg:w-[100px]">
-                                        <SelectValue />
+                                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <SelectValue />}
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="10">10</SelectItem>
                                         <SelectItem value="100">100</SelectItem>
-                                        <SelectItem value="1000">1000</SelectItem>
+                                        <SelectItem value="250">250</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <span className="text-brand-offwhite text-[10px] sm:text-xs lg:text-sm">entries</span>

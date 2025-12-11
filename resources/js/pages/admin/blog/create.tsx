@@ -30,12 +30,14 @@ type BlogFormData = {
     };
     tags: string[];
     isPrimary: boolean;
+    featured_until: string;
     sort_order: number;
     published_at: string;
 };
 
 export default function CreateBlog() {
     const [publishedDate, setPublishedDate] = useState<Date>();
+    const [featuredUntilDate, setFeaturedUntilDate] = useState<Date>();
     const [tagInput, setTagInput] = useState('');
     const [imageInputType, setImageInputType] = useState<'upload' | 'url'>('url');
     const [imagePreview, setImagePreview] = useState<string>('');
@@ -56,6 +58,7 @@ export default function CreateBlog() {
         },
         tags: [],
         isPrimary: false,
+        featured_until: '',
         sort_order: 0,
         published_at: '',
     });
@@ -95,6 +98,8 @@ export default function CreateBlog() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
+        const featuredUntil = featuredUntilDate ? format(featuredUntilDate, 'yyyy-MM-dd HH:mm:ss') : '';
+
         transform((data) => ({
             ...data,
             slug: data.slug || generateSlug(data.title),
@@ -104,6 +109,7 @@ export default function CreateBlog() {
                 meta_keywords: data.meta_data.meta_keywords || generateKeywords(data.title),
             },
             published_at: publishedDate ? format(publishedDate, 'yyyy-MM-dd HH:mm:ss') : '',
+            featured_until: data.isPrimary ? featuredUntil : '',
         }));
 
         post(route('blogs.store'), {
@@ -120,6 +126,8 @@ export default function CreateBlog() {
         setData('status', 'draft');
         setData('published_at', '');
 
+        const featuredUntil = featuredUntilDate ? format(featuredUntilDate, 'yyyy-MM-dd HH:mm:ss') : '';
+
         transform((data) => ({
             ...data,
             slug: data.slug || generateSlug(data.title),
@@ -129,6 +137,7 @@ export default function CreateBlog() {
                 meta_keywords: data.meta_data.meta_keywords || generateKeywords(data.title),
             },
             published_at: '',
+            featured_until: data.isPrimary ? featuredUntil : '',
         }));
 
         post(route('blogs.store'), {
@@ -149,6 +158,8 @@ export default function CreateBlog() {
             setData('published_at', format(publishedDate, 'yyyy-MM-dd HH:mm:ss'));
         }
 
+        const featuredUntil = featuredUntilDate ? format(featuredUntilDate, 'yyyy-MM-dd HH:mm:ss') : '';
+
         transform((data) => ({
             ...data,
             slug: data.slug || generateSlug(data.title),
@@ -158,6 +169,7 @@ export default function CreateBlog() {
                 meta_keywords: data.meta_data.meta_keywords || generateKeywords(data.title),
             },
             published_at: publishedDate ? format(publishedDate, 'yyyy-MM-dd HH:mm:ss') : format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+            featured_until: data.isPrimary ? featuredUntil : '',
         }));
 
         post(route('blogs.store'), {
@@ -458,11 +470,61 @@ export default function CreateBlog() {
                             <CardContent className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="isPrimary" className="text-sm font-medium">
-                                        Primary Post
+                                        Featured Post
                                     </Label>
-                                    <Switch id="isPrimary" checked={data.isPrimary} onCheckedChange={(checked) => setData('isPrimary', checked)} />
+                                    <Switch
+                                        id="isPrimary"
+                                        checked={data.isPrimary}
+                                        onCheckedChange={(checked) => {
+                                            setData('isPrimary', checked);
+                                            if (!checked) {
+                                                setFeaturedUntilDate(undefined);
+                                            }
+                                        }}
+                                    />
                                 </div>
-                                <p className="text-muted-foreground text-xs">Mark this as a primary/featured post</p>
+                                <p className="text-muted-foreground text-xs">
+                                    Mark this as a featured post. Will appear prominently on the homepage.
+                                </p>
+
+                                {/* Featured Until Date Picker - only shown when isPrimary is true */}
+                                {data.isPrimary && (
+                                    <div className="space-y-2 rounded-lg border border-orange-200 bg-orange-50 p-3 dark:border-orange-800 dark:bg-orange-950/30">
+                                        <Label className="text-sm font-medium">Featured Until (Optional)</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    className={cn(
+                                                        'w-full justify-start text-left font-normal',
+                                                        !featuredUntilDate && 'text-muted-foreground',
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {featuredUntilDate ? format(featuredUntilDate, 'PPP') : 'No expiration (featured forever)'}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar mode="single" selected={featuredUntilDate} onSelect={setFeaturedUntilDate} initialFocus />
+                                            </PopoverContent>
+                                        </Popover>
+                                        {featuredUntilDate && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-auto p-0 text-xs text-orange-600 hover:text-orange-800"
+                                                onClick={() => setFeaturedUntilDate(undefined)}
+                                            >
+                                                Clear expiration date
+                                            </Button>
+                                        )}
+                                        <p className="text-muted-foreground text-xs">
+                                            Set an expiration date for manual featuring. After this date, the post will no longer be manually featured
+                                            but may still appear as "trending" based on views.
+                                        </p>
+                                    </div>
+                                )}
 
                                 <div className="space-y-2">
                                     <Label htmlFor="sort_order">Sort Order</Label>

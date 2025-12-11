@@ -7,7 +7,7 @@ import { QuickActionsWidget } from '@/components/dashboard/QuickActionsWidget';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { TopContentList } from '@/components/dashboard/TopContentList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileTextIcon, GiftIcon, HomeIcon, InboxIcon } from 'lucide-react';
+import { FileTextIcon, GiftIcon, HomeIcon, InboxIcon, SparklesIcon, TrendingUpIcon } from 'lucide-react';
 import {
     Bar,
     BarChart,
@@ -76,6 +76,8 @@ interface TopContent {
 interface Insights {
     inquiriesByType: Array<{ type: string; count: number }>;
     totalBlogs: number;
+    featuredBlogs: number;
+    totalViewsLast30Days: number;
     totalExperiences: number;
     totalProjects: number;
 }
@@ -220,7 +222,7 @@ export default function Dashboard({ dashboardData }: DashboardProps) {
                 <div className="grid gap-4 md:grid-cols-2">
                     <ActivityFeed activities={data.recentActivity} />
                     <div className="space-y-4">
-                        <TopContentList title="Top Blog Posts" items={data.topContent.topBlogs} type="views" />
+                        <TopContentList title="Trending Blog Posts (30 Days)" items={data.topContent.topBlogs} type="views" />
                     </div>
                 </div>
 
@@ -275,26 +277,46 @@ export default function Dashboard({ dashboardData }: DashboardProps) {
                             <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Content Overview</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between rounded-xl bg-blue-50 p-4 dark:bg-blue-950/50">
-                                    <div className="flex items-center gap-3">
-                                        <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900">
-                                            <FileTextIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" strokeWidth={1.5} />
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="flex flex-col justify-between rounded-xl bg-blue-50 p-4 dark:bg-blue-950/50">
+                                    <div className="flex items-center gap-2">
+                                        <div className="rounded-lg bg-blue-100 p-1.5 dark:bg-blue-900">
+                                            <FileTextIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" strokeWidth={1.5} />
                                         </div>
-                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Blogs</span>
+                                        <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Total Blogs</span>
                                     </div>
-                                    <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">{data.insights.totalBlogs}</span>
+                                    <span className="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">{data.insights.totalBlogs}</span>
                                 </div>
-                                <div className="flex items-center justify-between rounded-xl bg-emerald-50 p-4 dark:bg-emerald-950/50">
-                                    <div className="flex items-center gap-3">
-                                        <div className="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900">
-                                            <GiftIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" strokeWidth={1.5} />
+                                <div className="flex flex-col justify-between rounded-xl bg-orange-50 p-4 dark:bg-orange-950/50">
+                                    <div className="flex items-center gap-2">
+                                        <div className="rounded-lg bg-orange-100 p-1.5 dark:bg-orange-900">
+                                            <SparklesIcon className="h-4 w-4 text-orange-600 dark:text-orange-400" strokeWidth={1.5} />
                                         </div>
-                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Experiences</span>
+                                        <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Featured</span>
                                     </div>
-                                    <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">{data.insights.totalExperiences}</span>
+                                    <span className="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">{data.insights.featuredBlogs}</span>
                                 </div>
-                                <div className="flex items-center justify-between rounded-xl bg-purple-50 p-4 dark:bg-purple-950/50">
+                                <div className="flex flex-col justify-between rounded-xl bg-cyan-50 p-4 dark:bg-cyan-950/50">
+                                    <div className="flex items-center gap-2">
+                                        <div className="rounded-lg bg-cyan-100 p-1.5 dark:bg-cyan-900">
+                                            <TrendingUpIcon className="h-4 w-4 text-cyan-600 dark:text-cyan-400" strokeWidth={1.5} />
+                                        </div>
+                                        <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Views (30d)</span>
+                                    </div>
+                                    <span className="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                        {data.insights.totalViewsLast30Days.toLocaleString()}
+                                    </span>
+                                </div>
+                                <div className="flex flex-col justify-between rounded-xl bg-emerald-50 p-4 dark:bg-emerald-950/50">
+                                    <div className="flex items-center gap-2">
+                                        <div className="rounded-lg bg-emerald-100 p-1.5 dark:bg-emerald-900">
+                                            <GiftIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" strokeWidth={1.5} />
+                                        </div>
+                                        <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Experiences</span>
+                                    </div>
+                                    <span className="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">{data.insights.totalExperiences}</span>
+                                </div>
+                                <div className="col-span-2 flex items-center justify-between rounded-xl bg-purple-50 p-4 dark:bg-purple-950/50">
                                     <div className="flex items-center gap-3">
                                         <div className="rounded-lg bg-purple-100 p-2 dark:bg-purple-900">
                                             <HomeIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" strokeWidth={1.5} />

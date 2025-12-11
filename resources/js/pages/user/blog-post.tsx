@@ -1,11 +1,10 @@
+import FloatingNav from '@/components/floating-nav';
 import Footer from '@/components/global/Footer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, User } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { publicNavItems } from '@/config/navigation';
+import { ArrowLeft, Calendar, Clock, Eye, Share2, Sparkles } from 'lucide-react';
 import AdBanner from '@/components/ads/AdBanner';
 import StickyAd from '@/components/ads/StickyAd';
 
@@ -49,33 +48,40 @@ interface PageProps {
     [key: string]: unknown;
 }
 
+// Calculate reading time
+function getReadingTime(content: string): number {
+    const text = content.replace(/<[^>]*>/g, '');
+    const wordCount = text.split(/\s+/).length;
+    return Math.max(1, Math.ceil(wordCount / 200));
+}
+
 export default function BlogPost({ blog }: Props) {
     const { props } = usePage<PageProps>();
     const adsense = props.adsense;
-    const [isVisible, setIsVisible] = useState(true);
-    const [activeItem, setActiveItem] = useState('blog');
+    const readingTime = getReadingTime(blog.content);
 
     // Check if ads are configured
     const hasAds = adsense?.client_id && (adsense?.slots?.blog_post_top || adsense?.slots?.blog_post_bottom || adsense?.slots?.blog_post_sidebar);
 
-    console.log('is string?', typeof blog.display_image === 'string');
-    useEffect(() => {
-        let lastScrollY = window.scrollY;
-
-        const updateScrollDirection = () => {
-            const scrollY = window.scrollY;
-            const direction = scrollY > lastScrollY ? 'down' : 'up';
-            if (direction !== (isVisible ? 'up' : 'down')) {
-                setIsVisible(direction === 'up' || scrollY < 50);
-            }
-            lastScrollY = scrollY > 0 ? scrollY : 0;
-        };
-
-        window.addEventListener('scroll', updateScrollDirection);
-        return () => window.removeEventListener('scroll', updateScrollDirection);
-    }, [isVisible]);
-
     const safeImage = typeof blog.display_image === 'string' ? blog.display_image : '';
+
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: blog.title,
+                    text: blog.excerpt || '',
+                    url: window.location.href,
+                });
+            } catch (err) {
+                console.log('Share cancelled');
+            }
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            alert('Link copied to clipboard!');
+        }
+    };
+
     return (
         <>
             <Head title={String(blog.meta_data?.meta_title || blog.title || '')}>
@@ -135,153 +141,145 @@ export default function BlogPost({ blog }: Props) {
                 <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
             </Head>
 
-            <div className="bg-muted-white min-h-screen">
-                {/* Floating Navbar */}
-                <nav
-                    className={`fixed top-6 left-1/2 z-50 -translate-x-1/2 transform transition-all duration-300 ease-in-out ${
-                        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-                    }`}
-                >
-                    <div className="rounded-full border border-white/20 bg-white/80 px-6 py-4 shadow-lg backdrop-blur-md">
-                        <div className="flex items-center space-x-3">
-                            {publicNavItems.map((item, index) => {
-                                const Icon = item.icon;
-                                const isActive = activeItem === item.id;
+            <div className="min-h-screen bg-[#FAFAF8]">
+                <FloatingNav currentPage="blog" />
 
-                                return (
-                                    <Link
-                                        key={`${item.id}-${index}`}
-                                        href={item.route}
-                                        onClick={() => setActiveItem(item.id)}
-                                        className={`group relative flex items-center space-x-2 rounded-full px-5 py-3 transition-all duration-200 ${
-                                            isActive
-                                                ? 'scale-105 bg-orange-500 text-white shadow-md'
-                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                                        }`}
-                                        title={item.label}
-                                    >
-                                        {/* Desktop: Show both icon and text */}
-                                        <Icon size={20} className="transition-transform duration-200 group-hover:scale-110" />
-                                        <span className="hidden text-sm font-medium sm:block">{item.label}</span>
-
-                                        {/* Mobile tooltip - only for icon-only buttons */}
-                                        <div className="pointer-events-none absolute -bottom-12 left-1/2 -translate-x-1/2 transform opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:hidden">
-                                            <div className="rounded bg-gray-900 px-2 py-1 text-xs whitespace-nowrap text-white">{item.label}</div>
-                                            <div className="absolute top-0 left-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1 transform border-r-2 border-b-2 border-l-2 border-transparent border-b-gray-900"></div>
-                                        </div>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </nav>
-                {/* Hero Section with Featured Image */}
-                <section
-                    className={`relative overflow-hidden ${blog.display_image ? '' : 'from-brand-orange via-brand-orange to-brand-orange bg-gradient-to-br'}`}
-                >
-                    {/* Featured Image Background */}
-                    {blog.display_image && (
-                        <div className="absolute inset-0">
-                            <img src={blog.display_image} alt={blog.title} className="h-full w-full object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
-                        </div>
-                    )}
-
-                    {/* Hero Content */}
-                    <div className={`relative z-10 py-24 ${blog.display_image ? 'text-white' : 'text-white'}`}>
-                        <div className="container mx-auto max-w-4xl px-4">
-                            <Link href="/blog">
-                                <Button variant="ghost" className="mb-8 border-white/30 text-white hover:bg-white/20">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back to Blog
-                                </Button>
+                <main className="pt-20">
+                    {/* Article Header */}
+                    <article>
+                        {/* Hero Section */}
+                        <header className="container mx-auto px-4 py-8 md:py-12">
+                            {/* Back Link */}
+                            <Link
+                                href="/blog"
+                                className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                            >
+                                <ArrowLeft className="h-4 w-4" />
+                                Back to all articles
                             </Link>
 
-                            <div className="space-y-6">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <Badge className="border-white/30 bg-white/20 text-white">{blog.status_label}</Badge>
-                                    {blog.isPrimary && (
-                                        <Badge className="from-brand-orange to-brand-orange border-0 bg-gradient-to-r text-white">⭐ Featured</Badge>
-                                    )}
-                                </div>
-
-                                <h1 className="text-4xl leading-tight font-bold tracking-tight md:text-6xl">{blog.title}</h1>
-
-                                {blog.excerpt && <p className="max-w-3xl text-xl leading-relaxed text-white/90">{blog.excerpt}</p>}
-
-                                <div className="flex items-center gap-6 text-sm text-white/80">
-                                    {blog.published_at && (
-                                        <div className="flex items-center gap-2">
-                                            <Calendar className="h-4 w-4" />
-                                            <span>{format(new Date(blog.published_at), 'MMMM dd, yyyy')}</span>
-                                        </div>
-                                    )}
-                                    <div className="flex items-center gap-2">
-                                        <User className="h-4 w-4" />
-                                        <span>Admin</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span>👁️ {blog.view_count || 0} views</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Blog Content */}
-                <section className="bg-white py-16">
-                    <div className={`container mx-auto px-4 ${hasAds ? 'max-w-7xl' : 'max-w-4xl'}`}>
-                        <div className={`grid grid-cols-1 gap-8 ${hasAds ? 'lg:grid-cols-12' : ''}`}>
-                            {/* Main Content */}
-                            <div className={hasAds ? 'lg:col-span-8' : ''}>
-                                {/* Top Banner Ad */}
-                                <AdBanner
-                                    adClient={adsense?.client_id}
-                                    adSlot={adsense?.slots?.blog_post_top}
-                                    adFormat="horizontal"
-                                    testMode={!adsense?.enabled}
-                                    className="mb-8"
-                                />
-
-                                <div className="prose prose-lg prose-headings:text-brand-black prose-p:text-gray-700 prose-a:text-brand-orange prose-strong:text-brand-black w-full max-w-none">
-                                    <div
-                                        dangerouslySetInnerHTML={{ __html: blog.content }}
-                                        className="blog-content w-full leading-relaxed [&_blockquote]:w-full [&_div]:w-full [&_figure]:w-full [&_img]:h-auto [&_img]:w-full [&_img]:max-w-full [&_p]:w-full [&_table]:w-full [&>*]:w-full"
-                                    />
-                                </div>
-
-                                {/* Bottom Banner Ad */}
-                                <AdBanner
-                                    adClient={adsense?.client_id}
-                                    adSlot={adsense?.slots?.blog_post_bottom}
-                                    adFormat="horizontal"
-                                    testMode={!adsense?.enabled}
-                                    className="mt-8"
-                                />
+                            {/* Article Meta */}
+                            <div className="mb-6 flex flex-wrap items-center gap-3">
+                                {blog.isPrimary && (
+                                    <Badge className="rounded-full border-0 bg-orange-500 px-3 py-1 text-white">
+                                        <Sparkles className="mr-1 h-3 w-3" />
+                                        Featured
+                                    </Badge>
+                                )}
+                                {blog.published_at && (
+                                    <span className="flex items-center gap-1 text-sm text-gray-500">
+                                        <Calendar className="h-4 w-4" />
+                                        {format(new Date(blog.published_at), 'MMMM dd, yyyy')}
+                                    </span>
+                                )}
+                                <span className="flex items-center gap-1 text-sm text-gray-500">
+                                    <Clock className="h-4 w-4" />
+                                    {readingTime} min read
+                                </span>
+                                <span className="flex items-center gap-1 text-sm text-gray-500">
+                                    <Eye className="h-4 w-4" />
+                                    {blog.view_count || 0} views
+                                </span>
                             </div>
 
-                            {/* Sidebar with Sticky Ad - Only show if sidebar ads are configured */}
-                            {adsense?.client_id && adsense?.slots?.blog_post_sidebar && (
-                                <div className="lg:col-span-4">
-                                    <StickyAd adClient={adsense?.client_id} adSlot={adsense?.slots?.blog_post_sidebar} testMode={!adsense?.enabled} />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </section>
+                            {/* Title */}
+                            <h1 className="mb-6 font-serif text-4xl leading-tight font-bold tracking-tight text-gray-900 md:text-5xl lg:text-6xl">
+                                {blog.title}
+                            </h1>
 
-                {/* Back to Blog */}
-                <section className="from-brand-orange to-brand-orange bg-gradient-to-r py-12">
-                    <div className="container mx-auto max-w-4xl px-4 text-center">
-                        <Link href="/blog">
-                            <Button className="text-brand-orange rounded-xl bg-white px-8 py-3 shadow-lg hover:bg-gray-100">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to All Posts
+                            {/* Excerpt */}
+                            {blog.excerpt && <p className="mb-8 max-w-3xl text-xl leading-relaxed text-gray-600">{blog.excerpt}</p>}
+
+                            {/* Share Button */}
+                            <Button variant="outline" size="sm" onClick={handleShare} className="rounded-full">
+                                <Share2 className="mr-2 h-4 w-4" />
+                                Share
                             </Button>
-                        </Link>
-                    </div>
-                </section>
+                        </header>
+
+                        {/* Featured Image */}
+                        {blog.display_image && (
+                            <div className="container mx-auto px-4">
+                                <div className="aspect-[21/9] overflow-hidden rounded-3xl">
+                                    <img src={blog.display_image} alt={blog.title} className="h-full w-full object-cover" />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Article Content */}
+                        <div className={`container mx-auto px-4 py-12 ${hasAds ? 'max-w-7xl' : 'max-w-4xl'}`}>
+                            <div className={`grid grid-cols-1 gap-12 ${hasAds ? 'lg:grid-cols-12' : ''}`}>
+                                {/* Main Content */}
+                                <div className={hasAds ? 'lg:col-span-8' : ''}>
+                                    {/* Top Banner Ad */}
+                                    <AdBanner
+                                        adClient={adsense?.client_id}
+                                        adSlot={adsense?.slots?.blog_post_top}
+                                        adFormat="horizontal"
+                                        testMode={!adsense?.enabled}
+                                        className="mb-8"
+                                    />
+
+                                    {/* Article Body */}
+                                    <div className="rounded-3xl bg-white p-8 shadow-sm md:p-12">
+                                        <div
+                                            className="prose prose-lg prose-gray prose-headings:font-serif prose-headings:font-bold prose-headings:tracking-tight prose-h2:text-3xl prose-h3:text-2xl prose-p:leading-relaxed prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-2xl prose-blockquote:border-l-orange-500 prose-blockquote:bg-orange-50 prose-blockquote:py-4 prose-blockquote:pl-6 prose-blockquote:not-italic max-w-none"
+                                            dangerouslySetInnerHTML={{ __html: blog.content }}
+                                        />
+                                    </div>
+
+                                    {/* Bottom Banner Ad */}
+                                    <AdBanner
+                                        adClient={adsense?.client_id}
+                                        adSlot={adsense?.slots?.blog_post_bottom}
+                                        adFormat="horizontal"
+                                        testMode={!adsense?.enabled}
+                                        className="mt-8"
+                                    />
+
+                                    {/* Author Card */}
+                                    <div className="mt-12 flex items-center gap-4 rounded-2xl bg-white p-6 shadow-sm">
+                                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-100">
+                                            <img src="/logo.png" alt="Author" className="h-10 w-10" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Written by</p>
+                                            <p className="font-semibold text-gray-900">Humfurie</p>
+                                            <p className="text-sm text-gray-500">Software Developer</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Sidebar with Sticky Ad */}
+                                {adsense?.client_id && adsense?.slots?.blog_post_sidebar && (
+                                    <div className="lg:col-span-4">
+                                        <StickyAd
+                                            adClient={adsense?.client_id}
+                                            adSlot={adsense?.slots?.blog_post_sidebar}
+                                            testMode={!adsense?.enabled}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </article>
+
+                    {/* Back to Blog CTA */}
+                    <section className="container mx-auto px-4 pb-12">
+                        <div className="rounded-3xl bg-gradient-to-r from-orange-500 to-amber-500 p-8 text-center text-white md:p-12">
+                            <h2 className="mb-4 text-2xl font-bold md:text-3xl">Enjoyed this article?</h2>
+                            <p className="mx-auto mb-6 max-w-lg text-white/80">
+                                Check out more articles on software development, design, and technology.
+                            </p>
+                            <Link href="/blog">
+                                <Button variant="secondary" size="lg" className="bg-white text-orange-600 hover:bg-gray-100">
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
+                                    Back to All Articles
+                                </Button>
+                            </Link>
+                        </div>
+                    </section>
+                </main>
             </div>
 
             <Footer />
