@@ -1,7 +1,5 @@
 import { useEffect, useRef } from 'react';
-// @ts-expect-error - react-leaflet types are installed separately
 import { MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from 'react-leaflet';
-// @ts-expect-error - leaflet types are installed separately
 import L from 'leaflet';
 import type { BlogLocation } from '@/types';
 import { LocationPopup } from './LocationPopup';
@@ -75,6 +73,30 @@ export function TravelMapInner({
     // Create route line coordinates (ordered by location.order)
     const routeCoordinates: [number, number][] = [...locations].sort((a, b) => a.order - b.order).map((loc) => [loc.latitude, loc.longitude]);
 
+    // Cast components to any to work around react-leaflet v5 type incompatibilities
+    const MapContainerAny = MapContainer as unknown as React.ComponentType<{
+        center: [number, number];
+        zoom: number;
+        scrollWheelZoom: boolean;
+        dragging: boolean;
+        zoomControl: boolean;
+        doubleClickZoom: boolean;
+        style: React.CSSProperties;
+        className: string;
+        children: React.ReactNode;
+    }>;
+    const TileLayerAny = TileLayer as unknown as React.ComponentType<{
+        attribution: string;
+        url: string;
+    }>;
+    const MarkerAny = Marker as unknown as React.ComponentType<{
+        key: number;
+        position: [number, number];
+        icon: L.DivIcon;
+        eventHandlers: { click: () => void };
+        children: React.ReactNode;
+    }>;
+
     return (
         <>
             <style>{`
@@ -139,7 +161,7 @@ export function TravelMapInner({
                     max-width: 320px;
                 }
             `}</style>
-            <MapContainer
+            <MapContainerAny
                 center={defaultCenter}
                 zoom={13}
                 scrollWheelZoom={interactive}
@@ -149,7 +171,7 @@ export function TravelMapInner({
                 style={{ height, width: '100%' }}
                 className={`rounded-lg ${className}`}
             >
-                <TileLayer
+                <TileLayerAny
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
@@ -171,7 +193,7 @@ export function TravelMapInner({
 
                 {/* Location markers */}
                 {locations.map((location, index) => (
-                    <Marker
+                    <MarkerAny
                         key={location.id}
                         position={[location.latitude, location.longitude]}
                         icon={createNumberedIcon(index + 1)}
@@ -182,9 +204,9 @@ export function TravelMapInner({
                         <Popup>
                             <LocationPopup location={location} number={index + 1} />
                         </Popup>
-                    </Marker>
+                    </MarkerAny>
                 ))}
-            </MapContainer>
+            </MapContainerAny>
         </>
     );
 }
