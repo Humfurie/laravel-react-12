@@ -68,29 +68,37 @@ class StockService
     /**
      * Get list of popular stocks
      *
+     * @param int $limit Number of stocks to fetch (default 10, supports 10, 100, 1000)
      * @return array
      */
-    public function getPopularStocks(): array
+    public function getPopularStocks(int $limit = 10): array
     {
-        $cacheKey = 'popular_stocks';
+        // Use different stock lists based on requested limit
+        $allSymbols = $this->getStockSymbolsList($limit);
+        $cacheKey = "popular_stocks_{$limit}";
 
-        return Cache::remember($cacheKey, self::CACHE_DURATION, function () {
+        return Cache::remember($cacheKey, self::CACHE_DURATION, function () use ($allSymbols) {
             try {
-                // Get quotes for popular stocks (free tier requires individual calls)
-                $symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'AMD', 'NFLX', 'DIS'];
                 $results = [];
 
-                foreach ($symbols as $symbol) {
-                    $response = Http::timeout(10)
-                        ->get($this->baseUrl . "/quote", [
-                            'symbol' => $symbol,
+                // Batch symbols in groups of 5 to reduce API calls
+                $batches = array_chunk($allSymbols, 5);
+
+                foreach ($batches as $batch) {
+                    $symbolString = implode(',', $batch);
+                    $response = Http::timeout(15)
+                        ->get($this->baseUrl . "/quote/{$symbolString}", [
                             'apikey' => $this->apiKey,
                         ]);
 
                     if ($response->successful()) {
                         $data = $response->json();
-                        if (!empty($data)) {
-                            $results[] = is_array($data) ? $data[0] : $data;
+                        if (!empty($data) && is_array($data)) {
+                            foreach ($data as $stock) {
+                                if (!empty($stock)) {
+                                    $results[] = $stock;
+                                }
+                            }
                         }
                     }
                 }
@@ -104,6 +112,136 @@ class StockService
                 return [];
             }
         });
+    }
+
+    /**
+     * Get stock symbols list based on limit
+     *
+     * @param int $limit
+     * @return array
+     */
+    private function getStockSymbolsList(int $limit): array
+    {
+        // Core popular stocks (always included)
+        $coreSymbols = [
+            'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'AMD', 'NFLX', 'DIS'
+        ];
+
+        if ($limit <= 10) {
+            return $coreSymbols;
+        }
+
+        // Extended list for 100 stocks
+        $extendedSymbols = [
+            // Tech
+            'INTC', 'CRM', 'ADBE', 'PYPL', 'CSCO', 'ORCL', 'IBM', 'QCOM', 'TXN', 'AVGO',
+            'NOW', 'SHOP', 'SQ', 'UBER', 'LYFT', 'SNAP', 'PINS', 'TWTR', 'ZM', 'DOCU',
+            // Finance
+            'JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'AXP', 'V', 'MA', 'BLK',
+            // Healthcare
+            'JNJ', 'PFE', 'UNH', 'MRK', 'ABBV', 'TMO', 'ABT', 'LLY', 'BMY', 'AMGN',
+            // Consumer
+            'WMT', 'HD', 'NKE', 'MCD', 'SBUX', 'KO', 'PEP', 'PG', 'COST', 'TGT',
+            // Industrial
+            'BA', 'CAT', 'GE', 'MMM', 'HON', 'UPS', 'FDX', 'LMT', 'RTX', 'DE',
+            // Energy
+            'XOM', 'CVX', 'COP', 'SLB', 'EOG', 'MPC', 'PSX', 'VLO', 'OXY', 'HAL',
+            // Auto
+            'F', 'GM', 'RIVN', 'LCID', 'NIO',
+            // Entertainment
+            'CMCSA', 'T', 'VZ', 'TMUS', 'CHTR',
+            // Retail
+            'AMZN', 'EBAY', 'ETSY', 'W', 'BBY',
+            // Other Tech
+            'PLTR', 'SNOW', 'DDOG', 'NET', 'CRWD', 'ZS', 'OKTA', 'MDB', 'TEAM', 'SPLK'
+        ];
+
+        if ($limit <= 100) {
+            return array_unique(array_merge($coreSymbols, array_slice($extendedSymbols, 0, $limit - 10)));
+        }
+
+        // For 1000+, we fetch from the screener API
+        return array_unique(array_merge($coreSymbols, $extendedSymbols));
+    }
+
+    /**
+     * Get large stock list from screener (for 1000+ stocks)
+     *
+     * @param int $limit
+     * @return array
+     */
+    public function getLargeStockList(int $limit = 1000): array
+    {
+        $cacheKey = "stock_screener_{$limit}";
+
+        return Cache::remember($cacheKey, self::CACHE_DURATION, function () use ($limit) {
+            try {
+                $response = Http::timeout(30)
+                    ->get($this->baseUrl . "/stock-screener", [
+                        'marketCapMoreThan' => 1000000000, // $1B+ market cap
+                        'limit' => min($limit, 1000),
+                        'exchange' => 'NASDAQ,NYSE',
+                        'apikey' => $this->apiKey,
+                    ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    if (!empty($data) && is_array($data)) {
+                        // Get symbols from screener
+                        $symbols = array_column($data, 'symbol');
+                        // Fetch quotes for these symbols in batches
+                        return $this->getQuotesForSymbols($symbols);
+                    }
+                }
+
+                return [];
+            } catch (Exception $e) {
+                Log::error('Error fetching large stock list', [
+                    'message' => $e->getMessage()
+                ]);
+
+                return [];
+            }
+        });
+    }
+
+    /**
+     * Get quotes for multiple symbols
+     *
+     * @param array $symbols
+     * @return array
+     */
+    private function getQuotesForSymbols(array $symbols): array
+    {
+        $results = [];
+        $batches = array_chunk($symbols, 50); // FMP supports up to 50 symbols per request
+
+        foreach ($batches as $batch) {
+            try {
+                $symbolString = implode(',', $batch);
+                $response = Http::timeout(15)
+                    ->get($this->baseUrl . "/quote/{$symbolString}", [
+                        'apikey' => $this->apiKey,
+                    ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    if (!empty($data) && is_array($data)) {
+                        foreach ($data as $stock) {
+                            if (!empty($stock)) {
+                                $results[] = $stock;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                Log::error('Error fetching quotes batch', [
+                    'message' => $e->getMessage()
+                ]);
+            }
+        }
+
+        return $results;
     }
 
     /**

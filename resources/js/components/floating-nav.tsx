@@ -1,6 +1,6 @@
+import { publicNavItems } from '@/config/navigation';
 import { Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { publicNavItems } from '@/config/navigation';
 
 interface FloatingNavProps {
     currentPage?: string;
@@ -31,30 +31,71 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
 
     return (
         <nav
-            className={`fixed left-1/2 z-50 w-[calc(100vw-16px)] max-w-[95vw] -translate-x-1/2 transform transition-all duration-300 ease-in-out sm:w-auto sm:max-w-none ${
+            className={`fixed top-0 right-0 left-0 z-50 transition-all duration-500 ease-out ${
                 isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-            } top-2 sm:top-4 lg:top-6`}
+            }`}
         >
-            <div className="rounded-full border border-white/20 bg-white/80 px-2 py-2 shadow-lg backdrop-blur-md sm:px-4 lg:px-6 lg:py-4">
-                <div className="flex items-center justify-center gap-1 sm:gap-2 lg:gap-3">
-                    {publicNavItems.map((item, index) => {
-                        const Icon = item.icon;
-                        const isActive = activeItem === item.id;
+            <div className="container mx-auto px-3 py-3 sm:px-4 sm:py-4">
+                <div className="flex items-center justify-between px-4 py-2 sm:px-6 sm:py-3">
+                    {/* Logo with Humfurie - stands out */}
+                    <Link
+                        href="/"
+                        className="group flex shrink-0 items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 shadow-lg backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white hover:shadow-xl dark:bg-gray-900/90 dark:hover:bg-gray-900"
+                    >
+                        <div className="flex aspect-square size-8 items-center justify-center">
+                            <img src="/logo.png" alt="Logo" className="size-8 object-contain" />
+                        </div>
+                        <span className="pr-1 text-sm font-bold text-gray-900 dark:text-white">Humfurie</span>
+                    </Link>
 
-                        return (
-                            <Link
-                                key={`${item.id}-${index}`}
-                                href={item.route}
-                                onClick={() => setActiveItem(item.id)}
-                                className={`group relative flex shrink-0 items-center justify-center rounded-full p-2 transition-all duration-200 sm:p-2.5 lg:flex-row lg:space-x-2 lg:px-5 lg:py-3 ${
-                                    isActive ? 'bg-orange-500 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                                }`}
-                            >
-                                <Icon className="h-4 w-4 sm:h-5 sm:w-5 lg:h-5 lg:w-5" />
-                                <span className="hidden font-medium lg:inline">{item.label}</span>
-                            </Link>
-                        );
-                    })}
+                    {/* Desktop Pill Navigation */}
+                    <div className="hidden items-center gap-1 rounded-full border border-gray-200/50 bg-white/60 px-2 py-1.5 backdrop-blur-sm transition-all duration-300 md:flex dark:border-gray-600/50 dark:bg-gray-800/60">
+                        {publicNavItems.map((item) => {
+                            const Icon = item.icon;
+                            const isActive = activeItem === item.id;
+                            return (
+                                <Link
+                                    key={item.id}
+                                    href={item.route}
+                                    onClick={() => setActiveItem(item.id)}
+                                    className={`group relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                                        isActive
+                                            ? 'bg-orange-500 text-white shadow-md'
+                                            : 'text-gray-700 hover:bg-white/80 hover:text-orange-600 dark:text-gray-200 dark:hover:bg-gray-700/80 dark:hover:text-orange-400'
+                                    }`}
+                                >
+                                    {item.showIcon && (
+                                        <Icon
+                                            className={`h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${isActive ? '' : 'group-hover:rotate-6'}`}
+                                        />
+                                    )}
+                                    <span className="transition-all duration-200">{item.label}</span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+
+                    {/* Mobile Navigation */}
+                    <div className="flex items-center gap-1 md:hidden">
+                        {publicNavItems.map((item) => {
+                            const Icon = item.icon;
+                            const isActive = activeItem === item.id;
+                            return (
+                                <Link
+                                    key={item.id}
+                                    href={item.route}
+                                    onClick={() => setActiveItem(item.id)}
+                                    className={`rounded-full p-2 transition-all duration-200 active:scale-95 ${
+                                        isActive
+                                            ? 'bg-orange-500 text-white shadow-md'
+                                            : 'text-gray-700 hover:bg-white/80 hover:text-orange-600 dark:text-gray-200 dark:hover:bg-gray-700/80 dark:hover:text-orange-400'
+                                    }`}
+                                >
+                                    <Icon className={`h-5 w-5 transition-transform duration-200 ${isActive ? '' : 'hover:scale-110'}`} />
+                                </Link>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </nav>

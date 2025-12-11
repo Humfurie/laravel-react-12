@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateBlogRequest;
 use App\Models\Blog;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -91,14 +92,19 @@ class BlogController extends Controller
             $validated['published_at'] = now();
         }
 
-        $blog = DB::transaction(function () use ($validated) {
-            // If this blog is being set as primary, unset all other primary blogs
-            if (isset($validated['isPrimary']) && $validated['isPrimary']) {
-                Blog::where('isPrimary', true)->update(['isPrimary' => false]);
-            }
+        // Clear featured_until if not marking as primary
+        if (empty($validated['isPrimary'])) {
+            $validated['featured_until'] = null;
+        }
 
+        $blog = DB::transaction(function () use ($validated) {
             return Blog::create($validated);
         });
+
+        // Clear homepage cache when featured status changes
+        if (!empty($validated['isPrimary'])) {
+            Cache::forget('homepage.blogs');
+        }
 
         return redirect()->route('blogs.index')
             ->with('success', 'Blog created successfully.');
@@ -163,16 +169,21 @@ class BlogController extends Controller
             $validated['published_at'] = now();
         }
 
-        DB::transaction(function () use ($blog, $validated) {
-            // If this blog is being set as primary, unset all other primary blogs
-            if (isset($validated['isPrimary']) && $validated['isPrimary'] && !$blog->isPrimary) {
-                Blog::where('id', '!=', $blog->id)
-                    ->where('isPrimary', true)
-                    ->update(['isPrimary' => false]);
-            }
+        // Clear featured_until if not marking as primary
+        if (empty($validated['isPrimary'])) {
+            $validated['featured_until'] = null;
+        }
 
+        $wasFeatured = $blog->isPrimary;
+
+        DB::transaction(function () use ($blog, $validated) {
             $blog->update($validated);
         });
+
+        // Clear homepage cache when featured status changes
+        if ($wasFeatured || !empty($validated['isPrimary'])) {
+            Cache::forget('homepage.blogs');
+        }
 
         return redirect()->route('blogs.index')
             ->with('success', 'Blog updated successfully.');

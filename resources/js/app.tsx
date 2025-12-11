@@ -5,6 +5,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
 import ConsentBanner from './components/consent/ConsentBanner';
+import PageLoader from './components/page-loader';
 
 // Google Analytics page view tracking
 interface GtagEventParams {
@@ -52,14 +53,13 @@ createInertiaApp({
 
         root.render(
             <>
+                <PageLoader />
                 <App {...props} />
                 <ConsentBanner />
             </>,
         );
     },
-    progress: {
-        color: '#4B5563',
-    },
+    progress: false, // Using custom PageLoader instead
 });
 
 // This will set light / dark mode on load...
