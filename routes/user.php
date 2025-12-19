@@ -2,6 +2,15 @@
 
 use App\Http\Controllers\CryptoController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\UserProfileController;
+
+// Public user profile
+Route::get('/u/{username}', [UserProfileController::class, 'show'])->name('user.profile');
+
+// Refresh GitHub contributions (authenticated only)
+Route::post('/profile/refresh-github', [UserProfileController::class, 'refreshContributions'])
+    ->middleware('auth')
+    ->name('user.refresh-github');
 
 // Crypto routes - accessible to everyone (guests and authenticated users)
 Route::get('/crypto', [CryptoController::class, 'index'])->name('crypto.index');

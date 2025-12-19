@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -128,6 +129,10 @@ class GiveawayController extends Controller
                 'start_date' => $giveaway->start_date,
                 'end_date' => $giveaway->end_date,
                 'number_of_winners' => $giveaway->number_of_winners,
+                'background_image' => $giveaway->background_image,
+                'background_image_url' => $giveaway->background_image
+                    ? Storage::disk(config('filesystems.default'))->url($giveaway->background_image)
+                    : null,
                 'status' => $giveaway->status,
                 'is_active' => $giveaway->is_active,
                 'has_ended' => $giveaway->has_ended,
@@ -223,7 +228,8 @@ class GiveawayController extends Controller
         try {
             $file = $request->file('image');
             $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('giveaways', $filename, 'minio');
+            $disk = config('filesystems.default');
+            $path = $file->storeAs('giveaways', $filename, $disk);
 
             // Get the next order number
             $maxOrder = $giveaway->images()->max('order') ?? 0;
@@ -331,6 +337,55 @@ class GiveawayController extends Controller
         $image->delete();
 
         return back()->with('success', 'Image deleted successfully.');
+    }
+
+    /**
+     * Upload background image for the giveaway page
+     */
+    public function uploadBackground(Request $request, Giveaway $giveaway)
+    {
+        $request->validate([
+            'background' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:10240', // 10MB max
+        ]);
+
+        try {
+            $disk = config('filesystems.default');
+
+            // Delete old background if exists
+            if ($giveaway->background_image && Storage::disk($disk)->exists($giveaway->background_image)) {
+                Storage::disk($disk)->delete($giveaway->background_image);
+            }
+
+            $file = $request->file('background');
+            $filename = 'bg_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('giveaways/backgrounds', $filename, $disk);
+
+            $giveaway->update(['background_image' => $path]);
+
+            return back()->with('success', 'Background image uploaded successfully.');
+        } catch (Exception $e) {
+            return back()->with('error', 'Failed to upload background image: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete background image
+     */
+    public function deleteBackground(Giveaway $giveaway)
+    {
+        try {
+            $disk = config('filesystems.default');
+
+            if ($giveaway->background_image && Storage::disk($disk)->exists($giveaway->background_image)) {
+                Storage::disk($disk)->delete($giveaway->background_image);
+            }
+
+            $giveaway->update(['background_image' => null]);
+
+            return back()->with('success', 'Background image removed successfully.');
+        } catch (Exception $e) {
+            return back()->with('error', 'Failed to delete background image: ' . $e->getMessage());
+        }
     }
 
     /**

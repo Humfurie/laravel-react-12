@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Giveaway;
 use App\Models\GiveawayEntry;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class GiveawayController extends Controller
@@ -87,6 +88,9 @@ class GiveawayController extends Controller
                 'can_accept_entries' => $giveaway->can_accept_entries,
                 'can_start_giveaway' => $canStartGiveaway,
                 'entries_count' => $giveaway->entries->count(),
+                'background_image_url' => $giveaway->background_image
+                    ? Storage::disk(config('filesystems.default'))->url($giveaway->background_image)
+                    : null,
                 'winner' => $giveaway->winner ? [
                     'name' => $giveaway->winner->name,
                 ] : null,

@@ -79,10 +79,13 @@ class BlogSeeder extends Seeder
     }
 
     /**
-     * Attach MinIO images to blogs using polymorphic relationship
+     * Attach images to blogs using polymorphic relationship
      */
     private function attachMinIOImages($blogs): void
     {
+        // Determine which disk to use based on configuration
+        $disk = config('filesystems.default');
+
         foreach ($blogs as $blog) {
             // Generate a sample image using picsum.photos (reliable service)
             $imageUrl = "https://picsum.photos/800/600";
@@ -94,15 +97,15 @@ class BlogSeeder extends Seeder
                 if ($response->successful()) {
                     $imageContent = $response->body();
                     $filename = 'blog-' . $blog->id . '-' . uniqid() . '.jpg';
-                    $minioPath = 'images/blogs/' . $filename;
+                    $storagePath = 'images/blogs/' . $filename;
 
-                    // Upload to MinIO
-                    Storage::disk('minio')->put($minioPath, $imageContent);
+                    // Upload to the configured disk (minio in production, public in local)
+                    Storage::disk($disk)->put($storagePath, $imageContent);
 
                     // Create polymorphic image relationship
                     $blog->image()->create([
                         'name' => $filename,
-                        'path' => $minioPath,
+                        'path' => $storagePath,
                     ]);
 
                     // Clear the featured_image field since we're using polymorphic relationship

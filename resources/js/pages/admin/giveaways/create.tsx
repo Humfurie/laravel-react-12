@@ -13,6 +13,7 @@ export default function Create() {
         description: '',
         start_date: '',
         end_date: '',
+        number_of_winners: 1,
         status: 'draft' as 'draft' | 'active' | 'ended',
     });
 
@@ -98,6 +99,25 @@ export default function Create() {
                                 <p className="text-muted-foreground mt-1 text-xs">Must be after the start date</p>
                                 {errors.end_date && <p className="mt-1 text-sm text-red-600">{errors.end_date}</p>}
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-card rounded-lg border p-6">
+                        <h2 className="mb-4 text-xl font-semibold">Winners Configuration</h2>
+
+                        <div>
+                            <Label htmlFor="number_of_winners">Number of Winners *</Label>
+                            <Input
+                                id="number_of_winners"
+                                type="number"
+                                min="1"
+                                max="100"
+                                value={data.number_of_winners}
+                                onChange={(e) => setData('number_of_winners', parseInt(e.target.value) || 1)}
+                                className="mt-1"
+                            />
+                            <p className="text-muted-foreground mt-1 text-xs">How many winners will be selected from the entries (1-100)</p>
+                            {errors.number_of_winners && <p className="mt-1 text-sm text-red-600">{errors.number_of_winners}</p>}
                         </div>
                     </div>
 

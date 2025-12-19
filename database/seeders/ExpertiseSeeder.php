@@ -137,28 +137,31 @@ class ExpertiseSeeder extends Seeder
         ];
 
         foreach ($expertises as $expertiseData) {
-            // All environments now use MinIO
+            // Determine which disk to use based on configuration
+            $disk = config('filesystems.default');
             $localImagePath = public_path($expertiseData['image']);
 
             if (File::exists($localImagePath)) {
                 $filename = basename($expertiseData['image']);
-                $minioPath = 'images/techstack/' . $filename;
+                $storagePath = 'images/techstack/' . $filename;
 
-                // Check if already uploaded to MinIO
-                if (!Storage::disk('minio')->exists($minioPath)) {
-                    // Upload to MinIO
-                    $imageContent = File::get($localImagePath);
-                    Storage::disk('minio')->put($minioPath, $imageContent);
-                    $this->command->info("Uploaded {$filename} to MinIO");
+                if ($disk === 'minio') {
+                    // Production: Upload to MinIO
+                    if (!Storage::disk('minio')->exists($storagePath)) {
+                        $imageContent = File::get($localImagePath);
+                        Storage::disk('minio')->put($storagePath, $imageContent);
+                        $this->command->info("Uploaded {$filename} to MinIO");
+                    } else {
+                        $this->command->info("Image already exists in MinIO: {$filename}");
+                    }
+                    // Store MinIO URL
+                    $expertiseData['image'] = Storage::disk('minio')->url($storagePath);
                 } else {
-                    $this->command->info("Image already exists in MinIO: {$filename}");
+                    // Local: Use public disk - keep original path
+                    $this->command->info("Using local public path for {$filename}");
+                    // Keep the original image path (e.g., 'images/techstack/laravel.webp')
+                    // This will be served from public directory
                 }
-
-                // Store MinIO URL
-                // This will automatically use the correct URL based on MINIO_URL env var:
-                // - Local/Testing: http://localhost:9200
-                // - Production: https://cdn.humfurie.org
-                $expertiseData['image'] = Storage::disk('minio')->url($minioPath);
             } else {
                 if (!str_starts_with($expertiseData['image'], 'http')) {
                     $this->command->warn("Image not found: {$expertiseData['image']}");
