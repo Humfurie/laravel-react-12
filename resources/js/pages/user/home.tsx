@@ -79,6 +79,13 @@ interface Props {
         total_projects: number;
         live_projects: number;
     };
+    profileUser?: {
+        name: string;
+        headline: string | null;
+        bio: string | null;
+        about: string | null;
+        profile_stats: { label: string; value: string }[];
+    };
 }
 
 // Untitled UI style Blog Card - Clean, minimal design
@@ -150,7 +157,15 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
     );
 }
 
-export default function Home({ primary = [], latest = [], experiences = [], expertises = [], projects = [], projectStats }: Props): JSX.Element {
+export default function Home({
+    primary = [],
+    latest = [],
+    experiences = [],
+    expertises = [],
+    projects = [],
+    projectStats,
+    profileUser,
+}: Props): JSX.Element {
     // Combine and dedupe blogs for display
     const allBlogs = [...primary, ...latest.filter((b) => !primary.find((p) => p.id === b.id))];
     const featuredBlog = primary[0];
@@ -190,7 +205,7 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
             <FloatingNav currentPage="home" />
 
             <HomeBanner />
-            <HomeAboutMe />
+            <HomeAboutMe profileUser={profileUser} />
 
             {/* Projects Section */}
             {projects.length > 0 && <HomeProjects projects={projects} stats={projectStats} />}

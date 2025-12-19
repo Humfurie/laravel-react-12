@@ -25,6 +25,7 @@ class Giveaway extends Model
         'start_date',
         'end_date',
         'number_of_winners',
+        'background_image',
         'status',
         'winner_id',
         'prize_claimed',
@@ -83,6 +84,22 @@ class Giveaway extends Model
     public function winners(): HasMany
     {
         return $this->hasMany(GiveawayEntry::class)->where('status', 'winner');
+    }
+
+    /**
+     * Get all comments for this giveaway.
+     */
+    public function comments(): MorphMany
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    /**
+     * Get only approved comments for this giveaway.
+     */
+    public function approvedComments(): MorphMany
+    {
+        return $this->comments()->where('status', 'approved');
     }
 
     /**

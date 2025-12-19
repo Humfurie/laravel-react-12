@@ -39,6 +39,9 @@ interface Giveaway {
     description: string;
     start_date: string;
     end_date: string;
+    number_of_winners: number;
+    background_image?: string | null;
+    background_image_url?: string | null;
     status: 'draft' | 'active' | 'ended';
     is_active: boolean;
     has_ended: boolean;
@@ -48,6 +51,7 @@ interface Giveaway {
     prize_claimed_at: string | null;
     rejection_reason: string | null;
     winner: Winner | null;
+    winners?: Winner[];
     images: Image[];
     entries_count: number;
     entries: Entry[];
@@ -58,16 +62,32 @@ interface Props {
 }
 
 export default function Edit({ giveaway }: Props) {
+    // Convert dates to local datetime for datetime-local input
+    const formatDateForInput = (dateString: string) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        // Format to YYYY-MM-DDTHH:mm in local timezone
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
     const { data, setData, put, processing, errors } = useForm({
         title: giveaway.title,
         description: giveaway.description,
-        start_date: giveaway.start_date ? giveaway.start_date.slice(0, 16) : '',
-        end_date: giveaway.end_date ? giveaway.end_date.slice(0, 16) : '',
+        start_date: formatDateForInput(giveaway.start_date),
+        end_date: formatDateForInput(giveaway.end_date),
+        number_of_winners: giveaway.number_of_winners || 1,
         status: giveaway.status,
     });
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const backgroundInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
+    const [uploadingBackground, setUploadingBackground] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
@@ -104,6 +124,30 @@ export default function Edit({ giveaway }: Props) {
 
     const handleSetPrimaryImage = (imageId: number) => {
         router.patch(route('admin.giveaways.images.set-primary', [giveaway.slug, imageId]));
+    };
+
+    const handleBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('background', file);
+
+        setUploadingBackground(true);
+        router.post(route('admin.giveaways.background.upload', giveaway.slug), formData, {
+            onFinish: () => {
+                setUploadingBackground(false);
+                if (backgroundInputRef.current) {
+                    backgroundInputRef.current.value = '';
+                }
+            },
+        });
+    };
+
+    const handleDeleteBackground = () => {
+        if (confirm('Are you sure you want to remove the background image?')) {
+            router.delete(route('admin.giveaways.background.delete', giveaway.slug));
+        }
     };
 
     const handleWinnerSelection = () => {
@@ -162,10 +206,11 @@ export default function Edit({ giveaway }: Props) {
                         <p className="text-muted-foreground">{giveaway.title}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                        {giveaway.entries_count > 0 && !giveaway.winner && (
+                        {giveaway.entries_count > 0 && (giveaway.winners?.length || 0) < giveaway.number_of_winners && (
                             <Button onClick={handleWinnerSelection}>
                                 <Trophy className="mr-2 h-4 w-4" />
-                                Select Winner
+                                Select {(giveaway.winners?.length || 0) === 0 ? 'Winner' : 'Next Winner'} ({(giveaway.winners?.length || 0) + 1}/
+                                {giveaway.number_of_winners})
                             </Button>
                         )}
                         <Badge
@@ -248,6 +293,25 @@ export default function Edit({ giveaway }: Props) {
                             </div>
 
                             <div className="bg-card rounded-lg border p-6">
+                                <h2 className="mb-4 text-xl font-semibold">Winners Configuration</h2>
+
+                                <div>
+                                    <Label htmlFor="number_of_winners">Number of Winners *</Label>
+                                    <Input
+                                        id="number_of_winners"
+                                        type="number"
+                                        min="1"
+                                        max="100"
+                                        value={data.number_of_winners}
+                                        onChange={(e) => setData('number_of_winners', parseInt(e.target.value) || 1)}
+                                        className="mt-1"
+                                    />
+                                    <p className="text-muted-foreground mt-1 text-xs">How many winners will be selected from the entries (1-100)</p>
+                                    {errors.number_of_winners && <p className="mt-1 text-sm text-red-600">{errors.number_of_winners}</p>}
+                                </div>
+                            </div>
+
+                            <div className="bg-card rounded-lg border p-6">
                                 <h2 className="mb-4 text-xl font-semibold">Status</h2>
 
                                 <select
@@ -312,6 +376,53 @@ export default function Edit({ giveaway }: Props) {
                                     <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
                                         <ImageIcon className="text-muted-foreground mb-2 h-8 w-8" />
                                         <p className="text-muted-foreground text-sm">No images uploaded yet</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="bg-card rounded-lg border p-6">
+                            <h2 className="mb-4 text-xl font-semibold">Page Background Image</h2>
+                            <p className="text-muted-foreground mb-4 text-sm">
+                                Upload a custom background image for the public giveaway page. Great for themed giveaways (e.g., Christmas, Halloween)
+                            </p>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <input
+                                        ref={backgroundInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleBackgroundUpload}
+                                        className="hidden"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => backgroundInputRef.current?.click()}
+                                        disabled={uploadingBackground}
+                                        className="w-full"
+                                    >
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        {uploadingBackground ? 'Uploading...' : 'Upload Background Image'}
+                                    </Button>
+                                </div>
+
+                                {giveaway.background_image_url ? (
+                                    <div className="group relative overflow-hidden rounded-lg border">
+                                        <img src={giveaway.background_image_url} alt="Background" className="h-48 w-full object-cover" />
+                                        <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                                            <Button size="sm" variant="destructive" onClick={handleDeleteBackground}>
+                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                Remove
+                                            </Button>
+                                        </div>
+                                        <Badge className="absolute top-2 left-2 bg-purple-600">Background Image</Badge>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
+                                        <ImageIcon className="text-muted-foreground mb-2 h-8 w-8" />
+                                        <p className="text-muted-foreground text-sm">No background image uploaded</p>
                                     </div>
                                 )}
                             </div>
@@ -390,6 +501,12 @@ export default function Edit({ giveaway }: Props) {
                                     <span className="font-semibold">{giveaway.entries_count}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
+                                    <span className="text-muted-foreground text-sm">Winners Selected</span>
+                                    <span className="font-semibold">
+                                        {giveaway.winners?.length || 0} / {giveaway.number_of_winners}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
                                     <span className="text-muted-foreground text-sm">Status</span>
                                     <Badge className={giveaway.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
                                         {giveaway.is_active ? 'Active' : 'Inactive'}
@@ -398,32 +515,34 @@ export default function Edit({ giveaway }: Props) {
                             </div>
                         </div>
 
-                        {giveaway.winner && (
+                        {giveaway.winners && giveaway.winners.length > 0 && (
                             <div className="bg-card rounded-lg border p-6">
                                 <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
                                     <Trophy className="h-5 w-5 text-yellow-600" />
-                                    Winner
+                                    {giveaway.winners.length === 1 ? 'Winner' : `Winners (${giveaway.winners.length})`}
                                 </h3>
-                                <div className="space-y-2">
-                                    <div>
-                                        <p className="text-muted-foreground text-sm">Name</p>
-                                        <p className="font-medium">{giveaway.winner.name}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-muted-foreground text-sm">Phone</p>
-                                        <p className="font-medium">{giveaway.winner.phone}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-muted-foreground text-sm">Facebook</p>
-                                        <a
-                                            href={giveaway.winner.facebook_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-sm text-blue-600 hover:underline"
-                                        >
-                                            View Profile
-                                        </a>
-                                    </div>
+                                <div className="space-y-4">
+                                    {giveaway.winners.map((winner, index) => (
+                                        <div key={winner.id} className="rounded-lg border bg-gray-50 p-3">
+                                            <div className="mb-2 flex items-center gap-2">
+                                                <Badge variant="secondary">#{index + 1}</Badge>
+                                                <p className="font-medium">{winner.name}</p>
+                                            </div>
+                                            <div className="space-y-1 text-sm">
+                                                <p className="text-muted-foreground">
+                                                    <span className="font-medium">Phone:</span> {winner.phone}
+                                                </p>
+                                                <a
+                                                    href={winner.facebook_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-600 hover:underline"
+                                                >
+                                                    View Facebook Profile
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
@@ -559,10 +678,11 @@ export default function Edit({ giveaway }: Props) {
                         <div className="bg-card rounded-lg border p-6">
                             <h3 className="mb-4 text-lg font-semibold">Quick Actions</h3>
                             <div className="space-y-2">
-                                {giveaway.entries_count > 0 && !giveaway.winner && (
+                                {giveaway.entries_count > 0 && (giveaway.winners?.length || 0) < giveaway.number_of_winners && (
                                     <Button className="w-full" onClick={handleWinnerSelection}>
                                         <Trophy className="mr-2 h-4 w-4" />
-                                        Select Winner
+                                        Select {(giveaway.winners?.length || 0) === 0 ? 'Winner' : 'Next Winner'} (
+                                        {(giveaway.winners?.length || 0) + 1}/{giveaway.number_of_winners})
                                     </Button>
                                 )}
                                 <Button variant="outline" className="w-full" onClick={() => window.open(`/giveaways/${giveaway.slug}`, '_blank')}>
