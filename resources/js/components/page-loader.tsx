@@ -4,11 +4,19 @@ import { useEffect, useState } from 'react';
 export default function PageLoader() {
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [showOverlay, setShowOverlay] = useState(false);
+
+    // Check if current page is an admin page
+    const isAdminPage = () => {
+        const path = window.location.pathname;
+        return path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/settings');
+    };
 
     useEffect(() => {
         const startHandler = () => {
             setLoading(true);
             setProgress(0);
+            setShowOverlay(false);
             // Animate progress
             const interval = setInterval(() => {
                 setProgress((prev) => {
@@ -23,9 +31,19 @@ export default function PageLoader() {
         };
 
         let interval: ReturnType<typeof setInterval>;
+        let overlayTimeout: ReturnType<typeof setTimeout>;
 
         const removeStart = router.on('start', () => {
+            // Skip loader entirely for admin pages
+            if (isAdminPage()) {
+                return;
+            }
+
             interval = startHandler();
+            // Only show overlay after 500ms for slow loads
+            overlayTimeout = setTimeout(() => {
+                setShowOverlay(true);
+            }, 500);
         });
 
         const removeProgress = router.on('progress', (event) => {
@@ -36,28 +54,37 @@ export default function PageLoader() {
 
         const removeFinish = router.on('finish', () => {
             setProgress(100);
+            // Wait for progress bar to complete, then fade out
             setTimeout(() => {
                 setLoading(false);
-                setProgress(0);
-            }, 300);
+                setShowOverlay(false);
+                // Reset progress after fade out
+                setTimeout(() => {
+                    setProgress(0);
+                }, 300);
+            }, 200);
             if (interval) clearInterval(interval);
+            if (overlayTimeout) clearTimeout(overlayTimeout);
         });
 
         return () => {
             removeStart();
             removeProgress();
             removeFinish();
+            if (overlayTimeout) clearTimeout(overlayTimeout);
         };
     }, []);
-
-    if (!loading) return null;
 
     return (
         <>
             {/* Top progress bar */}
-            <div className="fixed inset-x-0 top-0 z-[100] h-1 bg-orange-100/50">
+            <div
+                className={`fixed inset-x-0 top-0 z-[100] h-1 bg-orange-100/50 transition-opacity duration-300 dark:bg-orange-900/30 ${
+                    loading ? 'opacity-100' : 'pointer-events-none opacity-0'
+                }`}
+            >
                 <div
-                    className="h-full bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 transition-all duration-300 ease-out"
+                    className="h-full bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 transition-[width] duration-300 ease-out"
                     style={{ width: `${progress}%` }}
                 />
                 {/* Glow effect */}
@@ -67,10 +94,10 @@ export default function PageLoader() {
                 />
             </div>
 
-            {/* Center spinner for longer loads */}
+            {/* Center spinner for longer loads - only shows after 500ms delay */}
             <div
                 className={`fixed inset-0 z-[99] flex items-center justify-center bg-white/60 backdrop-blur-sm transition-opacity duration-300 dark:bg-gray-900/60 ${
-                    progress > 50 ? 'opacity-100' : 'pointer-events-none opacity-0'
+                    showOverlay && progress > 30 ? 'opacity-100' : 'pointer-events-none opacity-0'
                 }`}
             >
                 <div className="flex flex-col items-center gap-4">

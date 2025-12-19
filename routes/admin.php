@@ -153,6 +153,10 @@ Route::prefix('giveaways')->name('admin.giveaways.')->middleware('permission:giv
     Route::patch('/{giveaway}/images/{image}/primary', [GiveawayController::class, 'setPrimaryImage'])->name('images.set-primary')->middleware('permission:giveaway,update');
     Route::delete('/{giveaway}/images/{image}', [GiveawayController::class, 'deleteImage'])->name('images.delete')->middleware('permission:giveaway,update');
 
+    // Background image management
+    Route::post('/{giveaway}/background', [GiveawayController::class, 'uploadBackground'])->name('background.upload')->middleware('permission:giveaway,update');
+    Route::delete('/{giveaway}/background', [GiveawayController::class, 'deleteBackground'])->name('background.delete')->middleware('permission:giveaway,update');
+
     // Winner selection
     Route::get('/{giveaway}/winner-selection', [GiveawayController::class, 'showWinnerSelection'])->name('winner-selection')->middleware('permission:giveaway,view');
     Route::post('/{giveaway}/select-winner', [GiveawayController::class, 'selectWinner'])->name('select-winner')->middleware('permission:giveaway,update');
@@ -188,4 +192,19 @@ Route::prefix('inquiries')->name('inquiries.')->middleware('permission:inquiry,v
     Route::get('/{inquiry}', [InquiryController::class, 'show'])->name('show')->middleware('permission:inquiry,view');
     Route::patch('/{inquiry}/status', [InquiryController::class, 'updateStatus'])->name('update-status')->middleware('permission:inquiry,update');
     Route::delete('/{inquiry}', [InquiryController::class, 'destroy'])->name('destroy')->middleware('permission:inquiry,delete');
+});
+
+// Admin comment routes - isAdmin() checked in controller/policy
+Route::prefix('comments')->name('comments.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\CommentController::class, 'index'])->name('index');
+    Route::get('/reported', [App\Http\Controllers\Admin\CommentController::class, 'reportedIndex'])->name('reported');
+    Route::put('/{comment}', [App\Http\Controllers\Admin\CommentController::class, 'update'])->name('update');
+    Route::delete('/{comment}', [App\Http\Controllers\Admin\CommentController::class, 'destroy'])->name('destroy');
+    Route::patch('/{comment}/status', [App\Http\Controllers\Admin\CommentController::class, 'updateStatus'])->name('update-status');
+    Route::patch('/reports/{report}', [App\Http\Controllers\Admin\CommentController::class, 'reviewReport'])->name('review-report');
+
+    // Bulk actions for better UX
+    Route::post('/bulk-delete', [App\Http\Controllers\Admin\CommentController::class, 'bulkDelete'])->name('bulk-delete');
+    Route::post('/bulk-approve', [App\Http\Controllers\Admin\CommentController::class, 'bulkApprove'])->name('bulk-approve');
+    Route::post('/bulk-hide', [App\Http\Controllers\Admin\CommentController::class, 'bulkHide'])->name('bulk-hide');
 });

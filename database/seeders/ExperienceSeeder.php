@@ -107,29 +107,38 @@ class ExperienceSeeder extends Seeder
                 ...$experienceData,
             ]);
 
-            // Upload image to MinIO if it exists locally
+            // Determine which disk to use based on configuration
+            $disk = config('filesystems.default');
+            $storagePath = 'experiences/' . $imageName;
             $localImagePath = storage_path('app/public/experiences/' . $imageName);
-            $minioPath = 'experiences/' . $imageName;
 
-            if (\Illuminate\Support\Facades\File::exists($localImagePath)) {
-                // Check if already uploaded to MinIO
-                if (!\Illuminate\Support\Facades\Storage::disk('minio')->exists($minioPath)) {
-                    // Upload to MinIO
-                    $imageContent = \Illuminate\Support\Facades\File::get($localImagePath);
-                    \Illuminate\Support\Facades\Storage::disk('minio')->put($minioPath, $imageContent);
-                    $this->command->info("Uploaded {$imageName} to MinIO");
+            // Handle file upload based on disk type
+            if ($disk === 'minio') {
+                // Production: Upload to MinIO
+                if (\Illuminate\Support\Facades\File::exists($localImagePath)) {
+                    if (!\Illuminate\Support\Facades\Storage::disk('minio')->exists($storagePath)) {
+                        $imageContent = \Illuminate\Support\Facades\File::get($localImagePath);
+                        \Illuminate\Support\Facades\Storage::disk('minio')->put($storagePath, $imageContent);
+                        $this->command->info("Uploaded {$imageName} to MinIO");
+                    } else {
+                        $this->command->info("Image already exists in MinIO: {$imageName}");
+                    }
                 } else {
-                    $this->command->info("Image already exists in MinIO: {$imageName}");
+                    $this->command->warn("Local image not found: {$localImagePath}");
                 }
             } else {
-                $this->command->warn("Local image not found: {$localImagePath}");
+                // Local: Use public disk
+                if (\Illuminate\Support\Facades\File::exists($localImagePath)) {
+                    $this->command->info("Using local public disk for {$imageName}");
+                } else {
+                    $this->command->warn("Local image not found: {$localImagePath}");
+                }
             }
 
             // Create the associated image using polymorphic relationship
-            // Path will be used by Image model to generate MinIO URL
             $experience->image()->create([
                 'name' => $imageName,
-                'path' => $minioPath,
+                'path' => $storagePath,
             ]);
 
             $this->command->info("Created experience: {$experience->position} at {$experience->company}");

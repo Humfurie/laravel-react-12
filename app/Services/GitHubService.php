@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 class GitHubService
 {
     protected string $baseUrl = 'https://api.github.com';
+    protected string $graphqlUrl = 'https://api.github.com/graphql';
     protected ?string $token;
 
     public function __construct()
@@ -25,7 +26,7 @@ class GitHubService
      */
     public function getContributorCount(string $repo): int
     {
-        $cacheKey = "github_contributors_{$repo}";
+        $cacheKey = "github_contributors_count_{$repo}";
 
         return Cache::remember($cacheKey, 3600, function () use ($repo) {
             try {
@@ -36,6 +37,42 @@ class GitHubService
             } catch (Exception $e) {
                 Log::error("GitHub API error getting contributors for {$repo}: " . $e->getMessage());
                 return 0;
+            }
+        });
+    }
+
+    /**
+     * Get contributors for a repository with full details.
+     *
+     * @param string $repo Repository in "owner/repo" format
+     * @param int $limit Maximum number of contributors to return
+     * @return array
+     */
+    public function getContributors(string $repo, int $limit = 10): array
+    {
+        $cacheKey = "github_contributors_{$repo}_{$limit}";
+
+        return Cache::remember($cacheKey, 3600, function () use ($repo, $limit) {
+            try {
+                $response = $this->makeRequest("/repos/{$repo}/contributors?per_page={$limit}");
+
+                if (!$response || !is_array($response)) {
+                    return [];
+                }
+
+                return array_map(function ($contributor) {
+                    return [
+                        'login' => $contributor['login'] ?? null,
+                        'id' => $contributor['id'] ?? null,
+                        'avatar_url' => $contributor['avatar_url'] ?? null,
+                        'profile_url' => $contributor['html_url'] ?? null,
+                        'contributions' => $contributor['contributions'] ?? 0,
+                        'type' => $contributor['type'] ?? 'User',
+                    ];
+                }, $response);
+            } catch (Exception $e) {
+                Log::error("GitHub API error getting contributors for {$repo}: " . $e->getMessage());
+                return [];
             }
         });
     }
@@ -84,9 +121,10 @@ class GitHubService
      * Get all metrics for a repository.
      *
      * @param string $repo Repository in "owner/repo" format
+     * @param int $contributorLimit Maximum number of contributors to include
      * @return array|null
      */
-    public function getAllMetrics(string $repo): ?array
+    public function getAllMetrics(string $repo, int $contributorLimit = 10): ?array
     {
         $stats = $this->getRepoStats($repo);
 
@@ -95,6 +133,7 @@ class GitHubService
         }
 
         $downloads = $this->getDownloadCount($repo);
+        $contributors = $this->getContributors($repo, $contributorLimit);
 
         return [
             'stars' => $stats['stars'],
@@ -106,6 +145,8 @@ class GitHubService
             'topics' => $stats['topics'],
             'license' => $stats['license'],
             'last_push' => $stats['pushed_at'],
+            'contributors' => $contributors,
+            'contributor_count' => count($contributors),
         ];
     }
 
@@ -191,6 +232,133 @@ class GitHubService
     {
         Cache::forget("github_stats_{$repo}");
         Cache::forget("github_downloads_{$repo}");
-        Cache::forget("github_contributors_{$repo}");
+        Cache::forget("github_contributors_count_{$repo}");
+
+        // Clear contributor caches for common limits
+        foreach ([5, 10, 20, 50] as $limit) {
+            Cache::forget("github_contributors_{$repo}_{$limit}");
+        }
+    }
+
+    /**
+     * Get user's GitHub contribution data via GraphQL API.
+     *
+     * @param string $username GitHub username
+     * @return array|null
+     */
+    public function getUserContributions(string $username): ?array
+    {
+        if (!$this->token) {
+            Log::warning("GitHub token not configured, cannot fetch user contributions");
+            return null;
+        }
+
+        $cacheKey = "github_user_contributions_{$username}";
+
+        return Cache::remember($cacheKey, 86400, function () use ($username) {
+            try {
+                $query = <<<GRAPHQL
+                query(\$username: String!) {
+                    user(login: \$username) {
+                        contributionsCollection {
+                            totalCommitContributions
+                            totalPullRequestContributions
+                            totalIssueContributions
+                            totalPullRequestReviewContributions
+                            restrictedContributionsCount
+                            contributionCalendar {
+                                totalContributions
+                                weeks {
+                                    contributionDays {
+                                        contributionCount
+                                        date
+                                        color
+                                    }
+                                }
+                            }
+                        }
+                        repositories(first: 5, orderBy: {field: STARGAZERS, direction: DESC}, ownerAffiliations: OWNER) {
+                            nodes {
+                                name
+                                stargazerCount
+                                forkCount
+                                primaryLanguage {
+                                    name
+                                    color
+                                }
+                            }
+                        }
+                    }
+                }
+                GRAPHQL;
+
+                $response = Http::withHeaders([
+                    'Authorization' => "Bearer {$this->token}",
+                    'Content-Type' => 'application/json',
+                ])->post($this->graphqlUrl, [
+                    'query' => $query,
+                    'variables' => ['username' => $username],
+                ]);
+
+                if (!$response->successful()) {
+                    Log::warning("GitHub GraphQL request failed for user {$username}", [
+                        'status' => $response->status(),
+                        'body' => $response->body(),
+                    ]);
+                    return null;
+                }
+
+                $data = $response->json();
+
+                if (isset($data['errors'])) {
+                    Log::warning("GitHub GraphQL errors for user {$username}", [
+                        'errors' => $data['errors'],
+                    ]);
+                    return null;
+                }
+
+                $user = $data['data']['user'] ?? null;
+
+                if (!$user) {
+                    return null;
+                }
+
+                $contributions = $user['contributionsCollection'];
+                $calendar = $contributions['contributionCalendar'];
+
+                return [
+                    'total_contributions' => $calendar['totalContributions'],
+                    'commits' => $contributions['totalCommitContributions'],
+                    'pull_requests' => $contributions['totalPullRequestContributions'],
+                    'issues' => $contributions['totalIssueContributions'],
+                    'reviews' => $contributions['totalPullRequestReviewContributions'],
+                    'private_contributions' => $contributions['restrictedContributionsCount'],
+                    'calendar' => $calendar['weeks'],
+                    'top_repositories' => array_map(function ($repo) {
+                        return [
+                            'name' => $repo['name'],
+                            'stars' => $repo['stargazerCount'],
+                            'forks' => $repo['forkCount'],
+                            'language' => $repo['primaryLanguage']['name'] ?? null,
+                            'language_color' => $repo['primaryLanguage']['color'] ?? null,
+                        ];
+                    }, $user['repositories']['nodes'] ?? []),
+                ];
+            } catch (Exception $e) {
+                Log::error("GitHub GraphQL error for user {$username}: " . $e->getMessage());
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Clear cached contribution data for a user.
+     *
+     * @param string $username
+     * @return void
+     */
+    public function clearUserContributionsCache(string $username): void
+    {
+        Cache::forget("github_user_contributions_{$username}");
     }
 }

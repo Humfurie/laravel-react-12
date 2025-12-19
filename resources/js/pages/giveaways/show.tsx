@@ -41,6 +41,7 @@ interface Giveaway {
     entry_names: string[];
     images: Image[];
     primary_image_url: string | null;
+    background_image_url?: string | null;
 }
 
 interface Props {
@@ -186,10 +187,25 @@ export default function Show({ giveaway }: Props) {
             </Head>
             <FloatingNav currentPage="giveaways" />
 
-            <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
-                <div className="container mx-auto px-4 py-12">
+            <div
+                className="relative min-h-screen bg-gradient-to-b from-purple-50 to-white"
+                style={
+                    giveaway.background_image_url
+                        ? {
+                              backgroundImage: `url(${giveaway.background_image_url})`,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                              backgroundAttachment: 'fixed',
+                          }
+                        : undefined
+                }
+            >
+                {/* Overlay for readability when background image is present */}
+                {giveaway.background_image_url && <div className="absolute inset-0 -z-10 bg-white/90 backdrop-blur-sm"></div>}
+
+                <div className="relative z-10 container mx-auto px-4 pt-24 pb-12">
                     {/* Back Link */}
-                    <Button variant="ghost" onClick={() => router.visit('/giveaways')} className="mb-6">
+                    <Button variant="outline" onClick={() => router.visit('/giveaways')} className="relative z-20 mb-6 bg-white/90 hover:bg-white">
                         ← Back to Giveaways
                     </Button>
 
