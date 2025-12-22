@@ -85,10 +85,14 @@ class CommentController extends Controller
         $stats = [
             'pending' => CommentReport::where('status', 'pending')->count(),
             'today' => CommentReport::whereDate('created_at', today())->count(),
+            // Database-agnostic average resolution time calculation
             'avg_resolution_time' => CommentReport::where('status', '!=', 'pending')
                 ->whereNotNull('reviewed_at')
-                ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, reviewed_at)) as avg_hours')
-                ->value('avg_hours'),
+                ->get()
+                ->map(function ($report) {
+                    return $report->created_at->diffInHours($report->reviewed_at);
+                })
+                ->average(),
             'top_reason' => CommentReport::select('reason', DB::raw('count(*) as total'))
                     ->whereDate('created_at', '>=', now()->subDays(7))
                     ->groupBy('reason')
@@ -113,9 +117,9 @@ class CommentController extends Controller
             'content' => ['required', 'string', 'min:3', 'max:1000'],
         ]);
 
-        // Sanitize content
-        $validated['content'] = strip_tags($validated['content'], '<p><br><strong><em><a>');
-        $validated['content'] = htmlspecialchars($validated['content'], ENT_QUOTES, 'UTF-8');
+        // Sanitize content - strip ALL HTML tags for security
+        // Even admins shouldn't be able to inject HTML for consistency and security
+        $validated['content'] = strip_tags($validated['content']);
 
         $comment->update(['content' => $validated['content']]);
         $comment->markAsEdited();
