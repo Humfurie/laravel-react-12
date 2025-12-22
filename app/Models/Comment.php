@@ -106,10 +106,27 @@ class Comment extends Model
 
     /**
      * Scope a query to eager load replies with user relationship.
+     *
+     * WARNING: Only use this for shallow comment threads.
+     * For deeply nested threads, use explicit eager loading in controllers.
+     * This loads up to 3 levels to match validation limits.
      */
     public function scopeWithReplies($query)
     {
-        return $query->with(['replies.user', 'replies.replies.user']);
+        return $query->with([
+            'replies' => function ($q) {
+                $q->where('status', 'approved');
+            },
+            'replies.user',
+            'replies.replies' => function ($q) {
+                $q->where('status', 'approved');
+            },
+            'replies.replies.user',
+            'replies.replies.replies' => function ($q) {
+                $q->where('status', 'approved');
+            },
+            'replies.replies.replies.user',
+        ]);
     }
 
     /**
