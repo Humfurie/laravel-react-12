@@ -156,10 +156,9 @@ class GiveawayController extends Controller
                     },
                 ],
                 'facebook_url' => 'required|url|max:500',
-                'screenshot' => 'required|image|mimes:jpeg,jpg,png|max:5120',
+                'screenshot' => 'nullable|image|mimes:jpeg,jpg,png|max:5120',
             ], [
                 'phone.regex' => 'Phone number must be in format 09XXXXXXXXX or +639XXXXXXXXX',
-                'screenshot.required' => 'Screenshot is required.',
                 'screenshot.image' => 'Screenshot must be an image.',
                 'screenshot.mimes' => 'Screenshot must be a JPEG, JPG, or PNG file.',
                 'screenshot.max' => 'Screenshot must not be larger than 5MB.',

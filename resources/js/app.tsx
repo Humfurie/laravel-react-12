@@ -45,11 +45,9 @@ router.on('navigate', () => {
 });
 
 // Instant scroll to top on navigation (for public pages only)
-router.on('navigate', (event) => {
+router.on('navigate', () => {
     const path = window.location.pathname;
-    const isAdminPage = path.startsWith('/dashboard') ||
-                       path.startsWith('/admin') ||
-                       path.startsWith('/settings');
+    const isAdminPage = path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/settings');
 
     if (!isAdminPage) {
         // Instant scroll - the blur transition makes it smooth

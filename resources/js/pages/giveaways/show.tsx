@@ -1,6 +1,7 @@
 import AdBanner from '@/components/ads/AdBanner';
 import FloatingNav from '@/components/floating-nav';
 import WinnerAnnouncement from '@/components/giveaway/WinnerAnnouncement';
+import WheelSpinner from '@/components/giveaway-wheel/WheelSpinner';
 import Footer from '@/components/global/Footer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,8 @@ interface Giveaway {
     can_start_giveaway: boolean;
     entries_count: number;
     winner: Winner | null;
+    winners: Winner[];
+    number_of_winners: number;
     entry_names: string[];
     images: Image[];
     primary_image_url: string | null;
@@ -88,6 +91,12 @@ export default function Show({ giveaway }: Props) {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
+
+    // Real-time phone validation
+    const isPhoneValid = (phone: string): boolean => {
+        if (!phone) return false;
+        return /^(\+639|09)\d{9}$/.test(phone);
+    };
     const [startingRaffle, setStartingRaffle] = useState(false);
     const [isSpinning, setIsSpinning] = useState(false);
     const [showGrandReveal, setShowGrandReveal] = useState(false);
@@ -106,9 +115,22 @@ export default function Show({ giveaway }: Props) {
             }
         } catch (error: unknown) {
             if (error instanceof Error && 'response' in error) {
-                const axiosError = error as { response?: { data?: { errors?: Record<string, string>; message?: string } } };
+                const axiosError = error as {
+                    response?: {
+                        data?: {
+                            errors?: Record<string, string | string[]>;
+                            message?: string;
+                        };
+                    };
+                };
                 if (axiosError.response?.data?.errors) {
-                    setErrors(axiosError.response.data.errors);
+                    // Laravel returns errors as arrays, so we need to flatten them
+                    const flatErrors: Record<string, string> = {};
+                    Object.keys(axiosError.response.data.errors).forEach((key) => {
+                        const error = axiosError.response!.data!.errors![key];
+                        flatErrors[key] = Array.isArray(error) ? error[0] : error;
+                    });
+                    setErrors(flatErrors);
                 } else if (axiosError.response?.data?.message) {
                     setErrors({ general: axiosError.response.data.message });
                 } else {
@@ -289,34 +311,71 @@ export default function Show({ giveaway }: Props) {
                             </div>
 
                             {/* Winner Announcement */}
-                            {giveaway.winner && (
+                            {giveaway.winners && giveaway.winners.length > 0 && (
                                 <Card className="border-yellow-200 bg-yellow-50">
                                     <CardContent className="p-6">
                                         <div className="flex items-start gap-4">
                                             <Trophy className="h-8 w-8 flex-shrink-0 text-yellow-600" />
-                                            <div>
-                                                <h3 className="mb-2 text-xl font-semibold">Winner Announced!</h3>
-                                                <p className="text-lg">
-                                                    Congratulations to <span className="font-bold">{giveaway.winner.name}</span>!
-                                                </p>
+                                            <div className="w-full">
+                                                <h3 className="mb-2 text-xl font-semibold">
+                                                    {giveaway.winners.length > 1 ? 'Winners Announced!' : 'Winner Announced!'}
+                                                </h3>
+                                                {giveaway.winners.length === 1 ? (
+                                                    <p className="text-lg">
+                                                        Congratulations to <span className="font-bold">{giveaway.winners[0].name}</span>!
+                                                    </p>
+                                                ) : (
+                                                    <div className="space-y-3">
+                                                        <p className="text-lg font-semibold">Congratulations to our winners:</p>
+                                                        <div className="grid gap-3 sm:grid-cols-2">
+                                                            {giveaway.winners.map((winner, index) => (
+                                                                <div
+                                                                    key={index}
+                                                                    className="flex items-center gap-3 rounded-lg border-2 border-yellow-300 bg-white p-4"
+                                                                >
+                                                                    <Trophy className="h-6 w-6 flex-shrink-0 text-yellow-600" />
+                                                                    <div>
+                                                                        <p className="text-xs font-medium text-yellow-700">Winner #{index + 1}</p>
+                                                                        <p className="text-lg font-bold">{winner.name}</p>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </CardContent>
                                 </Card>
                             )}
 
-                            {/* Winner Selection Animation */}
+                            {/* Winner Selection with Rolling Wheel */}
                             {giveaway.entries_count > 0 && (
-                                <div>
-                                    <WinnerAnnouncement
-                                        totalEntries={giveaway.entries_count}
-                                        winner={giveaway.winner?.name}
-                                        winnerAnnounced={!!giveaway.winner && !showGrandReveal}
-                                        isSelecting={isSpinning}
-                                        onSelectWinner={handlePickWinner}
-                                        canSelectWinner={canManageGiveaway && giveaway.can_start_giveaway}
-                                        isAdmin={canManageGiveaway}
-                                    />
+                                <div className="space-y-6">
+                                    {/* Show wheel when spinning or winner announced (single winner only) */}
+                                    {(isSpinning || (giveaway.winners && giveaway.winners.length > 0)) &&
+                                        giveaway.entry_names.length > 0 &&
+                                        giveaway.number_of_winners === 1 && (
+                                            <WheelSpinner
+                                                entryNames={giveaway.entry_names}
+                                                isSpinning={isSpinning}
+                                                winner={giveaway.winners?.[0]?.name || null}
+                                            />
+                                        )}
+
+                                    {/* Show announcement when not spinning and no winner yet */}
+                                    {!isSpinning && (!giveaway.winners || giveaway.winners.length === 0) && (
+                                        <WinnerAnnouncement
+                                            totalEntries={giveaway.entries_count}
+                                            winner={undefined}
+                                            winnerAnnounced={false}
+                                            isSelecting={isSpinning}
+                                            onSelectWinner={handlePickWinner}
+                                            canSelectWinner={canManageGiveaway && giveaway.can_start_giveaway}
+                                            isAdmin={canManageGiveaway}
+                                            entryNames={giveaway.entry_names}
+                                        />
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -372,23 +431,56 @@ export default function Show({ giveaway }: Props) {
 
                                                     <div>
                                                         <Label htmlFor="phone">Phone Number *</Label>
-                                                        <Input
-                                                            id="phone"
-                                                            type="tel"
-                                                            value={formData.phone}
-                                                            onChange={(e) =>
-                                                                setFormData({
-                                                                    ...formData,
-                                                                    phone: e.target.value,
-                                                                })
-                                                            }
-                                                            placeholder="09XXXXXXXXX or +639XXXXXXXXX"
-                                                            pattern="^(\+639|09)\d{9}$"
-                                                            className="mt-1"
-                                                            required
-                                                        />
+                                                        <div className="relative">
+                                                            <Input
+                                                                id="phone"
+                                                                type="tel"
+                                                                value={formData.phone}
+                                                                onChange={(e) => {
+                                                                    // Allow only numbers, +, and limit length
+                                                                    const value = e.target.value;
+                                                                    if (value === '' || /^[\d+]*$/.test(value)) {
+                                                                        setFormData({
+                                                                            ...formData,
+                                                                            phone: value,
+                                                                        });
+                                                                        // Clear phone error when user types
+                                                                        if (errors.phone) {
+                                                                            setErrors({ ...errors, phone: '' });
+                                                                        }
+                                                                    }
+                                                                }}
+                                                                placeholder="09XXXXXXXXX or +639XXXXXXXXX"
+                                                                className={`mt-1 pr-10 ${
+                                                                    formData.phone && !errors.phone
+                                                                        ? isPhoneValid(formData.phone)
+                                                                            ? 'border-green-500 focus:border-green-500 focus:ring-green-500'
+                                                                            : 'border-orange-300'
+                                                                        : ''
+                                                                }`}
+                                                                maxLength={13}
+                                                                required
+                                                            />
+                                                            {formData.phone && isPhoneValid(formData.phone) && !errors.phone && (
+                                                                <CheckCircle2 className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-green-500" />
+                                                            )}
+                                                        </div>
                                                         <p className="text-muted-foreground mt-1 text-xs">
-                                                            Format: 09XXXXXXXXX or +639XXXXXXXXX (must be unique per giveaway)
+                                                            {formData.phone && !isPhoneValid(formData.phone) ? (
+                                                                <span className="text-orange-600">
+                                                                    ⚠️ Must start with 09 or +639, followed by 9 digits
+                                                                    <br />
+                                                                    Examples: 09123456789 or +639123456789
+                                                                </span>
+                                                            ) : (
+                                                                <>
+                                                                    Format: 09XXXXXXXXX or +639XXXXXXXXX
+                                                                    <br />
+                                                                    <span className="text-gray-500">
+                                                                        Example: 09123456789 (must be unique per giveaway)
+                                                                    </span>
+                                                                </>
+                                                            )}
                                                         </p>
                                                         {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
                                                     </div>
@@ -461,7 +553,7 @@ export default function Show({ giveaway }: Props) {
             </div>
 
             {/* Grand Winner Reveal Modal */}
-            {showGrandReveal && giveaway.winner && (
+            {showGrandReveal && giveaway.winners && giveaway.winners.length > 0 && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm">
                     <div className="relative w-full max-w-4xl p-8 text-center">
                         {/* Fireworks/Confetti Effect */}
@@ -510,16 +602,29 @@ export default function Show({ giveaway }: Props) {
                             {/* Animated "Winner!" text */}
                             <div className="space-y-4">
                                 <h1 className="animate-pulse text-8xl font-black text-yellow-400 drop-shadow-[0_0_30px_rgba(250,204,21,0.8)]">
-                                    🎉 WINNER! 🎉
+                                    🎉 {giveaway.winners.length > 1 ? 'WINNERS!' : 'WINNER!'} 🎉
                                 </h1>
                             </div>
 
-                            {/* Winner Name - BIG */}
+                            {/* Winner Name(s) - BIG */}
                             <div className="animate-pulse rounded-2xl border-4 border-yellow-400 bg-gradient-to-r from-yellow-500/20 via-yellow-400/30 to-yellow-500/20 p-12 shadow-2xl backdrop-blur-sm">
                                 <p className="mb-4 text-3xl font-semibold tracking-wider text-yellow-300 uppercase">Congratulations to</p>
-                                <h2 className="animate-bounce text-9xl font-black text-yellow-400 drop-shadow-[0_0_60px_rgba(250,204,21,1)]">
-                                    {giveaway.winner.name}
-                                </h2>
+                                {giveaway.winners.length === 1 ? (
+                                    <h2 className="animate-bounce text-9xl font-black text-yellow-400 drop-shadow-[0_0_60px_rgba(250,204,21,1)]">
+                                        {giveaway.winners[0].name}
+                                    </h2>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {giveaway.winners.map((winner, index) => (
+                                            <div key={index} className="space-y-2">
+                                                <p className="text-2xl font-semibold text-yellow-300">Winner #{index + 1}</p>
+                                                <h2 className="text-6xl font-black text-yellow-400 drop-shadow-[0_0_60px_rgba(250,204,21,1)]">
+                                                    {winner.name}
+                                                </h2>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Decorative elements */}

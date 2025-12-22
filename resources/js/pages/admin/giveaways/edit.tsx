@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Head, router, useForm } from '@inertiajs/react';
-import { AlertCircle, CheckCircle2, Image as ImageIcon, Search, Trash2, Trophy, Upload, Users, XCircle } from 'lucide-react';
+import { CheckCircle2, Image as ImageIcon, Search, Trash2, Trophy, Upload, Users, XCircle } from 'lucide-react';
 import { FormEventHandler, useMemo, useRef, useState } from 'react';
 
 interface Image {
@@ -92,6 +92,7 @@ export default function Edit({ giveaway }: Props) {
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
     const [submittingClaim, setSubmittingClaim] = useState(false);
+    const [winnerToReject, setWinnerToReject] = useState<number | null>(null);
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -175,14 +176,20 @@ export default function Edit({ giveaway }: Props) {
             return;
         }
 
+        if (!winnerToReject) {
+            alert('No winner selected to reject.');
+            return;
+        }
+
         setSubmittingClaim(true);
         router.post(
             route('admin.giveaways.reject-winner', giveaway.slug),
-            { reason: rejectionReason },
+            { reason: rejectionReason, winner_id: winnerToReject },
             {
                 onSuccess: () => {
                     setShowRejectModal(false);
                     setRejectionReason('');
+                    setWinnerToReject(null);
                 },
                 onFinish: () => setSubmittingClaim(false),
             },
@@ -519,107 +526,99 @@ export default function Edit({ giveaway }: Props) {
                             <div className="bg-card rounded-lg border p-6">
                                 <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
                                     <Trophy className="h-5 w-5 text-yellow-600" />
-                                    {giveaway.winners.length === 1 ? 'Winner' : `Winners (${giveaway.winners.length})`}
+                                    {giveaway.number_of_winners === 1 ? 'Winner Selected' : `All ${giveaway.winners.length} Winners Selected`}
                                 </h3>
                                 <div className="space-y-4">
                                     {giveaway.winners.map((winner, index) => (
-                                        <div key={winner.id} className="rounded-lg border bg-gray-50 p-3">
-                                            <div className="mb-2 flex items-center gap-2">
-                                                <Badge variant="secondary">#{index + 1}</Badge>
-                                                <p className="font-medium">{winner.name}</p>
+                                        <div key={winner.id} className="rounded-lg border-2 border-yellow-200 bg-yellow-50/50 p-4">
+                                            <div className="mb-3 flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Trophy className="h-5 w-5 text-yellow-600" />
+                                                    <Badge className="bg-yellow-600 hover:bg-yellow-700">
+                                                        Winner {giveaway.number_of_winners > 1 ? `#${index + 1}` : ''}
+                                                    </Badge>
+                                                </div>
                                             </div>
-                                            <div className="space-y-1 text-sm">
-                                                <p className="text-muted-foreground">
-                                                    <span className="font-medium">Phone:</span> {winner.phone}
-                                                </p>
-                                                <a
-                                                    href={winner.facebook_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-blue-600 hover:underline"
-                                                >
-                                                    View Facebook Profile
-                                                </a>
+
+                                            <div className="mb-4 space-y-2">
+                                                <div>
+                                                    <p className="text-muted-foreground text-xs font-medium">Name</p>
+                                                    <p className="text-lg font-semibold">{winner.name}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-muted-foreground text-xs font-medium">Phone</p>
+                                                    <p className="font-medium">{winner.phone}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-muted-foreground text-xs font-medium">Facebook</p>
+                                                    <a
+                                                        href={winner.facebook_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-blue-600 hover:underline"
+                                                    >
+                                                        View Profile →
+                                                    </a>
+                                                </div>
                                             </div>
+
+                                            {/* Winner Actions */}
+                                            {!giveaway.prize_claimed && (
+                                                <div className="flex flex-col gap-2 border-t pt-3 sm:flex-row">
+                                                    <Button
+                                                        onClick={() => {
+                                                            if (confirm('Mark prize as claimed for this winner?')) {
+                                                                handleClaimPrize();
+                                                            }
+                                                        }}
+                                                        disabled={submittingClaim}
+                                                        size="sm"
+                                                        className="w-full bg-green-600 hover:bg-green-700 sm:flex-1"
+                                                    >
+                                                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                                                        Claimed
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => {
+                                                            setWinnerToReject(winner.id);
+                                                            setShowRejectModal(true);
+                                                        }}
+                                                        disabled={submittingClaim}
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="w-full border-red-300 text-red-600 hover:bg-red-50 sm:flex-1"
+                                                    >
+                                                        <XCircle className="mr-2 h-4 w-4" />
+                                                        Reject
+                                                    </Button>
+                                                </div>
+                                            )}
+
+                                            {giveaway.prize_claimed && (
+                                                <div className="rounded-md border border-green-300 bg-green-100 p-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <CheckCircle2 className="h-4 w-4 text-green-700" />
+                                                        <p className="text-sm font-medium text-green-800">Prize Claimed</p>
+                                                    </div>
+                                                    {giveaway.prize_claimed_at && (
+                                                        <p className="mt-1 text-xs text-green-700">
+                                                            {new Date(giveaway.prize_claimed_at).toLocaleDateString('en-US', {
+                                                                year: 'numeric',
+                                                                month: 'long',
+                                                                day: 'numeric',
+                                                            })}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
-                            </div>
-                        )}
 
-                        {/* Prize Claim Verification */}
-                        {giveaway.winner && (
-                            <div className="bg-card rounded-lg border p-6">
-                                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                                    {giveaway.prize_claimed ? (
-                                        <CheckCircle2 className="h-5 w-5 text-green-600" />
-                                    ) : (
-                                        <AlertCircle className="h-5 w-5 text-orange-600" />
-                                    )}
-                                    Prize Claim Status
-                                </h3>
-
-                                {giveaway.prize_claimed ? (
-                                    <div className="space-y-3">
-                                        <div className="rounded-md border border-green-200 bg-green-50 p-3">
-                                            <p className="text-sm font-medium text-green-800">Prize Claimed Successfully</p>
-                                            <p className="mt-1 text-xs text-green-600">
-                                                Claimed on{' '}
-                                                {new Date(giveaway.prize_claimed_at!).toLocaleDateString('en-US', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                })}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        <div className="rounded-md border border-orange-200 bg-orange-50 p-3">
-                                            <p className="text-sm font-medium text-orange-800">Pending Prize Claim</p>
-                                            <p className="mt-1 text-xs text-orange-600">
-                                                Winner has been selected but prize has not been claimed yet.
-                                            </p>
-                                        </div>
-
-                                        {giveaway.rejection_reason && (
-                                            <div className="rounded-md border border-red-200 bg-red-50 p-3">
-                                                <p className="text-sm font-medium text-red-800">Previous Rejection</p>
-                                                <p className="mt-1 text-xs text-red-600">{giveaway.rejection_reason}</p>
-                                            </div>
-                                        )}
-
-                                        <div className="flex flex-col gap-2 sm:flex-row">
-                                            <Button
-                                                onClick={handleClaimPrize}
-                                                disabled={submittingClaim}
-                                                className="w-full bg-green-600 hover:bg-green-700 sm:flex-1"
-                                            >
-                                                {submittingClaim ? (
-                                                    <>
-                                                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                                                        Processing...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <CheckCircle2 className="mr-2 h-4 w-4" />
-                                                        Prize Claimed
-                                                    </>
-                                                )}
-                                            </Button>
-
-                                            <Button
-                                                onClick={() => setShowRejectModal(true)}
-                                                disabled={submittingClaim}
-                                                variant="outline"
-                                                className="w-full border-red-200 text-red-600 hover:bg-red-50 sm:flex-1"
-                                            >
-                                                <XCircle className="mr-2 h-4 w-4" />
-                                                <span className="whitespace-nowrap">Reject & Pick New Winner</span>
-                                            </Button>
-                                        </div>
+                                {giveaway.rejection_reason && (
+                                    <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3">
+                                        <p className="text-sm font-medium text-red-800">Previous Rejection</p>
+                                        <p className="mt-1 text-xs text-red-600">{giveaway.rejection_reason}</p>
                                     </div>
                                 )}
                             </div>
@@ -629,7 +628,14 @@ export default function Edit({ giveaway }: Props) {
                         {showRejectModal && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                                 <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-                                    <h3 className="mb-4 text-lg font-semibold">Reject Winner & Select New</h3>
+                                    <h3 className="mb-4 text-lg font-semibold">
+                                        Reject Winner{' '}
+                                        {winnerToReject && giveaway.winners && (
+                                            <span className="text-muted-foreground text-base font-normal">
+                                                ({giveaway.winners.find((w) => w.id === winnerToReject)?.name})
+                                            </span>
+                                        )}
+                                    </h3>
 
                                     <div className="mb-4">
                                         <Label htmlFor="rejection_reason">Rejection Reason *</Label>
@@ -649,6 +655,7 @@ export default function Edit({ giveaway }: Props) {
                                             onClick={() => {
                                                 setShowRejectModal(false);
                                                 setRejectionReason('');
+                                                setWinnerToReject(null);
                                             }}
                                             variant="outline"
                                             className="flex-1"
