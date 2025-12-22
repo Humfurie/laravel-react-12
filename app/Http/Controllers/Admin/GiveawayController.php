@@ -543,21 +543,35 @@ class GiveawayController extends Controller
     {
         $request->validate([
             'reason' => 'required|string|max:500',
+            'winner_id' => 'required|integer|exists:giveaway_entries,id',
         ]);
 
-        if (!$giveaway->winner_id) {
-            return back()->with('error', 'No winner selected for this giveaway.');
+        // Find the specific winner to reject
+        $winnerToReject = $giveaway->entries()->where('id', $request->winner_id)->where('status', 'winner')->first();
+
+        if (!$winnerToReject) {
+            return back()->with('error', 'Winner not found or already rejected.');
         }
 
         if ($giveaway->prize_claimed) {
             return back()->with('error', 'Cannot reject winner after prize has been claimed.');
         }
 
-        $rejectedWinnerName = $giveaway->winner->name;
-        $newWinner = $giveaway->rejectWinner($request->reason);
+        $rejectedWinnerName = $winnerToReject->name;
+
+        // Mark this specific winner as rejected
+        $winnerToReject->markAsRejected();
+
+        // Store rejection reason
+        $giveaway->update([
+            'rejection_reason' => $request->reason,
+        ]);
+
+        // Select a replacement winner
+        $newWinner = $giveaway->selectWinner();
 
         if (!$newWinner) {
-            return back()->with('error', 'Failed to select a new winner.');
+            return back()->with('error', 'Failed to select a new winner. No eligible entries remaining.');
         }
 
         return back()->with('success', "Winner '{$rejectedWinnerName}' rejected. New winner selected: {$newWinner->name}");

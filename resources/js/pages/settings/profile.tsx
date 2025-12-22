@@ -1,7 +1,7 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Github, Globe, Linkedin, Plus, Trash2, Twitter, Facebook, FileText, Upload, X } from 'lucide-react';
+import { Facebook, FileText, Github, Globe, Linkedin, Plus, Trash2, Twitter, Upload, X } from 'lucide-react';
 import { FormEventHandler, useRef } from 'react';
 
 import DeleteUser from '@/components/delete-user';
@@ -74,8 +74,9 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
         post(route('profile.update'), {
             preserveScroll: true,
             forceFormData: true,
+            // @ts-expect-error - Inertia types don't include _method override
             _method: 'patch',
-        } as any);
+        });
     };
 
     const addStat = () => {

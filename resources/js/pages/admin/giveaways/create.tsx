@@ -38,7 +38,7 @@ export default function Create() {
 
                         <div className="space-y-4">
                             <div>
-                                <Label htmlFor="title">Raffle Title *</Label>
+                                <Label htmlFor="title">Giveaway Title *</Label>
                                 <Input
                                     id="title"
                                     type="text"
@@ -125,7 +125,7 @@ export default function Create() {
                         <h2 className="mb-4 text-xl font-semibold">Status</h2>
 
                         <div>
-                            <Label htmlFor="status">Raffle Status *</Label>
+                            <Label htmlFor="status">Giveaway Status *</Label>
                             <select
                                 id="status"
                                 value={data.status}
