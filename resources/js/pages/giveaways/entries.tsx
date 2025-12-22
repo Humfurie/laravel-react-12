@@ -79,11 +79,11 @@ export default function Entries({ giveaway, entries }: Props) {
             <FloatingNav currentPage="giveaways" />
 
             <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
-                <div className="container mx-auto px-4 py-12">
+                <div className="container mx-auto px-4 pt-24 pb-12">
                     {/* Back Link */}
                     <Link
                         href={`/giveaways/${giveaway.slug}`}
-                        className="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center text-sm"
+                        className="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center text-sm transition-colors"
                     >
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Back to Giveaway

@@ -32,7 +32,7 @@ interface Props {
 // Featured Giveaway Card (Large)
 function FeaturedGiveawayCard({ giveaway }: { giveaway: Giveaway }) {
     const endDate = new Date(giveaway.end_date);
-    const timeRemaining = formatDistanceToNow(endDate, { addSuffix: false });
+    formatDistanceToNow(endDate, { addSuffix: false });
 
     return (
         <article className="group cursor-pointer lg:col-span-2">

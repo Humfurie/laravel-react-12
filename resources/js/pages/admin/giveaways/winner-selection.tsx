@@ -19,6 +19,7 @@ interface Winner {
     name: string;
     phone: string;
     facebook_url: string;
+    entry_date?: string;
 }
 
 interface Giveaway {
@@ -26,8 +27,11 @@ interface Giveaway {
     title: string;
     slug: string;
     status: string;
+    number_of_winners: number;
     winner_id: number | null;
     winner: Winner | null;
+    winners: Winner[];
+    winners_count: number;
     entries: Entry[];
 }
 
@@ -96,36 +100,48 @@ export default function WinnerSelection({ giveaway }: Props) {
                 <div className="mb-8">
                     <Button variant="ghost" onClick={() => router.visit(route('admin.giveaways.edit', giveaway.slug))} className="mb-4">
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Raffle
+                        Back to Giveaway
                     </Button>
                     <h1 className="text-3xl font-bold">Winner Selection</h1>
                     <p className="text-muted-foreground">{giveaway.title}</p>
                 </div>
 
-                {giveaway.winner ? (
+                {giveaway.winners_count >= giveaway.number_of_winners ? (
                     <div className="bg-card rounded-lg border p-8 text-center">
                         <Trophy className="mx-auto mb-4 h-16 w-16 text-yellow-600" />
-                        <h2 className="mb-2 text-2xl font-bold">Winner Already Selected</h2>
-                        <div className="bg-muted/50 mx-auto mt-6 max-w-md space-y-4 rounded-lg border p-6">
-                            <div>
-                                <p className="text-muted-foreground text-sm">Name</p>
-                                <p className="text-xl font-semibold">{giveaway.winner.name}</p>
-                            </div>
-                            <div>
-                                <p className="text-muted-foreground text-sm">Phone</p>
-                                <p className="font-medium">{giveaway.winner.phone}</p>
-                            </div>
-                            <div>
-                                <p className="text-muted-foreground text-sm">Facebook</p>
-                                <a
-                                    href={giveaway.winner.facebook_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline"
-                                >
-                                    View Profile
-                                </a>
-                            </div>
+                        <h2 className="mb-2 text-2xl font-bold">
+                            {giveaway.number_of_winners > 1 ? `All ${giveaway.number_of_winners} Winners Selected` : 'Winner Already Selected'}
+                        </h2>
+                        <div className="bg-muted/50 mx-auto mt-6 max-w-2xl space-y-4 rounded-lg border p-6">
+                            {giveaway.winners.map((winner, index) => (
+                                <div key={winner.id} className="border-b pb-4 last:border-b-0 last:pb-0">
+                                    <div className="mb-2 flex items-center justify-center gap-2">
+                                        <Trophy className="h-5 w-5 text-yellow-600" />
+                                        <p className="text-lg font-semibold">Winner {giveaway.number_of_winners > 1 ? `#${index + 1}` : ''}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div>
+                                            <p className="text-muted-foreground text-sm">Name</p>
+                                            <p className="text-xl font-semibold">{winner.name}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-muted-foreground text-sm">Phone</p>
+                                            <p className="font-medium">{winner.phone}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-muted-foreground text-sm">Facebook</p>
+                                            <a
+                                                href={winner.facebook_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:underline"
+                                            >
+                                                View Profile
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 ) : giveaway.entries.length === 0 ? (
@@ -139,11 +155,17 @@ export default function WinnerSelection({ giveaway }: Props) {
                 ) : (
                     <div className="space-y-6">
                         <div className="bg-card rounded-lg border p-8">
-                            <div className="mb-6 text-center">
-                                <Badge variant="secondary" className="mb-2">
+                            <div className="mb-6 flex flex-col items-center justify-center gap-2 text-center">
+                                <Badge variant="secondary" className="mb-1">
                                     <Users className="mr-1 h-3 w-3" />
                                     {giveaway.entries.length} Total Entries
                                 </Badge>
+                                {giveaway.number_of_winners > 1 && (
+                                    <Badge variant={giveaway.winners_count > 0 ? 'default' : 'outline'}>
+                                        <Trophy className="mr-1 h-3 w-3" />
+                                        {giveaway.winners_count} / {giveaway.number_of_winners} Winners Selected
+                                    </Badge>
+                                )}
                             </div>
 
                             {/* Spinning Display */}
@@ -183,33 +205,82 @@ export default function WinnerSelection({ giveaway }: Props) {
                                     ) : (
                                         <>
                                             <Trophy className="mr-2 h-4 w-4" />
-                                            Select Random Winner
+                                            {giveaway.winners_count > 0
+                                                ? `Select Remaining ${giveaway.number_of_winners - giveaway.winners_count} Winner${giveaway.number_of_winners - giveaway.winners_count > 1 ? 's' : ''}`
+                                                : giveaway.number_of_winners > 1
+                                                  ? `Select ${giveaway.number_of_winners} Winners`
+                                                  : 'Select Random Winner'}
                                         </>
                                     )}
                                 </Button>
+                                {giveaway.winners_count > 0 && (
+                                    <p className="text-muted-foreground mt-2 text-sm">
+                                        {giveaway.winners_count} winner{giveaway.winners_count > 1 ? 's' : ''} already selected
+                                    </p>
+                                )}
                             </div>
                         </div>
 
                         {/* Entries List */}
                         <div className="bg-card rounded-lg border p-6">
-                            <h2 className="mb-4 text-xl font-semibold">All Entries</h2>
+                            <div className="mb-4 flex items-center justify-between">
+                                <h2 className="text-xl font-semibold">All Entries</h2>
+                                <p className="text-muted-foreground text-xs">Rejected entries cannot be selected again</p>
+                            </div>
                             <div className="max-h-[400px] space-y-2 overflow-y-auto">
-                                {giveaway.entries.map((entry, index) => (
-                                    <div
-                                        key={entry.id}
-                                        className={`flex items-center justify-between rounded-lg border p-3 transition-colors ${
-                                            currentIndex === index && isSpinning ? 'border-yellow-400 bg-yellow-50' : 'bg-white hover:bg-gray-50'
-                                        }`}
-                                    >
-                                        <div>
-                                            <p className="font-medium">{entry.name}</p>
-                                            <p className="text-muted-foreground text-sm">{entry.phone}</p>
+                                {giveaway.entries.map((entry, index) => {
+                                    const isWinner = entry.status === 'winner';
+                                    const isRejected = entry.status === 'rejected';
+                                    return (
+                                        <div
+                                            key={entry.id}
+                                            className={`flex items-center justify-between rounded-lg border p-3 transition-colors ${
+                                                isWinner
+                                                    ? 'border-yellow-400 bg-yellow-50'
+                                                    : isRejected
+                                                      ? 'border-gray-300 bg-gray-100 opacity-60'
+                                                      : currentIndex === index && isSpinning
+                                                        ? 'border-purple-400 bg-purple-50'
+                                                        : 'bg-white hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                {isWinner && <Trophy className="h-4 w-4 text-yellow-600" />}
+                                                <div>
+                                                    <p
+                                                        className={`font-medium ${
+                                                            isWinner ? 'text-yellow-900' : isRejected ? 'text-gray-500 line-through' : ''
+                                                        }`}
+                                                    >
+                                                        {entry.name}
+                                                    </p>
+                                                    <p
+                                                        className={`text-sm ${
+                                                            isWinner ? 'text-yellow-700' : isRejected ? 'text-gray-400' : 'text-muted-foreground'
+                                                        }`}
+                                                    >
+                                                        {entry.phone}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {isWinner && (
+                                                    <Badge variant="default" className="bg-yellow-600 text-xs">
+                                                        Winner
+                                                    </Badge>
+                                                )}
+                                                {isRejected && (
+                                                    <Badge variant="outline" className="border-red-300 bg-red-50 text-xs text-red-700">
+                                                        Rejected
+                                                    </Badge>
+                                                )}
+                                                <Badge variant="outline" className="text-xs">
+                                                    #{index + 1}
+                                                </Badge>
+                                            </div>
                                         </div>
-                                        <Badge variant="outline" className="text-xs">
-                                            #{index + 1}
-                                        </Badge>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
