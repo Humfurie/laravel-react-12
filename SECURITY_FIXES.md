@@ -306,6 +306,45 @@ public function scopeWithReplies($query)
 
 ---
 
+### 10. Route Model Binding Signature Fixed ✅
+
+**Issue**: CommentController::store() method signature didn't match route model binding, causing "Too few arguments"
+error in tests.
+
+**Before**:
+
+```php
+// Method expected type string and id int, but routes use model binding
+public function store(StoreCommentRequest $request, string $type, int $id): JsonResponse
+{
+    $commentable = match ($type) {
+        'blog' => Blog::findOrFail($id),
+        'giveaway' => Giveaway::findOrFail($id),
+        default => abort(404)
+    };
+}
+```
+
+**After**:
+
+```php
+// Method now accepts polymorphic model instance directly via union type
+public function store(StoreCommentRequest $request, Blog|Giveaway $commentable): JsonResponse
+{
+    // Laravel automatically injects correct model based on route parameter
+}
+```
+
+**Impact**:
+
+- Fixes test failures (comments_work_on_giveaways_too test)
+- Simplifies code by leveraging Laravel's route model binding
+- Improves type safety with union types
+
+**Files**: `app/Http/Controllers/CommentController.php:23`
+
+---
+
 ## Remaining Recommendations
 
 ### Medium Priority
@@ -352,7 +391,7 @@ Created 40+ tests covering all security and functionality:
 
 ### Security Fixes:
 
-- `app/Http/Controllers/CommentController.php` - XSS fix, authorization, duplicate prevention
+- `app/Http/Controllers/CommentController.php` - XSS fix, authorization, duplicate prevention, route model binding
 - `app/Http/Controllers/Admin/CommentController.php` - XSS fix, DB portability
 - `app/Http/Requests/StoreCommentRequest.php` - Depth validation, soft delete check
 - `app/Models/Comment.php` - N+1 prevention, eager loading optimization

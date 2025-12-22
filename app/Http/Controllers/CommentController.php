@@ -20,16 +20,9 @@ class CommentController extends Controller
     /**
      * Store a new comment.
      */
-    public function store(StoreCommentRequest $request, string $type, int $id): JsonResponse|RedirectResponse
+    public function store(StoreCommentRequest $request, Blog|Giveaway $commentable): JsonResponse|RedirectResponse
     {
         $validated = $request->validated();
-
-        // Determine commentable type
-        $commentable = match ($type) {
-            'blog' => Blog::findOrFail($id),
-            'giveaway' => Giveaway::findOrFail($id),
-            default => abort(404, 'Invalid commentable type.')
-        };
 
         // Sanitize content - strip ALL HTML tags for security
         $validated['content'] = strip_tags($validated['content']);

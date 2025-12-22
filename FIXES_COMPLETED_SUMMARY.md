@@ -128,6 +128,37 @@ if ($existingReport) {
 CommentReport::create([...]);
 ```
 
+### 7. Method Signature Fixed for Route Model Binding ✅
+
+**File Modified:** `app/Http/Controllers/CommentController.php:23`
+
+**Issue:** Method signature didn't match route model binding expectations, causing "Too few arguments" error.
+
+**Fix:** Changed method signature to accept polymorphic model instance directly.
+
+```php
+// Before (Incompatible with route model binding):
+public function store(StoreCommentRequest $request, string $type, int $id): JsonResponse|RedirectResponse
+{
+    $commentable = match ($type) {
+        'blog' => Blog::findOrFail($id),
+        'giveaway' => Giveaway::findOrFail($id),
+        default => abort(404, 'Invalid commentable type.')
+    };
+}
+
+// After (Works with route model binding):
+public function store(StoreCommentRequest $request, Blog|Giveaway $commentable): JsonResponse|RedirectResponse
+{
+    // Laravel automatically injects the correct model based on route parameter
+}
+```
+
+**Routes:**
+
+- `POST /blogs/{blog}/comments` → Laravel injects Blog model
+- `POST /giveaways/{giveaway}/comments` → Laravel injects Giveaway model
+
 ---
 
 ## Comprehensive Test Suite Created ✅
@@ -497,7 +528,7 @@ php -l database/factories/UserFactory.php ✅
 
 ### What Was Fixed:
 
-- ✅ 6 critical security and code quality issues
+- ✅ 7 critical security and code quality issues (including route model binding fix)
 - ✅ 30 comprehensive tests created
 - ✅ 3 factory files created/modified
 - ✅ 4 documentation files created
