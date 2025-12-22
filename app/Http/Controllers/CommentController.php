@@ -31,9 +31,8 @@ class CommentController extends Controller
             default => abort(404, 'Invalid commentable type.')
         };
 
-        // Sanitize content
-        $validated['content'] = strip_tags($validated['content'], '<p><br><strong><em><a>');
-        $validated['content'] = htmlspecialchars($validated['content'], ENT_QUOTES, 'UTF-8');
+        // Sanitize content - strip ALL HTML tags for security
+        $validated['content'] = strip_tags($validated['content']);
 
         // Create comment
         $comment = $commentable->comments()->create([
@@ -57,11 +56,13 @@ class CommentController extends Controller
      */
     public function update(UpdateCommentRequest $request, Comment $comment): JsonResponse|RedirectResponse
     {
+        // Authorize (policy checks ownership or admin)
+        $this->authorize('update', $comment);
+
         $validated = $request->validated();
 
-        // Sanitize content
-        $validated['content'] = strip_tags($validated['content'], '<p><br><strong><em><a>');
-        $validated['content'] = htmlspecialchars($validated['content'], ENT_QUOTES, 'UTF-8');
+        // Sanitize content - strip ALL HTML tags for security
+        $validated['content'] = strip_tags($validated['content']);
 
         // Update comment
         $comment->update(['content' => $validated['content']]);
@@ -100,29 +101,28 @@ class CommentController extends Controller
     {
         $validated = $request->validated();
 
-        try {
-            // Create report (unique constraint prevents duplicates)
-            CommentReport::create([
-                'comment_id' => $comment->id,
-                'reported_by' => $request->user()->id,
-                'reason' => $validated['reason'],
-                'description' => $validated['description'] ?? null,
-                'status' => 'pending',
-            ]);
+        // Check if user has already reported this comment
+        $existingReport = CommentReport::where('comment_id', $comment->id)
+            ->where('reported_by', $request->user()->id)
+            ->first();
 
+        if ($existingReport) {
             return response()->json([
-                'message' => 'Comment reported successfully. Our team will review it shortly.',
-            ], 201);
-
-        } catch (\Illuminate\Database\QueryException $e) {
-            // Catch duplicate report error
-            if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'Duplicate entry')) {
-                return response()->json([
-                    'message' => 'You have already reported this comment.',
-                ], 422);
-            }
-
-            throw $e;
+                'message' => 'You have already reported this comment.',
+            ], 422);
         }
+
+        // Create report
+        CommentReport::create([
+            'comment_id' => $comment->id,
+            'reported_by' => $request->user()->id,
+            'reason' => $validated['reason'],
+            'description' => $validated['description'] ?? null,
+            'status' => 'pending',
+        ]);
+
+        return response()->json([
+            'message' => 'Comment reported successfully. Our team will review it shortly.',
+        ], 201);
     }
 }
