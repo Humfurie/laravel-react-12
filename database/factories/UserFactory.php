@@ -44,4 +44,17 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that the user is an admin.
+     * Admin users have id = 1.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'id' => 1,
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+        ]);
+    }
 }
