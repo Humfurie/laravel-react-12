@@ -250,6 +250,24 @@ static::deleting(function ($comment) {
 
 ## Additional Improvements
 
+### Route Model Binding Fixed ✅
+
+**Issue**: `CommentController::store()` method signature incompatible with route model binding.
+
+**Error**: "Too few arguments to function CommentController::store(), 2 passed... and exactly 3 expected"
+
+**Fix**: Changed method signature to accept polymorphic model instance directly:
+
+```php
+// Before:
+public function store(StoreCommentRequest $request, string $type, int $id)
+
+// After:
+public function store(StoreCommentRequest $request, Blog|Giveaway $commentable)
+```
+
+**Impact**: Fixes test failures for polymorphic comments on blogs and giveaways.
+
 ### Rate Limiting ✅ VERIFIED
 
 Already configured in `routes/web.php`:
@@ -345,12 +363,14 @@ the comprehensive documentation provided.
 - [x] Authorization verified (update/delete)
 - [x] Database portability (TIMESTAMPDIFF removed)
 - [x] N+1 queries prevented (optimized eager loading)
+- [x] Route model binding fixed (polymorphic support)
 - [x] Test coverage (40+ tests, all passing)
 - [x] Rate limiting configured
 - [x] Frontend components documented
 - [x] Nesting depth limited (max 3 levels)
 - [x] Soft delete validation
 - [x] Duplicate report prevention
+- [x] Factories created (Comment, CommentReport, User)
 - [x] Code formatted (PSR-12)
 - [x] Documentation complete
 
