@@ -64,10 +64,12 @@ class Comment extends Model
 
     /**
      * Get the replies to this comment.
+     * Note: Don't eager load replies recursively here to avoid N+1 issues.
+     * Load explicitly in controllers when needed.
      */
     public function replies(): HasMany
     {
-        return $this->hasMany(Comment::class, 'parent_id')->with('replies');
+        return $this->hasMany(Comment::class, 'parent_id');
     }
 
     /**
