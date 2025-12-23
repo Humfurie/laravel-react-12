@@ -73,14 +73,8 @@ export function TravelMapInner({
     // Create route line coordinates (ordered by location.order)
     const routeCoordinates: [number, number][] = [...locations].sort((a, b) => a.order - b.order).map((loc) => [loc.latitude, loc.longitude]);
 
-    // Cast components to any to work around react-leaflet v5 type incompatibilities
-    // @ts-ignore - @ts-expect-error react-leaflet types incompatible with React 19
-    const MapContainerAny = MapContainer as any;
-    // @ts-ignore - @ts-expect-error react-leaflet types incompatible with React 19
-    const TileLayerAny = TileLayer as any;
-    // @ts-ignore - @ts-expect-error react-leaflet types incompatible with React 19
-    const MarkerAny = Marker as any;
-
+    // Note: Using @ts-ignore for react-leaflet v5 compatibility with React 19
+    // (@ts-expect-error would be preferred but there's no actual type error to suppress)
     return (
         <>
             <style>{`
@@ -145,7 +139,8 @@ export function TravelMapInner({
                     max-width: 320px;
                 }
             `}</style>
-            <MapContainerAny
+            {/* @ts-ignore - react-leaflet types incompatible with React 19 */}
+            <MapContainer
                 center={defaultCenter}
                 zoom={13}
                 scrollWheelZoom={interactive}
@@ -155,7 +150,8 @@ export function TravelMapInner({
                 style={{ height, width: '100%' }}
                 className={`rounded-lg ${className}`}
             >
-                <TileLayerAny
+                {/* @ts-ignore - react-leaflet types incompatible with React 19 */}
+                <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
@@ -177,7 +173,8 @@ export function TravelMapInner({
 
                 {/* Location markers */}
                 {locations.map((location, index) => (
-                    <MarkerAny
+                    // @ts-ignore - react-leaflet types incompatible with React 19
+                    <Marker
                         key={location.id}
                         position={[location.latitude, location.longitude]}
                         icon={createNumberedIcon(index + 1)}
@@ -188,9 +185,9 @@ export function TravelMapInner({
                         <Popup>
                             <LocationPopup location={location} number={index + 1} />
                         </Popup>
-                    </MarkerAny>
+                    </Marker>
                 ))}
-            </MapContainerAny>
+            </MapContainer>
         </>
     );
 }

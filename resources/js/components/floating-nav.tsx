@@ -1,6 +1,7 @@
 import { publicNavItems } from '@/config/navigation';
 import { Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import ThemeToggle from './theme-toggle';
 
 interface FloatingNavProps {
     currentPage?: string;
@@ -73,6 +74,9 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
                                 </Link>
                             );
                         })}
+                        <div className="ml-1 border-l border-gray-200/50 pl-1 dark:border-gray-600/50">
+                            <ThemeToggle variant="with-label" />
+                        </div>
                     </div>
 
                     {/* Mobile Navigation */}
@@ -95,6 +99,7 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
                                 </Link>
                             );
                         })}
+                        <ThemeToggle />
                     </div>
                 </div>
             </div>
