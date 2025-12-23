@@ -80,6 +80,7 @@ function MapPickerInner({ latitude, longitude, onChange, height = '300px' }: Map
     // (@ts-expect-error would be preferred but there's no actual type error to suppress)
     return (
         <div className="relative">
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
             {/* @ts-ignore - react-leaflet types incompatible with React 19 */}
             <MapContainer
                 center={center}
@@ -87,6 +88,7 @@ function MapPickerInner({ latitude, longitude, onChange, height = '300px' }: Map
                 style={{ height, width: '100%' }}
                 className="rounded-lg border border-gray-200 dark:border-gray-700"
             >
+                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                 {/* @ts-ignore - react-leaflet types incompatible with React 19 */}
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
