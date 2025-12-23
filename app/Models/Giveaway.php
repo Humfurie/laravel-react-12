@@ -25,6 +25,7 @@ class Giveaway extends Model
         'start_date',
         'end_date',
         'number_of_winners',
+        'background_image',
         'status',
         'winner_id',
         'prize_claimed',
@@ -83,6 +84,22 @@ class Giveaway extends Model
     public function winners(): HasMany
     {
         return $this->hasMany(GiveawayEntry::class)->where('status', 'winner');
+    }
+
+    /**
+     * Get all comments for this giveaway.
+     */
+    public function comments(): MorphMany
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    /**
+     * Get only approved comments for this giveaway.
+     */
+    public function approvedComments(): MorphMany
+    {
+        return $this->comments()->where('status', 'approved');
     }
 
     /**
@@ -149,7 +166,7 @@ class Giveaway extends Model
     }
 
     /**
-     * Check if raffle has ended
+     * Check if giveaway has ended
      */
     public function hasEnded(): bool
     {
@@ -165,7 +182,7 @@ class Giveaway extends Model
     }
 
     /**
-     * Check if raffle can accept new entries
+     * Check if giveaway can accept new entries
      */
     public function canAcceptEntries(): bool
     {
@@ -269,17 +286,23 @@ class Giveaway extends Model
             $rejectedWinner->markAsRejected();
         }
 
-        // Clear winner and store rejection reason
+        // Store rejection reason
         $this->update([
-            'winner_id' => null,
-            'prize_claimed' => null,
-            'prize_claimed_at' => null,
             'rejection_reason' => $reason,
             'status' => self::STATUS_ACTIVE, // Temporarily reactivate for winner selection
         ]);
 
-        // Select a new winner (automatically excludes rejected entries)
+        // Select a replacement winner (automatically excludes rejected entries)
+        // This will select ONE new winner to replace the rejected one
         $newWinner = $this->selectWinner();
+
+        // If we got a new winner, update winner_id to the latest winner
+        if ($newWinner) {
+            $this->update([
+                'winner_id' => $newWinner->id,
+                'status' => self::STATUS_ENDED,
+            ]);
+        }
 
         return $newWinner;
     }
@@ -301,21 +324,25 @@ class Giveaway extends Model
         // Calculate how many more winners we need
         $winnersToSelect = $requiredWinners - $currentWinnersCount;
 
-        // Get eligible entries (excludes rejected and already-winner entries)
+        // Get ALL eligible entries (excludes rejected and already-winner entries)
         $eligibleEntries = $this->entries()
             ->eligible()
-            ->inRandomOrder()
-            ->limit($winnersToSelect)
             ->get();
 
         if ($eligibleEntries->isEmpty()) {
             return null;
         }
 
+        // Shuffle the collection in PHP for true randomization
+        $shuffledEntries = $eligibleEntries->shuffle();
+
+        // Take only the number of winners we need
+        $selectedWinners = $shuffledEntries->take($winnersToSelect);
+
         $lastWinner = null;
 
         // Mark each selected entry as a winner
-        foreach ($eligibleEntries as $entry) {
+        foreach ($selectedWinners as $entry) {
             $entry->markAsWinner();
             $lastWinner = $entry;
         }

@@ -73,30 +73,8 @@ export function TravelMapInner({
     // Create route line coordinates (ordered by location.order)
     const routeCoordinates: [number, number][] = [...locations].sort((a, b) => a.order - b.order).map((loc) => [loc.latitude, loc.longitude]);
 
-    // Cast components to any to work around react-leaflet v5 type incompatibilities
-    const MapContainerAny = MapContainer as unknown as React.ComponentType<{
-        center: [number, number];
-        zoom: number;
-        scrollWheelZoom: boolean;
-        dragging: boolean;
-        zoomControl: boolean;
-        doubleClickZoom: boolean;
-        style: React.CSSProperties;
-        className: string;
-        children: React.ReactNode;
-    }>;
-    const TileLayerAny = TileLayer as unknown as React.ComponentType<{
-        attribution: string;
-        url: string;
-    }>;
-    const MarkerAny = Marker as unknown as React.ComponentType<{
-        key: number;
-        position: [number, number];
-        icon: L.DivIcon;
-        eventHandlers: { click: () => void };
-        children: React.ReactNode;
-    }>;
-
+    // Note: Using @ts-ignore for react-leaflet v5 compatibility with React 19
+    // (@ts-expect-error would be preferred but there's no actual type error to suppress)
     return (
         <>
             <style>{`
@@ -161,7 +139,9 @@ export function TravelMapInner({
                     max-width: 320px;
                 }
             `}</style>
-            <MapContainerAny
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+            {/* @ts-ignore - react-leaflet types incompatible with React 19 */}
+            <MapContainer
                 center={defaultCenter}
                 zoom={13}
                 scrollWheelZoom={interactive}
@@ -171,7 +151,9 @@ export function TravelMapInner({
                 style={{ height, width: '100%' }}
                 className={`rounded-lg ${className}`}
             >
-                <TileLayerAny
+                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                {/* @ts-ignore - react-leaflet types incompatible with React 19 */}
+                <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
@@ -193,7 +175,9 @@ export function TravelMapInner({
 
                 {/* Location markers */}
                 {locations.map((location, index) => (
-                    <MarkerAny
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore - react-leaflet types incompatible with React 19
+                    <Marker
                         key={location.id}
                         position={[location.latitude, location.longitude]}
                         icon={createNumberedIcon(index + 1)}
@@ -204,9 +188,9 @@ export function TravelMapInner({
                         <Popup>
                             <LocationPopup location={location} number={index + 1} />
                         </Popup>
-                    </MarkerAny>
+                    </Marker>
                 ))}
-            </MapContainerAny>
+            </MapContainer>
         </>
     );
 }
