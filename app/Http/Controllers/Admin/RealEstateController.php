@@ -156,12 +156,14 @@ class RealEstateController extends Controller
         ]);
     }
 
-    public function editProject($project)
+    public function editProject(RealEstateProject $project)
     {
-        $this->authorize('update', RealEstateProject::class);
-        $project = RealEstateProject::with(['developer', 'images' => function ($query) {
+        // Load relationships
+        $project->load(['developer', 'images' => function ($query) {
             $query->ordered(); // Load images in order
-        }])->findOrFail($project);
+        }]);
+
+        $this->authorize('update', $project);
 
         $developers = Developer::all();
 
@@ -245,12 +247,11 @@ class RealEstateController extends Controller
         }
     }
 
-    public function updateProject(Request $request, $project)
+    public function updateProject(Request $request, RealEstateProject $project)
     {
-        $this->authorize('update', RealEstateProject::class);
+        $this->authorize('update', $project);
 
         try {
-            $project = RealEstateProject::findOrFail($project);
             Log::info('Update project request:', $request->except(['featured_image', 'additional_images']));
 
             $validated = $request->validate([

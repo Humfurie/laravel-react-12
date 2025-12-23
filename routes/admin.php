@@ -195,7 +195,7 @@ Route::prefix('inquiries')->name('inquiries.')->middleware('permission:inquiry,v
 });
 
 // Admin comment routes - isAdmin() checked in controller/policy
-Route::prefix('comments')->name('comments.')->group(function () {
+Route::prefix('comments')->name('admin.comments.')->group(function () {
     Route::get('/', [App\Http\Controllers\Admin\CommentController::class, 'index'])->name('index');
     Route::get('/reported', [App\Http\Controllers\Admin\CommentController::class, 'reportedIndex'])->name('reported');
     Route::put('/{comment}', [App\Http\Controllers\Admin\CommentController::class, 'update'])->name('update');
