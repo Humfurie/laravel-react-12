@@ -29,7 +29,7 @@ interface Props {
     };
 }
 
-export default function Index({ comments, stats }: Props) {
+export default function Index({ stats }: Props) {
     return (
         <AdminLayout>
             <Head title="Comments Management" />
