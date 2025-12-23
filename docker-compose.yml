@@ -26,6 +26,8 @@ services:
             - proxy
         depends_on:
             - pgsql
+        external_links:
+            - minio-standalone:minio-standalone
 
     pgsql:
         image: 'postgres:17'
