@@ -24,8 +24,11 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->name();
+
         return [
-            'name' => fake()->name(),
+            'name' => $name,
+            'username' => fake()->unique()->userName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
@@ -47,14 +50,13 @@ class UserFactory extends Factory
 
     /**
      * Indicate that the user is an admin.
-     * Admin users have id = 1.
      */
     public function admin(): static
     {
         return $this->state(fn(array $attributes) => [
-            'id' => 1,
             'name' => 'Admin User',
             'email' => 'admin@example.com',
+            'username' => 'admin',
         ]);
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\SitemapController;
 use App\Models\Experience;
 use App\Models\Expertise;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
@@ -56,8 +57,8 @@ Route::get('/', function () {
 
     // Get primary user profile data for homepage
     $primaryUser = Cache::remember('homepage.user_profile', 1800, function () {
-        return \App\Models\User::where('email', 'humfurie@gmail.com')->first()
-            ?? \App\Models\User::first();
+        return User::where('email', 'humfurie@gmail.com')->first()
+            ?? User::first();
     });
 
     return Inertia::render('user/home', array_merge($blogs, [
@@ -125,7 +126,7 @@ Route::middleware('auth')->group(function () {
     // Create comments (with rate limiting)
     Route::post('/blogs/{blog}/comments', [App\Http\Controllers\CommentController::class, 'store'])
         ->middleware('throttle:10,1'); // 10 per minute
-    Route::post('/giveaways/{giveaway}/comments', [App\Http\Controllers\CommentController::class, 'store'])
+    Route::post('/giveaways/{giveaway}/comments', [App\Http\Controllers\CommentController::class, 'storeOnGiveaway'])
         ->middleware('throttle:10,1');
 
     // Update/delete own comments

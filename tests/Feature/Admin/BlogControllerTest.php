@@ -23,10 +23,10 @@ test('get primary and latest returns correct structure', function () {
     $result = $controller->getPrimaryAndLatest();
 
     expect($result)->toHaveKeys(['primary', 'latest', 'stats'])
-        ->and($result['primary'])->toHaveCount(2)
+        ->and($result['primary'])->toHaveCount(3) // getFeaturedBlogs(3) returns 2 manual + 1 auto-featured
         ->and($result['latest'])->toHaveCount(6)
         ->and($result['stats']['total_posts'])->toBe(6)
-        ->and($result['stats']['featured_count'])->toBe(2)
+        ->and($result['stats']['featured_count'])->toBe(2) // Only 2 manually featured
         ->and($result['stats']['total_views'])->toBeGreaterThan(0);
 });
 
