@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Storage;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    // Set minio as the default disk for tests
+    config(['filesystems.default' => 'minio']);
     Storage::fake('minio');
     $this->imageService = app(ImageService::class);
 });

@@ -69,6 +69,7 @@ class Project extends Model
         'status_label',
         'category_label',
         'thumbnail_url',
+        'contributors',
     ];
 
     public static function getCategories(): array
@@ -168,6 +169,39 @@ class Project extends Model
         $plainText = strip_tags($this->description ?? '');
 
         return Str::limit($plainText, 150);
+    }
+
+    public function getContributorsAttribute(): array
+    {
+        $contributors = $this->metrics['contributors'] ?? [];
+
+        if (empty($contributors)) {
+            return [];
+        }
+
+        // Get all GitHub usernames from contributors
+        $githubUsernames = collect($contributors)->pluck('login')->filter()->toArray();
+
+        if (empty($githubUsernames)) {
+            return $contributors;
+        }
+
+        // Find matching local users
+        $localUsers = User::whereIn('github_username', $githubUsernames)
+            ->get()
+            ->keyBy('github_username');
+
+        // Enrich contributors with local user data
+        return collect($contributors)->map(function ($contributor) use ($localUsers) {
+            $localUser = $localUsers->get($contributor['login'] ?? null);
+
+            return array_merge($contributor, [
+                'is_local_user' => $localUser !== null,
+                'local_user_id' => $localUser?->id,
+                'local_user_name' => $localUser?->name,
+                'local_user_username' => $localUser?->username,
+            ]);
+        })->toArray();
     }
 
     public function scopePublic($query)

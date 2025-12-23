@@ -48,7 +48,15 @@ class Image extends Model
      */
     public function getUrlAttribute(): string
     {
-        return Storage::disk('minio')->url($this->path);
+        $disk = Storage::disk(config('filesystems.default'));
+
+        // For local/public disks, return relative path
+        if (in_array(config('filesystems.default'), ['local', 'public', 'minio'])) {
+            return '/storage/' . $this->path;
+        }
+
+        // For other disks (S3, etc.), return full URL
+        return $disk->url($this->path);
     }
 
     /**
@@ -60,9 +68,18 @@ class Image extends Model
             return [];
         }
 
+        $disk = Storage::disk(config('filesystems.default'));
+        $defaultDisk = config('filesystems.default');
+
         $urls = [];
         foreach ($this->sizes as $size => $path) {
-            $urls[$size] = Storage::disk('minio')->url($path);
+            // For local/public disks, return relative path
+            if (in_array($defaultDisk, ['local', 'public', 'minio'])) {
+                $urls[$size] = '/storage/' . $path;
+            } else {
+                // For other disks (S3, etc.), return full URL
+                $urls[$size] = $disk->url($path);
+            }
         }
 
         return $urls;
@@ -77,7 +94,17 @@ class Image extends Model
             return null;
         }
 
-        return Storage::disk('minio')->url($this->sizes[$size]);
+        $disk = Storage::disk(config('filesystems.default'));
+        $defaultDisk = config('filesystems.default');
+        $path = $this->sizes[$size];
+
+        // For local/public disks, return relative path
+        if (in_array($defaultDisk, ['local', 'public', 'minio'])) {
+            return '/storage/' . $path;
+        }
+
+        // For other disks (S3, etc.), return full URL
+        return $disk->url($path);
     }
 
     /**
@@ -140,16 +167,18 @@ class Image extends Model
         parent::boot();
 
         static::deleting(function ($image) {
-            // Delete the main image file from MinIO
-            if (Storage::disk('minio')->exists($image->path)) {
-                Storage::disk('minio')->delete($image->path);
+            $disk = Storage::disk(config('filesystems.default'));
+
+            // Delete the main image file from storage
+            if ($disk->exists($image->path)) {
+                $disk->delete($image->path);
             }
 
             // Delete all thumbnail files
             if ($image->sizes) {
                 foreach ($image->sizes as $path) {
-                    if (Storage::disk('minio')->exists($path)) {
-                        Storage::disk('minio')->delete($path);
+                    if ($disk->exists($path)) {
+                        $disk->delete($path);
                     }
                 }
             }

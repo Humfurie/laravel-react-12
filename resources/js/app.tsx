@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
 import ConsentBanner from './components/consent/ConsentBanner';
 import PageLoader from './components/page-loader';
+import PageTransition from './components/page-transition';
 
 // Google Analytics page view tracking
 interface GtagEventParams {
@@ -43,6 +44,17 @@ router.on('navigate', () => {
     }
 });
 
+// Instant scroll to top on navigation (for public pages only)
+router.on('navigate', () => {
+    const path = window.location.pathname;
+    const isAdminPage = path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/settings');
+
+    if (!isAdminPage) {
+        // Instant scroll - the blur transition makes it smooth
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+});
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -54,7 +66,9 @@ createInertiaApp({
         root.render(
             <>
                 <PageLoader />
-                <App {...props} />
+                <PageTransition>
+                    <App {...props} />
+                </PageTransition>
                 <ConsentBanner />
             </>,
         );

@@ -120,7 +120,7 @@ class ImageService
         }
 
         // Get the file size of the converted WebP image
-        $fileSize = Storage::disk('minio')->size($path);
+        $fileSize = Storage::disk(config('filesystems.default'))->size($path);
 
         // Create the image record
         $image = $model->images()->create([
@@ -153,9 +153,9 @@ class ImageService
         // Encode as WebP with quality 85 (good balance between quality and file size)
         $encodedImage = $image->toWebp(85);
 
-        // Store using Laravel's Storage facade with MinIO
+        // Store using Laravel's Storage facade with configured disk
         $path = $directory . '/' . $filename;
-        Storage::disk('minio')->put($path, (string)$encodedImage);
+        Storage::disk(config('filesystems.default'))->put($path, (string)$encodedImage);
 
         return $path;
     }
@@ -188,8 +188,8 @@ class ImageService
             // Generate the path
             $thumbnailPath = $thumbnailDir . '/' . $thumbnailFilename;
 
-            // Store using Laravel's Storage facade with MinIO
-            Storage::disk('minio')->put($thumbnailPath, (string)$encodedThumbnail);
+            // Store using Laravel's Storage facade with configured disk
+            Storage::disk(config('filesystems.default'))->put($thumbnailPath, (string)$encodedThumbnail);
 
             $thumbnailPaths[$sizeName] = $thumbnailPath;
         }

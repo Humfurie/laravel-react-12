@@ -194,12 +194,12 @@ test('home page shows primary and latest blogs with stats', function () {
 
     $response->assertInertia(fn ($page) =>
     $page->component('user/home')
-        ->has('primary', 1)
+        ->has('primary', 2) // getFeaturedBlogs(3) auto-fills with trending when < 3 manual featured
         ->has('latest')
         ->has('stats')
         ->where('stats.total_posts', 2)
         ->where('stats.total_views', 150)
-        ->where('stats.featured_count', 1)
+        ->where('stats.featured_count', 1) // Only 1 manually featured
     );
 });
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Giveaway;
 use App\Models\GiveawayEntry;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class GiveawayController extends Controller
@@ -64,7 +65,7 @@ class GiveawayController extends Controller
 
         $giveaway->load(['images' => function ($query) {
             $query->ordered();
-        }, 'winner', 'entries']);
+        }, 'winner', 'winners', 'entries']);
 
         // Determine if giveaway can be started (backend conditions only)
         // Admin can start anytime between start_date and end_date if there are entries
@@ -87,9 +88,15 @@ class GiveawayController extends Controller
                 'can_accept_entries' => $giveaway->can_accept_entries,
                 'can_start_giveaway' => $canStartGiveaway,
                 'entries_count' => $giveaway->entries->count(),
-                'winner' => $giveaway->winner ? [
-                    'name' => $giveaway->winner->name,
+                'background_image_url' => $giveaway->background_image
+                    ? Storage::disk(config('filesystems.default'))->url($giveaway->background_image)
+                    : null,
+                // Show all actual winners (not rejected)
+                'winner' => $giveaway->winners->isNotEmpty() ? [
+                    'name' => $giveaway->winners->first()->name,
                 ] : null,
+                'winners' => $giveaway->winners->map(fn($w) => ['name' => $w->name])->toArray(),
+                'number_of_winners' => $giveaway->number_of_winners,
                 // Only show eligible entries (exclude rejected participants)
                 'entry_names' => $giveaway->entries
                     ->whereNotIn('status', [GiveawayEntry::STATUS_REJECTED])

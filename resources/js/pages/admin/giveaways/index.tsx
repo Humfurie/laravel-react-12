@@ -67,7 +67,7 @@ const getStatusLabel = (status: string) => {
     }
 };
 
-function RaffleCard({ giveaway }: { giveaway: Giveaway }) {
+function GiveawayCard({ giveaway }: { giveaway: Giveaway }) {
     const handleDelete = () => {
         if (confirm('Are you sure you want to delete this giveaway?')) {
             router.delete(route('admin.giveaways.destroy', giveaway.slug));
@@ -236,7 +236,7 @@ export default function Index({ giveaways, filters }: Props) {
                 ) : (
                     <div className="space-y-4">
                         {giveaways?.data?.map((giveaway) => (
-                            <RaffleCard key={giveaway.id} giveaway={giveaway} />
+                            <GiveawayCard key={giveaway.id} giveaway={giveaway} />
                         ))}
                     </div>
                 )}
