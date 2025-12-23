@@ -154,9 +154,8 @@ class Comment extends Model
      */
     public function markAsEdited(): void
     {
-        $this->update([
-            'is_edited' => true,
-            'edited_at' => now(),
-        ]);
+        $this->is_edited = true;
+        $this->edited_at = now();
+        $this->save();
     }
 }

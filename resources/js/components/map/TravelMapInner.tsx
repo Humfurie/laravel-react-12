@@ -74,28 +74,12 @@ export function TravelMapInner({
     const routeCoordinates: [number, number][] = [...locations].sort((a, b) => a.order - b.order).map((loc) => [loc.latitude, loc.longitude]);
 
     // Cast components to any to work around react-leaflet v5 type incompatibilities
-    const MapContainerAny = MapContainer as unknown as React.ComponentType<{
-        center: [number, number];
-        zoom: number;
-        scrollWheelZoom: boolean;
-        dragging: boolean;
-        zoomControl: boolean;
-        doubleClickZoom: boolean;
-        style: React.CSSProperties;
-        className: string;
-        children: React.ReactNode;
-    }>;
-    const TileLayerAny = TileLayer as unknown as React.ComponentType<{
-        attribution: string;
-        url: string;
-    }>;
-    const MarkerAny = Marker as unknown as React.ComponentType<{
-        key: number;
-        position: [number, number];
-        icon: L.DivIcon;
-        eventHandlers: { click: () => void };
-        children: React.ReactNode;
-    }>;
+    // @ts-ignore - @ts-expect-error react-leaflet types incompatible with React 19
+    const MapContainerAny = MapContainer as any;
+    // @ts-ignore - @ts-expect-error react-leaflet types incompatible with React 19
+    const TileLayerAny = TileLayer as any;
+    // @ts-ignore - @ts-expect-error react-leaflet types incompatible with React 19
+    const MarkerAny = Marker as any;
 
     return (
         <>

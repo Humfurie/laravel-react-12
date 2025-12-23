@@ -21,7 +21,7 @@ class CommentTest extends TestCase
     public function authenticated_user_can_create_comment()
     {
         $response = $this->actingAs($this->user)
-            ->postJson("/blogs/{$this->blog->id}/comments", [
+            ->postJson("/blogs/{$this->blog->slug}/comments", [
                 'content' => 'This is a test comment',
             ]);
 
@@ -43,7 +43,7 @@ class CommentTest extends TestCase
     /** @test */
     public function guest_cannot_create_comment()
     {
-        $response = $this->postJson("/blogs/{$this->blog->id}/comments", [
+        $response = $this->postJson("/blogs/{$this->blog->slug}/comments", [
             'content' => 'Guest comment',
         ]);
 
@@ -56,7 +56,7 @@ class CommentTest extends TestCase
         $maliciousContent = 'Safe text <script>alert("XSS")</script> <a href="javascript:alert()">click</a>';
 
         $response = $this->actingAs($this->user)
-            ->postJson("/blogs/{$this->blog->id}/comments", [
+            ->postJson("/blogs/{$this->blog->slug}/comments", [
                 'content' => $maliciousContent,
             ]);
 
@@ -79,7 +79,7 @@ class CommentTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->user)
-            ->postJson("/blogs/{$this->blog->id}/comments", [
+            ->postJson("/blogs/{$this->blog->slug}/comments", [
                 'content' => 'This is a reply',
                 'parent_id' => $parentComment->id,
             ]);
@@ -116,7 +116,7 @@ class CommentTest extends TestCase
 
         // Trying to create a 4th level should fail
         $response = $this->actingAs($this->user)
-            ->postJson("/blogs/{$this->blog->id}/comments", [
+            ->postJson("/blogs/{$this->blog->slug}/comments", [
                 'content' => 'Too deep',
                 'parent_id' => $level3->id,
             ]);
@@ -136,7 +136,7 @@ class CommentTest extends TestCase
         $deletedComment->delete();
 
         $response = $this->actingAs($this->user)
-            ->postJson("/blogs/{$this->blog->id}/comments", [
+            ->postJson("/blogs/{$this->blog->slug}/comments", [
                 'content' => 'Reply to deleted',
                 'parent_id' => $deletedComment->id,
             ]);
@@ -275,7 +275,7 @@ class CommentTest extends TestCase
     public function comment_validates_minimum_length()
     {
         $response = $this->actingAs($this->user)
-            ->postJson("/blogs/{$this->blog->id}/comments", [
+            ->postJson("/blogs/{$this->blog->slug}/comments", [
                 'content' => 'ab', // Only 2 characters
             ]);
 
@@ -287,7 +287,7 @@ class CommentTest extends TestCase
     public function comment_validates_maximum_length()
     {
         $response = $this->actingAs($this->user)
-            ->postJson("/blogs/{$this->blog->id}/comments", [
+            ->postJson("/blogs/{$this->blog->slug}/comments", [
                 'content' => str_repeat('a', 1001), // 1001 characters
             ]);
 
@@ -301,7 +301,7 @@ class CommentTest extends TestCase
         $giveaway = Giveaway::factory()->create(['status' => 'active']);
 
         $response = $this->actingAs($this->user)
-            ->postJson("/giveaways/{$giveaway->id}/comments", [
+            ->postJson("/giveaways/{$giveaway->slug}/comments", [
                 'content' => 'Comment on giveaway',
             ]);
 

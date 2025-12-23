@@ -18,9 +18,25 @@ class CommentController extends Controller
     use AuthorizesRequests;
 
     /**
-     * Store a new comment.
+     * Store a new comment on a blog.
      */
-    public function store(StoreCommentRequest $request, Blog|Giveaway $commentable): JsonResponse|RedirectResponse
+    public function store(StoreCommentRequest $request, Blog $blog): JsonResponse|RedirectResponse
+    {
+        return $this->storeComment($request, $blog);
+    }
+
+    /**
+     * Store a new comment on a giveaway.
+     */
+    public function storeOnGiveaway(StoreCommentRequest $request, Giveaway $giveaway): JsonResponse|RedirectResponse
+    {
+        return $this->storeComment($request, $giveaway);
+    }
+
+    /**
+     * Store a new comment (shared logic).
+     */
+    protected function storeComment(StoreCommentRequest $request, Blog|Giveaway $commentable): JsonResponse|RedirectResponse
     {
         $validated = $request->validated();
 

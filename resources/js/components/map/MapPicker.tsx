@@ -77,17 +77,10 @@ function MapPickerInner({ latitude, longitude, onChange, height = '300px' }: Map
     const hasPosition = latitude !== null && longitude !== null && latitude && longitude;
 
     // Cast components to any to work around react-leaflet v5 type incompatibilities
-    const MapContainerAny = MapContainer as unknown as React.ComponentType<{
-        center: [number, number];
-        zoom: number;
-        style: React.CSSProperties;
-        className: string;
-        children: React.ReactNode;
-    }>;
-    const TileLayerAny = TileLayer as unknown as React.ComponentType<{
-        attribution: string;
-        url: string;
-    }>;
+    // @ts-ignore - @ts-expect-error react-leaflet types incompatible with React 19
+    const MapContainerAny = MapContainer as any;
+    // @ts-ignore - @ts-expect-error react-leaflet types incompatible with React 19
+    const TileLayerAny = TileLayer as any;
 
     return (
         <div className="relative">

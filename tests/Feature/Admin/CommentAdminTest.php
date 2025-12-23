@@ -6,6 +6,8 @@ use App\Models\Comment;
 use App\Models\CommentReport;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class CommentAdminTest extends TestCase
@@ -269,7 +271,7 @@ class CommentAdminTest extends TestCase
         Comment::factory()->count(3)->create(['status' => 'pending']);
         Comment::factory()->count(2)->create(['status' => 'hidden']);
 
-        $comment = Comment::factory()->create();
+        $comment = Comment::factory()->create(['status' => 'approved']);
         CommentReport::factory()->count(2)->create([
             'comment_id' => $comment->id,
             'status' => 'pending',
@@ -281,7 +283,7 @@ class CommentAdminTest extends TestCase
         $response->assertInertia(fn($page) => $page
             ->has('stats')
             ->where('stats.total', 11)
-            ->where('stats.approved', 5)
+            ->where('stats.approved', 6)
             ->where('stats.pending', 3)
             ->where('stats.hidden', 2)
             ->where('stats.reported', 2)
@@ -292,7 +294,33 @@ class CommentAdminTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->admin()->create();
+        // Ensure admin user exists with ID = 1 (required for isAdmin() to work)
+        if (!User::find(1)) {
+            DB::table('users')->insert([
+                'id' => 1,
+                'name' => 'Admin User',
+                'username' => 'admin',
+                'email' => 'admin@example.com',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+                'remember_token' => Str::random(10),
+                'mobile' => fake()->phoneNumber(),
+                'telephone' => fake()->phoneNumber(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Reset sequence for PostgreSQL so next user gets ID=2
+            if (DB::getDriverName() === 'pgsql') {
+                DB::statement("SELECT setval('users_id_seq', 1, true)");
+            } elseif (DB::getDriverName() === 'mysql') {
+                DB::statement("ALTER TABLE users AUTO_INCREMENT = 2");
+            } elseif (DB::getDriverName() === 'sqlite') {
+                // SQLite handles this automatically
+            }
+        }
+        $this->admin = User::find(1);
+
         $this->regularUser = User::factory()->create();
     }
 }
