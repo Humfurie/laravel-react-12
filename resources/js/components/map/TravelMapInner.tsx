@@ -139,6 +139,7 @@ export function TravelMapInner({
                     max-width: 320px;
                 }
             `}</style>
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
             {/* @ts-ignore - react-leaflet types incompatible with React 19 */}
             <MapContainer
                 center={defaultCenter}
@@ -150,6 +151,7 @@ export function TravelMapInner({
                 style={{ height, width: '100%' }}
                 className={`rounded-lg ${className}`}
             >
+                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                 {/* @ts-ignore - react-leaflet types incompatible with React 19 */}
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -173,6 +175,7 @@ export function TravelMapInner({
 
                 {/* Location markers */}
                 {locations.map((location, index) => (
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore - react-leaflet types incompatible with React 19
                     <Marker
                         key={location.id}
