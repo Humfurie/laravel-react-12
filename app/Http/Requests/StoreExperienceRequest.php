@@ -12,7 +12,7 @@ class StoreExperienceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check();
+        return true; // Authorization is handled by middleware and controller
     }
 
     /**

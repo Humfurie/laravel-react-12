@@ -14,10 +14,12 @@ class ExperienceController extends Controller
 
     /**
      * Get public experiences (API endpoint).
+     * Only shows experiences from the admin user (user_id = 1).
      */
     public function public()
     {
         $experiences = Experience::with('image')
+            ->where('user_id', 1)
             ->ordered()
             ->get();
 
@@ -87,6 +89,8 @@ class ExperienceController extends Controller
      */
     public function store(StoreExperienceRequest $request)
     {
+        $this->authorize('create', Experience::class);
+
         $validated = $request->validated();
 
         $experience = Experience::create([
@@ -113,6 +117,8 @@ class ExperienceController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Experience::class);
+
         return Inertia::render('admin/experience/create');
     }
 
