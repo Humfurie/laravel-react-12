@@ -14,12 +14,12 @@ class ExperienceController extends Controller
 
     /**
      * Get public experiences (API endpoint).
-     * Only shows experiences from the admin user (user_id = 1).
+     * Only shows experiences marked as public.
      */
     public function public()
     {
         $experiences = Experience::with('image')
-            ->where('user_id', 1)
+            ->where('is_public', true)
             ->ordered()
             ->get();
 
@@ -72,9 +72,9 @@ class ExperienceController extends Controller
                 $experience->image->delete();
             }
 
-            $path = $request->file('image')->store('experiences', 'minio');
+            $path = $request->file('image')?->store('experiences', 'minio');
             $experience->image()->create([
-                'name' => $request->file('image')->getClientOriginalName(),
+                'name' => $request->file('image')?->getClientOriginalName(),
                 'path' => $path,
             ]);
         }

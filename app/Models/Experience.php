@@ -24,11 +24,13 @@ class Experience extends Model
         'end_year',
         'is_current_position',
         'display_order',
+        'is_public',
     ];
 
     protected $casts = [
         'description' => 'array', // JSON cast for description bullet points
         'is_current_position' => 'boolean',
+        'is_public' => 'boolean',
         'start_month' => 'integer',
         'start_year' => 'integer',
         'end_month' => 'integer',
