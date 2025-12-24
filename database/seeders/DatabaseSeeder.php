@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
+            SettingsSeeder::class,
         ]);
 
         // Only run demo/fake data seeders in local environment

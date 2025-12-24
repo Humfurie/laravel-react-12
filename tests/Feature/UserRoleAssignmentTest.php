@@ -42,44 +42,74 @@ beforeEach(function () {
 });
 
 test('user ID 1 cannot be deleted', function () {
-    // Find or create user ID 1
+    // Ensure user ID 1 exists
     $superAdmin = User::find(1);
     if (!$superAdmin) {
-        $superAdmin = User::factory()->create(['id' => 1]);
+        // Force insert with ID 1
+        DB::table('users')->insert([
+            'id' => 1,
+            'name' => 'Super Admin',
+            'username' => 'superadmin',
+            'email' => 'superadmin@example.com',
+            'password' => bcrypt('password'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $superAdmin = User::find(1);
     }
 
     $this->actingAs($this->adminUser)
-        ->delete(route('users.destroy', $superAdmin))
+        ->delete(route('users.destroy', ['user' => $superAdmin->username]))
         ->assertForbidden();
 
     expect(User::find(1))->not->toBeNull();
 });
 
 test('user ID 1 cannot be force deleted', function () {
-    // Find or create user ID 1
+    // Ensure user ID 1 exists
     $superAdmin = User::find(1);
     if (!$superAdmin) {
-        $superAdmin = User::factory()->create(['id' => 1]);
+        // Force insert with ID 1
+        DB::table('users')->insert([
+            'id' => 1,
+            'name' => 'Super Admin',
+            'username' => 'superadmin',
+            'email' => 'superadmin@example.com',
+            'password' => bcrypt('password'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $superAdmin = User::find(1);
     }
 
     $this->actingAs($this->adminUser)
-        ->delete(route('users.forceDestroy', $superAdmin))
+        ->delete(route('users.forceDestroy', ['user' => $superAdmin->username]))
         ->assertForbidden();
 
     expect(User::find(1))->not->toBeNull();
 });
 
 test('user ID 1 cannot have roles assigned via assignRole endpoint', function () {
-    // Find or create user ID 1
+    // Ensure user ID 1 exists
     $superAdmin = User::find(1);
     if (!$superAdmin) {
-        $superAdmin = User::factory()->create(['id' => 1]);
+        // Force insert with ID 1
+        DB::table('users')->insert([
+            'id' => 1,
+            'name' => 'Super Admin',
+            'username' => 'superadmin',
+            'email' => 'superadmin@example.com',
+            'password' => bcrypt('password'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $superAdmin = User::find(1);
     }
 
     $originalRoleIds = $superAdmin->roles->pluck('id')->toArray();
 
     $this->actingAs($this->adminUser)
-        ->patch(route('users.assign-role', $superAdmin), [
+        ->patch(route('users.assign-role', ['user' => $superAdmin->username]), [
             'role_ids' => [$this->editorRole->id],
         ])
         ->assertForbidden();
@@ -89,16 +119,26 @@ test('user ID 1 cannot have roles assigned via assignRole endpoint', function ()
 });
 
 test('user ID 1 cannot have roles changed via update endpoint', function () {
-    // Find or create user ID 1
+    // Ensure user ID 1 exists
     $superAdmin = User::find(1);
     if (!$superAdmin) {
-        $superAdmin = User::factory()->create(['id' => 1]);
+        // Force insert with ID 1
+        DB::table('users')->insert([
+            'id' => 1,
+            'name' => 'Super Admin',
+            'username' => 'superadmin',
+            'email' => 'superadmin@example.com',
+            'password' => bcrypt('password'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $superAdmin = User::find(1);
     }
 
     $originalRoleIds = $superAdmin->roles->pluck('id')->toArray();
 
     $this->actingAs($superAdmin)
-        ->put(route('users.update', $superAdmin), [
+        ->put(route('users.update', ['user' => $superAdmin->username]), [
             'name' => $superAdmin->name,
             'email' => $superAdmin->email,
             'role_ids' => [$this->viewerRole->id],
@@ -113,7 +153,7 @@ test('regular user can have roles assigned', function () {
     $regularUser = User::factory()->create();
 
     $this->actingAs($this->adminUser)
-        ->patch(route('users.assign-role', $regularUser), [
+        ->patch(route('users.assign-role', ['user' => $regularUser->username]), [
             'role_ids' => [$this->editorRole->id, $this->viewerRole->id],
         ])
         ->assertRedirect()
@@ -128,7 +168,7 @@ test('regular user can be deleted', function () {
     $regularUser = User::factory()->create();
 
     $this->actingAs($this->adminUser)
-        ->delete(route('users.destroy', $regularUser))
+        ->delete(route('users.destroy', ['user' => $regularUser->username]))
         ->assertRedirect()
         ->assertSessionHas('success', 'User deleted successfully.');
 
@@ -140,7 +180,7 @@ test('regular user roles can be updated', function () {
     $regularUser->roles()->attach($this->viewerRole);
 
     $this->actingAs($this->adminUser)
-        ->put(route('users.update', $regularUser), [
+        ->put(route('users.update', ['user' => $regularUser->username]), [
             'name' => 'Updated Name',
             'email' => $regularUser->email,
             'role_ids' => [$this->editorRole->id],
@@ -158,7 +198,7 @@ test('user without permission cannot assign roles', function () {
     $unprivilegedUser = User::factory()->create();
 
     $this->actingAs($unprivilegedUser)
-        ->patch(route('users.assign-role', $regularUser), [
+        ->patch(route('users.assign-role', ['user' => $regularUser->username]), [
             'role_ids' => [$this->editorRole->id],
         ])
         ->assertForbidden();
@@ -168,7 +208,7 @@ test('assignRole endpoint validates role_ids', function () {
     $regularUser = User::factory()->create();
 
     $this->actingAs($this->adminUser)
-        ->patch(route('users.assign-role', $regularUser), [
+        ->patch(route('users.assign-role', ['user' => $regularUser->username]), [
             'role_ids' => [999999], // Non-existent role ID
         ])
         ->assertSessionHasErrors(['role_ids.0']);
@@ -178,7 +218,7 @@ test('assignRole endpoint requires role_ids array', function () {
     $regularUser = User::factory()->create();
 
     $this->actingAs($this->adminUser)
-        ->patch(route('users.assign-role', $regularUser), [
+        ->patch(route('users.assign-role', ['user' => $regularUser->username]), [
             // Missing role_ids
         ])
         ->assertSessionHasErrors(['role_ids']);

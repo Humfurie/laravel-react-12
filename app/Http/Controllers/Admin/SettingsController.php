@@ -13,10 +13,23 @@ class SettingsController extends Controller
     public function index()
     {
         $settings = Setting::getAllGrouped();
+        $disk = config('filesystems.default');
+
+        // Add URL field to file-type settings for proper display
+        $allSettings = Setting::orderBy('group')->orderBy('key')->get()->map(function ($setting) use ($disk) {
+            $settingArray = $setting->toArray();
+
+            // Add URL for file-type settings
+            if ($setting->type === 'file' && $setting->value) {
+                $settingArray['url'] = $this->generateFileUrl($disk, $setting->value);
+            }
+
+            return $settingArray;
+        });
 
         return Inertia::render('admin/settings/index', [
             'settings' => $settings,
-            'allSettings' => Setting::orderBy('group')->orderBy('key')->get(),
+            'allSettings' => $allSettings,
         ]);
     }
 
@@ -33,18 +46,9 @@ class SettingsController extends Controller
                 continue;
             }
 
-            // Handle file uploads
-            if ($setting->type === 'file' && $request->hasFile("files.{$key}")) {
-                $file = $request->file("files.{$key}");
-
-                // Delete old file if exists
-                if ($setting->value && Storage::disk('public')->exists($setting->value)) {
-                    Storage::disk('public')->delete($setting->value);
-                }
-
-                // Store new file
-                $path = $file->store('settings', 'minio');
-                $value = $path;
+            // Skip file settings as they are handled separately via uploadFile
+            if ($setting->type === 'file') {
+                continue;
             }
 
             Setting::set(
@@ -73,20 +77,42 @@ class SettingsController extends Controller
             return response()->json(['error' => 'Invalid setting key'], 400);
         }
 
+        // Determine which disk to use based on configuration
+        $disk = config('filesystems.default');
+
         // Delete old file if exists
-        if ($setting->value && Storage::disk('public')->exists($setting->value)) {
-            Storage::disk('public')->delete($setting->value);
+        if ($setting->value) {
+            if (Storage::disk($disk)->exists($setting->value)) {
+                Storage::disk($disk)->delete($setting->value);
+            }
         }
 
         // Store new file
-        $path = $request->file('file')->store('settings', 'minio');
+        $path = $request->file('file')->store('settings', $disk);
 
         Setting::set($key, $path, 'file', $setting->group, $setting->description);
+
+        // Generate the proper URL based on disk
+        $url = $this->generateFileUrl($disk, $path);
 
         return response()->json([
             'success' => true,
             'path' => $path,
-            'url' => Storage::disk('public')->url($path),
+            'url' => $url,
         ]);
+    }
+
+    /**
+     * Generate proper file URL based on disk configuration
+     */
+    private function generateFileUrl(string $disk, string $path): string
+    {
+        if ($disk === 'minio') {
+            // In production with MinIO, use the Storage URL method
+            return Storage::disk('minio')->url($path);
+        }
+
+        // In local with public disk, use the standard /storage URL
+        return Storage::disk('public')->url($path);
     }
 }

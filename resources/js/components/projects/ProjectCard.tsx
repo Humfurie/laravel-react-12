@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import type { Project, ProjectCategory, ProjectStatus } from '@/types/project';
 import { ArrowUpRight, Github, Globe } from 'lucide-react';
+import { memo } from 'react';
 
 interface ProjectCardProps {
     project: Project;
@@ -42,7 +43,7 @@ const getCategoryColor = (category: ProjectCategory) => {
     }
 };
 
-export function ProjectCard({ project, onClick, size = 'normal' }: ProjectCardProps) {
+export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 'normal' }: ProjectCardProps) {
     const isLarge = size === 'large';
 
     return (
@@ -152,4 +153,4 @@ export function ProjectCard({ project, onClick, size = 'normal' }: ProjectCardPr
             </div>
         </article>
     );
-}
+});
