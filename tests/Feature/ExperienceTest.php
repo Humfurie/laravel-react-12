@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Storage;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    // Create user with experience permissions for all tests
+    $this->user = createAdminUser('experience', ['viewAny', 'view', 'create', 'update', 'delete']);
 });
 
 test('can list experiences for authenticated user', function () {
@@ -26,7 +27,14 @@ test('can list experiences for authenticated user', function () {
 });
 
 test('can show public experiences', function () {
-    Experience::factory()->count(5)->create();
+    // Public API only shows experiences from user_id = 1 (admin)
+    // First create the admin user with id = 1
+    $admin = User::factory()->create(['id' => 1]);
+    Experience::factory()->count(5)->create(['user_id' => $admin->id]);
+
+    // Create some experiences for other users (should not appear in public API)
+    $otherUser = User::factory()->create();
+    Experience::factory()->count(3)->create(['user_id' => $otherUser->id]);
 
     $this->get(route('experiences.public'))
         ->assertOk()
@@ -192,10 +200,12 @@ test('can update experience with new image', function () {
 });
 
 test('prevents unauthorized users from editing others experiences', function () {
+    // Create a user without admin permissions (just their own experience management)
+    $regularUser = createUserWithRole('Regular User', 'regular-user', 'experience', ['viewAny']);
     $otherUser = User::factory()->create();
     $experience = Experience::factory()->create(['user_id' => $otherUser->id]);
 
-    $this->actingAs($this->user)
+    $this->actingAs($regularUser)
         ->get(route('admin.experiences.edit', $experience))
         ->assertForbidden();
 });
@@ -214,10 +224,12 @@ test('can delete an experience', function () {
 });
 
 test('prevents unauthorized users from deleting others experiences', function () {
+    // Create a user without admin permissions (just their own experience management)
+    $regularUser = createUserWithRole('Regular User', 'regular-user', 'experience', ['viewAny']);
     $otherUser = User::factory()->create();
     $experience = Experience::factory()->create(['user_id' => $otherUser->id]);
 
-    $this->actingAs($this->user)
+    $this->actingAs($regularUser)
         ->delete(route('admin.experiences.destroy', $experience))
         ->assertForbidden();
 });
