@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class CommentAdminTest extends TestCase
@@ -17,7 +18,7 @@ class CommentAdminTest extends TestCase
     protected User $admin;
     protected User $regularUser;
 
-    /** @test */
+    #[Test]
     public function admin_can_view_all_comments()
     {
         Comment::factory()->count(3)->create();
@@ -32,7 +33,7 @@ class CommentAdminTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function non_admin_cannot_access_comment_admin()
     {
         $response = $this->actingAs($this->regularUser)
@@ -41,7 +42,7 @@ class CommentAdminTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_update_any_comment()
     {
         $comment = Comment::factory()->create([
@@ -61,7 +62,7 @@ class CommentAdminTest extends TestCase
         $this->assertTrue($comment->is_edited);
     }
 
-    /** @test */
+    #[Test]
     public function admin_comment_update_strips_html_tags()
     {
         $comment = Comment::factory()->create();
@@ -76,7 +77,7 @@ class CommentAdminTest extends TestCase
         $this->assertStringNotContainsString('<script>', $comment->content);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_change_comment_status()
     {
         $comment = Comment::factory()->create(['status' => 'pending']);
@@ -92,7 +93,7 @@ class CommentAdminTest extends TestCase
         $this->assertEquals('approved', $comment->status);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_delete_any_comment()
     {
         $comment = Comment::factory()->create([
@@ -107,7 +108,7 @@ class CommentAdminTest extends TestCase
         $this->assertSoftDeleted('comments', ['id' => $comment->id]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_reported_comments()
     {
         $comment = Comment::factory()->create();
@@ -125,7 +126,7 @@ class CommentAdminTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_review_and_hide_reported_comment()
     {
         $comment = Comment::factory()->create(['status' => 'approved']);
@@ -151,7 +152,7 @@ class CommentAdminTest extends TestCase
         $this->assertNotNull($report->reviewed_at);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_review_and_delete_reported_comment()
     {
         $comment = Comment::factory()->create();
@@ -174,7 +175,7 @@ class CommentAdminTest extends TestCase
         $this->assertEquals('actioned', $report->status);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_dismiss_report()
     {
         $comment = Comment::factory()->create(['status' => 'approved']);
@@ -198,7 +199,7 @@ class CommentAdminTest extends TestCase
         $this->assertEquals('dismissed', $report->status);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_bulk_approve_comments()
     {
         $comments = Comment::factory()->count(3)->create(['status' => 'pending']);
@@ -216,7 +217,7 @@ class CommentAdminTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_bulk_hide_comments()
     {
         $comments = Comment::factory()->count(3)->create(['status' => 'approved']);
@@ -234,7 +235,7 @@ class CommentAdminTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_bulk_delete_comments()
     {
         $comments = Comment::factory()->count(3)->create();
@@ -251,7 +252,7 @@ class CommentAdminTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function non_admin_cannot_perform_bulk_operations()
     {
         $comments = Comment::factory()->count(3)->create();
@@ -264,7 +265,7 @@ class CommentAdminTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function admin_stats_are_calculated_correctly()
     {
         Comment::factory()->count(5)->create(['status' => 'approved']);
