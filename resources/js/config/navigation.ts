@@ -1,4 +1,4 @@
-import { Coins, FileText, FolderKanban, Home as HomeIcon, type LucideIcon, TrendingUp, Trophy } from 'lucide-react';
+import { Coins, FileText, FolderKanban, Home as HomeIcon, type LucideIcon, Trophy } from 'lucide-react';
 
 export interface NavItem {
     id: string;
@@ -14,8 +14,7 @@ export const publicNavItems: NavItem[] = [
     { id: 'projects', label: 'Projects', icon: FolderKanban, route: '/projects', showIcon: true },
     { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
     { id: 'giveaways', label: 'Giveaways', icon: Trophy, route: '/giveaways', showIcon: true },
-    { id: 'crypto', label: 'Crypto', icon: Coins, route: '/crypto', showIcon: true },
-    { id: 'stocks', label: 'Stocks', icon: TrendingUp, route: '/stocks', showIcon: true },
+    { id: 'markets', label: 'Markets', icon: Coins, route: '/markets', showIcon: true },
 ];
 
 // Giveaway-specific navigation

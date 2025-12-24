@@ -40,7 +40,7 @@ class StockService
                 $results = [];
 
                 foreach ($indices as $index) {
-                    $response = Http::timeout(10)
+                    $response = Http::timeout(3) // Reduced from 10 to 3 seconds
                         ->get($this->baseUrl . "/quote", [
                             'symbol' => $index,
                             'apikey' => $this->apiKey,
@@ -86,7 +86,7 @@ class StockService
 
                 foreach ($batches as $batch) {
                     $symbolString = implode(',', $batch);
-                    $response = Http::timeout(15)
+                    $response = Http::timeout(5) // Reduced from 15 to 5 seconds
                         ->get($this->baseUrl . "/quote/{$symbolString}", [
                             'apikey' => $this->apiKey,
                         ]);
@@ -100,6 +100,11 @@ class StockService
                                 }
                             }
                         }
+                    }
+
+                    // Stop if we already have enough results to avoid unnecessary API calls
+                    if (count($results) >= 10) {
+                        break;
                     }
                 }
 
@@ -321,13 +326,13 @@ class StockService
 
         return Cache::remember($cacheKey, self::CACHE_DURATION, function () {
             try {
-                $gainers = Http::timeout(10)
+                $gainers = Http::timeout(3) // Reduced from 10 to 3 seconds
                     ->get($this->baseUrl . '/gainers', [
                         'apikey' => $this->apiKey,
                     ])
                     ->json();
 
-                $losers = Http::timeout(10)
+                $losers = Http::timeout(3) // Reduced from 10 to 3 seconds
                     ->get($this->baseUrl . '/losers', [
                         'apikey' => $this->apiKey,
                     ])

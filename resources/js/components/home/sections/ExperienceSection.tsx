@@ -156,11 +156,11 @@ export function calculateDuration(
  */
 export const ExperienceSection = ({ experiences = fallbackExperiences }: ExperienceSectionProps) => {
     return (
-        <section id="experience" className="relative overflow-hidden bg-white py-20">
+        <section id="experience" className="relative overflow-hidden bg-white py-20 dark:bg-gray-950">
             <SectionTitle title={'Experience'} />
 
             <div className="primary-container">
-                <div className="text-brand-gray mb-12 w-full text-center">My professional journey in the tech industry.</div>
+                <div className="text-brand-gray mb-12 w-full text-center dark:text-gray-300">My professional journey in the tech industry.</div>
 
                 <div className="relative mx-auto mt-12 mb-12 w-full lg:mt-[80px]">
                     {/* Vertical line */}
@@ -172,12 +172,12 @@ export const ExperienceSection = ({ experiences = fallbackExperiences }: Experie
                             initial={{ opacity: 0, x: index % 2 === 0 ? 100 : -100 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.6, delay: index * 0.2 }}
-                            className={`hs-shadow relative mb-8 w-full cursor-pointer rounded-xl p-4 transition-all duration-300 sm:p-6 lg:mb-12 ${
+                            className={`hs-shadow relative mb-8 w-full cursor-pointer rounded-xl p-4 transition-all duration-300 sm:p-6 lg:mb-12 dark:bg-gray-900 ${
                                 index % 2 === 0 ? 'lg:mr-8 lg:ml-auto' : 'lg:mr-auto lg:ml-8'
                             } mx-auto lg:mx-0 lg:w-5/12`}
                         >
                             <div className="mb-4 flex items-center">
-                                <div className="mr-3 h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border-2 border-gray-200 bg-gray-100 sm:mr-4 sm:h-16 sm:w-16">
+                                <div className="mr-3 h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border-2 border-gray-200 bg-gray-100 sm:mr-4 sm:h-16 sm:w-16 dark:border-gray-700 dark:bg-gray-800">
                                     <img
                                         src={experience.image_url || '/default-company.png'}
                                         alt={experience.company}
@@ -196,7 +196,7 @@ export const ExperienceSection = ({ experiences = fallbackExperiences }: Experie
                             </div>
                             <p className="text-brand-gray mb-3 flex items-center text-xs sm:text-sm">{experience.location}</p>
 
-                            <div className="text-brand-gray mb-4 flex flex-col gap-1 rounded-lg bg-gray-50 p-2 text-xs sm:flex-row sm:justify-between sm:p-3 sm:text-sm">
+                            <div className="text-brand-gray mb-4 flex flex-col gap-1 rounded-lg bg-gray-50 p-2 text-xs sm:flex-row sm:justify-between sm:p-3 sm:text-sm dark:bg-gray-800 dark:text-gray-300">
                                 <span className="mb-1 sm:mb-0">
                                     {formatMonthYear(experience.start_month, experience.start_year)} -{' '}
                                     {experience.is_current_position ? 'Present' : formatMonthYear(experience.end_month!, experience.end_year!)}
@@ -225,7 +225,7 @@ export const ExperienceSection = ({ experiences = fallbackExperiences }: Experie
 
                             {/* Timeline dot */}
                             <div
-                                className={`bg-brand-orange absolute top-[13%] hidden h-6 w-6 rounded-full border-4 border-white transition-all duration-300 lg:block ${
+                                className={`bg-brand-orange absolute top-[13%] hidden h-6 w-6 rounded-full border-4 border-white transition-all duration-300 lg:block dark:border-gray-950 ${
                                     index % 2 === 0 ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'
                                 } `}
                             />

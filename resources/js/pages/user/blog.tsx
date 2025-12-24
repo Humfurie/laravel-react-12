@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
 import { ArrowRight, ArrowUpRight, BookOpen, Calendar, Eye, Sparkles } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 
 interface Blog {
     id: number;
@@ -46,12 +46,12 @@ const truncateText = (text: string, maxLength: number = 150) => {
 };
 
 // Magazine-style Blog Card
-function BlogCard({ blog, size = 'normal' }: { blog: Blog; size?: 'normal' | 'large' | 'featured' }) {
+const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog; size?: 'normal' | 'large' | 'featured' }) {
     const viewCount = blog.view_count || 0;
 
-    const handleCardClick = () => {
+    const handleCardClick = useCallback(() => {
         router.visit(`/blog/${blog.slug}`);
-    };
+    }, [blog.slug]);
 
     const isLarge = size === 'large';
     const isFeatured = size === 'featured';
@@ -59,11 +59,12 @@ function BlogCard({ blog, size = 'normal' }: { blog: Blog; size?: 'normal' | 'la
     if (isFeatured) {
         return (
             <article className="group cursor-pointer lg:col-span-2" onClick={handleCardClick}>
-                <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-[#E8E4DC]">
+                <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-[#E8E4DC] dark:bg-gray-800">
                     {blog.display_image ? (
                         <img
                             src={blog.display_image}
                             alt={blog.title}
+                            loading="lazy"
                             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                     ) : (
@@ -74,7 +75,7 @@ function BlogCard({ blog, size = 'normal' }: { blog: Blog; size?: 'normal' | 'la
 
                     {/* Date Badge */}
                     {blog.published_at && (
-                        <div className="absolute top-6 left-6 rounded-full bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-sm">
+                        <div className="absolute top-6 left-6 rounded-full bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-sm dark:bg-gray-700 dark:text-gray-200">
                             {new Date(blog.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </div>
                     )}
@@ -115,7 +116,7 @@ function BlogCard({ blog, size = 'normal' }: { blog: Blog; size?: 'normal' | 'la
     return (
         <article className={`group cursor-pointer ${isLarge ? 'md:col-span-2' : ''}`} onClick={handleCardClick}>
             {/* Image Container */}
-            <div className={`relative overflow-hidden rounded-2xl bg-[#F5F5F3] ${isLarge ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}>
+            <div className={`relative overflow-hidden rounded-2xl bg-[#F5F5F3] dark:bg-gray-800 ${isLarge ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}>
                 {blog.display_image ? (
                     <img
                         src={blog.display_image}
@@ -139,7 +140,7 @@ function BlogCard({ blog, size = 'normal' }: { blog: Blog; size?: 'normal' | 'la
 
                 {/* Date badge */}
                 {blog.published_at && (
-                    <div className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-700 backdrop-blur-sm">
+                    <div className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-700 backdrop-blur-sm dark:bg-gray-700/90 dark:text-gray-200">
                         {new Date(blog.published_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                     </div>
                 )}
@@ -160,20 +161,20 @@ function BlogCard({ blog, size = 'normal' }: { blog: Blog; size?: 'normal' | 'la
             <div className={`mt-4 ${isLarge ? 'md:mt-6' : ''}`}>
                 {/* Title */}
                 <h3
-                    className={`line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-gray-600 ${isLarge ? 'text-2xl md:text-3xl' : 'text-lg'}`}
+                    className={`line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-gray-600 dark:text-white dark:group-hover:text-gray-300 ${isLarge ? 'text-2xl md:text-3xl' : 'text-lg'}`}
                 >
                     {blog.title}
                 </h3>
 
                 {/* Excerpt */}
                 {blog.excerpt && (
-                    <p className={`mt-2 line-clamp-2 text-gray-500 ${isLarge ? 'text-base' : 'text-sm'}`}>
+                    <p className={`mt-2 line-clamp-2 text-gray-500 dark:text-gray-400 ${isLarge ? 'text-base' : 'text-sm'}`}>
                         {truncateText(blog.excerpt, isLarge ? 200 : 100)}
                     </p>
                 )}
 
                 {/* Meta */}
-                <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
+                <div className="mt-3 flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
                     {blog.published_at && (
                         <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
@@ -188,7 +189,7 @@ function BlogCard({ blog, size = 'normal' }: { blog: Blog; size?: 'normal' | 'la
             </div>
         </article>
     );
-}
+});
 
 export default function BlogIndex({ blogs }: Props) {
     const [isVisible, setIsVisible] = useState(true);
@@ -296,7 +297,7 @@ export default function BlogIndex({ blogs }: Props) {
                 <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href.split('?')[0] : ''} />
             </Head>
 
-            <div className="min-h-screen bg-[#FAFAF8]">
+            <div className="min-h-screen bg-[#FAFAF8] dark:bg-gray-900">
                 <FloatingNav currentPage="blog" />
 
                 <main className="pt-20">
@@ -305,7 +306,7 @@ export default function BlogIndex({ blogs }: Props) {
                         {/* Section Header */}
                         <div className="mb-8 flex items-end justify-between">
                             <div>
-                                <h1 className="font-serif text-5xl font-bold tracking-tight text-gray-900 md:text-6xl lg:text-7xl">
+                                <h1 className="font-serif text-5xl font-bold tracking-tight text-gray-900 md:text-6xl lg:text-7xl dark:text-white">
                                     Best of the
                                     <br />
                                     <span className="relative">
@@ -316,7 +317,7 @@ export default function BlogIndex({ blogs }: Props) {
                                                 stroke="currentColor"
                                                 strokeWidth="2"
                                                 strokeLinecap="round"
-                                                className="text-gray-300"
+                                                className="text-gray-300 dark:text-gray-600"
                                             />
                                         </svg>
                                     </span>
@@ -324,7 +325,7 @@ export default function BlogIndex({ blogs }: Props) {
                             </div>
                             <Link
                                 href="#all-posts"
-                                className="hidden items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 md:flex"
+                                className="hidden items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 md:flex dark:text-gray-400 dark:hover:text-white"
                             >
                                 See all posts
                                 <ArrowRight className="h-4 w-4" />
@@ -340,21 +341,23 @@ export default function BlogIndex({ blogs }: Props) {
                                 {/* Sidebar Cards */}
                                 <div className="flex flex-col gap-6">
                                     {/* Info Card */}
-                                    <div className="flex flex-col justify-between rounded-3xl bg-[#C5E8D5] p-6">
-                                        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-gray-600">
+                                    <div className="flex flex-col justify-between rounded-3xl bg-[#C5E8D5] p-6 dark:bg-green-900/30">
+                                        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
                                             <Sparkles className="h-4 w-4" />
                                             <span>ARTICLES</span>
                                         </div>
                                         <div>
-                                            <p className="mb-2 text-sm text-gray-600">Become a</p>
-                                            <h3 className="mb-4 text-2xl font-bold text-gray-900">
+                                            <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">Become a</p>
+                                            <h3 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
                                                 Regular
                                                 <br />
                                                 Reader
                                             </h3>
-                                            <p className="text-sm text-gray-600">Stay updated with the latest insights and tutorials</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                Stay updated with the latest insights and tutorials
+                                            </p>
                                         </div>
-                                        <div className="mt-6 font-serif text-3xl font-bold text-gray-900">{blogs.total} posts</div>
+                                        <div className="mt-6 font-serif text-3xl font-bold text-gray-900 dark:text-white">{blogs.total} posts</div>
                                     </div>
 
                                     {/* Second Featured Post */}
@@ -367,11 +370,12 @@ export default function BlogIndex({ blogs }: Props) {
                                                 <img
                                                     src={otherPosts[0].display_image}
                                                     alt={otherPosts[0].title}
+                                                    loading="lazy"
                                                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                                                 />
                                             ) : (
-                                                <div className="flex h-full items-center justify-center bg-[#F5E6D3]">
-                                                    <BookOpen className="h-16 w-16 text-gray-400" />
+                                                <div className="flex h-full items-center justify-center bg-[#F5E6D3] dark:bg-gray-700">
+                                                    <BookOpen className="h-16 w-16 text-gray-400 dark:text-gray-500" />
                                                 </div>
                                             )}
 
@@ -397,27 +401,27 @@ export default function BlogIndex({ blogs }: Props) {
                     </section>
 
                     {/* All Posts Section */}
-                    <section id="all-posts" className="bg-white py-16">
+                    <section id="all-posts" className="bg-white py-16 dark:bg-gray-800">
                         <div className="container mx-auto px-4">
                             {/* Section Header */}
                             <div className="mb-8">
                                 <div className="mb-4 flex items-center gap-3">
-                                    <div className="h-px flex-1 bg-gray-200" />
-                                    <h2 className="font-serif text-3xl font-bold text-gray-900">All Articles</h2>
-                                    <div className="h-px flex-1 bg-gray-200" />
+                                    <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                                    <h2 className="font-serif text-3xl font-bold text-gray-900 dark:text-white">All Articles</h2>
+                                    <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
                                 </div>
-                                <p className="text-center text-gray-500">
+                                <p className="text-center text-gray-500 dark:text-gray-400">
                                     Browse through {blogs.total} article{blogs.total !== 1 ? 's' : ''}
                                 </p>
                             </div>
 
                             {blogs.data.length === 0 ? (
                                 <div className="py-16 text-center">
-                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                                        <BookOpen className="h-8 w-8 text-gray-400" />
+                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
+                                        <BookOpen className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                                     </div>
-                                    <h3 className="mb-2 text-2xl font-semibold text-gray-900">No posts found</h3>
-                                    <p className="mb-6 text-gray-500">We're working on some great content. Check back soon!</p>
+                                    <h3 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-white">No posts found</h3>
+                                    <p className="mb-6 text-gray-500 dark:text-gray-400">We're working on some great content. Check back soon!</p>
                                     <Button onClick={() => router.visit('/')} className="rounded-full bg-gray-900 px-8 text-white hover:bg-gray-800">
                                         Back to Home
                                     </Button>

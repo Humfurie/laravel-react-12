@@ -80,7 +80,7 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
                     </div>
 
                     {/* Mobile Navigation */}
-                    <div className="flex items-center gap-1 md:hidden">
+                    <div className="flex items-center gap-0.5 md:hidden">
                         {publicNavItems.map((item) => {
                             const Icon = item.icon;
                             const isActive = activeItem === item.id;
@@ -89,17 +89,19 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
                                     key={item.id}
                                     href={item.route}
                                     onClick={() => setActiveItem(item.id)}
-                                    className={`rounded-full p-2 transition-all duration-200 active:scale-95 ${
+                                    className={`rounded-full p-1.5 transition-all duration-200 active:scale-95 ${
                                         isActive
                                             ? 'bg-orange-500 text-white shadow-md'
                                             : 'text-gray-700 hover:bg-white/80 hover:text-orange-600 dark:text-gray-200 dark:hover:bg-gray-700/80 dark:hover:text-orange-400'
                                     }`}
                                 >
-                                    <Icon className={`h-5 w-5 transition-transform duration-200 ${isActive ? '' : 'hover:scale-110'}`} />
+                                    <Icon className={`h-4 w-4 transition-transform duration-200 ${isActive ? '' : 'hover:scale-110'}`} />
                                 </Link>
                             );
                         })}
-                        <ThemeToggle />
+                        <div className="ml-0.5">
+                            <ThemeToggle />
+                        </div>
                     </div>
                 </div>
             </div>
