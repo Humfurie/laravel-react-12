@@ -136,6 +136,8 @@ class User extends Authenticatable implements JWTSubject
                     'expertise',
                     'skills',
                     'technology',
+                    'setting',
+                    'about',
                 ];
 
                 $allPermissions = [];

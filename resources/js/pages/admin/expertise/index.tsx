@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { usePermissions } from '@/hooks/usePermissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { Edit, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
@@ -27,7 +28,7 @@ const categoryNames: Record<string, string> = {
     td: 'Tools & DevOps',
 };
 
-function ExpertiseCard({ expertise }: { expertise: Expertise }) {
+function ExpertiseCard({ expertise, canUpdate, canDelete }: { expertise: Expertise; canUpdate: boolean; canDelete: boolean }) {
     const handleDelete = () => {
         if (confirm('Are you sure you want to delete this expertise?')) {
             router.delete(route('admin.expertises.destroy', expertise.id));
@@ -35,11 +36,13 @@ function ExpertiseCard({ expertise }: { expertise: Expertise }) {
     };
 
     const handleEdit = () => {
-        router.visit(route('admin.expertises.edit', expertise.id));
+        if (canUpdate) {
+            router.visit(route('admin.expertises.edit', expertise.id));
+        }
     };
 
     return (
-        <div className="hover:bg-muted/50 cursor-pointer rounded-lg border p-4 transition-colors" onClick={handleEdit}>
+        <div className={`rounded-lg border p-4 transition-colors ${canUpdate ? 'hover:bg-muted/50 cursor-pointer' : ''}`} onClick={handleEdit}>
             <div className="flex items-start justify-between gap-4">
                 <div className="flex flex-1 gap-4">
                     {/* Tech Logo */}
@@ -70,31 +73,42 @@ function ExpertiseCard({ expertise }: { expertise: Expertise }) {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={handleEdit}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+                {(canUpdate || canDelete) && (
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                {canUpdate && (
+                                    <DropdownMenuItem onClick={handleEdit}>
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Edit
+                                    </DropdownMenuItem>
+                                )}
+                                {canDelete && (
+                                    <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                )}
             </div>
         </div>
     );
 }
 
 export default function Index({ expertises }: Props) {
+    const { can } = usePermissions();
+    const canCreate = can('expertise', 'create');
+    const canUpdate = can('expertise', 'update');
+    const canDelete = can('expertise', 'delete');
+
     // Group by category
     const groupedExpertises = expertises.reduce(
         (acc, expertise) => {
@@ -116,12 +130,14 @@ export default function Index({ expertises }: Props) {
                         <h1 className="text-3xl font-bold tracking-tight">Expertises</h1>
                         <p className="text-muted-foreground mt-2">Manage your technical skills and expertise</p>
                     </div>
-                    <Link href={route('admin.expertises.create')}>
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add Expertise
-                        </Button>
-                    </Link>
+                    {canCreate && (
+                        <Link href={route('admin.expertises.create')}>
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Expertise
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Stats */}
@@ -150,7 +166,7 @@ export default function Index({ expertises }: Props) {
                         <h2 className="text-xl font-semibold">{categoryNames[slug]}</h2>
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             {items.map((expertise) => (
-                                <ExpertiseCard key={expertise.id} expertise={expertise} />
+                                <ExpertiseCard key={expertise.id} expertise={expertise} canUpdate={canUpdate} canDelete={canDelete} />
                             ))}
                         </div>
                     </div>
@@ -160,12 +176,14 @@ export default function Index({ expertises }: Props) {
                     <div className="text-muted-foreground rounded-lg border border-dashed p-12 text-center">
                         <p className="text-lg font-medium">No expertises found</p>
                         <p className="mt-2 text-sm">Get started by creating your first expertise</p>
-                        <Link href={route('admin.expertises.create')} className="mt-4 inline-block">
-                            <Button>
-                                <Plus className="mr-2 h-4 w-4" />
-                                Add Expertise
-                            </Button>
-                        </Link>
+                        {canCreate && (
+                            <Link href={route('admin.expertises.create')} className="mt-4 inline-block">
+                                <Button>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Add Expertise
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                 )}
             </div>

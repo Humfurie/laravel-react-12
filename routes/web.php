@@ -18,9 +18,10 @@ Route::get('/', function () {
     $blogController = new BlogController;
     $blogs = $blogController->getPrimaryAndLatest();
 
-    // Cache experiences for 30 minutes
+    // Cache experiences for 30 minutes (only admin's experiences)
     $experiences = Cache::remember('homepage.experiences', 1800, function () {
         return Experience::with('image')
+            ->where('user_id', 1)
             ->ordered()
             ->get();
     });

@@ -116,6 +116,8 @@ class ExpertiseController extends Controller
      */
     public function reorder(Request $request)
     {
+        $this->authorize('update', Expertise::class);
+
         $validated = $request->validate([
             'items' => 'required|array',
             'items.*.id' => 'required|exists:expertises,id',
