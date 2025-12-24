@@ -14,7 +14,8 @@ describe('TypeScript Compilation', function () {
             ->timeout(120)
             ->run('npx tsc --noEmit');
 
-        expect($result->exitCode())->toBe(0, 'TypeScript compilation failed: ' . $result->errorOutput());
+        $output = $result->output() . "\n" . $result->errorOutput();
+        expect($result->exitCode())->toBe(0, 'TypeScript compilation failed: ' . $output);
     });
 
     it('has valid type definitions in index.d.ts', function () {
