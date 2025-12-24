@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import type { Project, ProjectCategory } from '@/types/project';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowRight, ArrowUpRight, Code2, Github, Sparkles } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 interface Props {
     featured: Project[];
@@ -38,15 +38,15 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
         });
     }, [projects, selectedCategory, selectedTech]);
 
-    const handleProjectClick = (project: Project) => {
+    const handleProjectClick = useCallback((project: Project) => {
         setSelectedProject(project);
         setModalOpen(true);
-    };
+    }, []);
 
-    const handleCloseModal = () => {
+    const handleCloseModal = useCallback(() => {
         setModalOpen(false);
         setSelectedProject(null);
-    };
+    }, []);
 
     // Get first featured project for hero
     const heroProject = featured[0];
@@ -58,7 +58,7 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                 <meta name="description" content="Explore my portfolio of projects - web applications, mobile apps, APIs, libraries, and more." />
             </Head>
 
-            <div className="min-h-screen bg-[#FAFAF8]">
+            <div className="min-h-screen bg-[#FAFAF8] dark:bg-gray-900">
                 <FloatingNav currentPage="projects" />
 
                 <main className="pt-20">
@@ -67,7 +67,7 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                         {/* Section Header */}
                         <div className="mb-8 flex items-end justify-between">
                             <div>
-                                <h1 className="font-serif text-5xl font-bold tracking-tight text-gray-900 md:text-6xl lg:text-7xl">
+                                <h1 className="font-serif text-5xl font-bold tracking-tight text-gray-900 md:text-6xl lg:text-7xl dark:text-white">
                                     Best of the
                                     <br />
                                     <span className="relative">
@@ -78,7 +78,7 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                                                 stroke="currentColor"
                                                 strokeWidth="2"
                                                 strokeLinecap="round"
-                                                className="text-gray-300"
+                                                className="text-gray-300 dark:text-gray-600"
                                             />
                                         </svg>
                                     </span>
@@ -86,7 +86,7 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                             </div>
                             <Link
                                 href="#all-projects"
-                                className="hidden items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 md:flex"
+                                className="hidden items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 md:flex dark:text-gray-400 dark:hover:text-white"
                             >
                                 See all projects
                                 <ArrowRight className="h-4 w-4" />
@@ -98,11 +98,12 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                             <div className="grid gap-6 lg:grid-cols-3">
                                 {/* Main Featured Card */}
                                 <div className="group cursor-pointer lg:col-span-2" onClick={() => handleProjectClick(heroProject)}>
-                                    <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-[#E8E4DC]">
+                                    <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-[#E8E4DC] dark:bg-gray-800">
                                         {heroProject.thumbnail_url ? (
                                             <img
                                                 src={heroProject.thumbnail_url}
                                                 alt={heroProject.title}
+                                                loading="lazy"
                                                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                                             />
                                         ) : (
@@ -113,7 +114,7 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
 
                                         {/* Date Badge */}
                                         {heroProject.started_at && (
-                                            <div className="absolute top-6 left-6 rounded-full bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-sm">
+                                            <div className="absolute top-6 left-6 rounded-full bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-sm dark:bg-gray-700 dark:text-gray-200">
                                                 {new Date(heroProject.started_at).toLocaleDateString('en-US', {
                                                     month: 'short',
                                                     day: 'numeric',
@@ -147,23 +148,25 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                                 {/* Sidebar Cards */}
                                 <div className="flex flex-col gap-6">
                                     {/* Info Card */}
-                                    <div className="flex flex-col justify-between rounded-3xl bg-[#C5E8D5] p-6">
-                                        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-gray-600">
+                                    <div className="flex flex-col justify-between rounded-3xl bg-[#C5E8D5] p-6 dark:bg-green-900/30">
+                                        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
                                             <Sparkles className="h-4 w-4" />
                                             <span>FEATURED</span>
                                         </div>
                                         <div>
-                                            <p className="mb-2 text-sm text-gray-600">Explore my</p>
-                                            <h3 className="mb-4 text-2xl font-bold text-gray-900">
+                                            <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">Explore my</p>
+                                            <h3 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
                                                 Web & Mobile
                                                 <br />
                                                 Projects
                                             </h3>
-                                            <p className="text-sm text-gray-600">Building innovative solutions with modern technologies</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                Building innovative solutions with modern technologies
+                                            </p>
                                         </div>
                                         <Button
                                             variant="outline"
-                                            className="mt-6 rounded-full border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white"
+                                            className="mt-6 rounded-full border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white dark:border-gray-200 dark:text-gray-200 dark:hover:bg-gray-200 dark:hover:text-gray-900"
                                             onClick={() => document.getElementById('all-projects')?.scrollIntoView({ behavior: 'smooth' })}
                                         >
                                             Learn more
@@ -180,11 +183,12 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                                                 <img
                                                     src={sidebarProjects[0].thumbnail_url}
                                                     alt={sidebarProjects[0].title}
+                                                    loading="lazy"
                                                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                                                 />
                                             ) : (
-                                                <div className="flex h-full items-center justify-center bg-[#F5E6D3]">
-                                                    <Code2 className="h-16 w-16 text-gray-400" />
+                                                <div className="flex h-full items-center justify-center bg-[#F5E6D3] dark:bg-gray-700">
+                                                    <Code2 className="h-16 w-16 text-gray-400 dark:text-gray-500" />
                                                 </div>
                                             )}
 
@@ -219,16 +223,16 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                     </section>
 
                     {/* All Projects Section */}
-                    <section id="all-projects" className="bg-white py-16">
+                    <section id="all-projects" className="bg-white py-16 dark:bg-gray-800">
                         <div className="container mx-auto px-4">
                             {/* Section Header */}
                             <div className="mb-8">
                                 <div className="mb-4 flex items-center gap-3">
-                                    <div className="h-px flex-1 bg-gray-200" />
-                                    <h2 className="font-serif text-3xl font-bold text-gray-900">All Projects</h2>
-                                    <div className="h-px flex-1 bg-gray-200" />
+                                    <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                                    <h2 className="font-serif text-3xl font-bold text-gray-900 dark:text-white">All Projects</h2>
+                                    <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
                                 </div>
-                                <p className="text-center text-gray-500">
+                                <p className="text-center text-gray-500 dark:text-gray-400">
                                     Browse through {projects.length} project{projects.length !== 1 ? 's' : ''} in my portfolio
                                 </p>
                             </div>
@@ -246,7 +250,7 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                             </div>
 
                             {/* Results Count */}
-                            <div className="mb-6 text-sm text-gray-500">
+                            <div className="mb-6 text-sm text-gray-500 dark:text-gray-400">
                                 {filteredProjects.length} project{filteredProjects.length !== 1 ? 's' : ''} found
                             </div>
 
@@ -264,10 +268,10 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                                 </div>
                             ) : (
                                 <div className="py-16 text-center">
-                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                                        <Code2 className="h-8 w-8 text-gray-400" />
+                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
+                                        <Code2 className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                                     </div>
-                                    <p className="mb-4 text-lg text-gray-600">No projects match your filters.</p>
+                                    <p className="mb-4 text-lg text-gray-600 dark:text-gray-300">No projects match your filters.</p>
                                     <Button
                                         variant="outline"
                                         className="rounded-full"
@@ -284,28 +288,32 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                     </section>
 
                     {/* Stats Section - Magazine Style */}
-                    <section className="bg-[#FAFAF8] py-16">
+                    <section className="bg-[#FAFAF8] py-16 dark:bg-gray-900">
                         <div className="container mx-auto px-4">
                             <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-8">
-                                <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:p-8">
-                                    <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl">{projects.length}</div>
-                                    <div className="text-sm font-medium text-gray-500">Total Projects</div>
+                                <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:p-8 dark:border-gray-700 dark:bg-gray-800">
+                                    <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
+                                        {projects.length}
+                                    </div>
+                                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Projects</div>
                                 </div>
-                                <div className="rounded-3xl bg-[#C5E8D5] p-6 md:p-8">
-                                    <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl">
+                                <div className="rounded-3xl bg-[#C5E8D5] p-6 md:p-8 dark:bg-green-900/30">
+                                    <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
                                         {projects.filter((p) => p.status === 'live').length}
                                     </div>
-                                    <div className="text-sm font-medium text-gray-700">Live Projects</div>
+                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Live Projects</div>
                                 </div>
-                                <div className="rounded-3xl bg-[#F5E6D3] p-6 md:p-8">
-                                    <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl">
+                                <div className="rounded-3xl bg-[#F5E6D3] p-6 md:p-8 dark:bg-amber-900/30">
+                                    <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
                                         {projects.filter((p) => p.is_featured).length}
                                     </div>
-                                    <div className="text-sm font-medium text-gray-700">Featured</div>
+                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Featured</div>
                                 </div>
-                                <div className="rounded-3xl bg-[#E8E4DC] p-6 md:p-8">
-                                    <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl">{techStack.length}</div>
-                                    <div className="text-sm font-medium text-gray-700">Technologies</div>
+                                <div className="rounded-3xl bg-[#E8E4DC] p-6 md:p-8 dark:bg-gray-700">
+                                    <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
+                                        {techStack.length}
+                                    </div>
+                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Technologies</div>
                                 </div>
                             </div>
                         </div>

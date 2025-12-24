@@ -73,7 +73,7 @@ const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
             : defaultAboutData.items;
 
     return (
-        <section className="about-me bg-brand-white py-[40px] md:py-[80px]">
+        <section className="about-me bg-brand-white py-[40px] md:py-[80px] dark:bg-gray-950">
             <div className="primary-container flex flex-col items-center gap-[24px] sm:flex-row sm:gap-[32px] lg:gap-[48px]">
                 {/* Left side: Pop-in cards with stagger */}
                 <motion.div
@@ -87,7 +87,7 @@ const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
                         <motion.div
                             key={index}
                             variants={popIn}
-                            className="bg-muted-yellow flex h-[120px] w-full flex-col items-center justify-center rounded-[20px] p-2 text-center sm:h-[150px] sm:rounded-[28px] md:h-[200px]"
+                            className="bg-muted-yellow flex h-[120px] w-full flex-col items-center justify-center rounded-[20px] p-2 text-center sm:h-[150px] sm:rounded-[28px] md:h-[200px] dark:bg-orange-950/30"
                         >
                             {item.imgUrl ? (
                                 <img src={item.imgUrl} alt="About item" className="h-full w-full object-contain" />
@@ -106,7 +106,7 @@ const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
                 {/* Right side: Just static content */}
                 <div className="excerpt w-full md:w-[50%]">
                     <h4 className="mb-3 w-full text-center font-bold sm:mb-4 sm:text-start">{title}</h4>
-                    <p className="mb-6 text-justify text-sm text-gray-600 sm:mb-8 sm:text-base md:text-[18px]">{excerpt}</p>
+                    <p className="mb-6 text-justify text-sm text-gray-600 sm:mb-8 sm:text-base md:text-[18px] dark:text-gray-300">{excerpt}</p>
                     <div className="flex w-full flex-col items-center justify-center sm:items-start">
                         {/*<ButtonOne*/}
                         {/*    type="button"*/}

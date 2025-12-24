@@ -8,6 +8,7 @@ use App\Models\CommentReport;
 use App\Models\Giveaway;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class CommentTest extends TestCase
@@ -17,7 +18,7 @@ class CommentTest extends TestCase
     protected User $user;
     protected Blog $blog;
 
-    /** @test */
+    #[Test]
     public function authenticated_user_can_create_comment()
     {
         $response = $this->actingAs($this->user)
@@ -40,7 +41,7 @@ class CommentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function guest_cannot_create_comment()
     {
         $response = $this->postJson("/blogs/{$this->blog->slug}/comments", [
@@ -50,7 +51,7 @@ class CommentTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /** @test */
+    #[Test]
     public function comment_content_strips_all_html_tags()
     {
         $maliciousContent = 'Safe text <script>alert("XSS")</script> <a href="javascript:alert()">click</a>';
@@ -69,7 +70,7 @@ class CommentTest extends TestCase
         $this->assertStringNotContainsString('<a', $comment->content);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_create_nested_reply()
     {
         $parentComment = Comment::factory()->create([
@@ -92,7 +93,7 @@ class CommentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function comment_nesting_depth_is_limited_to_three_levels()
     {
         // Create comment hierarchy: root -> reply -> reply
@@ -126,7 +127,7 @@ class CommentTest extends TestCase
         $this->assertStringContainsString('cannot be nested more than 3 levels deep', $response->json('errors.parent_id.0'));
     }
 
-    /** @test */
+    #[Test]
     public function cannot_reply_to_deleted_comment()
     {
         $deletedComment = Comment::factory()->create([
@@ -145,7 +146,7 @@ class CommentTest extends TestCase
         $response->assertJsonValidationErrors('parent_id');
     }
 
-    /** @test */
+    #[Test]
     public function user_can_update_own_comment()
     {
         $comment = Comment::factory()->create([
@@ -168,7 +169,7 @@ class CommentTest extends TestCase
         $this->assertNotNull($comment->edited_at);
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_update_others_comment()
     {
         $otherUser = User::factory()->create();
@@ -186,7 +187,7 @@ class CommentTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_delete_own_comment()
     {
         $comment = Comment::factory()->create([
@@ -203,7 +204,7 @@ class CommentTest extends TestCase
         $this->assertSoftDeleted('comments', ['id' => $comment->id]);
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_delete_others_comment()
     {
         $otherUser = User::factory()->create();
@@ -219,7 +220,7 @@ class CommentTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_report_comment()
     {
         $comment = Comment::factory()->create([
@@ -244,7 +245,7 @@ class CommentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_report_same_comment_twice()
     {
         $comment = Comment::factory()->create([
@@ -271,7 +272,7 @@ class CommentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function comment_validates_minimum_length()
     {
         $response = $this->actingAs($this->user)
@@ -283,7 +284,7 @@ class CommentTest extends TestCase
         $response->assertJsonValidationErrors('content');
     }
 
-    /** @test */
+    #[Test]
     public function comment_validates_maximum_length()
     {
         $response = $this->actingAs($this->user)
@@ -295,7 +296,7 @@ class CommentTest extends TestCase
         $response->assertJsonValidationErrors('content');
     }
 
-    /** @test */
+    #[Test]
     public function comments_work_on_giveaways_too()
     {
         $giveaway = Giveaway::factory()->create(['status' => 'active']);

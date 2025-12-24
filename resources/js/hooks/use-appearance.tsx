@@ -55,7 +55,11 @@ export function initializeTheme() {
 }
 
 export function useAppearance() {
-    const [appearance, setAppearance] = useState<Appearance>('system');
+    // Initialize from localStorage immediately to prevent flash
+    const [appearance, setAppearance] = useState<Appearance>(() => {
+        if (typeof localStorage === 'undefined') return 'system';
+        return (localStorage.getItem('appearance') as Appearance) || 'system';
+    });
 
     const updateAppearance = useCallback((mode: Appearance) => {
         setAppearance(mode);
@@ -74,11 +78,12 @@ export function useAppearance() {
     useEffect(() => {
         if (typeof localStorage === 'undefined') return;
 
-        const savedAppearance = localStorage.getItem('appearance') as Appearance | null;
-        updateAppearance(savedAppearance || 'system');
+        // Theme is already initialized from useState, just set up listener
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
 
-        return () => mediaQuery()?.removeEventListener('change', handleSystemThemeChange);
-    }, [updateAppearance]);
+        return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    }, []);
 
     return { appearance, updateAppearance } as const;
 }

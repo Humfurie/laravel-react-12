@@ -66,7 +66,7 @@ const HomeExpertise: React.FC<HomeExpertiseProps> = ({ expertises = [] }) => {
     }, [activeCategory]);
 
     return (
-        <section className="home-expertise bg-brand-white py-[40px] md:py-[80px]">
+        <section className="home-expertise bg-brand-white py-[40px] md:py-[80px] dark:bg-gray-900">
             <div className="primary-container">
                 <SectionTitle title="Expertise" />
 
@@ -98,7 +98,7 @@ const HomeExpertise: React.FC<HomeExpertiseProps> = ({ expertises = [] }) => {
                                 <img
                                     src={item.image_url}
                                     alt={item.name}
-                                    className="bg-brand-white hs-shadow mb-2 h-[50px] w-[50px] rounded-[14px] object-contain p-1.5 sm:h-[80px] sm:w-[80px] sm:rounded-[18px] sm:p-2 md:h-[100px] md:w-[100px]"
+                                    className="bg-brand-white hs-shadow mb-2 h-[50px] w-[50px] rounded-[14px] object-contain p-1.5 sm:h-[80px] sm:w-[80px] sm:rounded-[18px] sm:p-2 md:h-[100px] md:w-[100px] dark:bg-gray-800"
                                     width={100}
                                     height={100}
                                     loading="lazy"
