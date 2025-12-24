@@ -25,10 +25,24 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
         'mobile',
         'telephone',
+        'bio',
+        'avatar_url',
+        'github_username',
+        'google_id',
+        'facebook_id',
+        'github_id',
+        'github_contributions',
+        'github_synced_at',
+        'social_links',
+        'resume_path',
+        'profile_stats',
+        'about',
+        'headline',
     ];
 
     /**
@@ -161,7 +175,60 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'github_contributions' => 'array',
+            'github_synced_at' => 'datetime',
+            'social_links' => 'array',
+            'profile_stats' => 'array',
         ];
+    }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'username';
+    }
+
+    /**
+     * Get total GitHub contribution count.
+     */
+    public function getContributionCountAttribute(): int
+    {
+        return $this->github_contributions['total_contributions'] ?? 0;
+    }
+
+    /**
+     * Check if user has a linked GitHub account.
+     */
+    public function hasGithubLinked(): bool
+    {
+        return !empty($this->github_id);
+    }
+
+    /**
+     * Check if user has a linked Google account.
+     */
+    public function hasGoogleLinked(): bool
+    {
+        return !empty($this->google_id);
+    }
+
+    /**
+     * Check if user has a linked Facebook account.
+     */
+    public function hasFacebookLinked(): bool
+    {
+        return !empty($this->facebook_id);
+    }
+
+    /**
+     * Check if user signed up via social login (no password set).
+     */
+    public function isSocialOnlyUser(): bool
+    {
+        return ($this->google_id || $this->facebook_id || $this->github_id)
+            && $this->password === null;
     }
 
     /**

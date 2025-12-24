@@ -76,28 +76,21 @@ function MapPickerInner({ latitude, longitude, onChange, height = '300px' }: Map
     const center: [number, number] = latitude && longitude ? [latitude, longitude] : defaultCenter;
     const hasPosition = latitude !== null && longitude !== null && latitude && longitude;
 
-    // Cast components to any to work around react-leaflet v5 type incompatibilities
-    const MapContainerAny = MapContainer as unknown as React.ComponentType<{
-        center: [number, number];
-        zoom: number;
-        style: React.CSSProperties;
-        className: string;
-        children: React.ReactNode;
-    }>;
-    const TileLayerAny = TileLayer as unknown as React.ComponentType<{
-        attribution: string;
-        url: string;
-    }>;
-
+    // Note: Using @ts-ignore for react-leaflet v5 compatibility with React 19
+    // (@ts-expect-error would be preferred but there's no actual type error to suppress)
     return (
         <div className="relative">
-            <MapContainerAny
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+            {/* @ts-ignore - react-leaflet types incompatible with React 19 */}
+            <MapContainer
                 center={center}
                 zoom={hasPosition ? 15 : 5}
                 style={{ height, width: '100%' }}
                 className="rounded-lg border border-gray-200 dark:border-gray-700"
             >
-                <TileLayerAny
+                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                {/* @ts-ignore - react-leaflet types incompatible with React 19 */}
+                <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
@@ -110,7 +103,7 @@ function MapPickerInner({ latitude, longitude, onChange, height = '300px' }: Map
                         <MapCenterer lat={latitude!} lng={longitude!} />
                     </>
                 )}
-            </MapContainerAny>
+            </MapContainer>
 
             {/* Instructions overlay */}
             {!hasPosition && (

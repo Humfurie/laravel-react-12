@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Head, Link } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
 import { ArrowRight, ArrowUpRight, Calendar, Clock, Gift, Sparkles, Trophy, Users } from 'lucide-react';
+import { memo } from 'react';
 
 interface Giveaway {
     id: number;
@@ -30,18 +31,19 @@ interface Props {
 }
 
 // Featured Giveaway Card (Large)
-function FeaturedGiveawayCard({ giveaway }: { giveaway: Giveaway }) {
+const FeaturedGiveawayCard = memo(function FeaturedGiveawayCard({ giveaway }: { giveaway: Giveaway }) {
     const endDate = new Date(giveaway.end_date);
-    const timeRemaining = formatDistanceToNow(endDate, { addSuffix: false });
+    formatDistanceToNow(endDate, { addSuffix: false });
 
     return (
         <article className="group cursor-pointer lg:col-span-2">
             <Link href={`/giveaways/${giveaway.slug}`}>
-                <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-[#F5E6D3]">
+                <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-[#F5E6D3] dark:bg-gray-800">
                     {giveaway.primary_image_url ? (
                         <img
                             src={giveaway.primary_image_url}
                             alt={giveaway.title}
+                            loading="lazy"
                             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                     ) : (
@@ -87,10 +89,10 @@ function FeaturedGiveawayCard({ giveaway }: { giveaway: Giveaway }) {
             </Link>
         </article>
     );
-}
+});
 
 // Regular Giveaway Card
-function GiveawayCard({ giveaway, isLarge = false }: { giveaway: Giveaway; isLarge?: boolean }) {
+const GiveawayCard = memo(function GiveawayCard({ giveaway, isLarge = false }: { giveaway: Giveaway; isLarge?: boolean }) {
     const startDate = new Date(giveaway.start_date);
     const endDate = new Date(giveaway.end_date);
     const timeRemaining = giveaway.can_accept_entries
@@ -101,21 +103,22 @@ function GiveawayCard({ giveaway, isLarge = false }: { giveaway: Giveaway; isLar
         <article className={`group cursor-pointer ${isLarge ? 'md:col-span-2' : ''}`}>
             <Link href={`/giveaways/${giveaway.slug}`}>
                 {/* Image Container */}
-                <div className={`relative overflow-hidden rounded-2xl bg-[#F5F5F3] ${isLarge ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}>
+                <div className={`relative overflow-hidden rounded-2xl bg-[#F5F5F3] dark:bg-gray-800 ${isLarge ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}>
                     {giveaway.primary_image_url ? (
                         <img
                             src={giveaway.primary_image_url}
                             alt={giveaway.title}
+                            loading="lazy"
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                     ) : (
-                        <div className="flex h-full items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50">
-                            <Trophy className="h-16 w-16 text-orange-200" />
+                        <div className="flex h-full items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20">
+                            <Trophy className="h-16 w-16 text-orange-200 dark:text-orange-700" />
                         </div>
                     )}
 
                     {/* Date Badge */}
-                    <div className="absolute top-4 left-4 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
+                    <div className="absolute top-4 left-4 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm dark:bg-gray-700 dark:text-gray-200">
                         {new Date(giveaway.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </div>
 
@@ -144,13 +147,13 @@ function GiveawayCard({ giveaway, isLarge = false }: { giveaway: Giveaway; isLar
                             {giveaway.can_accept_entries ? `Ends ${timeRemaining}` : `Starts ${timeRemaining}`}
                         </span>
                     </div>
-                    <h3 className="mb-2 line-clamp-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-orange-600">
+                    <h3 className="mb-2 line-clamp-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-orange-600 dark:text-white dark:group-hover:text-orange-400">
                         {giveaway.title}
                     </h3>
-                    <p className="line-clamp-2 text-sm text-gray-600">{giveaway.description}</p>
+                    <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">{giveaway.description}</p>
 
                     {/* Meta Info */}
-                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                         <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
                             Ends {new Date(giveaway.end_date).toLocaleDateString()}
@@ -164,7 +167,7 @@ function GiveawayCard({ giveaway, isLarge = false }: { giveaway: Giveaway; isLar
             </Link>
         </article>
     );
-}
+});
 
 export default function Index({ giveaways }: Props) {
     const featuredGiveaway = giveaways.find((g) => g.can_accept_entries) || giveaways[0];
@@ -195,7 +198,7 @@ export default function Index({ giveaways }: Props) {
                 />
             </Head>
 
-            <div className="min-h-screen bg-[#FAFAF8]">
+            <div className="min-h-screen bg-[#FAFAF8] dark:bg-gray-900">
                 <FloatingNav currentPage="giveaways" />
 
                 <main className="pt-20">
@@ -204,10 +207,10 @@ export default function Index({ giveaways }: Props) {
                         {/* Section Header */}
                         <div className="mb-8 flex items-end justify-between">
                             <div>
-                                <h1 className="font-serif text-5xl font-bold tracking-tight text-gray-900 md:text-6xl lg:text-7xl">
+                                <h1 className="font-serif text-5xl font-bold tracking-tight text-gray-900 md:text-6xl lg:text-7xl dark:text-white">
                                     Active
                                     <br />
-                                    <span className="relative text-orange-500">
+                                    <span className="relative text-orange-500 dark:text-orange-400">
                                         giveaways
                                         <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 8" fill="none">
                                             <path
@@ -215,7 +218,7 @@ export default function Index({ giveaways }: Props) {
                                                 stroke="currentColor"
                                                 strokeWidth="2"
                                                 strokeLinecap="round"
-                                                className="text-orange-300"
+                                                className="text-orange-300 dark:text-orange-600"
                                             />
                                         </svg>
                                     </span>
@@ -223,7 +226,7 @@ export default function Index({ giveaways }: Props) {
                             </div>
                             <Link
                                 href="/giveaways/winners"
-                                className="hidden items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 md:flex"
+                                className="hidden items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 md:flex dark:text-gray-400 dark:hover:text-white"
                             >
                                 View past winners
                                 <ArrowRight className="h-4 w-4" />
@@ -239,21 +242,25 @@ export default function Index({ giveaways }: Props) {
                                 {/* Sidebar Cards */}
                                 <div className="flex flex-col gap-6">
                                     {/* Info Card */}
-                                    <div className="flex flex-col justify-between rounded-3xl bg-[#FED7AA] p-6">
-                                        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-gray-600">
+                                    <div className="flex flex-col justify-between rounded-3xl bg-[#FED7AA] p-6 dark:bg-orange-900/30">
+                                        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
                                             <Gift className="h-4 w-4" />
                                             <span>GIVEAWAYS</span>
                                         </div>
                                         <div>
-                                            <p className="mb-2 text-sm text-gray-600">Win amazing</p>
-                                            <h3 className="mb-4 text-2xl font-bold text-gray-900">
+                                            <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">Win amazing</p>
+                                            <h3 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
                                                 Prizes &
                                                 <br />
                                                 Rewards
                                             </h3>
-                                            <p className="text-sm text-gray-600">Enter our exciting giveaways for a chance to win!</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                Enter our exciting giveaways for a chance to win!
+                                            </p>
                                         </div>
-                                        <div className="mt-6 font-serif text-3xl font-bold text-gray-900">{giveaways.length} active</div>
+                                        <div className="mt-6 font-serif text-3xl font-bold text-gray-900 dark:text-white">
+                                            {giveaways.length} active
+                                        </div>
                                     </div>
 
                                     {/* Second Giveaway Post */}
@@ -264,6 +271,7 @@ export default function Index({ giveaways }: Props) {
                                                     <img
                                                         src={otherGiveaways[0].primary_image_url}
                                                         alt={otherGiveaways[0].title}
+                                                        loading="lazy"
                                                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                                                     />
                                                 ) : (
@@ -294,10 +302,12 @@ export default function Index({ giveaways }: Props) {
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-white p-8 text-center">
-                                <Trophy className="mb-4 h-16 w-16 text-gray-300" />
-                                <h3 className="mb-2 text-xl font-semibold text-gray-900">No Active Giveaways</h3>
-                                <p className="text-gray-500">There are no active giveaways at the moment. Check back soon for new opportunities!</p>
+                            <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
+                                <Trophy className="mb-4 h-16 w-16 text-gray-300 dark:text-gray-600" />
+                                <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">No Active Giveaways</h3>
+                                <p className="text-gray-500 dark:text-gray-400">
+                                    There are no active giveaways at the moment. Check back soon for new opportunities!
+                                </p>
                             </div>
                         )}
                     </section>
@@ -306,13 +316,13 @@ export default function Index({ giveaways }: Props) {
                     {otherGiveaways.length > 1 && (
                         <section id="all-giveaways" className="container mx-auto px-4 py-8 md:py-12">
                             {/* Section Header */}
-                            <div className="mb-8 border-t border-gray-200 pt-8">
+                            <div className="mb-8 border-t border-gray-200 pt-8 dark:border-gray-700">
                                 <div className="flex items-center gap-4">
-                                    <div className="h-px flex-1 bg-gray-200" />
-                                    <h2 className="font-serif text-3xl font-bold text-gray-900">All Giveaways</h2>
-                                    <div className="h-px flex-1 bg-gray-200" />
+                                    <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                                    <h2 className="font-serif text-3xl font-bold text-gray-900 dark:text-white">All Giveaways</h2>
+                                    <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
                                 </div>
-                                <p className="mt-4 text-center text-gray-500">Browse through {giveaways.length} giveaways</p>
+                                <p className="mt-4 text-center text-gray-500 dark:text-gray-400">Browse through {giveaways.length} giveaways</p>
                             </div>
 
                             {/* Giveaways Grid */}
