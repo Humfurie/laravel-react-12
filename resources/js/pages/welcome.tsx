@@ -1,8 +1,10 @@
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
+import React from 'react';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
+    const BLEND_MODE_PLUS_DARKER = 'plus-darker' as React.CSSProperties['mixBlendMode'];
 
     return (
         <>
@@ -218,8 +220,7 @@ export default function Welcome() {
                                     />
                                 </g>
                                 <g
-                                    /** @ts-expect-error 'plus-darker' doesn't seem to be defined in the 'csstype' module */
-                                    style={{ mixBlendMode: 'plus-darker' }}
+                                    style={{ mixBlendMode: BLEND_MODE_PLUS_DARKER }}
                                     className="translate-y-0 opacity-100 transition-all delay-300 duration-750 starting:translate-y-4 starting:opacity-0"
                                 >
                                     <path

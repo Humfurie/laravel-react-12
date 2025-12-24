@@ -65,13 +65,18 @@ Route::prefix('v1')->group(function () {
         Route::patch('properties/{property}/inquiries/{inquiry}', [PropertyController::class, 'updateInquiryStatus'])->name('properties.inquiries.update-status');
 
         // Inquiry resource endpoints
-        Route::apiResource('inquiries', InquiryController::class)->except(['store']);
+        Route::apiResource('inquiries', InquiryController::class)->except(['store'])->names([
+            'index' => 'api.inquiries.index',
+            'show' => 'api.inquiries.show',
+            'update' => 'api.inquiries.update',
+            'destroy' => 'api.inquiries.destroy',
+        ]);
 
         // Additional inquiry endpoints
-        Route::get('inquiries-statistics', [InquiryController::class, 'statistics'])->name('inquiries.statistics');
-        Route::post('inquiries-bulk-update', [InquiryController::class, 'bulkUpdate'])->name('inquiries.bulk-update');
-        Route::post('inquiries/{inquiry}/mark-in-progress', [InquiryController::class, 'markInProgress'])->name('inquiries.mark-in-progress');
-        Route::post('inquiries/{inquiry}/mark-responded', [InquiryController::class, 'markResponded'])->name('inquiries.mark-responded');
+        Route::get('inquiries-statistics', [InquiryController::class, 'statistics'])->name('api.inquiries.statistics');
+        Route::post('inquiries-bulk-update', [InquiryController::class, 'bulkUpdate'])->name('api.inquiries.bulk-update');
+        Route::post('inquiries/{inquiry}/mark-in-progress', [InquiryController::class, 'markInProgress'])->name('api.inquiries.mark-in-progress');
+        Route::post('inquiries/{inquiry}/mark-responded', [InquiryController::class, 'markResponded'])->name('api.inquiries.mark-responded');
 
         // Expertise management endpoints
         Route::post('expertises', [ExpertiseController::class, 'store'])->name('expertises.store');
