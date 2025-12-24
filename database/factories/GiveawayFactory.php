@@ -24,14 +24,14 @@ class GiveawayFactory extends Factory
         return [
             'title' => fake()->randomElement([
                     'iPhone 15 Pro Max Giveaway',
-                    'MacBook Air M3 Raffle',
+                    'MacBook Air M3 Giveaway',
                     'PlayStation 5 Bundle Giveaway',
-                    'Samsung Galaxy S24 Ultra Raffle',
+                    'Samsung Galaxy S24 Ultra Giveaway',
                     'AirPods Pro 2 Giveaway',
                     'Nintendo Switch OLED Giveaway',
-                    'iPad Pro 12.9" Raffle',
+                    'iPad Pro 12.9" Giveaway',
                     'GoPro Hero 12 Giveaway',
-                    'Sony WH-1000XM5 Headphones Raffle',
+                    'Sony WH-1000XM5 Headphones Giveaway',
                     'Apple Watch Series 9 Giveaway',
                 ]) . ' - ' . fake()->unique()->numberBetween(1000, 9999),
             'description' => fake()->randomElement([

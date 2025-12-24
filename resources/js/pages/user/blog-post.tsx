@@ -73,7 +73,7 @@ export default function BlogPost({ blog }: Props) {
                     text: blog.excerpt || '',
                     url: window.location.href,
                 });
-            } catch (err) {
+            } catch {
                 console.log('Share cancelled');
             }
         } else {

@@ -79,6 +79,13 @@ interface Props {
         total_projects: number;
         live_projects: number;
     };
+    profileUser?: {
+        name: string;
+        headline: string | null;
+        bio: string | null;
+        about: string | null;
+        profile_stats: { label: string; value: string }[];
+    };
 }
 
 // Untitled UI style Blog Card - Clean, minimal design
@@ -90,13 +97,13 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
     return (
         <article
             onClick={handleCardClick}
-            className={`group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900 ${
+            className={`group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 ${
                 featured ? 'md:col-span-2 md:grid md:grid-cols-2' : ''
             }`}
         >
             {/* Thumbnail */}
             <div
-                className={`relative overflow-hidden bg-gray-50 dark:bg-gray-800 ${featured ? 'aspect-[16/10] md:aspect-auto md:h-full' : 'aspect-[16/10]'}`}
+                className={`relative overflow-hidden bg-gray-50 dark:bg-gray-900 ${featured ? 'aspect-[16/10] md:aspect-auto md:h-full' : 'aspect-[16/10]'}`}
             >
                 {blog.featured_image ? (
                     <img
@@ -106,8 +113,8 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
                         loading="lazy"
                     />
                 ) : (
-                    <div className="flex h-full min-h-[200px] items-center justify-center bg-linear-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900">
-                        <span className="text-5xl font-bold text-gray-300 dark:text-gray-600">{blog.title.charAt(0).toUpperCase()}</span>
+                    <div className="flex h-full min-h-[200px] items-center justify-center bg-linear-to-br from-gray-100 to-gray-50 dark:from-gray-900 dark:to-gray-950">
+                        <span className="text-5xl font-bold text-gray-300 dark:text-gray-500">{blog.title.charAt(0).toUpperCase()}</span>
                     </div>
                 )}
 
@@ -119,7 +126,7 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
             <div className={`p-5 ${featured ? 'flex flex-col justify-center md:p-8' : ''}`}>
                 {/* Date */}
                 {blog.published_at && (
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-300">
                         {formatDistanceToNow(new Date(blog.published_at), { addSuffix: true })}
                     </span>
                 )}
@@ -135,7 +142,7 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
 
                 {/* Excerpt */}
                 {blog.excerpt && (
-                    <p className={`mt-2 text-gray-600 dark:text-gray-400 ${featured ? 'line-clamp-3 text-base' : 'line-clamp-2 text-sm'}`}>
+                    <p className={`mt-2 text-gray-600 dark:text-gray-300 ${featured ? 'line-clamp-3 text-base' : 'line-clamp-2 text-sm'}`}>
                         {blog.excerpt}
                     </p>
                 )}
@@ -150,7 +157,15 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
     );
 }
 
-export default function Home({ primary = [], latest = [], experiences = [], expertises = [], projects = [], projectStats }: Props): JSX.Element {
+export default function Home({
+    primary = [],
+    latest = [],
+    experiences = [],
+    expertises = [],
+    projects = [],
+    projectStats,
+    profileUser,
+}: Props): JSX.Element {
     // Combine and dedupe blogs for display
     const allBlogs = [...primary, ...latest.filter((b) => !primary.find((p) => p.id === b.id))];
     const featuredBlog = primary[0];
@@ -190,7 +205,7 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
             <FloatingNav currentPage="home" />
 
             <HomeBanner />
-            <HomeAboutMe />
+            <HomeAboutMe profileUser={profileUser} />
 
             {/* Projects Section */}
             {projects.length > 0 && <HomeProjects projects={projects} stats={projectStats} />}
@@ -213,7 +228,7 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
             />
 
             {/* Blog Section - Untitled UI Style */}
-            <section className="bg-gray-50 py-16 sm:py-24 dark:bg-gray-900">
+            <section className="bg-gray-50 py-16 sm:py-24 dark:bg-gray-950">
                 <div className="container mx-auto px-4">
                     {/* Header */}
                     <div className="mb-12 text-center">
