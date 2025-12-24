@@ -41,15 +41,15 @@ Route::prefix('permissions')->middleware('permission:permission,viewAny')->group
     Route::delete('/{permission}/force', [PermissionController::class, 'forceDestroy'])->name('permissions.force')->middleware('permission:permission,forceDelete');
 });
 
-Route::prefix('about')->group(function () {
+Route::prefix('about')->middleware('permission:about,viewAny')->group(function () {
     Route::get('/', [AboutController::class, 'index'])->name('about.index');
-    Route::post('/', [AboutController::class, 'store'])->name('about.store');
+    Route::post('/', [AboutController::class, 'store'])->name('about.store')->middleware('permission:about,create');
     Route::get('/history', [AboutController::class, 'listHistory'])->name('about.history.list');
-    Route::get('/history/{about}', [AboutController::class, 'showHistory'])->name('about.history.show');
-    Route::delete('/history/{about}', [AboutController::class, 'destroy'])->name('about.history.destroy');
-    Route::delete('/history/{about}/force', [AboutController::class, 'forceDestroy'])->name('about.history.force-destroy');
-    Route::patch('/history/{about}', [AboutController::class, 'restore'])->name('about.history.restore')->withTrashed();
-    Route::patch('/{about}', [AboutController::class, 'setPrimary'])->name('about.set.primary');
+    Route::get('/history/{about}', [AboutController::class, 'showHistory'])->name('about.history.show')->middleware('permission:about,view');
+    Route::delete('/history/{about}', [AboutController::class, 'destroy'])->name('about.history.destroy')->middleware('permission:about,delete');
+    Route::delete('/history/{about}/force', [AboutController::class, 'forceDestroy'])->name('about.history.force-destroy')->middleware('permission:about,forceDelete');
+    Route::patch('/history/{about}', [AboutController::class, 'restore'])->name('about.history.restore')->withTrashed()->middleware('permission:about,restore');
+    Route::patch('/{about}', [AboutController::class, 'setPrimary'])->name('about.set.primary')->middleware('permission:about,update');
 });
 
 Route::prefix('blogs')->middleware('permission:blog,viewAny')->group(function () {
@@ -112,29 +112,29 @@ Route::prefix('real-estate')->group(function () {
     //    Route::patch('/images/{image}/primary', [RealEstateController::class, 'setPrimaryImage'])->name('real-estate.images.set-primary');
 });
 
-Route::prefix('experiences')->name('admin.experiences.')->group(function () {
+Route::prefix('experiences')->name('admin.experiences.')->middleware('permission:experience,viewAny')->group(function () {
     Route::get('/', [ExperienceController::class, 'index'])->name('index');
-    Route::get('/create', [ExperienceController::class, 'create'])->name('create');
-    Route::post('/', [ExperienceController::class, 'store'])->name('store');
-    Route::get('/{experience}/edit', [ExperienceController::class, 'edit'])->name('edit');
-    Route::put('/{experience}', [ExperienceController::class, 'update'])->name('update');
-    Route::delete('/{experience}', [ExperienceController::class, 'destroy'])->name('destroy');
+    Route::get('/create', [ExperienceController::class, 'create'])->name('create')->middleware('permission:experience,create');
+    Route::post('/', [ExperienceController::class, 'store'])->name('store')->middleware('permission:experience,create');
+    Route::get('/{experience}/edit', [ExperienceController::class, 'edit'])->name('edit')->middleware('permission:experience,view');
+    Route::put('/{experience}', [ExperienceController::class, 'update'])->name('update')->middleware('permission:experience,update');
+    Route::delete('/{experience}', [ExperienceController::class, 'destroy'])->name('destroy')->middleware('permission:experience,delete');
 });
 
-Route::prefix('expertises')->name('admin.expertises.')->group(function () {
+Route::prefix('expertises')->name('admin.expertises.')->middleware('permission:expertise,viewAny')->group(function () {
     Route::get('/', [ExpertiseController::class, 'index'])->name('index');
-    Route::get('/create', [ExpertiseController::class, 'create'])->name('create');
-    Route::post('/', [ExpertiseController::class, 'store'])->name('store');
-    Route::get('/{expertise}/edit', [ExpertiseController::class, 'edit'])->name('edit');
-    Route::put('/{expertise}', [ExpertiseController::class, 'update'])->name('update');
-    Route::delete('/{expertise}', [ExpertiseController::class, 'destroy'])->name('destroy');
-    Route::post('/reorder', [ExpertiseController::class, 'reorder'])->name('reorder');
+    Route::get('/create', [ExpertiseController::class, 'create'])->name('create')->middleware('permission:expertise,create');
+    Route::post('/', [ExpertiseController::class, 'store'])->name('store')->middleware('permission:expertise,create');
+    Route::get('/{expertise}/edit', [ExpertiseController::class, 'edit'])->name('edit')->middleware('permission:expertise,view');
+    Route::put('/{expertise}', [ExpertiseController::class, 'update'])->name('update')->middleware('permission:expertise,update');
+    Route::delete('/{expertise}', [ExpertiseController::class, 'destroy'])->name('destroy')->middleware('permission:expertise,delete');
+    Route::post('/reorder', [ExpertiseController::class, 'reorder'])->name('reorder')->middleware('permission:expertise,update');
 });
 
-Route::prefix('settings')->name('admin.settings.')->group(function () {
+Route::prefix('settings')->name('admin.settings.')->middleware('permission:setting,viewAny')->group(function () {
     Route::get('/', [SettingsController::class, 'index'])->name('index');
-    Route::post('/', [SettingsController::class, 'update'])->name('update');
-    Route::post('/upload/{key}', [SettingsController::class, 'uploadFile'])->name('upload');
+    Route::post('/', [SettingsController::class, 'update'])->name('update')->middleware('permission:setting,update');
+    Route::post('/upload/{key}', [SettingsController::class, 'uploadFile'])->name('upload')->middleware('permission:setting,update');
 });
 
 Route::prefix('giveaways')->name('admin.giveaways.')->middleware('permission:giveaway,viewAny')->group(function () {

@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { usePermissions } from '@/hooks/usePermissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
@@ -35,7 +36,7 @@ function formatDate(month: number, year: number): string {
 }
 
 // Individual Experience Card Component
-function ExperienceCard({ experience }: { experience: Experience }) {
+function ExperienceCard({ experience, canUpdate, canDelete }: { experience: Experience; canUpdate: boolean; canDelete: boolean }) {
     const handleDelete = () => {
         if (confirm('Are you sure you want to delete this experience?')) {
             router.delete(route('admin.experiences.destroy', experience.id));
@@ -43,11 +44,13 @@ function ExperienceCard({ experience }: { experience: Experience }) {
     };
 
     const handleEdit = () => {
-        router.visit(route('admin.experiences.edit', experience.id));
+        if (canUpdate) {
+            router.visit(route('admin.experiences.edit', experience.id));
+        }
     };
 
     return (
-        <div className="hover:bg-muted/50 cursor-pointer rounded-lg border p-4 transition-colors" onClick={handleEdit}>
+        <div className={`rounded-lg border p-4 transition-colors ${canUpdate ? 'hover:bg-muted/50 cursor-pointer' : ''}`} onClick={handleEdit}>
             <div className="flex items-start justify-between gap-4">
                 <div className="flex flex-1 gap-4">
                     {/* Company Logo */}
@@ -90,31 +93,42 @@ function ExperienceCard({ experience }: { experience: Experience }) {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={handleEdit}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+                {(canUpdate || canDelete) && (
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                {canUpdate && (
+                                    <DropdownMenuItem onClick={handleEdit}>
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Edit
+                                    </DropdownMenuItem>
+                                )}
+                                {canDelete && (
+                                    <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                )}
             </div>
         </div>
     );
 }
 
 export default function ExperienceIndex({ experiences }: Props) {
+    const { can } = usePermissions();
+    const canCreate = can('experience', 'create');
+    const canUpdate = can('experience', 'update');
+    const canDelete = can('experience', 'delete');
+
     return (
         <AdminLayout>
             <Head title="Experience Management" />
@@ -125,12 +139,14 @@ export default function ExperienceIndex({ experiences }: Props) {
                         <h1 className="text-3xl font-bold tracking-tight">Work Experience</h1>
                         <p className="text-muted-foreground">Manage your professional experience timeline</p>
                     </div>
-                    <Link href={route('admin.experiences.create')}>
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add Experience
-                        </Button>
-                    </Link>
+                    {canCreate && (
+                        <Link href={route('admin.experiences.create')}>
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Experience
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 <div className="space-y-4">
@@ -142,13 +158,17 @@ export default function ExperienceIndex({ experiences }: Props) {
                         <Card>
                             <CardContent className="py-12 text-center">
                                 <p className="text-muted-foreground">No experiences found.</p>
-                                <Link href={route('admin.experiences.create')} className="mt-4 inline-block">
-                                    <Button>Add your first experience</Button>
-                                </Link>
+                                {canCreate && (
+                                    <Link href={route('admin.experiences.create')} className="mt-4 inline-block">
+                                        <Button>Add your first experience</Button>
+                                    </Link>
+                                )}
                             </CardContent>
                         </Card>
                     ) : (
-                        experiences.map((experience) => <ExperienceCard key={experience.id} experience={experience} />)
+                        experiences.map((experience) => (
+                            <ExperienceCard key={experience.id} experience={experience} canUpdate={canUpdate} canDelete={canDelete} />
+                        ))
                     )}
                 </div>
             </div>
