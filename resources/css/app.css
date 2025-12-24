@@ -6,7 +6,7 @@
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
-@custom-variant dark (&:is(.dark *));
+@variant dark (&:where(.dark, .dark *));
 
 @theme {
     --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
@@ -197,7 +197,7 @@
 /* ======= GLOBALS ======= */
 
 h3 {
-    @apply text-brand-black text-[18px] font-bold;
+    @apply text-brand-black text-[18px] font-bold dark:text-white;
 }
 
 h4 {
