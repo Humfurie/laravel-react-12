@@ -1,0 +1,782 @@
+import AdBanner from '@/components/ads/AdBanner';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import FloatingNav from '@/components/floating-nav';
+import WinnerAnnouncement from '@/components/giveaway/WinnerAnnouncement';
+import WheelSpinner from '@/components/giveaway-wheel/WheelSpinner';
+import Footer from '@/components/global/Footer';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Head, router, usePage } from '@inertiajs/react';
+import axios from 'axios';
+import { formatDistanceToNow } from 'date-fns';
+import { AlertCircle, Calendar, CheckCircle2, Clock, ImageIcon, Trophy, Upload, Users } from 'lucide-react';
+import { FormEventHandler, useState } from 'react';
+
+interface Image {
+    id: number;
+    url: string;
+    is_primary: boolean;
+    order: number;
+}
+
+interface Winner {
+    name: string;
+}
+
+interface Giveaway {
+    id: number;
+    title: string;
+    slug: string;
+    description: string;
+    start_date: string;
+    end_date: string | null;
+    status: string;
+    is_active: boolean;
+    has_ended: boolean;
+    can_accept_entries: boolean;
+    can_start_giveaway: boolean;
+    entries_count: number;
+    winner: Winner | null;
+    winners: Winner[];
+    number_of_winners: number;
+    entry_names: string[];
+    images: Image[];
+    primary_image_url: string | null;
+    background_image_url?: string | null;
+}
+
+interface Props {
+    giveaway: Giveaway;
+}
+
+interface GiveawayPageProps {
+    giveaway: Giveaway;
+    auth?: {
+        isAdmin?: boolean;
+        permissions?: {
+            giveaway?: {
+                viewAny?: boolean;
+                view?: boolean;
+                create?: boolean;
+                update?: boolean;
+                delete?: boolean;
+            };
+            [key: string]: unknown;
+        };
+    };
+    adsense?: {
+        client_id?: string;
+        enabled?: boolean;
+        slots?: {
+            raffle_top?: string;
+            raffle_sidebar?: string;
+        };
+    };
+    [key: string]: unknown;
+}
+
+export default function Show({ giveaway }: Props) {
+    const { props } = usePage<GiveawayPageProps>();
+    const adsense = props.adsense;
+    // Check if user has giveaway update permission (wildcard * or specific update)
+    const canManageGiveaway = props.auth?.permissions?.giveaway?.update ?? false;
+
+    const [formData, setFormData] = useState({
+        name: '',
+        phone: '',
+        facebook_url: '',
+        screenshot: null as File | null,
+    });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [submitting, setSubmitting] = useState(false);
+    const [success, setSuccess] = useState(false);
+
+    // Real-time phone validation
+    const isPhoneValid = (phone: string): boolean => {
+        if (!phone) return false;
+        return /^(\+639|09)\d{9}$/.test(phone);
+    };
+    const [startingRaffle, setStartingRaffle] = useState(false);
+    const [isSpinning, setIsSpinning] = useState(false);
+    const [showGrandReveal, setShowGrandReveal] = useState(false);
+
+    const handleSubmit: FormEventHandler = async (e) => {
+        e.preventDefault();
+        setErrors({});
+        setSubmitting(true);
+
+        try {
+            // Create FormData to handle file upload
+            const submitData = new FormData();
+            submitData.append('name', formData.name);
+            submitData.append('phone', formData.phone);
+            submitData.append('facebook_url', formData.facebook_url);
+            if (formData.screenshot) {
+                submitData.append('screenshot', formData.screenshot);
+            }
+
+            const response = await axios.post(`/api/v1/giveaways/${giveaway.slug}/enter`, submitData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.data.success) {
+                setSuccess(true);
+                setFormData({ name: '', phone: '', facebook_url: '', screenshot: null });
+            }
+        } catch (error: unknown) {
+            if (error instanceof Error && 'response' in error) {
+                const axiosError = error as {
+                    response?: {
+                        data?: {
+                            errors?: Record<string, string | string[]>;
+                            message?: string;
+                        };
+                    };
+                };
+                if (axiosError.response?.data?.errors) {
+                    // Laravel returns errors as arrays, so we need to flatten them
+                    const flatErrors: Record<string, string> = {};
+                    Object.keys(axiosError.response.data.errors).forEach((key) => {
+                        const error = axiosError.response!.data!.errors![key];
+                        flatErrors[key] = Array.isArray(error) ? error[0] : error;
+                    });
+                    setErrors(flatErrors);
+                } else if (axiosError.response?.data?.message) {
+                    setErrors({ general: axiosError.response.data.message });
+                } else {
+                    setErrors({ general: 'Failed to submit entry. Please try again.' });
+                }
+            } else {
+                setErrors({ general: 'Failed to submit entry. Please try again.' });
+            }
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handlePickWinner = () => {
+        // Don't show confirmation if already started
+        if (startingRaffle || isSpinning) {
+            return;
+        }
+
+        setStartingRaffle(true);
+        setIsSpinning(true);
+
+        // Simulate spinning for at least 5 seconds for dramatic effect
+        const minSpinTime = 5000;
+        const startTime = Date.now();
+
+        router.post(
+            `/giveaways/${giveaway.slug}/pick-winner`,
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => {
+                    // Ensure minimum spin time for dramatic effect
+                    const elapsed = Date.now() - startTime;
+                    const remainingTime = Math.max(0, minSpinTime - elapsed);
+
+                    setTimeout(() => {
+                        setIsSpinning(false);
+                        setStartingRaffle(false);
+
+                        // Show grand reveal after spinning completes
+                        setTimeout(() => {
+                            setShowGrandReveal(true);
+                        }, 500);
+                    }, remainingTime);
+                },
+            },
+        );
+    };
+
+    const endDate = giveaway.end_date ? new Date(giveaway.end_date) : null;
+    const startDate = new Date(giveaway.start_date);
+    const timeRemaining = giveaway.is_active
+        ? endDate
+            ? formatDistanceToNow(endDate, { addSuffix: true })
+            : 'No end date (unlimited)'
+        : formatDistanceToNow(startDate, { addSuffix: true });
+
+    return (
+        <ErrorBoundary>
+            <Head title={giveaway.title}>
+                <meta name="description" content={giveaway.description.slice(0, 160)} />
+
+                {/* Open Graph / Facebook */}
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content={window.location.href} />
+                <meta property="og:title" content={giveaway.title} />
+                <meta property="og:description" content={giveaway.description.slice(0, 160)} />
+                {giveaway.primary_image_url && <meta property="og:image" content={giveaway.primary_image_url} />}
+                {giveaway.primary_image_url && <meta property="og:image:width" content="1200" />}
+                {giveaway.primary_image_url && <meta property="og:image:height" content="630" />}
+
+                {/* Twitter */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={giveaway.title} />
+                <meta name="twitter:description" content={giveaway.description.slice(0, 160)} />
+                {giveaway.primary_image_url && <meta name="twitter:image" content={giveaway.primary_image_url} />}
+            </Head>
+            <FloatingNav currentPage="giveaways" />
+
+            <div
+                className="relative min-h-screen bg-gradient-to-b from-purple-50 to-white"
+                style={
+                    giveaway.background_image_url
+                        ? {
+                              backgroundImage: `url(${giveaway.background_image_url})`,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                              backgroundAttachment: 'fixed',
+                          }
+                        : undefined
+                }
+            >
+                {/* Overlay for readability when background image is present */}
+                {giveaway.background_image_url && <div className="absolute inset-0 -z-10 bg-white/90 backdrop-blur-sm"></div>}
+
+                <div className="relative z-10 container mx-auto px-4 pt-24 pb-12">
+                    {/* Back Link */}
+                    <Button variant="outline" onClick={() => router.visit('/giveaways')} className="relative z-20 mb-6 bg-white/90 hover:bg-white">
+                        ← Back to Giveaways
+                    </Button>
+
+                    {/* Top Banner Ad */}
+                    <AdBanner
+                        adClient={adsense?.client_id}
+                        adSlot={adsense?.slots?.raffle_top}
+                        adFormat="horizontal"
+                        testMode={!adsense?.enabled}
+                        className="mb-6"
+                    />
+
+                    <div className="grid gap-8 lg:grid-cols-3">
+                        {/* Main Content */}
+                        <div className="space-y-6 lg:col-span-2">
+                            {/* Hero Image */}
+                            <div className="overflow-hidden rounded-lg">
+                                {giveaway.primary_image_url ? (
+                                    <img src={giveaway.primary_image_url} alt={giveaway.title} className="aspect-video w-full object-cover" />
+                                ) : (
+                                    <div className="flex aspect-video items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100">
+                                        <Trophy className="h-24 w-24 text-purple-300" />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Gallery */}
+                            {giveaway.images.length > 1 && (
+                                <div className="grid grid-cols-4 gap-4">
+                                    {giveaway.images.map((image) => (
+                                        <img key={image.id} src={image.url} alt="Prize" className="aspect-square rounded-md object-cover" />
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Title & Description */}
+                            <div>
+                                <div className="mb-4 flex items-center gap-2">
+                                    <h1 className="text-4xl font-bold">{giveaway.title}</h1>
+                                    {giveaway.is_active && <Badge className="bg-green-100 text-green-800">Active</Badge>}
+                                    {giveaway.has_ended && <Badge className="bg-gray-100 text-gray-800">Ended</Badge>}
+                                </div>
+
+                                <div className="text-muted-foreground mb-6 flex flex-wrap items-center gap-4">
+                                    <button
+                                        onClick={() => router.visit(`/giveaways/${giveaway.slug}/entries`)}
+                                        className="hover:text-foreground flex items-center gap-2 transition-colors"
+                                    >
+                                        <Users className="h-5 w-5" />
+                                        <span className="underline">{giveaway.entries_count} entries</span>
+                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="h-5 w-5" />
+                                        <span>
+                                            {new Date(giveaway.start_date).toLocaleDateString()} -{' '}
+                                            {giveaway.end_date ? new Date(giveaway.end_date).toLocaleDateString() : 'Unlimited'}
+                                        </span>
+                                    </div>
+                                    {giveaway.is_active && (
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="h-5 w-5" />
+                                            <span>Ends {timeRemaining}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="prose max-w-none">
+                                    <h2 className="mb-3 text-2xl font-semibold">How to Enter</h2>
+                                    <div className="text-muted-foreground whitespace-pre-wrap">{giveaway.description}</div>
+                                </div>
+
+                                {/* Legal Disclaimer */}
+                                <Card className="border-blue-200 bg-blue-50/50">
+                                    <CardContent className="p-4">
+                                        <p className="text-center text-sm font-semibold text-blue-900">⚠️ NO PURCHASE NECESSARY</p>
+                                        <p className="mt-2 text-center text-xs text-blue-700">
+                                            This is a FREE promotional giveaway. Entry is completely free and no payment is required. Winner will be
+                                            selected randomly from all eligible entries. Void where prohibited.
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            {/* Winner Announcement */}
+                            {giveaway.winners && giveaway.winners.length > 0 && (
+                                <Card className="border-yellow-200 bg-yellow-50">
+                                    <CardContent className="p-6">
+                                        <div className="flex items-start gap-4">
+                                            <Trophy className="h-8 w-8 flex-shrink-0 text-yellow-600" />
+                                            <div className="w-full">
+                                                <h3 className="mb-2 text-xl font-semibold">
+                                                    {giveaway.winners.length > 1 ? 'Winners Announced!' : 'Winner Announced!'}
+                                                </h3>
+                                                {giveaway.winners.length === 1 ? (
+                                                    <p className="text-lg">
+                                                        Congratulations to <span className="font-bold">{giveaway.winners[0].name}</span>!
+                                                    </p>
+                                                ) : (
+                                                    <div className="space-y-3">
+                                                        <p className="text-lg font-semibold">Congratulations to our winners:</p>
+                                                        <div className="grid gap-3 sm:grid-cols-2">
+                                                            {giveaway.winners.map((winner, index) => (
+                                                                <div
+                                                                    key={index}
+                                                                    className="flex items-center gap-3 rounded-lg border-2 border-yellow-300 bg-white p-4"
+                                                                >
+                                                                    <Trophy className="h-6 w-6 flex-shrink-0 text-yellow-600" />
+                                                                    <div>
+                                                                        <p className="text-xs font-medium text-yellow-700">Winner #{index + 1}</p>
+                                                                        <p className="text-lg font-bold">{winner.name}</p>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {/* Winner Selection with Rolling Wheel */}
+                            {giveaway.entries_count > 0 && (
+                                <div className="space-y-6">
+                                    {/* Show wheel when spinning or winner announced (single winner only) */}
+                                    {(isSpinning || (giveaway.winners && giveaway.winners.length > 0)) &&
+                                        giveaway.entry_names.length > 0 &&
+                                        giveaway.number_of_winners === 1 && (
+                                            <WheelSpinner
+                                                entryNames={giveaway.entry_names}
+                                                isSpinning={isSpinning}
+                                                winner={giveaway.winners?.[0]?.name || null}
+                                            />
+                                        )}
+
+                                    {/* Show announcement when not spinning and no winner yet */}
+                                    {!isSpinning && (!giveaway.winners || giveaway.winners.length === 0) && (
+                                        <WinnerAnnouncement
+                                            totalEntries={giveaway.entries_count}
+                                            winner={undefined}
+                                            winnerAnnounced={false}
+                                            isSelecting={isSpinning}
+                                            onSelectWinner={handlePickWinner}
+                                            canSelectWinner={canManageGiveaway && giveaway.can_start_giveaway}
+                                            isAdmin={canManageGiveaway}
+                                            entryNames={giveaway.entry_names}
+                                        />
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Sidebar - Entry Form and Ads */}
+                        <div className="space-y-6 lg:col-span-1">
+                            {/* Sidebar Ad */}
+                            <AdBanner
+                                adClient={adsense?.client_id}
+                                adSlot={adsense?.slots?.raffle_sidebar}
+                                adFormat="rectangle"
+                                testMode={!adsense?.enabled}
+                                style={{ minHeight: '250px' }}
+                            />
+
+                            <div className="sticky top-6">
+                                <Card>
+                                    <CardContent className="p-6">
+                                        {success ? (
+                                            <div className="text-center">
+                                                <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-green-600" />
+                                                <h3 className="mb-2 text-xl font-semibold">Entry Submitted!</h3>
+                                                <p className="text-muted-foreground mb-4 text-sm">
+                                                    Your entry has been successfully submitted. Good luck!
+                                                </p>
+                                                <Button variant="outline" onClick={() => router.visit('/giveaways')} className="w-full">
+                                                    View Other Giveaways
+                                                </Button>
+                                            </div>
+                                        ) : giveaway.can_accept_entries ? (
+                                            <>
+                                                <h3 className="mb-4 text-xl font-semibold">Enter This Giveaway</h3>
+
+                                                <form onSubmit={handleSubmit} className="space-y-4">
+                                                    <div>
+                                                        <Label htmlFor="name">Full Name *</Label>
+                                                        <Input
+                                                            id="name"
+                                                            type="text"
+                                                            value={formData.name}
+                                                            onChange={(e) =>
+                                                                setFormData({
+                                                                    ...formData,
+                                                                    name: e.target.value,
+                                                                })
+                                                            }
+                                                            placeholder="Juan Dela Cruz"
+                                                            className="mt-1"
+                                                            required
+                                                        />
+                                                        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+                                                    </div>
+
+                                                    <div>
+                                                        <Label htmlFor="phone">Phone Number *</Label>
+                                                        <div className="relative">
+                                                            <Input
+                                                                id="phone"
+                                                                type="tel"
+                                                                value={formData.phone}
+                                                                onChange={(e) => {
+                                                                    // Allow only numbers, +, and limit length
+                                                                    const value = e.target.value;
+                                                                    if (value === '' || /^[\d+]*$/.test(value)) {
+                                                                        setFormData({
+                                                                            ...formData,
+                                                                            phone: value,
+                                                                        });
+                                                                        // Clear phone error when user types
+                                                                        if (errors.phone) {
+                                                                            setErrors({ ...errors, phone: '' });
+                                                                        }
+                                                                    }
+                                                                }}
+                                                                placeholder="09XXXXXXXXX or +639XXXXXXXXX"
+                                                                className={`mt-1 pr-10 ${
+                                                                    formData.phone && !errors.phone
+                                                                        ? isPhoneValid(formData.phone)
+                                                                            ? 'border-green-500 focus:border-green-500 focus:ring-green-500'
+                                                                            : 'border-orange-300'
+                                                                        : ''
+                                                                }`}
+                                                                maxLength={13}
+                                                                required
+                                                            />
+                                                            {formData.phone && isPhoneValid(formData.phone) && !errors.phone && (
+                                                                <CheckCircle2 className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-green-500" />
+                                                            )}
+                                                        </div>
+                                                        <p className="text-muted-foreground mt-1 text-xs">
+                                                            {formData.phone && !isPhoneValid(formData.phone) ? (
+                                                                <span className="text-orange-600">
+                                                                    ⚠️ Must start with 09 or +639, followed by 9 digits
+                                                                    <br />
+                                                                    Examples: 09123456789 or +639123456789
+                                                                </span>
+                                                            ) : (
+                                                                <>
+                                                                    Format: 09XXXXXXXXX or +639XXXXXXXXX
+                                                                    <br />
+                                                                    <span className="text-gray-500">
+                                                                        Example: 09123456789 (must be unique per giveaway)
+                                                                    </span>
+                                                                </>
+                                                            )}
+                                                        </p>
+                                                        {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+                                                    </div>
+
+                                                    <div>
+                                                        <Label htmlFor="facebook_url">Facebook Profile URL *</Label>
+                                                        <Input
+                                                            id="facebook_url"
+                                                            type="url"
+                                                            value={formData.facebook_url}
+                                                            onChange={(e) =>
+                                                                setFormData({
+                                                                    ...formData,
+                                                                    facebook_url: e.target.value,
+                                                                })
+                                                            }
+                                                            placeholder="https://facebook.com/yourprofile"
+                                                            className="mt-1"
+                                                            required
+                                                        />
+                                                        <p className="text-muted-foreground mt-1 text-xs">
+                                                            Make sure you've followed the required Facebook page
+                                                        </p>
+                                                        {errors.facebook_url && <p className="mt-1 text-sm text-red-600">{errors.facebook_url}</p>}
+                                                    </div>
+
+                                                    <div>
+                                                        <Label htmlFor="screenshot">Screenshot (Optional)</Label>
+                                                        <div className="mt-1">
+                                                            {formData.screenshot ? (
+                                                                <div className="space-y-2">
+                                                                    <div className="relative rounded-lg border border-green-200 bg-green-50 p-3">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-green-100">
+                                                                                <ImageIcon className="h-5 w-5 text-green-600" />
+                                                                            </div>
+                                                                            <div className="flex-1">
+                                                                                <p className="text-sm font-medium text-green-900">
+                                                                                    {formData.screenshot.name}
+                                                                                </p>
+                                                                                <p className="text-xs text-green-600">
+                                                                                    {(formData.screenshot.size / 1024 / 1024).toFixed(2)} MB
+                                                                                </p>
+                                                                            </div>
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="sm"
+                                                                                onClick={() =>
+                                                                                    setFormData({
+                                                                                        ...formData,
+                                                                                        screenshot: null,
+                                                                                    })
+                                                                                }
+                                                                                className="text-green-700 hover:text-green-900"
+                                                                            >
+                                                                                Remove
+                                                                            </Button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <label
+                                                                    htmlFor="screenshot"
+                                                                    className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 transition-colors hover:border-orange-300 hover:bg-orange-50"
+                                                                >
+                                                                    <Upload className="mb-2 h-8 w-8 text-gray-400" />
+                                                                    <p className="mb-1 text-sm font-medium text-gray-700">
+                                                                        Click to upload screenshot
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500">PNG, JPG, JPEG (Max 5MB)</p>
+                                                                    <input
+                                                                        id="screenshot"
+                                                                        type="file"
+                                                                        accept="image/jpeg,image/jpg,image/png"
+                                                                        onChange={(e) => {
+                                                                            const file = e.target.files?.[0];
+                                                                            if (file) {
+                                                                                setFormData({
+                                                                                    ...formData,
+                                                                                    screenshot: file,
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                        className="hidden"
+                                                                    />
+                                                                </label>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-muted-foreground mt-1 text-xs">
+                                                            Upload proof that you've completed the giveaway requirements
+                                                        </p>
+                                                        {errors.screenshot && <p className="mt-1 text-sm text-red-600">{errors.screenshot}</p>}
+                                                    </div>
+
+                                                    {errors.general && (
+                                                        <div className="flex items-start gap-2 rounded-md bg-red-50 p-3 text-sm text-red-600">
+                                                            <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                                                            <p>{errors.general}</p>
+                                                        </div>
+                                                    )}
+
+                                                    <Button type="submit" className="w-full" disabled={submitting}>
+                                                        {submitting ? (
+                                                            <>
+                                                                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                                                                Submitting...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Trophy className="mr-2 h-4 w-4" />
+                                                                Submit Entry
+                                                            </>
+                                                        )}
+                                                    </Button>
+                                                </form>
+                                            </>
+                                        ) : giveaway.has_ended ? (
+                                            <div className="text-center">
+                                                <Clock className="mx-auto mb-4 h-16 w-16 text-gray-400" />
+                                                <h3 className="mb-2 text-xl font-semibold">Giveaway Ended</h3>
+                                                <p className="text-muted-foreground text-sm">
+                                                    This giveaway has ended and is no longer accepting entries.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center">
+                                                <Clock className="mx-auto mb-4 h-16 w-16 text-gray-400" />
+                                                <h3 className="mb-2 text-xl font-semibold">Coming Soon</h3>
+                                                <p className="text-muted-foreground text-sm">This giveaway starts {timeRemaining}</p>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Grand Winner Reveal Modal */}
+            {showGrandReveal && giveaway.winners && giveaway.winners.length > 0 && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm">
+                    <div className="relative w-full max-w-4xl p-8 text-center">
+                        {/* Fireworks/Confetti Effect */}
+                        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                            {[...Array(100)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="animate-firework absolute"
+                                    style={{
+                                        left: `${Math.random() * 100}%`,
+                                        top: `${Math.random() * 100}%`,
+                                        animationDelay: `${Math.random() * 2}s`,
+                                        animationDuration: `${2 + Math.random() * 3}s`,
+                                    }}
+                                >
+                                    <div
+                                        className="h-3 w-3 rounded-full"
+                                        style={{
+                                            backgroundColor: ['#fbbf24', '#f59e0b', '#ec4899', '#a855f7', '#3b82f6', '#10b981'][
+                                                Math.floor(Math.random() * 6)
+                                            ],
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="relative z-10 space-y-8">
+                            {/* Trophy with glow rings */}
+                            <div className="flex justify-center">
+                                <div className="relative">
+                                    <Trophy className="h-32 w-32 animate-bounce text-yellow-400 drop-shadow-[0_0_50px_rgba(250,204,21,1)]" />
+                                    <div className="absolute inset-0 -m-8 animate-ping rounded-full border-8 border-yellow-400/30"></div>
+                                    <div
+                                        className="absolute inset-0 -m-16 animate-ping rounded-full border-8 border-yellow-400/20"
+                                        style={{ animationDelay: '0.5s' }}
+                                    ></div>
+                                    <div
+                                        className="absolute inset-0 -m-24 animate-ping rounded-full border-8 border-yellow-400/10"
+                                        style={{ animationDelay: '1s' }}
+                                    ></div>
+                                </div>
+                            </div>
+
+                            {/* Animated "Winner!" text */}
+                            <div className="space-y-4">
+                                <h1 className="animate-pulse text-8xl font-black text-yellow-400 drop-shadow-[0_0_30px_rgba(250,204,21,0.8)]">
+                                    🎉 {giveaway.winners.length > 1 ? 'WINNERS!' : 'WINNER!'} 🎉
+                                </h1>
+                            </div>
+
+                            {/* Winner Name(s) - BIG */}
+                            <div className="animate-pulse rounded-2xl border-4 border-yellow-400 bg-gradient-to-r from-yellow-500/20 via-yellow-400/30 to-yellow-500/20 p-12 shadow-2xl backdrop-blur-sm">
+                                <p className="mb-4 text-3xl font-semibold tracking-wider text-yellow-300 uppercase">Congratulations to</p>
+                                {giveaway.winners.length === 1 ? (
+                                    <h2 className="animate-bounce text-9xl font-black text-yellow-400 drop-shadow-[0_0_60px_rgba(250,204,21,1)]">
+                                        {giveaway.winners[0].name}
+                                    </h2>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {giveaway.winners.map((winner, index) => (
+                                            <div key={index} className="space-y-2">
+                                                <p className="text-2xl font-semibold text-yellow-300">Winner #{index + 1}</p>
+                                                <h2 className="text-6xl font-black text-yellow-400 drop-shadow-[0_0_60px_rgba(250,204,21,1)]">
+                                                    {winner.name}
+                                                </h2>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Decorative elements */}
+                            <div className="flex items-center justify-center gap-8 text-6xl">
+                                <span className="animate-spin-slow">⭐</span>
+                                <span className="animate-bounce">🎊</span>
+                                <span className="animate-pulse">🏆</span>
+                                <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>
+                                    🎊
+                                </span>
+                                <span className="animate-spin-slow" style={{ animationDelay: '1s' }}>
+                                    ⭐
+                                </span>
+                            </div>
+
+                            {/* Close button */}
+                            <Button
+                                onClick={() => setShowGrandReveal(false)}
+                                size="lg"
+                                className="mt-8 bg-yellow-500 px-12 py-6 text-xl font-bold text-black hover:bg-yellow-600"
+                            >
+                                Close Celebration
+                            </Button>
+                        </div>
+
+                        <style>{`
+                            @keyframes firework {
+                                0% {
+                                    transform: translate(0, 0) scale(0);
+                                    opacity: 1;
+                                }
+                                50% {
+                                    opacity: 1;
+                                }
+                                100% {
+                                    transform: translate(
+                                        ${Math.random() * 200 - 100}px,
+                                        ${Math.random() * 200 - 100}px
+                                    ) scale(1);
+                                    opacity: 0;
+                                }
+                            }
+
+                            .animate-firework {
+                                animation: firework ease-out infinite;
+                            }
+
+                            @keyframes spin-slow {
+                                from {
+                                    transform: rotate(0deg);
+                                }
+                                to {
+                                    transform: rotate(360deg);
+                                }
+                            }
+
+                            .animate-spin-slow {
+                                animation: spin-slow 3s linear infinite;
+                            }
+                        `}</style>
+                    </div>
+                </div>
+            )}
+
+            <Footer />
+        </ErrorBoundary>
+    );
+}

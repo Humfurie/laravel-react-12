@@ -11,9 +11,13 @@
 |
 */
 
+use App\Models\Permission;
+use App\Models\Role;
+use App\Models\User;
+
 pest()->extend(Tests\TestCase::class)
- // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
-    ->in('Feature');
+    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->in('Feature', 'Unit');
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +45,77 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Create a user with admin role and specified permissions.
+ *
+ * @param string|array $resources Resource(s) to grant permissions for (e.g., 'blog', ['blog', 'user'])
+ * @param array $actions Actions to grant (default: all CRUD actions)
+ * @return User
+ */
+function createAdminUser(string|array $resources = [], array $actions = ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']): User
 {
-    // ..
+    $resources = is_string($resources) ? [$resources] : $resources;
+
+    // Use firstOrCreate to avoid duplicate role errors
+    $role = Role::firstOrCreate(
+        ['slug' => 'admin'],
+        ['name' => 'Admin']
+    );
+
+    // Attach permissions for each resource
+    foreach ($resources as $resource) {
+        $permission = Permission::firstOrCreate(
+            ['resource' => $resource],
+            ['actions' => $actions] // Provide default actions for the permission
+        );
+
+        // Only attach if not already attached
+        if (!$role->permissions()->where('permission_id', $permission->id)->exists()) {
+            $role->permissions()->attach($permission->id, [
+                'actions' => json_encode($actions, JSON_THROW_ON_ERROR)
+            ]);
+        }
+    }
+
+    return User::factory()
+        ->hasAttached($role)
+        ->create();
+}
+
+/**
+ * Create a user with a specific role and permissions.
+ *
+ * @param string $roleName
+ * @param string $roleSlug
+ * @param string|array $resources
+ * @param array $actions
+ * @return User
+ */
+function createUserWithRole(string $roleName, string $roleSlug, string|array $resources, array $actions = ['viewAny', 'view']): User
+{
+    $resources = is_string($resources) ? [$resources] : $resources;
+
+    // Use firstOrCreate to avoid duplicate role errors
+    $role = Role::firstOrCreate(
+        ['slug' => $roleSlug],
+        ['name' => $roleName]
+    );
+
+    foreach ($resources as $resource) {
+        $permission = Permission::firstOrCreate(
+            ['resource' => $resource],
+            ['actions' => ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'forceDelete']] // All possible actions
+        );
+
+        // Only attach if not already attached
+        if (!$role->permissions()->where('permission_id', $permission->id)->exists()) {
+            $role->permissions()->attach($permission->id, [
+                'actions' => json_encode($actions, JSON_THROW_ON_ERROR)
+            ]);
+        }
+    }
+
+    return User::factory()
+        ->hasAttached($role)
+        ->create();
 }
