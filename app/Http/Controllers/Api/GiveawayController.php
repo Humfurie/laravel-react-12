@@ -8,8 +8,8 @@ use App\Models\GiveawayEntry;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Log;
 
 class GiveawayController extends Controller
 {
@@ -181,12 +181,31 @@ class GiveawayController extends Controller
         // Handle screenshot upload
         $screenshotPath = null;
         if ($request->hasFile('screenshot')) {
-            $screenshot = $request->file('screenshot');
-            $phoneHash = md5($normalizedPhone);
-            $filename = "giveaway_{$giveaway->id}_{$phoneHash}." . $screenshot->getClientOriginalExtension();
+            try {
+                $screenshot = $request->file('screenshot');
+                $phoneHash = md5($normalizedPhone);
+                $filename = "giveaway_{$giveaway->id}_{$phoneHash}." . $screenshot->getClientOriginalExtension();
+                // Use the default filesystem disk (public) instead of minio
+                $disk = config('filesystems.default');
+                $screenshotPath = $screenshot->storeAs('screenshots', $filename, $disk);
 
-            // Use Storage facade to ensure compatibility with Storage::fake() in tests
-            $screenshotPath = Storage::disk('minio')->putFileAs('screenshots', $screenshot, $filename);
+                // If storage returns false, set to null instead
+                if ($screenshotPath === false || $screenshotPath === 0 || $screenshotPath === '0') {
+                    Log::error('Screenshot storage failed for giveaway entry', [
+                        'giveaway_id' => $giveaway->id,
+                        'phone' => $normalizedPhone,
+                        'filename' => $filename,
+                        'disk' => $disk,
+                    ]);
+                    $screenshotPath = null;
+                }
+            } catch (Exception $e) {
+                Log::error('Screenshot upload exception', [
+                    'error' => $e->getMessage(),
+                    'giveaway_id' => $giveaway->id,
+                ]);
+                $screenshotPath = null;
+            }
         }
 
         DB::beginTransaction();

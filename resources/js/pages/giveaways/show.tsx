@@ -1,4 +1,5 @@
 import AdBanner from '@/components/ads/AdBanner';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import FloatingNav from '@/components/floating-nav';
 import WinnerAnnouncement from '@/components/giveaway/WinnerAnnouncement';
 import WheelSpinner from '@/components/giveaway-wheel/WheelSpinner';
@@ -11,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Head, router, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { formatDistanceToNow } from 'date-fns';
-import { AlertCircle, Calendar, CheckCircle2, Clock, Trophy, Users } from 'lucide-react';
+import { AlertCircle, Calendar, CheckCircle2, Clock, ImageIcon, Trophy, Upload, Users } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
 interface Image {
@@ -31,7 +32,7 @@ interface Giveaway {
     slug: string;
     description: string;
     start_date: string;
-    end_date: string;
+    end_date: string | null;
     status: string;
     is_active: boolean;
     has_ended: boolean;
@@ -87,6 +88,7 @@ export default function Show({ giveaway }: Props) {
         name: '',
         phone: '',
         facebook_url: '',
+        screenshot: null as File | null,
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [submitting, setSubmitting] = useState(false);
@@ -107,11 +109,24 @@ export default function Show({ giveaway }: Props) {
         setSubmitting(true);
 
         try {
-            const response = await axios.post(`/api/v1/giveaways/${giveaway.slug}/enter`, formData);
+            // Create FormData to handle file upload
+            const submitData = new FormData();
+            submitData.append('name', formData.name);
+            submitData.append('phone', formData.phone);
+            submitData.append('facebook_url', formData.facebook_url);
+            if (formData.screenshot) {
+                submitData.append('screenshot', formData.screenshot);
+            }
+
+            const response = await axios.post(`/api/v1/giveaways/${giveaway.slug}/enter`, submitData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
 
             if (response.data.success) {
                 setSuccess(true);
-                setFormData({ name: '', phone: '', facebook_url: '' });
+                setFormData({ name: '', phone: '', facebook_url: '', screenshot: null });
             }
         } catch (error: unknown) {
             if (error instanceof Error && 'response' in error) {
@@ -181,14 +196,16 @@ export default function Show({ giveaway }: Props) {
         );
     };
 
-    const endDate = new Date(giveaway.end_date);
+    const endDate = giveaway.end_date ? new Date(giveaway.end_date) : null;
     const startDate = new Date(giveaway.start_date);
     const timeRemaining = giveaway.is_active
-        ? formatDistanceToNow(endDate, { addSuffix: true })
+        ? endDate
+            ? formatDistanceToNow(endDate, { addSuffix: true })
+            : 'No end date (unlimited)'
         : formatDistanceToNow(startDate, { addSuffix: true });
 
     return (
-        <>
+        <ErrorBoundary>
             <Head title={giveaway.title}>
                 <meta name="description" content={giveaway.description.slice(0, 160)} />
 
@@ -282,7 +299,8 @@ export default function Show({ giveaway }: Props) {
                                     <div className="flex items-center gap-2">
                                         <Calendar className="h-5 w-5" />
                                         <span>
-                                            {new Date(giveaway.start_date).toLocaleDateString()} - {new Date(giveaway.end_date).toLocaleDateString()}
+                                            {new Date(giveaway.start_date).toLocaleDateString()} -{' '}
+                                            {giveaway.end_date ? new Date(giveaway.end_date).toLocaleDateString() : 'Unlimited'}
                                         </span>
                                     </div>
                                     {giveaway.is_active && (
@@ -507,6 +525,75 @@ export default function Show({ giveaway }: Props) {
                                                         {errors.facebook_url && <p className="mt-1 text-sm text-red-600">{errors.facebook_url}</p>}
                                                     </div>
 
+                                                    <div>
+                                                        <Label htmlFor="screenshot">Screenshot (Optional)</Label>
+                                                        <div className="mt-1">
+                                                            {formData.screenshot ? (
+                                                                <div className="space-y-2">
+                                                                    <div className="relative rounded-lg border border-green-200 bg-green-50 p-3">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-green-100">
+                                                                                <ImageIcon className="h-5 w-5 text-green-600" />
+                                                                            </div>
+                                                                            <div className="flex-1">
+                                                                                <p className="text-sm font-medium text-green-900">
+                                                                                    {formData.screenshot.name}
+                                                                                </p>
+                                                                                <p className="text-xs text-green-600">
+                                                                                    {(formData.screenshot.size / 1024 / 1024).toFixed(2)} MB
+                                                                                </p>
+                                                                            </div>
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="sm"
+                                                                                onClick={() =>
+                                                                                    setFormData({
+                                                                                        ...formData,
+                                                                                        screenshot: null,
+                                                                                    })
+                                                                                }
+                                                                                className="text-green-700 hover:text-green-900"
+                                                                            >
+                                                                                Remove
+                                                                            </Button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <label
+                                                                    htmlFor="screenshot"
+                                                                    className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 transition-colors hover:border-orange-300 hover:bg-orange-50"
+                                                                >
+                                                                    <Upload className="mb-2 h-8 w-8 text-gray-400" />
+                                                                    <p className="mb-1 text-sm font-medium text-gray-700">
+                                                                        Click to upload screenshot
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500">PNG, JPG, JPEG (Max 5MB)</p>
+                                                                    <input
+                                                                        id="screenshot"
+                                                                        type="file"
+                                                                        accept="image/jpeg,image/jpg,image/png"
+                                                                        onChange={(e) => {
+                                                                            const file = e.target.files?.[0];
+                                                                            if (file) {
+                                                                                setFormData({
+                                                                                    ...formData,
+                                                                                    screenshot: file,
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                        className="hidden"
+                                                                    />
+                                                                </label>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-muted-foreground mt-1 text-xs">
+                                                            Upload proof that you've completed the giveaway requirements
+                                                        </p>
+                                                        {errors.screenshot && <p className="mt-1 text-sm text-red-600">{errors.screenshot}</p>}
+                                                    </div>
+
                                                     {errors.general && (
                                                         <div className="flex items-start gap-2 rounded-md bg-red-50 p-3 text-sm text-red-600">
                                                             <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
@@ -690,6 +777,6 @@ export default function Show({ giveaway }: Props) {
             )}
 
             <Footer />
-        </>
+        </ErrorBoundary>
     );
 }
