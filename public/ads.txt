@@ -1,0 +1,6 @@
+# ads.txt file for humfurie.org
+# Required by Google AdSense to verify publisher ownership
+# Learn more: https://support.google.com/adsense/answer/7532444
+
+# Google AdSense
+google.com, pub-8464970113450424, DIRECT, f08c47fec0942fa0

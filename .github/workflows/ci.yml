@@ -15,18 +15,58 @@ jobs:
 
       - name: Setup environment
         run: |
-          # Use your existing .env file or copy from .env.example if needed
-          if [ ! -f .env ]; then
-            cp .env.example .env
-          fi
+          cp .env.example .env
+          echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
+          echo "JWT_SECRET=base64:$(openssl rand -base64 32)" >> .env
+          echo "APP_ENV=testing" >> .env
+          echo "DB_CONNECTION=pgsql" >> .env
+          echo "DB_HOST=pgsql" >> .env
+          echo "DB_PORT=5432" >> .env
+          echo "DB_DATABASE=testing" >> .env
+          echo "DB_USERNAME=postgres" >> .env
+          echo "DB_PASSWORD=password" >> .env
+          echo "VITE_APP_NAME=\${APP_NAME}" >> .env
 
-      - name: Build and run tests
+      - name: Build and start services
         run: |
-          docker-compose up -d
-          docker-compose exec -T app composer install
-          docker-compose exec -T app php artisan key:generate --ansi
-          docker-compose exec -T app php artisan migrate:fresh --seed
-          docker-compose exec -T app php artisan test
+          docker compose -f docker-compose.ci.yml up -d --build
+          sleep 30
+
+      - name: Verify PHP extensions
+        run: |
+          docker compose -f docker-compose.ci.yml exec -T app php -m | grep -i gd
+          docker compose -f docker-compose.ci.yml exec -T app php -r "echo extension_loaded('gd') ? 'GD is loaded\n' : 'GD is NOT loaded\n';"
+          docker compose -f docker-compose.ci.yml exec -T app php -r "var_dump(gd_info());"
+
+      - name: Install dependencies and setup
+        run: |
+          docker compose -f docker-compose.ci.yml exec -T -e GIT_DISCOVERY_ACROSS_FILESYSTEM=1 app git config --global --add safe.directory /var/www/html
+          docker compose -f docker-compose.ci.yml exec -T app composer install --optimize-autoloader
+          docker compose -f docker-compose.ci.yml exec -T app npm install
+          docker compose -f docker-compose.ci.yml exec -T app npm run build
+          docker compose -f docker-compose.ci.yml exec -T app php artisan key:generate --ansi
+          docker compose -f docker-compose.ci.yml exec -T app php artisan config:cache
+          docker compose -f docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed
+
+      - name: Debug GD and test a simple image creation
+        run: |
+          docker compose -f docker-compose.ci.yml exec -T app php -r "
+            echo 'PHP Version: ' . PHP_VERSION . \"\n\";
+            echo 'GD loaded: ' . (extension_loaded('gd') ? 'YES' : 'NO') . \"\n\";
+            if (extension_loaded('gd')) {
+              print_r(gd_info());
+              try {
+                \$img = imagecreate(10, 10);
+                echo 'Image creation: SUCCESS\n';
+              } catch (Exception \$e) {
+                echo 'Image creation failed: ' . \$e->getMessage() . \"\n\";
+              }
+            }
+          "
+
+      - name: Run tests
+        run: |
+          docker compose -f docker-compose.ci.yml exec -T app php artisan test
 
       - name: Cleanup
-        run: docker-compose down -v
+        run: docker compose -f docker-compose.ci.yml down -v

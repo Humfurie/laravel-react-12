@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use Tighten\Ziggy\Ziggy;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -39,18 +38,30 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $user = $request->user();
+
+        // Eager load relationships to prevent N+1 queries
+        if ($user) {
+            $user->load(['roles.permissions']);
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
+                'isAdmin' => $user?->isAdmin() ?? false,
+                'roles' => $user?->roles->pluck('slug') ?? collect(),
+                'permissions' => $user?->getAllPermissions() ?? [],
             ],
-            'ziggy' => fn (): array => [
-                ...(new Ziggy)->toArray(),
-                'location' => $request->url(),
-            ],
+            'csrf_token' => csrf_token(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'adsense' => [
+                'client_id' => config('services.adsense.client_id'),
+                'enabled' => !empty(config('services.adsense.client_id')),
+                'slots' => config('services.adsense.slots'),
+            ],
         ];
     }
 }

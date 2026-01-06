@@ -22,18 +22,18 @@ const footerData: FooterData[] = [
                 label: 'Home',
                 url: '/',
             },
-            {
-                label: 'About Me',
-                url: '/about-me',
-            },
-            {
-                label: 'Projects',
-                url: '/projects',
-            },
-            {
-                label: 'Blogs',
-                url: '/blogs',
-            },
+            // {
+            //     label: 'About Me',
+            //     url: '/about-me',
+            // },
+            // {
+            //     label: 'Projects',
+            //     url: '/projects',
+            // },
+            // {
+            //     label: 'Blogs',
+            //     url: '/blogs',
+            // },
         ],
     },
     {
@@ -71,28 +71,28 @@ export default function Footer() {
                 />
             </picture>
 
-            <div className="primary-container relative z-10 flex flex-col items-center justify-center gap-10 py-[40px] text-black md:flex-row md:items-start md:justify-start md:py-[80px]">
+            <div className="primary-container relative z-10 flex flex-col items-center justify-center gap-8 py-[40px] text-black sm:gap-10 md:flex-row md:items-start md:justify-start md:py-[80px]">
                 {footerData.map((section, index) => (
                     <div key={index} className="flex w-full flex-col items-center text-center sm:w-[200px] md:items-start md:text-start">
-                        <h5 className="mb-4 text-[18px] font-bold text-white">{section.title}</h5>
+                        <h5 className="mb-3 text-base font-bold text-white sm:mb-4 sm:text-[18px]">{section.title}</h5>
 
                         <ul className="w-full space-y-2">
                             {section.items.map((item, i) => (
                                 <li
                                     key={i}
-                                    className="relative flex cursor-pointer items-center justify-center gap-2 text-white md:justify-start"
+                                    className="relative flex cursor-pointer items-center justify-center gap-2 text-sm text-white sm:text-base md:justify-start"
                                     onClick={() => {
                                         if (!item.url && item.label) handleCopy(item.label, i);
                                     }}
                                 >
-                                    {item.icon && <span className="text-xl">{item.icon}</span>}
+                                    {item.icon && <span className="text-lg sm:text-xl">{item.icon}</span>}
                                     {item.url ? (
                                         <a href={item.url} className="hover:underline">
                                             {item.label}
                                         </a>
                                     ) : (
                                         <>
-                                            <span className="hover:underline">{item.label}</span>
+                                            <span className="break-all hover:underline">{item.label}</span>
                                             {copiedIndex === i && (
                                                 <span className="bg-brand-orange absolute -top-3 right-0 ml-2 rounded-sm px-2 text-xs text-white">
                                                     Copied!
@@ -106,7 +106,7 @@ export default function Footer() {
 
                         {/* Socials under Contact Me */}
                         {section.title === 'Contact Me' && (
-                            <div className="mt-6">
+                            <div className="mt-4 sm:mt-6">
                                 <Socials />
                             </div>
                         )}
@@ -114,8 +114,18 @@ export default function Footer() {
                 ))}
             </div>
 
-            <div className="text-brand-black relative z-10 w-full bg-white/70 py-6 text-center backdrop-blur-md">
-                © 2025 Humfurie™. All Rights Reserved.
+            <div className="text-brand-black relative z-10 w-full bg-white/70 py-4 text-center backdrop-blur-md sm:py-6">
+                <div className="flex flex-col items-center gap-2 px-4">
+                    <div className="text-sm sm:text-base">© 2025 Humfurie™. All Rights Reserved.</div>
+                    <a
+                        href="https://github.com/Humfurie/laravel-react-12"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-brand-orange hover:text-brand-orange/80 text-xs font-medium underline transition-colors sm:text-sm"
+                    >
+                        View Source Code
+                    </a>
+                </div>
             </div>
         </footer>
     );

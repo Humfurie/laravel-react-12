@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
 const sidebarNavItems: NavItem[] = [
@@ -25,12 +25,7 @@ const sidebarNavItems: NavItem[] = [
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
-    // When server-side rendering, we only render the layout on the client...
-    if (typeof window === 'undefined') {
-        return null;
-    }
-
-    const currentPath = window.location.pathname;
+    const { url } = usePage();
 
     return (
         <div className="px-4 py-6">
@@ -46,12 +41,10 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                 variant="ghost"
                                 asChild
                                 className={cn('w-full justify-start', {
-                                    'bg-muted': currentPath === item.href,
+                                    'bg-muted': url === item.href,
                                 })}
                             >
-                                <Link href={item.href} prefetch>
-                                    {item.title}
-                                </Link>
+                                <Link href={item.href}>{item.title}</Link>
                             </Button>
                         ))}
                     </nav>

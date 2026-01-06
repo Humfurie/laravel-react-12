@@ -1,23 +1,270 @@
+import FloatingNav from '@/components/floating-nav';
 import Footer from '@/components/global/Footer';
 import HomeAboutMe from '@/components/home/sections/HomeAboutMe';
 import HomeBanner from '@/components/home/sections/HomeBanner';
-import HomeCTA from '@/components/home/sections/HomeCTA';
 import HomeExpertise from '@/components/home/sections/HomeExpertise';
 import HomeProjects from '@/components/home/sections/HomeProjects';
+import { Badge } from '@/components/ui/badge';
+import type { Project } from '@/types/project';
+import { Head, Link, router } from '@inertiajs/react';
+import { formatDistanceToNow } from 'date-fns';
+import { ArrowRight } from 'lucide-react';
+
+import { ExperienceSection } from '@/components/home/sections/ExperienceSection';
 import { JSX } from 'react';
 
+interface Blog {
+    id: number;
+    title: string;
+    slug: string;
+    content: string;
+    excerpt: string | null;
+    status: 'draft' | 'published' | 'private';
+    featured_image: string | null;
+    meta_data: {
+        meta_title?: string;
+        meta_description?: string;
+        meta_keywords?: string;
+    } | null;
+    isPrimary: boolean;
+    sort_order: number;
+    published_at: string | null;
+    created_at: string;
+    updated_at: string;
+    status_label: string;
+}
 
+interface Props {
+    primary: Blog[];
+    latest: Blog[];
+    experiences: {
+        id: number;
+        position: string;
+        company: string;
+        location: string;
+        description: string[];
+        start_month: number;
+        start_year: number;
+        end_month: number | null;
+        end_year: number | null;
+        is_current_position: boolean;
+        user_id: number;
+        display_order: number;
+        created_at: string;
+        updated_at: string;
+        image?: {
+            id: number;
+            name: string;
+            path: string;
+            url: string;
+            imageable_id: number;
+            imageable_type: string;
+            created_at: string;
+            updated_at: string;
+        };
+    }[];
+    expertises: {
+        id: number;
+        name: string;
+        image: string;
+        image_url: string;
+        category_slug: string;
+        order: number;
+        is_active: boolean;
+        created_at: string;
+        updated_at: string;
+    }[];
+    projects: Project[];
+    projectStats: {
+        total_projects: number;
+        live_projects: number;
+    };
+    profileUser?: {
+        name: string;
+        headline: string | null;
+        bio: string | null;
+        about: string | null;
+        profile_stats: { label: string; value: string }[];
+    };
+}
 
-export default function Home(): JSX.Element {
-    // const { auth } = usePage<SharedData>().props;
+// Untitled UI style Blog Card - Clean, minimal design
+function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }) {
+    const handleCardClick = () => {
+        router.visit(`/blog/${blog.slug}`);
+    };
+
+    return (
+        <article
+            onClick={handleCardClick}
+            className={`group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 ${
+                featured ? 'md:col-span-2 md:grid md:grid-cols-2' : ''
+            }`}
+        >
+            {/* Thumbnail */}
+            <div
+                className={`relative overflow-hidden bg-gray-50 dark:bg-gray-900 ${featured ? 'aspect-[16/10] md:aspect-auto md:h-full' : 'aspect-[16/10]'}`}
+            >
+                {blog.featured_image ? (
+                    <img
+                        src={blog.featured_image}
+                        alt={blog.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                    />
+                ) : (
+                    <div className="flex h-full min-h-[200px] items-center justify-center bg-linear-to-br from-gray-100 to-gray-50 dark:from-gray-900 dark:to-gray-950">
+                        <span className="text-5xl font-bold text-gray-300 dark:text-gray-500">{blog.title.charAt(0).toUpperCase()}</span>
+                    </div>
+                )}
+
+                {/* Featured badge */}
+                {blog.isPrimary && <Badge className="absolute top-3 left-3 bg-orange-500 text-white hover:bg-orange-600">Featured</Badge>}
+            </div>
+
+            {/* Content */}
+            <div className={`p-5 ${featured ? 'flex flex-col justify-center md:p-8' : ''}`}>
+                {/* Date */}
+                {blog.published_at && (
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-300">
+                        {formatDistanceToNow(new Date(blog.published_at), { addSuffix: true })}
+                    </span>
+                )}
+
+                {/* Title */}
+                <h3
+                    className={`mt-2 font-semibold text-gray-900 transition-colors group-hover:text-orange-600 dark:text-white dark:group-hover:text-orange-400 ${
+                        featured ? 'text-xl md:text-2xl' : 'line-clamp-2 text-lg'
+                    }`}
+                >
+                    {blog.title}
+                </h3>
+
+                {/* Excerpt */}
+                {blog.excerpt && (
+                    <p className={`mt-2 text-gray-600 dark:text-gray-300 ${featured ? 'line-clamp-3 text-base' : 'line-clamp-2 text-sm'}`}>
+                        {blog.excerpt}
+                    </p>
+                )}
+
+                {/* Read more link */}
+                <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-orange-600 transition-colors group-hover:text-orange-700 dark:text-orange-400 dark:group-hover:text-orange-300">
+                    Read article
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </div>
+            </div>
+        </article>
+    );
+}
+
+export default function Home({
+    primary = [],
+    latest = [],
+    experiences = [],
+    expertises = [],
+    projects = [],
+    projectStats,
+    profileUser,
+}: Props): JSX.Element {
+    // Combine and dedupe blogs for display
+    const allBlogs = [...primary, ...latest.filter((b) => !primary.find((p) => p.id === b.id))];
+    const featuredBlog = primary[0];
+    const otherBlogs = allBlogs.filter((b) => b.id !== featuredBlog?.id).slice(0, 5);
 
     return (
         <>
+            <Head title="Portfolio & Blog">
+                <meta
+                    name="description"
+                    content="Professional portfolio and blog featuring expertise in software development, design, and technology insights."
+                />
+
+                {/* Open Graph Meta Tags for Social Media */}
+                <meta property="og:title" content="Portfolio & Blog" />
+                <meta
+                    property="og:description"
+                    content="Professional portfolio and blog featuring expertise in software development, design, and technology insights."
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+                <meta property="og:image" content="/images/og-default.jpg" />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
+                <meta property="og:image:alt" content="Portfolio & Blog - Professional Development Portfolio" />
+
+                {/* Twitter Card Meta Tags */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Portfolio & Blog" />
+                <meta
+                    name="twitter:description"
+                    content="Professional portfolio and blog featuring expertise in software development, design, and technology insights."
+                />
+                <meta name="twitter:image" content="/images/og-default.jpg" />
+            </Head>
+
+            <FloatingNav currentPage="home" />
+
             <HomeBanner />
-            <HomeAboutMe />
-            <HomeProjects />
-            <HomeExpertise />
-            <HomeCTA />
+            <HomeAboutMe profileUser={profileUser} />
+
+            {/* Projects Section */}
+            {projects.length > 0 && <HomeProjects projects={projects} stats={projectStats} />}
+
+            <HomeExpertise expertises={expertises} />
+            <ExperienceSection
+                experiences={experiences.map((exp) => ({
+                    id: exp.id,
+                    company: exp.company,
+                    image_url: exp.image?.url || null,
+                    location: exp.location,
+                    description: Array.isArray(exp.description) ? exp.description : [],
+                    position: exp.position,
+                    start_month: exp.start_month,
+                    start_year: exp.start_year,
+                    end_month: exp.end_month,
+                    end_year: exp.end_year,
+                    is_current_position: exp.is_current_position,
+                }))}
+            />
+
+            {/* Blog Section - Untitled UI Style */}
+            <section className="bg-gray-50 py-16 sm:py-24 dark:bg-gray-950">
+                <div className="container mx-auto px-4">
+                    {/* Header */}
+                    <div className="mb-12 text-center">
+                        <span className="text-sm font-semibold tracking-wider text-orange-600 uppercase dark:text-orange-400">Blog</span>
+                        <h2 className="mt-3 text-3xl font-bold text-gray-900 sm:text-4xl dark:text-white">Latest Articles</h2>
+                        <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
+                            Insights, tutorials, and stories about software development, design, and technology.
+                        </p>
+                    </div>
+
+                    {/* Blog Grid - Untitled UI Layout */}
+                    {allBlogs.length > 0 && (
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            {/* Featured post - spans 2 columns on medium+ screens */}
+                            {featuredBlog && <BlogCard blog={featuredBlog} featured />}
+
+                            {/* Other posts */}
+                            {otherBlogs.map((blog) => (
+                                <BlogCard key={String(blog.id)} blog={blog} />
+                            ))}
+                        </div>
+                    )}
+
+                    {/* View All Button */}
+                    <div className="mt-12 text-center">
+                        <Link
+                            href="/blog"
+                            className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+                        >
+                            View All Articles
+                            <ArrowRight className="h-4 w-4" />
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
             <Footer />
         </>
     );

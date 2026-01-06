@@ -35,4 +35,44 @@ return [
         ],
     ],
 
+    'fmp' => [
+        'api_key' => env('FMP_API_KEY'),
+        'base_url' => 'https://financialmodelingprep.com/stable',
+    ],
+
+    'google_analytics' => [
+        'measurement_id' => env('GOOGLE_ANALYTICS_ID'),
+    ],
+
+    'adsense' => [
+        'client_id' => env('ADSENSE_CLIENT_ID'),
+        'slots' => [
+            'blog_post_top' => env('ADSENSE_BLOG_POST_TOP_SLOT'),
+            'blog_post_bottom' => env('ADSENSE_BLOG_POST_BOTTOM_SLOT'),
+            'blog_post_sidebar' => env('ADSENSE_BLOG_POST_SIDEBAR_SLOT'),
+            'giveaway_top' => env('ADSENSE_GIVEAWAY_TOP_SLOT'),
+            'giveaway_sidebar' => env('ADSENSE_GIVEAWAY_SIDEBAR_SLOT'),
+        ],
+    ],
+
+    'facebook' => [
+        'app_id' => env('FACEBOOK_APP_ID'),
+        'client_id' => env('FACEBOOK_CLIENT_ID'),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'redirect' => '/auth/facebook/callback',
+    ],
+
+    'github' => [
+        'token' => env('GITHUB_TOKEN'),
+        'client_id' => env('GITHUB_CLIENT_ID'),
+        'client_secret' => env('GITHUB_CLIENT_SECRET'),
+        'redirect' => '/auth/github/callback',
+    ],
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => '/auth/google/callback',
+    ],
+
 ];
