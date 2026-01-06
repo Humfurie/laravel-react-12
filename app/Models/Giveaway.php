@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +16,9 @@ class Giveaway extends Model
     use HasFactory, SoftDeletes;
 
     const STATUS_DRAFT = 'draft';
+
     const STATUS_ACTIVE = 'active';
+
     const STATUS_ENDED = 'ended';
 
     protected $fillable = [
@@ -109,7 +112,10 @@ class Giveaway extends Model
     {
         return $query->where('status', self::STATUS_ACTIVE)
             ->where('start_date', '<=', now())
-            ->where('end_date', '>=', now());
+            ->where(function ($q) {
+                $q->whereNull('end_date') // Unlimited giveaways
+                ->orWhere('end_date', '>=', now()); // Or not yet ended
+            });
     }
 
     /**
@@ -127,7 +133,10 @@ class Giveaway extends Model
     {
         return $query->where(function ($q) {
             $q->where('status', self::STATUS_ENDED)
-                ->orWhere('end_date', '<', now());
+                ->orWhere(function ($q2) {
+                    $q2->whereNotNull('end_date')
+                        ->where('end_date', '<', now());
+                });
         });
     }
 
@@ -154,7 +163,7 @@ class Giveaway extends Model
     {
         return $this->status === self::STATUS_ACTIVE
             && $this->start_date <= now()
-            && $this->end_date >= now();
+            && ($this->end_date === null || $this->end_date >= now());
     }
 
     /**
@@ -170,7 +179,8 @@ class Giveaway extends Model
      */
     public function hasEnded(): bool
     {
-        return $this->status === self::STATUS_ENDED || $this->end_date < now();
+        return $this->status === self::STATUS_ENDED
+            || ($this->end_date !== null && $this->end_date < now());
     }
 
     /**
@@ -195,6 +205,7 @@ class Giveaway extends Model
     public function getPrimaryImageUrlAttribute(): ?string
     {
         $primaryImage = $this->images()->primary()->first();
+
         return $primaryImage ? $primaryImage->url : null;
     }
 
@@ -219,19 +230,21 @@ class Giveaway extends Model
         // If all winners have been selected, ensure status is ended
         if ($hasAllWinners && $this->status !== self::STATUS_ENDED) {
             $this->update(['status' => self::STATUS_ENDED]);
+
             return;
         }
 
-        // If end date has passed, ensure status is ended
-        if ($this->end_date < now() && $this->status !== self::STATUS_ENDED) {
+        // If end date has passed (and is not null/unlimited), ensure status is ended
+        if ($this->end_date !== null && $this->end_date < now() && $this->status !== self::STATUS_ENDED) {
             $this->update(['status' => self::STATUS_ENDED]);
+
             return;
         }
 
         // If currently active but dates don't match, update accordingly
         if ($this->status === self::STATUS_ACTIVE) {
-            // If end date has passed, mark as ended
-            if ($this->end_date < now()) {
+            // If end date has passed (and is not null), mark as ended
+            if ($this->end_date !== null && $this->end_date < now()) {
                 $this->update(['status' => self::STATUS_ENDED]);
             } // If start date is in the future, revert to draft
             elseif ($this->start_date > now()) {
@@ -313,49 +326,53 @@ class Giveaway extends Model
      */
     public function selectWinner(): ?GiveawayEntry
     {
-        // Check if we already have all winners selected
-        $currentWinnersCount = $this->winners()->count();
-        $requiredWinners = $this->number_of_winners ?? 1;
+        return DB::transaction(function () {
+            // Check if we already have all winners selected
+            $currentWinnersCount = $this->winners()->count();
+            $requiredWinners = $this->number_of_winners ?? 1;
 
-        if ($currentWinnersCount >= $requiredWinners) {
-            return $this->winner;
-        }
+            if ($currentWinnersCount >= $requiredWinners) {
+                return $this->winner;
+            }
 
-        // Calculate how many more winners we need
-        $winnersToSelect = $requiredWinners - $currentWinnersCount;
+            // Calculate how many more winners we need
+            $winnersToSelect = $requiredWinners - $currentWinnersCount;
 
-        // Get ALL eligible entries (excludes rejected and already-winner entries)
-        $eligibleEntries = $this->entries()
-            ->eligible()
-            ->get();
+            // Get ALL eligible entries (excludes rejected and already-winner entries)
+            // Use lockForUpdate() to prevent race conditions
+            $eligibleEntries = $this->entries()
+                ->eligible()
+                ->lockForUpdate()
+                ->get();
 
-        if ($eligibleEntries->isEmpty()) {
-            return null;
-        }
+            if ($eligibleEntries->isEmpty()) {
+                return null;
+            }
 
-        // Shuffle the collection in PHP for true randomization
-        $shuffledEntries = $eligibleEntries->shuffle();
+            // Shuffle the collection in PHP for true randomization
+            $shuffledEntries = $eligibleEntries->shuffle();
 
-        // Take only the number of winners we need
-        $selectedWinners = $shuffledEntries->take($winnersToSelect);
+            // Take only the number of winners we need
+            $selectedWinners = $shuffledEntries->take($winnersToSelect);
 
-        $lastWinner = null;
+            $lastWinner = null;
 
-        // Mark each selected entry as a winner
-        foreach ($selectedWinners as $entry) {
-            $entry->markAsWinner();
-            $lastWinner = $entry;
-        }
+            // Mark each selected entry as a winner
+            foreach ($selectedWinners as $entry) {
+                $entry->markAsWinner();
+                $lastWinner = $entry;
+            }
 
-        // Update the primary winner_id to the last selected winner
-        // and mark the giveaway as ended
-        if ($lastWinner) {
-            $this->update([
-                'winner_id' => $lastWinner->id,
-                'status' => self::STATUS_ENDED,
-            ]);
-        }
+            // Update the primary winner_id to the last selected winner
+            // and mark the giveaway as ended
+            if ($lastWinner) {
+                $this->update([
+                    'winner_id' => $lastWinner->id,
+                    'status' => self::STATUS_ENDED,
+                ]);
+            }
 
-        return $lastWinner;
+            return $lastWinner;
+        });
     }
 }

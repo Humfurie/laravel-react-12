@@ -17,10 +17,12 @@ class CheckPermission
      */
     public function handle(Request $request, Closure $next, string $resource, string $action): Response
     {
+        // Redirect to login if not authenticated
         if (!$request->user()) {
-            abort(403, 'Unauthorized access.');
+            return redirect()->route('login')->with('error', 'Please login to continue.');
         }
 
+        // Check if user has permission
         if (!$request->user()->hasPermission($resource, $action)) {
             abort(403, 'You do not have permission to perform this action.');
         }
