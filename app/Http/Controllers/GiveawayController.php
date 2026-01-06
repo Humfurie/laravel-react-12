@@ -63,14 +63,27 @@ class GiveawayController extends Controller
         // Update status if needed (e.g., end date passed or winner selected)
         $giveaway->updateStatusIfNeeded();
 
-        $giveaway->load(['images' => function ($query) {
-            $query->ordered();
-        }, 'winner', 'winners', 'entries']);
+        // Load only what we need with proper eager loading to avoid N+1 queries
+        $giveaway->load([
+            'images' => function ($query) {
+                $query->ordered();
+            },
+            'winners',
+        ]);
+
+        // Get entries count efficiently without loading all entries
+        $entriesCount = $giveaway->entries()->count();
+
+        // Get entry names only (for wheel spinner) - only load names to reduce memory
+        $entryNames = $giveaway->entries()
+            ->whereNotIn('status', [GiveawayEntry::STATUS_REJECTED])
+            ->pluck('name')
+            ->toArray();
 
         // Determine if giveaway can be started (backend conditions only)
         // Admin can start anytime between start_date and end_date if there are entries
         $canStartGiveaway = !$giveaway->winner_id
-            && $giveaway->entries->count() > 0
+            && $entriesCount > 0
             && $giveaway->start_date <= now()
             && $giveaway->status === Giveaway::STATUS_ACTIVE;
 
@@ -87,7 +100,7 @@ class GiveawayController extends Controller
                 'has_ended' => $giveaway->has_ended,
                 'can_accept_entries' => $giveaway->can_accept_entries,
                 'can_start_giveaway' => $canStartGiveaway,
-                'entries_count' => $giveaway->entries->count(),
+                'entries_count' => $entriesCount,
                 'background_image_url' => $giveaway->background_image
                     ? Storage::disk(config('filesystems.default'))->url($giveaway->background_image)
                     : null,
@@ -97,11 +110,8 @@ class GiveawayController extends Controller
                 ] : null,
                 'winners' => $giveaway->winners->map(fn($w) => ['name' => $w->name])->toArray(),
                 'number_of_winners' => $giveaway->number_of_winners,
-                // Only show eligible entries (exclude rejected participants)
-                'entry_names' => $giveaway->entries
-                    ->whereNotIn('status', [GiveawayEntry::STATUS_REJECTED])
-                    ->pluck('name')
-                    ->toArray(),
+                // Only show eligible entry names (for wheel spinner)
+                'entry_names' => $entryNames,
                 'images' => $giveaway->images->map(function ($image) {
                     return [
                         'id' => $image->id,

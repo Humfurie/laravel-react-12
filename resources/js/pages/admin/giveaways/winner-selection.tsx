@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Head, router } from '@inertiajs/react';
-import { ArrowLeft, Trophy, Users } from 'lucide-react';
+import { ArrowLeft, ExternalLink, ImageIcon, Trophy, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Entry {
@@ -12,6 +12,7 @@ interface Entry {
     facebook_url: string;
     status: string;
     entry_date: string;
+    screenshot_url: string | null;
 }
 
 interface Winner {
@@ -244,9 +245,9 @@ export default function WinnerSelection({ giveaway }: Props) {
                                                         : 'bg-white hover:bg-gray-50'
                                             }`}
                                         >
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex flex-1 items-center gap-2">
                                                 {isWinner && <Trophy className="h-4 w-4 text-yellow-600" />}
-                                                <div>
+                                                <div className="flex-1">
                                                     <p
                                                         className={`font-medium ${
                                                             isWinner ? 'text-yellow-900' : isRejected ? 'text-gray-500 line-through' : ''
@@ -261,6 +262,31 @@ export default function WinnerSelection({ giveaway }: Props) {
                                                     >
                                                         {entry.phone}
                                                     </p>
+                                                    <div className="mt-1 flex items-center gap-2">
+                                                        <a
+                                                            href={entry.facebook_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                                                        >
+                                                            Facebook Profile
+                                                            <ExternalLink className="h-3 w-3" />
+                                                        </a>
+                                                        {entry.screenshot_url && (
+                                                            <>
+                                                                <span className="text-muted-foreground">•</span>
+                                                                <a
+                                                                    href={entry.screenshot_url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="flex items-center gap-1 text-xs text-green-600 hover:underline"
+                                                                >
+                                                                    <ImageIcon className="h-3 w-3" />
+                                                                    View Screenshot
+                                                                </a>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">

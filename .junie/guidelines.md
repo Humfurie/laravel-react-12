@@ -11,11 +11,12 @@ should be followed closely to enhance the user's satisfaction building Laravel a
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an
 expert with them all. Ensure you abide by these specific packages & versions.
 
-- php - 8.4.12
+- php - 8.4.16
 - inertiajs/inertia-laravel (INERTIA) - v2
 - laravel/framework (LARAVEL) - v12
 - laravel/mcp (MCP) - v0
 - laravel/prompts (PROMPTS) - v0
+- laravel/socialite (SOCIALITE) - v5
 - tightenco/ziggy (ZIGGY) - v2
 - laravel/pint (PINT) - v1
 - laravel/sail (SAIL) - v1
@@ -40,7 +41,6 @@ expert with them all. Ensure you abide by these specific packages & versions.
   tests are more important.
 
 ## Application Structure & Architecture
-
 - Stick to existing directory structure - don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
 
@@ -50,17 +50,14 @@ expert with them all. Ensure you abide by these specific packages & versions.
   `npm run dev`, or `composer run dev`. Ask them.
 
 ## Replies
-
 - Be concise in your explanations - focus on what's important rather than explaining obvious details.
 
 ## Documentation Files
-
 - You must only create documentation files if explicitly requested by the user.
 
 === boost rules ===
 
 ## Laravel Boost
-
 - Laravel Boost is an MCP server that comes with powerful tools designed specifically for this application. Use them.
 
 ## Artisan
@@ -74,12 +71,10 @@ expert with them all. Ensure you abide by these specific packages & versions.
   correct scheme, domain / IP, and port.
 
 ## Tinker / Debugging
-
 - You should use the `tinker` tool when you need to execute PHP to debug code or query Eloquent models directly.
 - Use the `database-query` tool when you only need to read from the database.
 
 ## Reading Browser Logs With the `browser-logs` Tool
-
 - You can read browser logs, errors, and exceptions using the `browser-logs` tool from Boost.
 - Only recent browser logs will be useful - ignore old logs.
 
@@ -99,7 +94,6 @@ expert with them all. Ensure you abide by these specific packages & versions.
   not `filament 4 test resource table`.
 
 ### Available Search Syntax
-
 - You can and should pass multiple queries at once. The most relevant results will be returned first.
 
 1. Simple Word Searches with auto-stemming - query=authentication - finds 'authenticate' and 'auth'
@@ -115,13 +109,11 @@ expert with them all. Ensure you abide by these specific packages & versions.
 - Always use curly braces for control structures, even if it has one line.
 
 ### Constructors
-
 - Use PHP 8 constructor property promotion in `__construct()`.
     - <code-snippet>public function __construct(public GitHub $github) { }</code-snippet>
 - Do not allow empty `__construct()` methods with zero parameters.
 
 ### Type Declarations
-
 - Always use explicit return type declarations for methods and functions.
 - Use appropriate PHP type hints for method parameters.
 
@@ -138,11 +130,9 @@ protected function isAccessible(User $user, ?string $path = null): bool
   going on.
 
 ## PHPDoc Blocks
-
 - Add useful array shape type definitions for arrays when appropriate.
 
 ## Enums
-
 - Typically, keys in an Enum should be TitleCase. For example: `FavoritePerson`, `BestLake`, `Monthly`.
 
 === inertia-laravel/core rules ===
@@ -172,7 +162,6 @@ Route::get('/users', function () {
   taking the correct approach.
 
 ### Inertia v2 New Features
-
 - Polling
 - Prefetching
 - Deferred props
@@ -180,7 +169,6 @@ Route::get('/users', function () {
 - Lazy loading data on scroll
 
 ### Deferred Props & Empty States
-
 - When using deferred props on the frontend, you should add a nice empty state with pulsing / animated skeleton.
 
 ### Inertia Form General Guidance
@@ -229,15 +217,12 @@ Route::get('/users', function () {
 - Check sibling Form Requests to see if the application uses array or string based validation rules.
 
 ### Queues
-
 - Use queued jobs for time-consuming operations with the `ShouldQueue` interface.
 
 ### Authentication & Authorization
-
 - Use Laravel's built-in authentication and authorization features (gates, policies, Sanctum, etc.).
 
 ### URL Generation
-
 - When generating links to other pages, prefer named routes and the `route()` function.
 
 ### Configuration
@@ -267,7 +252,6 @@ Route::get('/users', function () {
 - Since Laravel 11, Laravel has a new streamlined file structure which this project uses.
 
 ### Laravel 12 Structure
-
 - No middleware files in `app/Http/Middleware/`.
 - `bootstrap/app.php` is the file to register middleware, exceptions, and routing files.
 - `bootstrap/providers.php` contains application specific service providers.
@@ -299,11 +283,9 @@ Route::get('/users', function () {
 ## Pest
 
 ### Testing
-
 - If you need to verify a feature is working, write or update a Unit / Feature test.
 
 ### Pest Tests
-
 - All tests must be written using Pest. Use `php artisan make:test --pest <name>`.
 - You must not remove any tests or test files from the tests directory without approval. These are not temporary or
   helper files - these are core to the application.
@@ -317,7 +299,6 @@ Route::get('/users', function () {
   </code-snippet>
 
 ### Running Tests
-
 - Run the minimal number of tests using an appropriate filter before finalizing code edits.
 - To run all tests: `php artisan test`.
 - To run all tests in a file: `php artisan test tests/Feature/ExampleTest.php`.
@@ -339,7 +320,6 @@ Route::get('/users', function () {
   </code-snippet>
 
 ### Mocking
-
 - Mocking can be very helpful when appropriate.
 - When mocking, you can use the `Pest\Laravel\mock` Pest function, but always import it via
   `use function Pest\Laravel\mock;` before using it. Alternatively, you can use `$this->mock()` if existing tests do.
@@ -407,7 +387,6 @@ defaults
         </>
     )}
     </Form>
-
 )
 
 </code-snippet>
@@ -425,7 +404,6 @@ defaults
 - You can use the `search-docs` tool to get exact examples from the official documentation when needed.
 
 ### Spacing
-
 - When listing items, use gap utilities for spacing, don't use margins.
 
     <code-snippet name="Valid Flex Gap Spacing Example" lang="html">
@@ -458,7 +436,6 @@ defaults
 </code-snippet>
 
 ### Replaced Utilities
-
 - Tailwind v4 removed deprecated utilities. Do not use the deprecated option - use the replacement.
 - Opacity values are still numeric.
 
