@@ -1,5 +1,4 @@
 import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 import InputError from '@/components/input-error';
@@ -22,7 +21,7 @@ interface LoginProps {
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<LoginForm>>({
+    const { data, setData, post, processing, errors } = useForm<LoginForm>({
         email: '',
         password: '',
         remember: false,
@@ -30,9 +29,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
+        post(route('login'));
     };
 
     return (
@@ -82,26 +79,24 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     <div className="flex items-center space-x-3">
                         <Checkbox
                             id="remember"
-                            name="remember"
                             checked={data.remember}
-                            onClick={() => setData('remember', !data.remember)}
+                            onCheckedChange={(checked) => setData('remember', checked as boolean)}
                             tabIndex={3}
                         />
                         <Label htmlFor="remember">Remember me</Label>
                     </div>
 
                     <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Log in
+                        {processing ? 'Logging in...' : 'Log in'}
                     </Button>
                 </div>
 
-                <div className="text-muted-foreground text-center text-sm">
-                    Don't have an account?{' '}
-                    <TextLink href={route('register')} tabIndex={5}>
-                        Sign up
-                    </TextLink>
-                </div>
+                {/*<div className="text-muted-foreground text-center text-sm">*/}
+                {/*    Don't have an account?{' '}*/}
+                {/*    <TextLink href={route('register')} tabIndex={5}>*/}
+                {/*        Sign up*/}
+                {/*    </TextLink>*/}
+                {/*</div>*/}
             </form>
 
             {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}

@@ -1,0 +1,152 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/production/Dockerfile
+    image: humfurie-app:staging
+    restart: unless-stopped
+    ports:
+      - '${APP_PORT:-9500}:80'
+    volumes:
+      - laravel-storage:/var/www/html/storage
+      - ./.docker/nginx.prod.conf:/etc/nginx/sites-available/default:ro
+      - ./.docker/supervisord.prod.conf:/etc/supervisor/conf.d/supervisord.conf:ro
+    env_file:
+      - .env.testing
+    environment:
+      - APP_ENV=staging
+      - APP_DEBUG=true
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+    networks:
+      - staging
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    ports:
+      - '${DB_PORT:-9432}:5432'
+    environment:
+      POSTGRES_DB: '${DB_DATABASE:-laravel_staging}'
+      POSTGRES_USER: '${DB_USERNAME:-postgres}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+      POSTGRES_INITDB_ARGS: '-E UTF8 --locale=C'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - staging
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - staging
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 256M
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: minio server /data/minio --console-address ":9001"
+    ports:
+      - '${MINIO_PORT:-9100}:9000'
+      - '${MINIO_CONSOLE_PORT:-9101}:9001'
+    environment:
+      MINIO_ROOT_USER: '${MINIO_ROOT_USER:-minioadmin}'
+      MINIO_ROOT_PASSWORD: '${MINIO_ROOT_PASSWORD:-minioadmin}'
+    volumes:
+      - minio-data:/data/minio
+    networks:
+      - staging
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  ssr:
+    image: humfurie-app:staging
+    restart: unless-stopped
+    command: node /var/www/html/bootstrap/ssr/ssr.js
+    working_dir: /var/www/html
+    env_file:
+      - .env.testing
+    environment:
+      - APP_ENV=staging
+      - NODE_ENV=production
+      - PORT=13714
+    networks:
+      - staging
+    depends_on:
+      app:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD-SHELL", "node -e \"require('http').get('http://localhost:13714', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\"" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+networks:
+  staging:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
+  laravel-storage:
+    driver: local
+  minio-data:
+    driver: local

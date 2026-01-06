@@ -1,60 +1,29 @@
-version: '3.8'
-
 services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: laravel-app
-    working_dir: /var/www/html
+      dockerfile: ci-cd.Dockerfile
+    container_name: laravel_app_ci
     volumes:
       - .:/var/www/html
-      - ./storage/app/public:/var/www/html/public/storage
-    env_file:
-      - .env
-    depends_on:
-      - mysql
-      - redis
-    networks:
-      - laravel-network
-
-  mysql:
-    image: mysql:8.0
-    container_name: laravel-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
-      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
-      MYSQL_USER: ${DB_USERNAME:-laravel}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      - APP_ENV=testing
+    depends_on:
+      pgsql:
+        condition: service_healthy
+
+  pgsql:
+    image: postgres:17
+    container_name: laravel_pgsql_ci
+    environment:
+      POSTGRES_DB: testing
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     ports:
-      - "${DB_PORT:-3306}:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - laravel-network
-    command: --default-authentication-plugin=mysql_native_password
-
-  redis:
-    image: redis:7-alpine
-    container_name: laravel-redis
-    ports:
-      - "6379:6379"
-    networks:
-      - laravel-network
-
-  node:
-    image: node:18-alpine
-    container_name: laravel-node
-    working_dir: /var/www/html
-    volumes:
-      - .:/var/www/html
-    command: sh -c "npm install && npm run build"
-    networks:
-      - laravel-network
-
-volumes:
-  mysql_data:
-
-networks:
-  laravel-network:
-    driver: bridge
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 10s

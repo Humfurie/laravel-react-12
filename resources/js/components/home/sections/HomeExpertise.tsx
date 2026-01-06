@@ -1,8 +1,7 @@
 import CategoryDropdown from '@/components/global/CategoryDropdown';
 import SectionTitle from '@/components/global/SectionTitle';
-import { motion } from "framer-motion";
-import React, { useState } from 'react';
-
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 
 interface CategoryData {
     name: string;
@@ -10,9 +9,17 @@ interface CategoryData {
 }
 
 interface ExpertiseData {
+    id: number;
     name: string;
-    logo: string;
-    categorySlug: string; // reference by slug
+    image: string;
+    image_url: string;
+    category_slug: string;
+    order: number;
+    is_active: boolean;
+}
+
+interface HomeExpertiseProps {
+    expertises?: ExpertiseData[];
 }
 
 // Separate category data
@@ -20,97 +27,6 @@ const categoriesData: CategoryData[] = [
     { name: 'Backend', slug: 'be' },
     { name: 'Frontend', slug: 'fe' },
     { name: 'Tools & DevOps', slug: 'td' },
-
-
-];
-
-// Your expertise items
-const expertiseData: ExpertiseData[] = [
-    {
-        name: 'Laravel',
-        logo: '/images/techstack/laravel.webp',
-        categorySlug: 'be',
-    },
-    {
-        name: 'Docker',
-        logo: '/images/techstack/docker.webp',
-        categorySlug: 'td',
-    },
-    {
-        name: 'Ngnix',
-        logo: '/images/techstack/ngnix.webp',
-        categorySlug: 'td',
-    },
-    {
-        name: 'API',
-        logo: '/images/techstack/api.webp',
-        categorySlug: 'td',
-    },
-    {
-        name: 'React JS',
-        logo: '/images/techstack/react.webp',
-        categorySlug: 'fe',
-    },
-    {
-        name: 'Tailwind CSS',
-        logo: '/images/techstack/tailwind-css.webp',
-        categorySlug: 'fe',
-    },
-    {
-        name: 'Next.js',
-        logo: '/images/techstack/next-js.webp',
-        categorySlug: 'fe',
-    },
-    {
-        name: 'GitHub',
-        logo: '/images/techstack/github.webp',
-        categorySlug: 'td',
-    },
-    {
-        name: 'Postman',
-        logo: '/images/techstack/postman.webp',
-        categorySlug: 'td',
-    },
-    {
-        name: 'Xampp',
-        logo: '/images/techstack/xampp.webp',
-        categorySlug: 'td',
-    },
-    {
-        name: 'Git',
-        logo: '/images/techstack/git.webp',
-        categorySlug: 'td',
-    },
-    {
-        name: 'Adonis JS',
-        logo: '/images/techstack/adonis.webp',
-        categorySlug: 'be',
-    },
-    {
-        name: 'PHP',
-        logo: '/images/techstack/php.webp',
-        categorySlug: 'be',
-    },
-    {
-        name: 'Filament',
-        logo: '/images/techstack/filament.webp',
-        categorySlug: 'be',
-    },
-    {
-        name: 'MySQL',
-        logo: '/images/techstack/mysql.webp',
-        categorySlug: 'td',
-    },
-    {
-        name: 'JavaScript',
-        logo: '/images/techstack/javascript.webp',
-        categorySlug: 'fe',
-    },
-    {
-        name: 'HTML',
-        logo: '/images/techstack/html.webp',
-        categorySlug: 'fe',
-    },
 ];
 
 const containerVariants = {
@@ -129,32 +45,33 @@ const itemVariants = {
         scale: 1,
         transition: {
             duration: 0.3,
-            ease: "easeOut" as const,
+            ease: 'easeOut' as const,
         },
     },
 };
 
-
-const HomeExpertise: React.FC = () => {
+const HomeExpertise: React.FC<HomeExpertiseProps> = ({ expertises = [] }) => {
     const [activeCategory, setActiveCategory] = useState<string>('all');
+    const [key, setKey] = useState(0);
 
-    const categories = ['all', ...categoriesData.map(cat => cat.slug)];
+    const categories = ['all', ...categoriesData.map((cat) => cat.slug)];
 
-    const filteredData =
-        activeCategory === 'all'
-            ? expertiseData
-            : expertiseData.filter(item => item.categorySlug === activeCategory);
+    const filteredData = activeCategory === 'all' ? expertises : expertises.filter((item) => item.category_slug === activeCategory);
 
-    const getCategoryName = (slug: string) =>
-        categoriesData.find(cat => cat.slug === slug)?.name ?? slug;
+    const getCategoryName = (slug: string) => categoriesData.find((cat) => cat.slug === slug)?.name ?? slug;
+
+    // Reset animation when category changes
+    useEffect(() => {
+        setKey((prevKey) => prevKey + 1);
+    }, [activeCategory]);
 
     return (
-        <section className="home-expertise py-[40px] md:py-[80px] bg-brand-white">
+        <section className="home-expertise bg-brand-white py-[40px] md:py-[80px] dark:bg-gray-900">
             <div className="primary-container">
                 <SectionTitle title="Expertise" />
 
                 {/* selection */}
-                <div className='pb-[16px] md:pb-[24px]'>
+                <div className="pb-[16px] md:pb-[24px]">
                     <CategoryDropdown
                         categories={categories}
                         getCategoryName={getCategoryName}
@@ -163,28 +80,34 @@ const HomeExpertise: React.FC = () => {
                     />
                 </div>
 
-                <motion.div className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-6 justify-center`}
-                    variants={containerVariants}
-                    initial="hidden"
-                    whileInView="show"
-                    viewport={{ once: true, amount: 0.3 }}
-                >
-                    {filteredData.map((item, index) => (
-                        <motion.div
-                            key={index}
-                            className="flex flex-col items-center text-center"
-                            variants={itemVariants}
-                        >
-                            <img
-                                src={item.logo}
-                                alt={item.name}
-                                className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[100px] md:h-[100px] object-contain mb-2 p-2 bg-brand-white hs-shadow rounded-[18px]"
-                            />
-                        </motion.div>
-                    ))}
-                </motion.div>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={key}
+                        className={`grid grid-cols-3 justify-center gap-3 sm:grid-cols-4 sm:gap-4 md:grid-cols-5 md:gap-6 lg:grid-cols-6`}
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="show"
+                        exit="hidden"
+                    >
+                        {filteredData.map((item) => (
+                            <motion.div
+                                key={`${activeCategory}-${item.id}`}
+                                className="flex flex-col items-center text-center"
+                                variants={itemVariants}
+                            >
+                                <img
+                                    src={item.image_url}
+                                    alt={item.name}
+                                    className="bg-brand-white hs-shadow mb-2 h-[50px] w-[50px] rounded-[14px] object-contain p-1.5 sm:h-[80px] sm:w-[80px] sm:rounded-[18px] sm:p-2 md:h-[100px] md:w-[100px] dark:bg-gray-800"
+                                    width={100}
+                                    height={100}
+                                    loading="lazy"
+                                />
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </AnimatePresence>
             </div>
-
         </section>
     );
 };

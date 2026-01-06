@@ -60,6 +60,20 @@ return [
             'report' => false,
         ],
 
+        'minio' => [
+            'driver' => 's3',
+            'key' => env('MINIO_ACCESS_KEY', env('MINIO_ROOT_USER', 'sail')),
+            'secret' => env('MINIO_SECRET_KEY', env('MINIO_ROOT_PASSWORD', 'password')),
+            'region' => env('MINIO_REGION', 'us-east-1'),
+            'bucket' => env('MINIO_BUCKET', 'laravel-uploads'),
+            'url' => env('MINIO_URL', 'http://localhost:9200'),
+            'endpoint' => env('MINIO_ENDPOINT', 'http://minio:9000'),
+            'use_path_style_endpoint' => true,
+            'throw' => false,
+            'report' => false,
+            'visibility' => 'public',
+        ],
+
     ],
 
     /*

@@ -1,7 +1,7 @@
 services:
     laravel.test:
         build:
-            context: ./vendor/laravel/sail/runtimes/8.4
+            context: ./docker/8.4
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
@@ -17,67 +17,51 @@ services:
             XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
+            PHP_IDE_CONFIG: "serverName=laravel-react-12"
         volumes:
             - '.:/var/www/html'
+            - './.docker/xdebug.ini:/etc/php/8.4/cli/conf.d/99-xdebug.ini'
         networks:
             - sail
+            - proxy
         depends_on:
-#            - pgsql
-            - mysql
-#    pgsql:
-#        image: 'postgres:17'
-#        ports:
-#            - '${FORWARD_DB_PORT:-5432}:5432'
-#        environment:
-#            PGPASSWORD: '${DB_PASSWORD:-secret}'
-#            POSTGRES_DB: '${DB_DATABASE}'
-#            POSTGRES_USER: '${DB_USERNAME}'
-#            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
-#        volumes:
-#            - 'sail-pgsql:/var/lib/postgresql/data'
-#            - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
-#        networks:
-#            - sail
-#        healthcheck:
-#            test:
-#                - CMD
-#                - pg_isready
-#                - '-q'
-#                - '-d'
-#                - '${DB_DATABASE}'
-#                - '-U'
-#                - '${DB_USERNAME}'
-#            retries: 3
-#            timeout: 5s
-    mysql:
-        image: 'mysql/mysql-server:8.0'
+            - pgsql
+        external_links:
+            - minio-standalone:minio-standalone
+
+    pgsql:
+        image: 'postgres:17'
         ports:
-            - '${FORWARD_DB_PORT:-3306}:3306'
+            - '${FORWARD_DB_PORT:-5432}:5432'
         environment:
-            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ROOT_HOST: '%'
-            MYSQL_DATABASE: '${DB_DATABASE}'
-            MYSQL_USER: '${DB_USERNAME}'
-            MYSQL_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+            PGPASSWORD: '${DB_PASSWORD:-secret}'
+            POSTGRES_DB: '${DB_DATABASE}'
+            POSTGRES_USER: '${DB_USERNAME}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
         volumes:
-            - 'sail-mysql:/var/lib/mysql'
-            - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+            - 'sail-pgsql:/var/lib/postgresql/data'
+            - './docker/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
         networks:
             - sail
         healthcheck:
             test:
                 - CMD
-                - mysqladmin
-                - ping
-                - '-p${DB_PASSWORD}'
+                - pg_isready
+                - '-q'
+                - '-d'
+                - '${DB_DATABASE}'
+                - '-U'
+                - '${DB_USERNAME}'
             retries: 3
             timeout: 5s
+
 networks:
     sail:
         driver: bridge
+    proxy:
+        external: true
 volumes:
-    # sail-pgsql:
-    #     driver: local
-    sail-mysql:
+    sail-pgsql:
         driver: local
+
+

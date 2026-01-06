@@ -1,0 +1,142 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/production/Dockerfile
+    image: humfurie-app:latest
+    restart: unless-stopped
+    # Production: No volume mounts - use built image only
+    volumes:
+      - laravel-storage:/var/www/html/storage
+      - ./.docker/nginx.prod.conf:/etc/nginx/sites-available/default:ro
+      - ./.docker/supervisord.prod.conf:/etc/supervisor/conf.d/supervisord.conf:ro
+    env_file:
+      - .env.production
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_CONNECTION=pgsql
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - REDIS_HOST=host.docker.internal
+      - REDIS_PORT=6380
+      - QUEUE_CONNECTION=redis
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+    networks:
+      - laravel
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.services.humfurie.loadbalancer.server.port=80"
+      - "traefik.http.routers.humfurie.rule=Host(`humfurie.org`)"
+      - "traefik.http.routers.humfurie.entrypoints=websecure"
+      - "traefik.http.routers.humfurie.tls=true"
+      - "traefik.http.routers.humfurie.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.humfurie-www.rule=Host(`www.humfurie.org`)"
+      - "traefik.http.routers.humfurie-www.entrypoints=websecure"
+      - "traefik.http.routers.humfurie-www.tls=true"
+      - "traefik.http.routers.humfurie-www.tls.certresolver=letsencrypt"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  postgres:
+    image: postgres:17-alpine  # Alpine = 50% smaller
+    restart: unless-stopped
+    # Keep port exposed for migrations/debugging
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    environment:
+      POSTGRES_DB: '${DB_DATABASE}'
+      POSTGRES_USER: '${DB_USERNAME}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+      POSTGRES_INITDB_ARGS: '-E UTF8 --locale=C'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - laravel
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  redis:
+    image: redis:7-alpine  # Specific version + Alpine
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - '6380:6379'
+    networks:
+      - laravel
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 256M
+
+  ssr:
+    image: humfurie-app:latest  # Reuse the same built image!
+    restart: unless-stopped
+    command: node /var/www/html/bootstrap/ssr/ssr.js
+    working_dir: /var/www/html
+    env_file:
+      - .env.production
+    environment:
+      - APP_ENV=production
+      - NODE_ENV=production
+      - PORT=13714
+    networks:
+      - laravel
+    depends_on:
+      app:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD-SHELL", "node -e \"require('http').get('http://localhost:13714', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\"" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+networks:
+  laravel:
+    driver: bridge
+  proxy:
+    external: true
+    name: proxy
+
+volumes:
+  postgres-data:
+    driver: local
+  laravel-storage:
+    driver: local

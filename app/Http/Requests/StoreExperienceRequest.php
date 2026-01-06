@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreExperienceRequest extends FormRequest
@@ -11,18 +12,39 @@ class StoreExperienceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true; // Authorization is handled by middleware and controller
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            //
+            'position' => ['required', 'string', 'max:255'],
+            'company' => ['required', 'string', 'max:255'],
+            'location' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'array', 'min:1'],
+            'description.*' => ['required', 'string'],
+            'start_month' => ['required', 'integer', 'min:0', 'max:11'],
+            'start_year' => ['required', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
+            'end_month' => ['nullable', 'integer', 'min:0', 'max:11'],
+            'end_year' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
+            'is_current_position' => ['boolean'],
+            'display_order' => ['integer', 'min:0'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg,webp', 'max:2048'],
+        ];
+    }
+
+    /**
+     * Get custom attribute names.
+     */
+    public function attributes(): array
+    {
+        return [
+            'description.*' => 'description point',
         ];
     }
 }
