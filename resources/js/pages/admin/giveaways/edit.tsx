@@ -1,11 +1,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Head, router, useForm } from '@inertiajs/react';
-import { CheckCircle2, Image as ImageIcon, Search, Trash2, Trophy, Upload, Users, XCircle } from 'lucide-react';
+import { CheckCircle2, ExternalLink, Image as ImageIcon, Search, Trash2, Trophy, Upload, Users, XCircle } from 'lucide-react';
 import { FormEventHandler, useMemo, useRef, useState } from 'react';
 
 interface Image {
@@ -30,6 +31,7 @@ interface Entry {
     facebook_url: string;
     status: string;
     created_at: string;
+    screenshot_url: string | null;
 }
 
 interface Giveaway {
@@ -83,6 +85,8 @@ export default function Edit({ giveaway }: Props) {
         number_of_winners: giveaway.number_of_winners || 1,
         status: giveaway.status,
     });
+
+    const [hasEndDate, setHasEndDate] = useState(!!giveaway.end_date);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const backgroundInputRef = useRef<HTMLInputElement>(null);
@@ -284,16 +288,37 @@ export default function Edit({ giveaway }: Props) {
                                     </div>
 
                                     <div>
-                                        <Label htmlFor="end_date">End Date & Time *</Label>
+                                        <div className="mb-2 flex items-center space-x-3">
+                                            <Checkbox
+                                                id="has_end_date"
+                                                checked={hasEndDate}
+                                                onCheckedChange={(checked: boolean) => {
+                                                    const isChecked = checked as boolean;
+                                                    setHasEndDate(isChecked);
+                                                    if (!isChecked) {
+                                                        setData('end_date', '');
+                                                    }
+                                                }}
+                                            />
+                                            <Label htmlFor="has_end_date" className="cursor-pointer">
+                                                Set end date (uncheck for unlimited duration)
+                                            </Label>
+                                        </div>
+                                        <Label htmlFor="end_date">End Date & Time</Label>
                                         <Input
                                             id="end_date"
                                             type="datetime-local"
-                                            value={data.end_date}
+                                            value={data.end_date || ''}
                                             onChange={(e) => setData('end_date', e.target.value)}
                                             min={data.start_date}
                                             className="mt-1"
+                                            disabled={!hasEndDate}
                                         />
-                                        <p className="text-muted-foreground mt-1 text-xs">Must be after the start date</p>
+                                        <p className="text-muted-foreground mt-1 text-xs">
+                                            {hasEndDate
+                                                ? 'Must be after the start date'
+                                                : 'Unlimited duration - giveaway ends only when winner is picked'}
+                                        </p>
                                         {errors.end_date && <p className="mt-1 text-sm text-red-600">{errors.end_date}</p>}
                                     </div>
                                 </div>
@@ -463,6 +488,7 @@ export default function Edit({ giveaway }: Props) {
                                                     <th className="px-4 py-2 text-left text-sm font-medium">Name</th>
                                                     <th className="px-4 py-2 text-left text-sm font-medium">Phone</th>
                                                     <th className="px-4 py-2 text-left text-sm font-medium">Facebook</th>
+                                                    <th className="px-4 py-2 text-left text-sm font-medium">Screenshot</th>
                                                     <th className="px-4 py-2 text-left text-sm font-medium">Date</th>
                                                 </tr>
                                             </thead>
@@ -481,10 +507,26 @@ export default function Edit({ giveaway }: Props) {
                                                                 href={entry.facebook_url}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="text-blue-600 hover:underline"
+                                                                className="inline-flex items-center gap-1 text-blue-600 hover:underline"
                                                             >
                                                                 View Profile
+                                                                <ExternalLink className="h-3 w-3" />
                                                             </a>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm">
+                                                            {entry.screenshot_url ? (
+                                                                <a
+                                                                    href={entry.screenshot_url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="inline-flex items-center gap-1 text-green-600 hover:underline"
+                                                                >
+                                                                    <ImageIcon className="h-4 w-4" />
+                                                                    View
+                                                                </a>
+                                                            ) : (
+                                                                <span className="text-muted-foreground text-xs">No screenshot</span>
+                                                            )}
                                                         </td>
                                                         <td className="text-muted-foreground px-4 py-3 text-sm">
                                                             {new Date(entry.created_at).toLocaleDateString()}

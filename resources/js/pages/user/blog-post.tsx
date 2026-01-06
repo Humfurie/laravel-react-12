@@ -8,6 +8,15 @@ import { ArrowLeft, Calendar, Clock, Eye, Share2, Sparkles } from 'lucide-react'
 import AdBanner from '@/components/ads/AdBanner';
 import StickyAd from '@/components/ads/StickyAd';
 
+// TipTap Node Styles for proper blog content formatting
+import '@/components/tiptap-node/blockquote-node/blockquote-node.scss';
+import '@/components/tiptap-node/code-block-node/code-block-node.scss';
+import '@/components/tiptap-node/heading-node/heading-node.scss';
+import '@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss';
+import '@/components/tiptap-node/image-node/image-node.scss';
+import '@/components/tiptap-node/list-node/list-node.scss';
+import '@/components/tiptap-node/paragraph-node/paragraph-node.scss';
+
 interface Blog {
     id: number;
     title: string;
@@ -223,7 +232,7 @@ export default function BlogPost({ blog }: Props) {
                                     {/* Article Body */}
                                     <div className="rounded-3xl bg-white p-8 shadow-sm md:p-12">
                                         <div
-                                            className="prose prose-lg prose-gray prose-headings:font-serif prose-headings:font-bold prose-headings:tracking-tight prose-h2:text-3xl prose-h3:text-2xl prose-p:leading-relaxed prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-2xl prose-blockquote:border-l-orange-500 prose-blockquote:bg-orange-50 prose-blockquote:py-4 prose-blockquote:pl-6 prose-blockquote:not-italic max-w-none"
+                                            className="tiptap ProseMirror prose prose-lg prose-gray prose-headings:font-serif prose-headings:font-bold prose-headings:tracking-tight prose-h2:text-3xl prose-h3:text-2xl prose-p:leading-relaxed prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-2xl max-w-none [&_p:empty]:hidden"
                                             dangerouslySetInnerHTML={{ __html: blog.content }}
                                         />
                                     </div>

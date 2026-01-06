@@ -77,9 +77,12 @@ class GiveawayController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'end_date' => 'nullable|date|after:start_date',
             'number_of_winners' => 'nullable|integer|min:1|max:100',
             'status' => 'required|in:draft,active,ended',
+            'images' => 'nullable|array|max:20',
+            'images.*' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:10240',
+            'background_image' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:10240',
         ]);
 
         // Set default number of winners if not provided
@@ -88,7 +91,33 @@ class GiveawayController extends Controller
         }
 
         try {
+            // Handle background image upload
+            if ($request->hasFile('background_image')) {
+                $backgroundImage = $request->file('background_image');
+                $filename = 'bg_' . time() . '_' . Str::random(10) . '.' . $backgroundImage->getClientOriginalExtension();
+                $path = $backgroundImage->storeAs('giveaways/backgrounds', $filename, config('filesystems.default'));
+                $validated['background_image'] = $path;
+            }
+
             $giveaway = Giveaway::create($validated);
+
+            // Handle prize images upload
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $index => $image) {
+                    $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+                    $path = $image->storeAs('giveaways', $filename, config('filesystems.default'));
+
+                    $giveaway->images()->create([
+                        'name' => $image->getClientOriginalName(),
+                        'path' => $path,
+                        'filename' => $filename,
+                        'mime_type' => $image->getMimeType(),
+                        'size' => $image->getSize(),
+                        'order' => $index,
+                        'is_primary' => $index === 0,
+                    ]);
+                }
+            }
 
             return redirect()->route('admin.giveaways.edit', $giveaway)
                 ->with('success', 'Giveaway created successfully.');
@@ -116,9 +145,18 @@ class GiveawayController extends Controller
      */
     public function edit(Giveaway $giveaway)
     {
-        $giveaway->loadCount(['entries', 'winners'])->load(['images' => function ($query) {
-            $query->ordered();
-        }, 'entries', 'winner', 'winners']);
+        // Use proper eager loading to avoid N+1 queries
+        $giveaway->loadCount(['entries', 'winners'])->load([
+            'images' => function ($query) {
+                $query->ordered();
+            },
+            'entries' => function ($query) {
+                // Only load the fields we need for the edit page
+                $query->select('id', 'giveaway_id', 'name', 'phone', 'facebook_url', 'screenshot_url', 'created_at', 'status')
+                    ->orderBy('created_at', 'desc');
+            },
+            'winners',
+        ]);
 
         return Inertia::render('admin/giveaways/edit', [
             'giveaway' => [
@@ -175,6 +213,7 @@ class GiveawayController extends Controller
                         'facebook_url' => $entry->facebook_url,
                         'status' => $entry->status,
                         'created_at' => $entry->created_at,
+                        'screenshot_url' => ($entry->screenshot_path && $entry->screenshot_path !== '0') ? Storage::disk(config('filesystems.default'))->url($entry->screenshot_path) : null,
                     ];
                 }),
             ],
@@ -250,6 +289,7 @@ class GiveawayController extends Controller
             return back()->with('success', 'Image uploaded successfully.');
         } catch (Exception $e) {
             DB::rollBack();
+
             return back()->with('error', 'Failed to upload image: ' . $e->getMessage());
         }
     }
@@ -275,9 +315,11 @@ class GiveawayController extends Controller
             }
 
             DB::commit();
+
             return back()->with('success', 'Images reordered successfully.');
         } catch (Exception $e) {
             DB::rollBack();
+
             return back()->with('error', 'Failed to reorder images.');
         }
     }
@@ -291,7 +333,7 @@ class GiveawayController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'end_date' => 'nullable|date|after:start_date',
             'number_of_winners' => 'nullable|integer|min:1|max:100',
             'status' => 'required|in:draft,active,ended',
         ]);
@@ -416,7 +458,14 @@ class GiveawayController extends Controller
      */
     public function showWinnerSelection(Giveaway $giveaway)
     {
-        $giveaway->load(['entries', 'winner', 'winners']);
+        // Load only the fields needed for winner selection
+        $giveaway->load([
+            'entries' => function ($query) {
+                $query->select('id', 'giveaway_id', 'name', 'status')
+                    ->whereNotIn('status', [GiveawayEntry::STATUS_REJECTED]);
+            },
+            'winners',
+        ]);
 
         return Inertia::render('admin/giveaways/winner-selection', [
             'giveaway' => [
@@ -450,6 +499,7 @@ class GiveawayController extends Controller
                         'facebook_url' => $entry->facebook_url,
                         'status' => $entry->status,
                         'entry_date' => $entry->entry_date,
+                        'screenshot_url' => ($entry->screenshot_path && $entry->screenshot_path !== '0') ? Storage::disk(config('filesystems.default'))->url($entry->screenshot_path) : null,
                     ];
                 }),
             ],
