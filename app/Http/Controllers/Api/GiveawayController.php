@@ -8,6 +8,7 @@ use App\Models\GiveawayEntry;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class GiveawayController extends Controller
@@ -183,7 +184,9 @@ class GiveawayController extends Controller
             $screenshot = $request->file('screenshot');
             $phoneHash = md5($normalizedPhone);
             $filename = "giveaway_{$giveaway->id}_{$phoneHash}." . $screenshot->getClientOriginalExtension();
-            $screenshotPath = $screenshot->storeAs('screenshots', $filename, 'minio');
+
+            // Use Storage facade to ensure compatibility with Storage::fake() in tests
+            $screenshotPath = Storage::disk('minio')->putFileAs('screenshots', $screenshot, $filename);
         }
 
         DB::beginTransaction();
