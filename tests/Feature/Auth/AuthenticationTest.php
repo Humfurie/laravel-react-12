@@ -1,8 +1,9 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 test('login screen can be rendered', function () {
     $response = $this->get('/login');
@@ -40,4 +41,19 @@ test('users can logout', function () {
 
     $this->assertGuest();
     $response->assertRedirect('/');
+});
+
+test('session persists after login', function () {
+    $user = User::factory()->create();
+
+    $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    // Make a subsequent request to dashboard
+    $response = $this->get(route('dashboard'));
+
+    $response->assertSuccessful();
+    $this->assertAuthenticated();
 });

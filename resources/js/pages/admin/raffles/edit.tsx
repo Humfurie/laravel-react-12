@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
+import { formatDatetimeForDisplay, formatForDatetimeLocal, formatForDisplay } from '@/lib/date-utils';
 import { Head, router, useForm } from '@inertiajs/react';
 import { AlertCircle, CheckCircle2, Image as ImageIcon, Search, Trash2, Trophy, Upload, Users, XCircle } from 'lucide-react';
 import { FormEventHandler, useMemo, useRef, useState } from 'react';
@@ -61,8 +62,8 @@ export default function Edit({ raffle }: Props) {
     const { data, setData, put, processing, errors } = useForm({
         title: raffle.title,
         description: raffle.description,
-        start_date: raffle.start_date ? raffle.start_date.slice(0, 16) : '',
-        end_date: raffle.end_date ? raffle.end_date.slice(0, 16) : '',
+        start_date: formatForDatetimeLocal(raffle.start_date),
+        end_date: formatForDatetimeLocal(raffle.end_date),
         status: raffle.status,
     });
 
@@ -369,7 +370,7 @@ export default function Edit({ raffle }: Props) {
                                                             </a>
                                                         </td>
                                                         <td className="text-muted-foreground px-4 py-3 text-sm">
-                                                            {new Date(entry.created_at).toLocaleDateString()}
+                                                            {formatForDisplay(entry.created_at)}
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -445,14 +446,7 @@ export default function Edit({ raffle }: Props) {
                                         <div className="rounded-md border border-green-200 bg-green-50 p-3">
                                             <p className="text-sm font-medium text-green-800">Prize Claimed Successfully</p>
                                             <p className="mt-1 text-xs text-green-600">
-                                                Claimed on{' '}
-                                                {new Date(raffle.prize_claimed_at!).toLocaleDateString('en-US', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                })}
+                                                Claimed on {formatDatetimeForDisplay(raffle.prize_claimed_at!)}
                                             </p>
                                         </div>
                                     </div>

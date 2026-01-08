@@ -15,16 +15,24 @@ class Project extends Model
 
     // Status Constants
     const STATUS_LIVE = 'live';
+
     const STATUS_ARCHIVED = 'archived';
+
     const STATUS_MAINTENANCE = 'maintenance';
+
     const STATUS_DEVELOPMENT = 'development';
 
     // Category Constants
     const CATEGORY_WEB_APP = 'web_app';
+
     const CATEGORY_MOBILE_APP = 'mobile_app';
+
     const CATEGORY_API = 'api';
+
     const CATEGORY_LIBRARY = 'library';
+
     const CATEGORY_CLI = 'cli';
+
     const CATEGORY_DESIGN = 'design';
 
     protected $fillable = [
@@ -102,6 +110,12 @@ class Project extends Model
 
         static::creating(function ($project) {
             if (empty($project->slug)) {
+                $project->slug = Str::slug($project->title);
+            }
+        });
+
+        static::updating(function ($project) {
+            if ($project->isDirty('title') && empty($project->slug)) {
                 $project->slug = Str::slug($project->title);
             }
         });
