@@ -1,0 +1,16 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/usr/bin/php8.4",
+            "args": ["/var/www/html/artisan", "boost:mcp"]
+        },
+        "playwright": {
+            "command": "npx",
+            "args": ["@playwright/mcp@latest"],
+            "env": {
+                "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH": "/usr/bin/chromium-browser",
+                "PLAYWRIGHT_BASE_URL": "http://localhost:80"
+            }
+        }
+    }
+}
