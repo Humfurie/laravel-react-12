@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense } from 'react';
 
 interface PriceChartProps {
     coinId?: string;
@@ -8,7 +8,7 @@ interface PriceChartProps {
     initialRange?: string;
 }
 
-type PriceChartComponent = React.ComponentType<PriceChartProps>;
+const PriceChart = lazy(() => import('@/components/price-chart'));
 
 function ChartSkeleton() {
     return (
@@ -16,29 +16,24 @@ function ChartSkeleton() {
             {/* Period selector skeleton */}
             <div className="flex justify-center gap-2">
                 {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="bg-brand-black/50 h-10 w-12 rounded-lg" />
+                    <div key={i} className="h-10 w-12 rounded-lg bg-gray-200 dark:bg-gray-700" />
                 ))}
             </div>
             {/* Chart area skeleton */}
-            <div className="bg-brand-black/30 h-64 rounded" />
+            <div className="h-64 rounded bg-gray-200 dark:bg-gray-700" />
         </div>
     );
 }
 
 export function LazyPriceChart(props: PriceChartProps) {
-    const [Component, setComponent] = useState<PriceChartComponent | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        import('@/components/price-chart').then((mod) => {
-            setComponent(() => mod.default);
-            setIsLoading(false);
-        });
-    }, []);
-
-    if (isLoading || !Component) {
+    // SSR safety check
+    if (typeof window === 'undefined') {
         return <ChartSkeleton />;
     }
 
-    return <Component {...props} />;
+    return (
+        <Suspense fallback={<ChartSkeleton />}>
+            <PriceChart {...props} />
+        </Suspense>
+    );
 }
