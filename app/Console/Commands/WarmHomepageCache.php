@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use RuntimeException;
 
 class WarmHomepageCache extends Command
 {
@@ -35,11 +36,11 @@ class WarmHomepageCache extends Command
         $force = $this->option('force');
 
         $caches = [
-            'homepage.blogs' => fn () => $this->warmBlogsCache(),
-            'homepage.experiences' => fn () => $this->warmExperiencesCache(),
-            'homepage.expertises' => fn () => $this->warmExpertisesCache(),
-            'homepage.projects' => fn () => $this->warmProjectsCache(),
-            'homepage.user_profile' => fn () => $this->warmUserProfileCache(),
+            config('cache-ttl.keys.homepage_blogs') => fn() => $this->warmBlogsCache(),
+            config('cache-ttl.keys.homepage_experiences') => fn() => $this->warmExperiencesCache(),
+            config('cache-ttl.keys.homepage_expertises') => fn() => $this->warmExpertisesCache(),
+            config('cache-ttl.keys.homepage_projects') => fn() => $this->warmProjectsCache(),
+            config('cache-ttl.keys.homepage_user_profile') => fn() => $this->warmUserProfileCache(),
         ];
 
         foreach ($caches as $key => $warmer) {
@@ -61,66 +62,89 @@ class WarmHomepageCache extends Command
 
     private function warmBlogsCache(): void
     {
-        Cache::forget('homepage.blogs');
-        (new BlogController)->getPrimaryAndLatest();
+        $data = app(BlogController::class)->getPrimaryAndLatest();
+
+        Cache::put(
+            config('cache-ttl.keys.homepage_blogs'),
+            $data,
+            config('cache-ttl.homepage.blogs')
+        );
     }
 
     private function warmExperiencesCache(): void
     {
-        Cache::forget('homepage.experiences');
-        Cache::remember('homepage.experiences', 3600, function () {
-            return Experience::with('image')
-                ->where('user_id', 1)
-                ->ordered()
-                ->get();
-        });
+        $data = Experience::with('image')
+            ->where('user_id', config('app.admin_user_id'))
+            ->ordered()
+            ->get();
+
+        Cache::put(
+            config('cache-ttl.keys.homepage_experiences'),
+            $data,
+            config('cache-ttl.homepage.experiences')
+        );
     }
 
     private function warmExpertisesCache(): void
     {
-        Cache::forget('homepage.expertises');
-        Cache::remember('homepage.expertises', 3600, function () {
-            return Expertise::active()
-                ->ordered()
-                ->get();
-        });
+        $data = Expertise::active()
+            ->ordered()
+            ->get();
+
+        Cache::put(
+            config('cache-ttl.keys.homepage_expertises'),
+            $data,
+            config('cache-ttl.homepage.expertises')
+        );
     }
 
     private function warmProjectsCache(): void
     {
-        Cache::forget('homepage.projects');
-        Cache::remember('homepage.projects', 1800, function () {
-            $featured = Project::query()
-                ->public()
-                ->with(['primaryImage'])
-                ->orderByDesc('is_featured')
-                ->orderBy('featured_at', 'desc')
-                ->orderBy('sort_order')
-                ->take(6)
-                ->get();
+        $featured = Project::query()
+            ->public()
+            ->with(['primaryImage'])
+            ->orderByDesc('is_featured')
+            ->orderBy('featured_at', 'desc')
+            ->orderBy('sort_order')
+            ->take(6)
+            ->get();
 
-            $stats = Project::query()
-                ->where('is_public', true)
-                ->selectRaw('COUNT(*) as total_projects')
-                ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as live_projects', ['live'])
-                ->first();
+        $stats = Project::query()
+            ->where('is_public', true)
+            ->selectRaw('COUNT(*) as total_projects')
+            ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as live_projects', ['live'])
+            ->first();
 
-            return [
-                'featured' => $featured,
-                'stats' => [
-                    'total_projects' => (int) $stats->total_projects,
-                    'live_projects' => (int) $stats->live_projects,
-                ],
-            ];
-        });
+        $data = [
+            'featured' => $featured,
+            'stats' => [
+                'total_projects' => (int)$stats->total_projects,
+                'live_projects' => (int)$stats->live_projects,
+            ],
+        ];
+
+        Cache::put(
+            config('cache-ttl.keys.homepage_projects'),
+            $data,
+            config('cache-ttl.homepage.projects')
+        );
     }
 
     private function warmUserProfileCache(): void
     {
-        Cache::forget('homepage.user_profile');
-        Cache::remember('homepage.user_profile', 3600, function () {
-            return User::where('email', 'humfurie@gmail.com')->first()
-                ?? User::first();
-        });
+        $adminId = config('app.admin_user_id');
+        $user = User::find($adminId);
+
+        if (!$user) {
+            throw new RuntimeException(
+                "Admin user with ID {$adminId} not found. Check app.admin_user_id configuration."
+            );
+        }
+
+        Cache::put(
+            config('cache-ttl.keys.homepage_user_profile'),
+            $user,
+            config('cache-ttl.homepage.user_profile')
+        );
     }
 }

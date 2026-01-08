@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useAppearance } from '@/hooks/use-appearance';
 import { Moon, Sun } from 'lucide-react';
 
@@ -9,16 +10,14 @@ interface ThemeToggleProps {
 export default function ThemeToggle({ variant = 'icon-only', className = '' }: ThemeToggleProps) {
     const { appearance, updateAppearance } = useAppearance();
 
-    const getIsDark = () => {
+    const isDark = useMemo(() => {
         if (typeof window === 'undefined') return appearance === 'dark';
         return appearance === 'dark' || (appearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    };
+    }, [appearance]);
 
     const toggleTheme = () => {
-        updateAppearance(getIsDark() ? 'light' : 'dark');
+        updateAppearance(isDark ? 'light' : 'dark');
     };
-
-    const isDark = getIsDark();
 
     // Show current mode, not the mode we're switching to
     const currentMode = isDark ? 'Dark' : 'Light';
