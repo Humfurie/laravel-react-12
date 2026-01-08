@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * @property mixed $isPrimary
@@ -31,7 +32,9 @@ class Blog extends Model
     use HasFactory, SoftDeletes;
 
     const STATUS_DRAFT = 'draft';
+
     const STATUS_PUBLISHED = 'published';
+
     const STATUS_PRIVATE = 'private';
 
     protected $fillable = [
@@ -63,6 +66,23 @@ class Blog extends Model
         'display_image',
         'image_url',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($blog) {
+            if (empty($blog->slug)) {
+                $blog->slug = Str::slug($blog->title);
+            }
+        });
+
+        static::updating(function ($blog) {
+            if ($blog->isDirty('title') && empty($blog->slug)) {
+                $blog->slug = Str::slug($blog->title);
+            }
+        });
+    }
 
     public function getRouteKeyName(): string
     {
@@ -104,7 +124,7 @@ class Blog extends Model
     public function scopePublished($query)
     {
         return $query->where('status', self::STATUS_PUBLISHED)
-                    ->where('published_at', '<=', now());
+            ->where('published_at', '<=', now());
     }
 
     public function scopeDraft($query)
@@ -132,12 +152,13 @@ class Blog extends Model
 
         // Generate excerpt from content if not provided
         $plainText = strip_tags($this->content);
+
         return str($plainText)->limit(160);
     }
 
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             self::STATUS_PUBLISHED => 'Published',
             self::STATUS_DRAFT => 'Draft',
             self::STATUS_PRIVATE => 'Private',
@@ -145,7 +166,7 @@ class Blog extends Model
         };
     }
 
-    public function getDisplayImageAttribute(): string|null
+    public function getDisplayImageAttribute(): ?string
     {
         // First priority: polymorphic image relationship (MinIO)
         if ($this->image?->url) {
@@ -163,7 +184,7 @@ class Blog extends Model
             $patterns = [
                 '/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i',  // Standard format
                 '/<img[^>]+src=([^"\'\s>]+)[^>]*>/i',        // No quotes
-                '/<img[^>]*src=["\']?([^"\'\s>]+)/i'          // Malformed/incomplete
+                '/<img[^>]*src=["\']?([^"\'\s>]+)/i',          // Malformed/incomplete
             ];
 
             foreach ($patterns as $pattern) {
@@ -261,7 +282,8 @@ class Blog extends Model
     public static function getFeaturedBlogs(int $limit = 3): Collection
     {
         // Get manually featured blogs
-        $manualFeatured = static::published()
+        $manualFeatured = static::with(['image'])
+            ->published()
             ->manuallyFeatured()
             ->orderBy('sort_order', 'asc')
             ->get();
@@ -276,7 +298,8 @@ class Blog extends Model
         $excludeIds = $manualFeatured->pluck('id')->toArray();
         $mostViewedIds = BlogView::getMostViewedBlogIds(30, $remaining + 5); // Get extra in case of overlap
 
-        $autoFeatured = static::published()
+        $autoFeatured = static::with(['image'])
+            ->published()
             ->whereIn('id', $mostViewedIds)
             ->whereNotIn('id', $excludeIds)
             ->limit($remaining)
@@ -291,7 +314,8 @@ class Blog extends Model
             $stillNeeded = $remaining - $autoFeatured->count();
             $excludeIds = array_merge($excludeIds, $autoFeatured->pluck('id')->toArray());
 
-            $recentPosts = static::published()
+            $recentPosts = static::with(['image'])
+                ->published()
                 ->whereNotIn('id', $excludeIds)
                 ->orderBy('published_at', 'desc')
                 ->limit($stillNeeded)

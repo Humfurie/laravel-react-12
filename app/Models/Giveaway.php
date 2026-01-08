@@ -204,6 +204,14 @@ class Giveaway extends Model
      */
     public function getPrimaryImageUrlAttribute(): ?string
     {
+        // Use eager loaded images if available to avoid N+1 queries
+        if ($this->relationLoaded('images')) {
+            $primaryImage = $this->images->firstWhere('is_primary', true);
+
+            return $primaryImage?->url;
+        }
+
+        // Fallback to query if images not loaded
         $primaryImage = $this->images()->primary()->first();
 
         return $primaryImage ? $primaryImage->url : null;
