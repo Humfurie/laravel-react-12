@@ -9,12 +9,16 @@ interface ThemeToggleProps {
 export default function ThemeToggle({ variant = 'icon-only', className = '' }: ThemeToggleProps) {
     const { appearance, updateAppearance } = useAppearance();
 
-    const toggleTheme = () => {
-        const isDark = appearance === 'dark' || (appearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        updateAppearance(isDark ? 'light' : 'dark');
+    const getIsDark = () => {
+        if (typeof window === 'undefined') return appearance === 'dark';
+        return appearance === 'dark' || (appearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     };
 
-    const isDark = appearance === 'dark' || (appearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const toggleTheme = () => {
+        updateAppearance(getIsDark() ? 'light' : 'dark');
+    };
+
+    const isDark = getIsDark();
 
     // Show current mode, not the mode we're switching to
     const currentMode = isDark ? 'Dark' : 'Light';
