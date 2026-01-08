@@ -29,14 +29,16 @@ class ProjectController extends Controller
             ->ordered()
             ->get();
 
-        // Get unique tech stack for filter options
-        $allTechStack = Project::public()
-            ->whereNotNull('tech_stack')
-            ->pluck('tech_stack')
-            ->flatten()
-            ->unique()
-            ->sort()
-            ->values();
+        // Get unique tech stack for filter options (cached for 30 minutes)
+        $allTechStack = Cache::remember('projects.tech_stack', 1800, function () {
+            return Project::public()
+                ->whereNotNull('tech_stack')
+                ->pluck('tech_stack')
+                ->flatten()
+                ->unique()
+                ->sort()
+                ->values();
+        });
 
         return Inertia::render('user/projects', [
             'featured' => $featured,

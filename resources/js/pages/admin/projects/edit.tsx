@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
 import { cn } from '@/lib/utils';
+import { slugify } from '@/lib/slugify';
 import type { Project, ProjectCategory, ProjectLinks, ProjectMetrics, ProjectStatus, ProjectTestimonial } from '@/types/project';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
@@ -80,18 +81,15 @@ export default function EditProject({ project, categories, statuses }: Props) {
         github_repo: project.github_repo || '',
     });
 
-    const generateSlug = (title: string) => {
-        return title
-            .toLowerCase()
-            .replace(/[^a-z0-9 -]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim()
-            .substring(0, 255);
-    };
-
     const handleTitleChange = (value: string) => {
-        setData('title', value);
+        // Smart slug regeneration: only update if current slug matches the old title's slug
+        const shouldUpdateSlug = data.slug === slugify(data.title);
+
+        setData({
+            ...data,
+            title: value,
+            slug: shouldUpdateSlug ? slugify(value) : data.slug,
+        });
     };
 
     const handleSubmit = (e: React.FormEvent) => {
