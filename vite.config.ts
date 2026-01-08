@@ -31,9 +31,18 @@ export default defineConfig({
                         return undefined;
                     }
 
-                    // Don't split vendor code at all - put everything in one chunk
-                    // This is the safest approach to avoid dependency loading order issues
+                    // Conservative chunk splitting - only split truly optional libraries
+                    // Keep React, Inertia, and core libs in vendor to avoid auth issues
                     if (id.includes('node_modules/')) {
+                        // TipTap editor (admin-only) - safe to split
+                        if (id.includes('@tiptap/') || id.includes('prosemirror')) {
+                            return 'tiptap';
+                        }
+                        // Recharts (specific pages only) - safe to split
+                        if (id.includes('recharts') || id.includes('d3-')) {
+                            return 'recharts';
+                        }
+                        // Everything else stays in vendor (including React, Inertia, Radix, etc.)
                         return 'vendor';
                     }
                 },
