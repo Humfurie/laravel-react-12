@@ -48,6 +48,7 @@ class GitHubService
      *
      * @param string $repo Repository in "owner/repo" format
      * @param int $limit Maximum number of contributors to return
+     * @return array<int, array{login: string|null, id: int|null, avatar_url: string|null, profile_url: string|null, contributions: int, type: string}>
      */
     public function getContributors(string $repo, int $limit = 10): array
     {
@@ -124,6 +125,7 @@ class GitHubService
      *
      * @param string $repo Repository in "owner/repo" format
      * @param int $contributorLimit Maximum number of contributors to include
+     * @return array{stars: int, forks: int, watchers: int, downloads: int, open_issues: int, language: string|null, topics: array<int, string>, license: string|null, last_push: string|null, contributors: array<int, array{login: string|null, id: int|null, avatar_url: string|null, profile_url: string|null, contributions: int, type: string}>, contributor_count: int, contribution_calendar: array{calendar: array<mixed>, total_contributions: int}|null}|null
      */
     public function getAllMetrics(string $repo, int $contributorLimit = 10): ?array
     {
@@ -156,6 +158,7 @@ class GitHubService
      * Get repository owner's contribution calendar.
      *
      * @param string $repo Repository in "owner/repo" format
+     * @return array{calendar: array<mixed>, total_contributions: int}|null
      */
     public function getRepoOwnerContributions(string $repo): ?array
     {
@@ -176,6 +179,7 @@ class GitHubService
      * Get repository statistics from GitHub.
      *
      * @param string $repo Repository in "owner/repo" format
+     * @return array{stars: int, forks: int, watchers: int, open_issues: int, language: string|null, description: string|null, topics: array<int, string>, license: string|null, created_at: string|null, updated_at: string|null, pushed_at: string|null}|null
      */
     public function getRepoStats(string $repo): ?array
     {
@@ -264,6 +268,7 @@ class GitHubService
      * Get user's GitHub contribution data via GraphQL API.
      *
      * @param string $username GitHub username
+     * @return array{total_contributions: int, commits: int, pull_requests: int, issues: int, reviews: int, private_contributions: int, calendar: array<mixed>, top_repositories: array<int, array{name: string, stars: int, forks: int, language: string|null, language_color: string|null}>}|null
      */
     public function getUserContributions(string $username): ?array
     {
