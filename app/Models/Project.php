@@ -110,15 +110,52 @@ class Project extends Model
 
         static::creating(function ($project) {
             if (empty($project->slug)) {
-                $project->slug = Str::slug($project->title);
+                $project->slug = static::generateUniqueSlug($project->title);
             }
         });
 
         static::updating(function ($project) {
             if ($project->isDirty('title') && empty($project->slug)) {
-                $project->slug = Str::slug($project->title);
+                $project->slug = static::generateUniqueSlug($project->title, $project->id);
             }
         });
+    }
+
+    /**
+     * Generate a unique slug from the given title.
+     *
+     * @param string $title The title to generate slug from
+     * @param int|null $excludeId ID to exclude from uniqueness check (for updates)
+     */
+    protected static function generateUniqueSlug(string $title, ?int $excludeId = null): string
+    {
+        $slug = Str::slug($title);
+        $originalSlug = $slug;
+        $counter = 1;
+
+        while (static::slugExists($slug, $excludeId)) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Check if a slug already exists in the database.
+     *
+     * @param string $slug The slug to check
+     * @param int|null $excludeId ID to exclude from the check (for updates)
+     */
+    protected static function slugExists(string $slug, ?int $excludeId = null): bool
+    {
+        $query = static::where('slug', $slug)->withTrashed();
+
+        if ($excludeId !== null) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->exists();
     }
 
     public function getRouteKeyName(): string
