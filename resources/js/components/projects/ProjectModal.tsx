@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import GitHubContributionGraph from '@/components/github-contribution-graph';
 import type { Project } from '@/types/project';
 import { Download, ExternalLink, Github, Globe, Star, Users } from 'lucide-react';
 
@@ -94,6 +95,19 @@ export function ProjectModal({ project, open, onClose }: ProjectModalProps) {
                                 <span className="text-muted-foreground text-sm">downloads</span>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* GitHub Contribution Graph */}
+                {project.metrics?.contribution_calendar?.calendar && (
+                    <div className="space-y-3 border-t pt-6">
+                        <div className="flex items-center justify-between">
+                            <h4 className="font-semibold text-gray-900 dark:text-white">GitHub Activity</h4>
+                            <span className="text-muted-foreground text-sm">
+                                {project.metrics.contribution_calendar.total_contributions.toLocaleString()} contributions
+                            </span>
+                        </div>
+                        <GitHubContributionGraph calendar={project.metrics.contribution_calendar.calendar} className="mt-2" />
                     </div>
                 )}
 
