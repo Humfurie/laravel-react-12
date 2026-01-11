@@ -130,4 +130,5 @@ return [
     'user_account_name' => env('USER_ACCOUNT_NAME', 'user'),
     'user_account_email' => env('USER_ACCOUNT_EMAIL', 'admin@admin.com'),
     'user_account_password' => env('USER_ACCOUNT_PASSWORD', 'password'),
+    'admin_user_id' => env('ADMIN_USER_ID', 1),
 ];

@@ -104,7 +104,7 @@ Route::get('/api/projects/{project}', [ProjectController::class, 'show'])->name(
 // Public API for experiences
 Route::get('/api/experiences', [ExperienceController::class, 'public'])->name('experiences.public');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     // Debug route to check experience data
     Route::get('/debug-experiences', function () {
         Gate::authorize('viewAny', Experience::class);

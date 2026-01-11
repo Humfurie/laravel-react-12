@@ -1,4 +1,4 @@
-import { BlogEditor } from '@/components/blog-editor';
+import { LazyBlogEditor } from '@/components/lazy';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
 import { cn } from '@/lib/utils';
+import { slugify } from '@/lib/slugify';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
 import { ArrowLeft, CalendarIcon, Plus, Upload, X } from 'lucide-react';
@@ -68,21 +69,12 @@ export default function EditBlog({ blog }: Props) {
         published_at: blog.published_at || '',
     });
 
-    const generateSlug = (title: string) => {
-        return title
-            .toLowerCase()
-            .replace(/[^a-z0-9 -]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim();
-    };
-
     const handleTitleChange = (value: string) => {
         setData((prev) => ({
             ...prev,
             title: value,
             // Only auto-generate slug if it's currently matching the title pattern
-            slug: prev.slug === generateSlug(prev.title) ? generateSlug(value) : prev.slug,
+            slug: prev.slug === slugify(prev.title) ? slugify(value) : prev.slug,
         }));
     };
 
@@ -283,7 +275,7 @@ export default function EditBlog({ blog }: Props) {
 
                                 <div className="space-y-2">
                                     <Label>Content *</Label>
-                                    <BlogEditor
+                                    <LazyBlogEditor
                                         content={data.content}
                                         onChange={(content) => setData('content', content)}
                                         placeholder="Start writing your blog post..."

@@ -1,4 +1,4 @@
-import { BlogEditor } from '@/components/blog-editor';
+import { LazyBlogEditor } from '@/components/lazy';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
 import { cn } from '@/lib/utils';
+import { slugify } from '@/lib/slugify';
 import type { ProjectCategory, ProjectLinks, ProjectMetrics, ProjectStatus, ProjectTestimonial } from '@/types/project';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
@@ -79,21 +80,11 @@ export default function CreateProject({ categories, statuses }: Props) {
         github_repo: '',
     });
 
-    const generateSlug = (title: string) => {
-        return title
-            .toLowerCase()
-            .replace(/[^a-z0-9 -]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim()
-            .substring(0, 255);
-    };
-
     const handleTitleChange = (value: string) => {
         setData((prev) => ({
             ...prev,
             title: value,
-            slug: prev.slug || generateSlug(value),
+            slug: prev.slug || slugify(value),
         }));
     };
 
@@ -232,7 +223,7 @@ export default function CreateProject({ categories, statuses }: Props) {
 
                                 <div className="space-y-2">
                                     <Label>Description *</Label>
-                                    <BlogEditor
+                                    <LazyBlogEditor
                                         content={data.description}
                                         onChange={(content) => setData('description', content)}
                                         placeholder="Detailed project description..."
@@ -416,7 +407,7 @@ export default function CreateProject({ categories, statuses }: Props) {
                                 <CardDescription>Optional detailed write-up about the project</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <BlogEditor
+                                <LazyBlogEditor
                                     content={data.case_study}
                                     onChange={(content) => setData('case_study', content)}
                                     placeholder="Write your case study here..."

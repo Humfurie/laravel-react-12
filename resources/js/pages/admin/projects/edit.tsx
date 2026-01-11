@@ -1,4 +1,4 @@
-import { BlogEditor } from '@/components/blog-editor';
+import { LazyBlogEditor } from '@/components/lazy';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
 import { cn } from '@/lib/utils';
+import { slugify } from '@/lib/slugify';
 import type { Project, ProjectCategory, ProjectLinks, ProjectMetrics, ProjectStatus, ProjectTestimonial } from '@/types/project';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
@@ -80,18 +81,15 @@ export default function EditProject({ project, categories, statuses }: Props) {
         github_repo: project.github_repo || '',
     });
 
-    const generateSlug = (title: string) => {
-        return title
-            .toLowerCase()
-            .replace(/[^a-z0-9 -]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim()
-            .substring(0, 255);
-    };
-
     const handleTitleChange = (value: string) => {
-        setData('title', value);
+        // Smart slug regeneration: only update if current slug matches the old title's slug
+        const shouldUpdateSlug = data.slug === slugify(data.title);
+
+        setData({
+            ...data,
+            title: value,
+            slug: shouldUpdateSlug ? slugify(value) : data.slug,
+        });
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -263,7 +261,7 @@ export default function EditProject({ project, categories, statuses }: Props) {
 
                                 <div className="space-y-2">
                                     <Label>Description *</Label>
-                                    <BlogEditor
+                                    <LazyBlogEditor
                                         content={data.description}
                                         onChange={(content) => setData('description', content)}
                                         placeholder="Detailed project description..."
@@ -500,7 +498,7 @@ export default function EditProject({ project, categories, statuses }: Props) {
                                 <CardDescription>Optional detailed write-up about the project</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <BlogEditor
+                                <LazyBlogEditor
                                     content={data.case_study}
                                     onChange={(content) => setData('case_study', content)}
                                     placeholder="Write your case study here..."

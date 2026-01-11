@@ -21,10 +21,26 @@ export interface ProjectLinks {
     play_store_url?: string;
 }
 
+export interface ContributionDay {
+    contributionCount: number;
+    date: string;
+    color: string;
+}
+
+export interface ContributionWeek {
+    contributionDays: ContributionDay[];
+}
+
+export interface ContributionCalendar {
+    calendar: ContributionWeek[];
+    total_contributions: number;
+}
+
 export interface ProjectMetrics {
     users?: number;
     stars?: number;
     downloads?: number;
+    contribution_calendar?: ContributionCalendar;
     custom?: Record<string, string | number>;
 }
 
