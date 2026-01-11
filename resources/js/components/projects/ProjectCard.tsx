@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import type { Project, ProjectCategory, ProjectStatus } from '@/types/project';
+import type { ContributionWeek, Project, ProjectCategory, ProjectStatus } from '@/types/project';
 import { ArrowUpRight, Github, Globe } from 'lucide-react';
 import { memo } from 'react';
 
@@ -42,6 +42,40 @@ const getCategoryColor = (category: ProjectCategory) => {
             return 'bg-gray-100 text-gray-700';
     }
 };
+
+function MiniContributionGraph({ calendar }: { calendar: ContributionWeek[] }) {
+    const recentWeeks = calendar.slice(-12);
+
+    if (!recentWeeks || recentWeeks.length === 0) {
+        return null;
+    }
+
+    const getColor = (count: number): string => {
+        if (count === 0) return '#ebedf0';
+        if (count <= 3) return '#9be9a8';
+        if (count <= 6) return '#40c463';
+        if (count <= 9) return '#30a14e';
+        return '#216e39';
+    };
+
+    return (
+        <div className="flex gap-[2px]">
+            {recentWeeks.map((week, weekIndex) => (
+                <div key={weekIndex} className="flex flex-col gap-[2px]">
+                    {week.contributionDays.map((day, dayIndex) => (
+                        <div
+                            key={dayIndex}
+                            className="h-[6px] w-[6px] rounded-[1px]"
+                            style={{
+                                backgroundColor: day.color || getColor(day.contributionCount),
+                            }}
+                        />
+                    ))}
+                </div>
+            ))}
+        </div>
+    );
+}
 
 export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 'normal' }: ProjectCardProps) {
     const isLarge = size === 'large';
@@ -148,6 +182,19 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
                                 +{project.tech_stack.length - (isLarge ? 5 : 3)}
                             </span>
                         )}
+                    </div>
+                )}
+
+                {/* Mini Contribution Graph */}
+                {project.metrics?.contribution_calendar?.calendar && (
+                    <div className="mt-3 border-t border-gray-100 pt-3 dark:border-gray-700">
+                        <div className="mb-1.5 flex items-center justify-between">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">GitHub Activity</span>
+                            <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                {project.metrics.contribution_calendar.total_contributions}
+                            </span>
+                        </div>
+                        <MiniContributionGraph calendar={project.metrics.contribution_calendar.calendar} />
                     </div>
                 )}
             </div>

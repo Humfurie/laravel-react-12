@@ -1,6 +1,7 @@
 import RoleActions from '@/components/role-actions';
 import RoleFormModal from '@/components/role-form-modal';
 import AppLayout from '@/layouts/app-layout';
+import { formatForDisplay } from '@/lib/date-utils';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { Edit, Plus, RotateCw, Search, Settings, Shield, Trash2, Users } from 'lucide-react';
@@ -188,7 +189,7 @@ export default function Role({ roles, permissions }: RoleProps) {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-500">{new Date(role.created_at).toLocaleDateString()}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-500">{formatForDisplay(role.created_at)}</td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-1">
                                                     {role.deleted_at ? (

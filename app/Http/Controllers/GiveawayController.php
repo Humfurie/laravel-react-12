@@ -214,6 +214,11 @@ class GiveawayController extends Controller
             abort(404);
         }
 
+        // Eager load images to avoid N+1 queries
+        $giveaway->load(['images' => function ($query) {
+            $query->primary();
+        }]);
+
         // Only show names, no phone or facebook info
         // Exclude rejected entries from public view
         $entries = $giveaway->entries()
