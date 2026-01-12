@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\IncrementViewCount;
 use App\Models\Blog;
 use App\Models\BlogView;
 use Illuminate\Support\Facades\Cache;
@@ -18,25 +19,25 @@ class BlogController extends Controller
             ->paginate(12);
 
         return Inertia::render('user/blog', [
-            'blogs' => $blogs
+            'blogs' => $blogs,
         ]);
     }
 
     public function show(Blog $blog)
     {
         // Only show published blogs to public
-        if (!$blog->isPublished()) {
+        if (! $blog->isPublished()) {
             abort(404);
         }
 
-        // Increment total view count (legacy)
-        $blog->increment('view_count');
+        // Increment total view count asynchronously (non-blocking)
+        IncrementViewCount::dispatch('Blog', $blog->id);
 
         // Record daily view for trending calculation
         BlogView::recordView($blog->id);
 
         return Inertia::render('user/blog-post', [
-            'blog' => $blog->fresh() // Get fresh instance with updated view count
+            'blog' => $blog,
         ]);
     }
 
@@ -68,10 +69,10 @@ class BlogController extends Controller
                 'primary' => $featuredBlogs->values(),
                 'latest' => $latestBlogs,
                 'stats' => [
-                    'total_posts' => (int)($stats->total_posts ?? 0),
-                    'total_views' => (int)($stats->total_views ?? 0),
+                    'total_posts' => (int) ($stats->total_posts ?? 0),
+                    'total_views' => (int) ($stats->total_views ?? 0),
                     'featured_count' => $manualFeaturedCount,
-                ]
+                ],
             ];
         });
     }

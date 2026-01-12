@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\IncrementViewCount;
 use App\Models\Project;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
@@ -15,7 +16,7 @@ class ProjectController extends Controller
             return Project::query()
                 ->public()
                 ->featured()
-                ->with(['images' => fn($q) => $q->ordered()])
+                ->with(['images' => fn ($q) => $q->ordered()])
                 ->orderBy('featured_at', 'desc')
                 ->orderBy('sort_order')
                 ->take(6)
@@ -51,18 +52,18 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         // Only show public projects
-        if (!$project->is_public) {
+        if (! $project->is_public) {
             abort(404);
         }
 
-        // Increment view count
-        $project->incrementViewCount();
+        // Increment view count asynchronously (non-blocking)
+        IncrementViewCount::dispatch('Project', $project->id);
 
         // Load images
-        $project->load(['images' => fn($q) => $q->ordered()]);
+        $project->load(['images' => fn ($q) => $q->ordered()]);
 
         return response()->json([
-            'project' => $project->fresh(),
+            'project' => $project,
         ]);
     }
 
