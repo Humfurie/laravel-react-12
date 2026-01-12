@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\IncrementViewCount;
 use App\Models\Property;
 use App\Models\RealEstateProject;
 use Illuminate\Http\Request;
@@ -24,7 +25,7 @@ class PropertyListingController extends Controller
 
         if ($request->filled('city')) {
             $query->whereHas('project', function ($q) use ($request) {
-                $q->where('city', 'like', '%' . $request->city . '%');
+                $q->where('city', 'like', '%'.$request->city.'%');
             });
         }
 
@@ -85,8 +86,8 @@ class PropertyListingController extends Controller
             'contacts',
         ]);
 
-        // Increment view count
-        $property->increment('views_count');
+        // Increment view count asynchronously (non-blocking)
+        IncrementViewCount::dispatch('Property', $property->id);
 
         // Get similar properties
         $similarProperties = Property::with(['project', 'pricing', 'images'])

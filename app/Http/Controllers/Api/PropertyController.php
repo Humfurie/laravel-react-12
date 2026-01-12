@@ -9,6 +9,7 @@ use App\Http\Requests\UpdatePropertyRequest;
 use App\Http\Requests\UploadImageRequest;
 use App\Http\Resources\ImageResource;
 use App\Http\Resources\PropertyResource;
+use App\Jobs\IncrementViewCount;
 use App\Mail\NewInquiryNotification;
 use App\Models\Image;
 use App\Models\Inquiry;
@@ -77,7 +78,7 @@ class PropertyController extends Controller
         Gate::authorize('view', $property);
 
         $property->load(['project.developer', 'pricing.financingOptions', 'contacts', 'inquiries', 'images']);
-        $property->incrementViewCount();
+        IncrementViewCount::dispatch('Property', $property->id);
 
         return response()->json([
             'success' => true,
@@ -297,7 +298,7 @@ class PropertyController extends Controller
         ]);
 
         // Validate coordinates if provided
-        if (($request->has('latitude') || $request->has('longitude')) && (!is_numeric($request->get('latitude')) || !is_numeric($request->get('longitude')))) {
+        if (($request->has('latitude') || $request->has('longitude')) && (! is_numeric($request->get('latitude')) || ! is_numeric($request->get('longitude')))) {
             return response()->json(['errors' => ['coordinates' => ['Invalid coordinates provided']]], 422);
         }
 
@@ -318,7 +319,7 @@ class PropertyController extends Controller
         // Location-based search through project relationships (fallback)
         if ($request->has('city')) {
             $query->whereHas('project', function ($projectQuery) use ($request) {
-                $projectQuery->where('city', 'like', '%' . $request->get('city') . '%');
+                $projectQuery->where('city', 'like', '%'.$request->get('city').'%');
             });
         }
 
