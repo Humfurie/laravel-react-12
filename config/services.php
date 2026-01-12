@@ -75,4 +75,48 @@ return [
         'redirect' => '/auth/google/callback',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Social Media Management Platforms
+    |--------------------------------------------------------------------------
+    |
+    | Credentials for social media platforms used in the social media dashboard.
+    | These are separate from the general social auth (facebook, google, github)
+    | and are specifically for managing social media accounts and posting content.
+    |
+    */
+
+    'youtube' => [
+        'client_id' => env('YOUTUBE_CLIENT_ID'),
+        'client_secret' => env('YOUTUBE_CLIENT_SECRET'),
+        'redirect' => env('APP_URL') . '/admin/social-media/connect/youtube/callback',
+    ],
+
+    'facebook_page' => [
+        'app_id' => env('FACEBOOK_PAGE_APP_ID', env('FACEBOOK_APP_ID')),
+        'client_id' => env('FACEBOOK_PAGE_APP_ID', env('FACEBOOK_APP_ID')),
+        'client_secret' => env('FACEBOOK_PAGE_APP_SECRET', env('FACEBOOK_APP_SECRET')),
+        'redirect' => env('APP_URL') . '/admin/social-media/connect/facebook/callback',
+    ],
+
+    'instagram' => [
+        'app_id' => env('INSTAGRAM_APP_ID'),
+        'client_id' => env('INSTAGRAM_APP_ID'), // Instagram uses app_id as client_id
+        'client_secret' => env('INSTAGRAM_APP_SECRET'),
+        'redirect' => env('APP_URL') . '/admin/social-media/connect/instagram/callback',
+    ],
+
+    'tiktok' => [
+        'client_key' => env('TIKTOK_CLIENT_KEY'),
+        'client_secret' => env('TIKTOK_CLIENT_SECRET'),
+        'redirect' => env('APP_URL') . '/admin/social-media/connect/tiktok/callback',
+    ],
+
+    'threads' => [
+        'app_id' => env('THREADS_APP_ID'),
+        'client_id' => env('THREADS_APP_ID'), // Threads uses app_id as client_id
+        'client_secret' => env('THREADS_APP_SECRET'),
+        'redirect' => env('APP_URL') . '/admin/social-media/connect/threads/callback',
+    ],
+
 ];

@@ -11,6 +11,8 @@
     "require": {
         "php": "^8.2",
         "doctrine/dbal": "^4.3",
+        "facebook/graph-sdk": "^5.1",
+        "google/apiclient": "^2.19",
         "inertiajs/inertia-laravel": "^2.0",
         "intervention/image": "^3.11",
         "laravel/framework": "^12.0",
@@ -18,6 +20,7 @@
         "laravel/socialite": "*",
         "laravel/tinker": "^2.10.1",
         "league/flysystem-aws-s3-v3": "^3.0",
+        "pbmedia/laravel-ffmpeg": "^8.7",
         "tightenco/ziggy": "^2.4",
         "tymon/jwt-auth": "^2.2"
     },
