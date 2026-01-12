@@ -87,6 +87,23 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsToMany(Role::class, 'user_roles');
     }
 
+    /**
+     * Get all connected social media accounts for this user.
+     * Supports multiple accounts per platform (e.g., 2 YouTube channels, 3 Instagram accounts).
+     */
+    public function socialAccounts()
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    /**
+     * Get all social media posts created by this user.
+     */
+    public function socialPosts()
+    {
+        return $this->hasMany(SocialPost::class);
+    }
+
     public function hasPermission(string $resource, string $action): bool
     {
         if ($this->isAdmin()) {

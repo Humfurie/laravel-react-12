@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\RealEstateController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\SocialMediaController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ExperienceController;
 
@@ -207,4 +208,45 @@ Route::prefix('comments')->name('admin.comments.')->group(function () {
     Route::post('/bulk-delete', [App\Http\Controllers\Admin\CommentController::class, 'bulkDelete'])->name('bulk-delete');
     Route::post('/bulk-approve', [App\Http\Controllers\Admin\CommentController::class, 'bulkApprove'])->name('bulk-approve');
     Route::post('/bulk-hide', [App\Http\Controllers\Admin\CommentController::class, 'bulkHide'])->name('bulk-hide');
+});
+
+// Social Media Management routes
+Route::prefix('social-media')->name('admin.social-media.')->group(function () {
+    // Dashboard - shows connected accounts, recent posts, and stats
+    Route::get('/', [SocialMediaController::class, 'index'])->name('index');
+
+    // OAuth Connection routes - generic routes that accept platform as parameter
+    Route::get('/connect/{platform}', [SocialMediaController::class, 'connectRedirect'])->name('connect');
+    Route::get('/connect/{platform}/callback', [SocialMediaController::class, 'connectCallback'])->name('connect.callback');
+
+    // Account Management routes
+    Route::delete('/accounts/{account}', [SocialMediaController::class, 'disconnect'])->name('accounts.disconnect');
+    Route::post('/accounts/{account}/set-default', [SocialMediaController::class, 'setDefaultAccount'])->name('accounts.set-default');
+    Route::put('/accounts/{account}/nickname', [SocialMediaController::class, 'updateAccountNickname'])->name('accounts.update-nickname');
+    Route::post('/accounts/{account}/refresh-token', [SocialMediaController::class, 'refreshToken'])->name('accounts.refresh-token');
+
+    // Post Management routes
+    Route::get('/posts', [SocialMediaController::class, 'posts'])->name('posts.index');
+    Route::get('/posts/create', [SocialMediaController::class, 'createPost'])->name('posts.create');
+    Route::post('/posts', [SocialMediaController::class, 'storePost'])->name('posts.store');
+    Route::get('/posts/{post}', [SocialMediaController::class, 'showPost'])->name('posts.show');
+    Route::get('/posts/{post}/edit', [SocialMediaController::class, 'editPost'])->name('posts.edit');
+    Route::put('/posts/{post}', [SocialMediaController::class, 'updatePost'])->name('posts.update');
+    Route::delete('/posts/{post}', [SocialMediaController::class, 'destroyPost'])->name('posts.destroy');
+
+    // Video Upload route with confirmation
+    Route::post('/upload-video', [SocialMediaController::class, 'uploadVideo'])->name('upload-video');
+
+    // Publishing & Scheduling routes
+    Route::post('/posts/{post}/publish', [SocialMediaController::class, 'publishPost'])->name('posts.publish');
+    Route::post('/posts/{post}/schedule', [SocialMediaController::class, 'schedulePost'])->name('posts.schedule');
+
+    // Analytics routes
+    Route::get('/analytics', [SocialMediaController::class, 'analytics'])->name('analytics.index');
+    Route::get('/analytics/account/{account}', [SocialMediaController::class, 'accountAnalytics'])->name('analytics.account');
+    Route::get('/analytics/post/{post}', [SocialMediaController::class, 'postAnalytics'])->name('analytics.post');
+
+    // Content Calendar routes
+    Route::get('/calendar', [SocialMediaController::class, 'calendar'])->name('calendar');
+    Route::get('/calendar/events', [SocialMediaController::class, 'calendarEvents'])->name('calendar.events');
 });

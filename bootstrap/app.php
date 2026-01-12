@@ -4,8 +4,11 @@ use App\Http\Middleware\AddRequestContext;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Jobs\FetchAccountAnalytics;
 use App\Jobs\RefreshCryptoCache;
+use App\Jobs\RefreshExpiredTokens;
 use App\Jobs\RefreshStockCache;
+use App\Models\SocialAccount;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -57,6 +60,18 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Refresh stock data cache every 15 minutes
         $schedule->job(new RefreshStockCache)->everyFifteenMinutes();
+
+        // Social Media Management scheduled jobs
+        // Refresh expiring access tokens hourly to prevent service interruption
+        $schedule->job(new RefreshExpiredTokens)->hourly();
+
+        // Fetch account-level analytics for all active accounts daily at 2 AM
+        $schedule->call(function () {
+            $accounts = SocialAccount::where('status', 'active')->get();
+            foreach ($accounts as $account) {
+                FetchAccountAnalytics::dispatch($account, now()->subDay(), now());
+            }
+        })->dailyAt('02:00')->name('fetch-account-analytics');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
