@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\IncrementViewCount;
 use App\Models\Blog;
 use App\Models\BlogView;
 use App\Services\HomepageCacheService;
@@ -19,6 +20,7 @@ class BlogController extends Controller
 
         return Inertia::render('user/blog', [
             'blogs' => $blogs,
+            'blogs' => $blogs,
         ]);
     }
 
@@ -29,22 +31,50 @@ class BlogController extends Controller
             abort(404);
         }
 
-        // Increment total view count (legacy)
-        $blog->increment('view_count');
+        // Increment total view count asynchronously (non-blocking)
+        IncrementViewCount::dispatch('Blog', $blog->id);
 
         // Record daily view for trending calculation
         BlogView::recordView($blog->id);
 
         return Inertia::render('user/blog-post', [
-            'blog' => $blog->fresh(), // Get fresh instance with updated view count
+            'blog' => $blog,
         ]);
     }
 
     public function getPrimaryAndLatest()
     {
         // Cache homepage blog data for 10 minutes
-        return Cache::remember('homepage.blogs', config('cache-ttl.homepage.blogs', 600), function () {
-            return app(HomepageCacheService::class)->getBlogsData();
+        return Cache::remember('homepage.blogs', 600, function () {
+            // Get featured blogs (manual featured + auto by views)
+            $featuredBlogs = Blog::getFeaturedBlogs(3);
+
+            // Get latest blogs
+            $latestBlogs = Blog::published()
+                ->orderBy('published_at', 'desc')
+                ->limit(6)
+                ->get();
+
+            // Get stats
+            $grammar = DB::connection()->getQueryGrammar();
+            $isPrimaryColumn = $grammar->wrap('isPrimary');
+
+            $stats = Blog::published()
+                ->selectRaw("COUNT(*) as total_posts, SUM(view_count) as total_views, SUM(CASE WHEN {$isPrimaryColumn} = ? THEN 1 ELSE 0 END) as featured_count", [true])
+                ->first();
+
+            // Count manually featured (with valid featured_until)
+            $manualFeaturedCount = Blog::published()->manuallyFeatured()->count();
+
+            return [
+                'primary' => $featuredBlogs->values(),
+                'latest' => $latestBlogs,
+                'stats' => [
+                    'total_posts' => (int) ($stats->total_posts ?? 0),
+                    'total_views' => (int) ($stats->total_views ?? 0),
+                    'featured_count' => $manualFeaturedCount,
+                ],
+            ];
         });
     }
 
