@@ -1,0 +1,23 @@
+{
+    "mcpServers": {
+        "chrome-devtools": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "chrome-devtools-mcp@latest"
+            ]
+        },
+        "laravel-boost": {
+            "type": "stdio",
+            "command": "docker",
+            "args": [
+                "exec",
+                "-i",
+                "laravel-react-12-laravel.test-1",
+                "php",
+                "artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}
