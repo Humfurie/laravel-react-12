@@ -1,7 +1,5 @@
 <?php
 
-use Laravel\Octane\Octane;
-
 return [
     'server' => env('OCTANE_SERVER', 'swoole'),
 
@@ -18,12 +16,14 @@ return [
     | This significantly reduces TTFB variance on first requests.
     |
     */
-    'warm' => [
-        ...Octane::defaultServicesToWarm(),
-        \Illuminate\Cache\CacheManager::class,
-        \Illuminate\Database\DatabaseManager::class,
-        \Inertia\ResponseFactory::class,
-    ],
+    'warm' => array_merge(
+        class_exists(\Laravel\Octane\Octane::class) ? \Laravel\Octane\Octane::defaultServicesToWarm() : [],
+        [
+            \Illuminate\Cache\CacheManager::class,
+            \Illuminate\Database\DatabaseManager::class,
+            \Inertia\ResponseFactory::class,
+        ]
+    ),
 
     /*
     |--------------------------------------------------------------------------

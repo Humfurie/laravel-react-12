@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Jobs\IncrementViewCount;
 use App\Models\Blog;
 use App\Models\BlogView;
+use App\Services\HomepageCacheService;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class BlogController extends Controller
@@ -20,12 +20,14 @@ class BlogController extends Controller
 
         return Inertia::render('user/blog', [
             'blogs' => $blogs,
+            'blogs' => $blogs,
         ]);
     }
 
     public function show(Blog $blog)
     {
         // Only show published blogs to public
+        if (! $blog->isPublished()) {
         if (! $blog->isPublished()) {
             abort(404);
         }
@@ -37,7 +39,7 @@ class BlogController extends Controller
         BlogView::recordView($blog->id);
 
         return Inertia::render('user/blog-post', [
-            'blog' => $blog,
+            'blog' => $blog->fresh(), // Get fresh instance with updated view count
         ]);
     }
 
