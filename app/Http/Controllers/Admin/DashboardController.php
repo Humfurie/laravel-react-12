@@ -12,6 +12,7 @@ use App\Models\Inquiry;
 use App\Models\Property;
 use App\Models\RealEstateProject;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -22,14 +23,14 @@ class DashboardController extends Controller
     public function index(): Response
     {
         return Inertia::render('admin/dashboard', [
-            'dashboardData' => [
+            'dashboardData' => Cache::remember('admin:dashboard', 60, fn() => [
                 'stats' => $this->getStats(),
                 'actionItems' => $this->getActionItems(),
                 'charts' => $this->getChartData(),
                 'recentActivity' => $this->getRecentActivity(),
                 'topContent' => $this->getTopContent(),
                 'insights' => $this->getInsights(),
-            ],
+            ]),
         ]);
     }
 

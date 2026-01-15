@@ -1,19 +1,15 @@
 import { CATEGORIES, svgs } from '@/components/svgs';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export const SkillSection = () => {
     const [activeCategory, setActiveCategory] = useState('all');
-    const [filteredSkills, setFilteredSkills] = useState(svgs);
 
-    // Update filtered skills when category changes
-    useEffect(() => {
-        if (activeCategory === 'all') {
-            setFilteredSkills(svgs);
-        } else {
-            setFilteredSkills(svgs.filter((skill) => skill.category === activeCategory));
-        }
-    }, [activeCategory]);
+    // Derive filtered skills directly with useMemo - avoids extra render cycle from useState + useEffect
+    const filteredSkills = useMemo(
+        () => (activeCategory === 'all' ? svgs : svgs.filter((skill) => skill.category === activeCategory)),
+        [activeCategory],
+    );
 
     return (
         <section className="h-full w-full bg-gray-50">
