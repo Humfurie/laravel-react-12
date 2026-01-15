@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Services\HomepageCacheService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class WarmHomepageCache extends Command
 {
@@ -28,7 +30,11 @@ class WarmHomepageCache extends Command
     public function handle(): int
     {
         $this->info('Warming homepage caches...');
+        Log::info('Starting homepage cache warming', ['force' => $this->option('force')]);
+
         $force = $this->option('force');
+        $successCount = 0;
+        $failureCount = 0;
 
         $caches = [
             config('cache-ttl.keys.homepage_blogs') => fn () => $this->warmBlogsCache(),
@@ -41,16 +47,43 @@ class WarmHomepageCache extends Command
         foreach ($caches as $key => $warmer) {
             if ($force || ! Cache::has($key)) {
                 $start = microtime(true);
-                $warmer();
-                $duration = round((microtime(true) - $start) * 1000);
-                $this->line("  <info>✓</info> {$key} <comment>({$duration}ms)</comment>");
+
+                try {
+                    $warmer();
+                    $duration = round((microtime(true) - $start) * 1000);
+                    $this->line("  <info>✓</info> {$key} <comment>({$duration}ms)</comment>");
+                    Log::debug("Cache warmed: {$key}", ['duration_ms' => $duration]);
+                    $successCount++;
+                } catch (Throwable $e) {
+                    $duration = round((microtime(true) - $start) * 1000);
+                    $this->line("  <error>✗</error> {$key} <error>({$e->getMessage()})</error>");
+                    Log::error("Cache warming failed: {$key}", [
+                        'duration_ms' => $duration,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+                    $failureCount++;
+                }
             } else {
                 $this->line("  <comment>⊘</comment> {$key} <comment>(already cached)</comment>");
+                Log::debug("Cache already exists: {$key}");
             }
         }
 
         $this->newLine();
+
+        if ($failureCount > 0) {
+            $this->warn("Homepage cache warming completed with {$failureCount} failure(s).");
+            Log::warning('Homepage cache warming completed with failures', [
+                'success_count' => $successCount,
+                'failure_count' => $failureCount,
+            ]);
+
+            return Command::FAILURE;
+        }
+
         $this->info('Homepage caches warmed successfully!');
+        Log::info('Homepage cache warming completed successfully', ['warmed_count' => $successCount]);
 
         return Command::SUCCESS;
     }
