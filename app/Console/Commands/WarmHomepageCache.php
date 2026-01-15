@@ -2,14 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\BlogController;
-use App\Models\Experience;
-use App\Models\Expertise;
-use App\Models\Project;
-use App\Models\User;
+use App\Services\HomepageCacheService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
-use RuntimeException;
 
 class WarmHomepageCache extends Command
 {
@@ -36,11 +31,11 @@ class WarmHomepageCache extends Command
         $force = $this->option('force');
 
         $caches = [
-            config('cache-ttl.keys.homepage_blogs') => fn() => $this->warmBlogsCache(),
-            config('cache-ttl.keys.homepage_experiences') => fn() => $this->warmExperiencesCache(),
-            config('cache-ttl.keys.homepage_expertises') => fn() => $this->warmExpertisesCache(),
-            config('cache-ttl.keys.homepage_projects') => fn() => $this->warmProjectsCache(),
-            config('cache-ttl.keys.homepage_user_profile') => fn() => $this->warmUserProfileCache(),
+            config('cache-ttl.keys.homepage_blogs') => fn () => $this->warmBlogsCache(),
+            config('cache-ttl.keys.homepage_experiences') => fn () => $this->warmExperiencesCache(),
+            config('cache-ttl.keys.homepage_expertises') => fn () => $this->warmExpertisesCache(),
+            config('cache-ttl.keys.homepage_projects') => fn () => $this->warmProjectsCache(),
+            config('cache-ttl.keys.homepage_user_profile') => fn () => $this->warmUserProfileCache(),
         ];
 
         foreach ($caches as $key => $warmer) {
@@ -62,88 +57,55 @@ class WarmHomepageCache extends Command
 
     private function warmBlogsCache(): void
     {
-        $data = app(BlogController::class)->getPrimaryAndLatest();
+        $service = app(HomepageCacheService::class);
 
         Cache::put(
             config('cache-ttl.keys.homepage_blogs'),
-            $data,
+            $service->getBlogsData(),
             config('cache-ttl.homepage.blogs')
         );
     }
 
     private function warmExperiencesCache(): void
     {
-        $data = Experience::with('image')
-            ->where('user_id', config('app.admin_user_id'))
-            ->ordered()
-            ->get();
+        $service = app(HomepageCacheService::class);
 
         Cache::put(
             config('cache-ttl.keys.homepage_experiences'),
-            $data,
+            $service->getExperiencesData(),
             config('cache-ttl.homepage.experiences')
         );
     }
 
     private function warmExpertisesCache(): void
     {
-        $data = Expertise::active()
-            ->ordered()
-            ->get();
+        $service = app(HomepageCacheService::class);
 
         Cache::put(
             config('cache-ttl.keys.homepage_expertises'),
-            $data,
+            $service->getExpertisesData(),
             config('cache-ttl.homepage.expertises')
         );
     }
 
     private function warmProjectsCache(): void
     {
-        $featured = Project::query()
-            ->public()
-            ->with(['primaryImage'])
-            ->orderByDesc('is_featured')
-            ->orderBy('featured_at', 'desc')
-            ->orderBy('sort_order')
-            ->take(6)
-            ->get();
-
-        $stats = Project::query()
-            ->where('is_public', true)
-            ->selectRaw('COUNT(*) as total_projects')
-            ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as live_projects', ['live'])
-            ->first();
-
-        $data = [
-            'featured' => $featured,
-            'stats' => [
-                'total_projects' => (int)$stats->total_projects,
-                'live_projects' => (int)$stats->live_projects,
-            ],
-        ];
+        $service = app(HomepageCacheService::class);
 
         Cache::put(
             config('cache-ttl.keys.homepage_projects'),
-            $data,
+            $service->getProjectsData(),
             config('cache-ttl.homepage.projects')
         );
     }
 
     private function warmUserProfileCache(): void
     {
-        $adminId = config('app.admin_user_id');
-        $user = User::find($adminId);
-
-        if (!$user) {
-            throw new RuntimeException(
-                "Admin user with ID {$adminId} not found. Check app.admin_user_id configuration."
-            );
-        }
+        $service = app(HomepageCacheService::class);
 
         Cache::put(
             config('cache-ttl.keys.homepage_user_profile'),
-            $user,
+            $service->getUserProfileData(),
             config('cache-ttl.homepage.user_profile')
         );
     }
