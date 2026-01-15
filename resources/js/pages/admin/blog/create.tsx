@@ -93,7 +93,7 @@ export default function CreateBlog() {
 
         transform((data) => ({
             ...data,
-            slug: data.slug || generateSlug(data.title),
+            slug: data.slug || slugify(data.title),
             meta_data: {
                 ...data.meta_data,
                 meta_title: data.meta_data.meta_title || data.title,
@@ -121,7 +121,7 @@ export default function CreateBlog() {
 
         transform((data) => ({
             ...data,
-            slug: data.slug || generateSlug(data.title),
+            slug: data.slug || slugify(data.title),
             meta_data: {
                 ...data.meta_data,
                 meta_title: data.meta_data.meta_title || data.title,
@@ -153,7 +153,7 @@ export default function CreateBlog() {
 
         transform((data) => ({
             ...data,
-            slug: data.slug || generateSlug(data.title),
+            slug: data.slug || slugify(data.title),
             meta_data: {
                 ...data.meta_data,
                 meta_title: data.meta_data.meta_title || data.title,

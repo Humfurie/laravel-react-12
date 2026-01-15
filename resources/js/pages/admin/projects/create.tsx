@@ -93,7 +93,7 @@ export default function CreateProject({ categories, statuses }: Props) {
 
         transform((data) => ({
             ...data,
-            slug: data.slug || generateSlug(data.title),
+            slug: data.slug || slugify(data.title),
             started_at: startDate ? format(startDate, 'yyyy-MM-dd') : '',
             completed_at: completedDate ? format(completedDate, 'yyyy-MM-dd') : '',
         }));
