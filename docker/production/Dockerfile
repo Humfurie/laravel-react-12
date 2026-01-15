@@ -84,8 +84,8 @@ RUN apk add --no-cache \
         zip \
         gd \
         intl \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
+    && pecl install redis swoole \
+    && docker-php-ext-enable redis swoole \
     && apk del autoconf gcc g++ make libc-dev linux-headers \
     && rm -rf /tmp/* /var/cache/apk/*
 
