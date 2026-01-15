@@ -23,7 +23,7 @@ class UserObserver
     protected function clearCache(User $user): void
     {
         // Only invalidate cache if this is the admin user shown on homepage
-        if ($user->id === config('app.admin_user_id')) {
+        if ($user->id === (int) config('app.admin_user_id')) {
             Cache::forget('homepage.user_profile');
         }
         Cache::forget('admin:dashboard');
