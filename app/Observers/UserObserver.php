@@ -18,15 +18,20 @@ class UserObserver
     /**
      * Clear the homepage user profile cache and admin dashboard.
      *
-     * Only clears cache if the modified user is the admin user.
+     * Only clears homepage cache if the modified user is the admin user.
      */
     protected function clearCache(User $user): void
     {
-        // Only invalidate cache if this is the admin user shown on homepage
-        if ($user->id === (int) config('app.admin_user_id')) {
-            Cache::forget('homepage.user_profile');
+        $adminId = config('app.admin_user_id');
+
+        // Only invalidate homepage cache if this is the admin user shown on homepage
+        // Guard against null/empty admin_user_id to prevent matching user ID 0
+        if ($adminId && $user->id === (int) $adminId) {
+            Cache::forget(config('cache-ttl.keys.homepage_user_profile'));
         }
-        Cache::forget('admin:dashboard');
+
+        // Always clear admin dashboard cache on any user change
+        Cache::forget(config('cache-ttl.keys.admin_dashboard'));
     }
 
     /**
