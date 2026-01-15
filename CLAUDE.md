@@ -33,3 +33,26 @@ PHP 8.4, Laravel 12, Inertia v2, React 19, Tailwind v4, Pest v3
 - All tests use Pest: `php artisan make:test --pest`
 - Use factories and datasets
 - Run minimal tests with `--filter`
+
+## Session Memory
+
+### 2026-01-16
+**Summary**: Implemented cache invalidation system with model observers, extracted homepage data fetching to HomepageCacheService, fixed CI failures.
+
+**Changes**:
+- `app/Observers/` - Added Experience, Expertise, User observers; updated Blog, Project to clear admin:dashboard
+- `app/Services/HomepageCacheService.php` - New service for homepage data fetching
+- `app/Console/Commands/WarmHomepageCache.php` - Refactored to use service
+- `database/factories/ProjectFactory.php` - New factory with public/private states
+- `config/cache-ttl.php` - Added projects_limit config
+- `docker-compose.prod.yml` - Fixed SSR healthcheck (exit 1)
+- 27 new tests added (all passing)
+
+**Decisions**:
+- Cache invalidation via model observers (existing pattern)
+- Type-safe `(int) config()` for ID comparisons
+- Projects use `is_public` not `is_published`
+
+**Open**:
+- [ ] Consider cache tags for granular invalidation
+- [ ] Add logging to WarmHomepageCache for production
