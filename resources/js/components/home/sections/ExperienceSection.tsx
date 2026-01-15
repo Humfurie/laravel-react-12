@@ -1,5 +1,5 @@
 import SectionTitle from '@/components/global/SectionTitle';
-import { motion } from 'framer-motion';
+import { memo, useEffect, useRef, useState } from 'react';
 
 type Experience = {
     id: number;
@@ -8,10 +8,10 @@ type Experience = {
     location: string;
     description: string[];
     position: string;
-    start_month: number; // 0-11 (0 = January)
-    start_year: number; // e.g., 2023
-    end_month: number | null; // null for current positions
-    end_year: number | null; // null for current positions
+    start_month: number;
+    start_year: number;
+    end_month: number | null;
+    end_year: number | null;
     is_current_position: boolean;
 };
 
@@ -19,18 +19,6 @@ type ExperienceSectionProps = {
     experiences?: Experience[];
 };
 
-/**
- * Fallback data for experiences.
- *
- * IMPORTANT: This data is primarily loaded from the database via Laravel Inertia props.
- * The fallback exists only as a safety mechanism if:
- * - The database is empty
- * - Props aren't passed correctly from the backend
- * - There's an error fetching data
- *
- * To update experiences, use the admin panel at /admin/experiences
- * The seeder (database/seeders/ExperienceSeeder.php) contains the same data.
- */
 const fallbackExperiences: Experience[] = [
     {
         id: 1,
@@ -104,10 +92,11 @@ const fallbackExperiences: Experience[] = [
     },
 ];
 
-export function formatMonthYear(month: number, year: number): string {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+// Month names constant - defined once at module level to avoid recreation
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-    return `${months[month]} ${year}`;
+export function formatMonthYear(month: number, year: number): string {
+    return `${MONTH_NAMES[month]} ${year}`;
 }
 
 export function calculateDuration(
@@ -141,95 +130,118 @@ export function calculateDuration(
     }
 }
 
-/**
- * ExperienceSection Component
- *
- * Displays professional work experience in a timeline format.
- *
- * Data Source: Database (App\Models\Experience)
- * - Experience data is loaded from the database via Laravel Inertia props
- * - Props are passed from routes/web.php home route
- * - CRUD operations available at /admin/experiences
- *
- * The component receives experiences from the database, but has fallback data
- * for safety if the database is empty or props aren't passed.
- */
+// Individual experience card with intersection observer - memoized to prevent re-renders
+const ExperienceCard = memo(function ExperienceCard({ experience, index }: { experience: Experience; index: number }) {
+    const [isVisible, setIsVisible] = useState(false);
+    const cardRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    // Add staggered delay based on index
+                    setTimeout(() => {
+                        setIsVisible(true);
+                    }, index * 100);
+                    observer.disconnect();
+                }
+            },
+            { threshold: 0.1, rootMargin: '50px' }
+        );
+
+        if (cardRef.current) {
+            observer.observe(cardRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, [index]);
+
+    const isEven = index % 2 === 0;
+
+    return (
+        <div
+            ref={cardRef}
+            className={`hs-shadow relative mb-8 w-full cursor-pointer rounded-xl p-4 transition-all duration-500 ease-out sm:p-6 lg:mb-12 dark:bg-gray-900 ${
+                isEven ? 'lg:mr-8 lg:ml-auto' : 'lg:mr-auto lg:ml-8'
+            } mx-auto lg:mx-0 lg:w-5/12 ${
+                isVisible
+                    ? 'opacity-100 translate-x-0'
+                    : `opacity-0 ${isEven ? 'translate-x-12' : '-translate-x-12'}`
+            }`}
+        >
+            <div className="mb-4 flex items-center">
+                <div className="mr-3 h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border-2 border-gray-200 bg-gray-100 sm:mr-4 sm:h-16 sm:w-16 dark:border-gray-700 dark:bg-gray-800">
+                    <img
+                        src={experience.image_url || '/default-company.png'}
+                        alt={experience.company}
+                        className="h-full w-full object-cover"
+                        width={64}
+                        height={64}
+                        loading="lazy"
+                    />
+                </div>
+                <div className="min-w-0 flex-1">
+                    <p className="text-brand-orange mb-1 text-lg leading-tight font-semibold sm:text-xl md:text-[28px]">
+                        {experience.position}
+                    </p>
+                    <p className="text-brand-gray text-xs sm:text-sm">{experience.company}</p>
+                </div>
+            </div>
+            <p className="text-brand-gray mb-3 flex items-center text-xs sm:text-sm">{experience.location}</p>
+
+            <div className="text-brand-gray mb-4 flex flex-col gap-1 rounded-lg bg-gray-50 p-2 text-xs sm:flex-row sm:justify-between sm:p-3 sm:text-sm dark:bg-gray-800 dark:text-gray-300">
+                <span className="mb-1 sm:mb-0">
+                    {formatMonthYear(experience.start_month, experience.start_year)} -{' '}
+                    {experience.is_current_position ? 'Present' : formatMonthYear(experience.end_month!, experience.end_year!)}
+                </span>
+                <span className="text-brand-orange">
+                    {calculateDuration(
+                        experience.start_month,
+                        experience.start_year,
+                        experience.end_month,
+                        experience.end_year,
+                        experience.is_current_position,
+                    )}
+                </span>
+            </div>
+
+            <div className="text-brand-gray text-sm sm:text-base">
+                <ul className="space-y-2">
+                    {experience.description.map((point, i) => (
+                        <li key={i} className="flex items-start leading-relaxed">
+                            <span className="bg-brand-orange mt-2 mr-2 h-1.5 w-1.5 flex-shrink-0 rounded-full sm:mr-3 sm:h-2 sm:w-2" />
+                            <span className="flex-1">{point}</span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Timeline dot */}
+            <div
+                className={`bg-brand-orange absolute top-[13%] hidden h-6 w-6 rounded-full border-4 border-white transition-all duration-300 lg:block dark:border-gray-950 ${
+                    isEven ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'
+                }`}
+            />
+        </div>
+    );
+});
+
 export const ExperienceSection = ({ experiences = fallbackExperiences }: ExperienceSectionProps) => {
     return (
         <section id="experience" className="relative overflow-hidden bg-white py-20 dark:bg-gray-950">
             <SectionTitle title={'Experience'} />
 
             <div className="primary-container">
-                <div className="text-brand-gray mb-12 w-full text-center dark:text-gray-300">My professional journey in the tech industry.</div>
+                <div className="text-brand-gray mb-12 w-full text-center dark:text-gray-300">
+                    My professional journey in the tech industry.
+                </div>
 
                 <div className="relative mx-auto mt-12 mb-12 w-full lg:mt-[80px]">
                     {/* Vertical line */}
                     <div className="bg-brand-orange absolute top-0 bottom-0 left-1/2 hidden w-px -translate-x-1/2 transform lg:block" />
 
                     {experiences.map((experience, index) => (
-                        <motion.div
-                            key={`timeline-${experience.id}`}
-                            initial={{ opacity: 0, x: index % 2 === 0 ? 100 : -100 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.6, delay: index * 0.2 }}
-                            className={`hs-shadow relative mb-8 w-full cursor-pointer rounded-xl p-4 transition-all duration-300 sm:p-6 lg:mb-12 dark:bg-gray-900 ${
-                                index % 2 === 0 ? 'lg:mr-8 lg:ml-auto' : 'lg:mr-auto lg:ml-8'
-                            } mx-auto lg:mx-0 lg:w-5/12`}
-                        >
-                            <div className="mb-4 flex items-center">
-                                <div className="mr-3 h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border-2 border-gray-200 bg-gray-100 sm:mr-4 sm:h-16 sm:w-16 dark:border-gray-700 dark:bg-gray-800">
-                                    <img
-                                        src={experience.image_url || '/default-company.png'}
-                                        alt={experience.company}
-                                        className="h-full w-full object-cover"
-                                        width={64}
-                                        height={64}
-                                        loading="lazy"
-                                    />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-brand-orange mb-1 text-lg leading-tight font-semibold sm:text-xl md:text-[28px]">
-                                        {experience.position}
-                                    </p>
-                                    <p className="text-brand-gray text-xs sm:text-sm">{experience.company}</p>
-                                </div>
-                            </div>
-                            <p className="text-brand-gray mb-3 flex items-center text-xs sm:text-sm">{experience.location}</p>
-
-                            <div className="text-brand-gray mb-4 flex flex-col gap-1 rounded-lg bg-gray-50 p-2 text-xs sm:flex-row sm:justify-between sm:p-3 sm:text-sm dark:bg-gray-800 dark:text-gray-300">
-                                <span className="mb-1 sm:mb-0">
-                                    {formatMonthYear(experience.start_month, experience.start_year)} -{' '}
-                                    {experience.is_current_position ? 'Present' : formatMonthYear(experience.end_month!, experience.end_year!)}
-                                </span>
-                                <span className="text-brand-orange">
-                                    {calculateDuration(
-                                        experience.start_month,
-                                        experience.start_year,
-                                        experience.end_month,
-                                        experience.end_year,
-                                        experience.is_current_position,
-                                    )}
-                                </span>
-                            </div>
-
-                            <div className="text-brand-gray text-sm sm:text-base">
-                                <ul className="space-y-2">
-                                    {experience.description.map((point, i) => (
-                                        <li key={i} className="flex items-start leading-relaxed">
-                                            <span className="bg-brand-orange mt-2 mr-2 h-1.5 w-1.5 flex-shrink-0 rounded-full sm:mr-3 sm:h-2 sm:w-2" />
-                                            <span className="flex-1">{point}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            {/* Timeline dot */}
-                            <div
-                                className={`bg-brand-orange absolute top-[13%] hidden h-6 w-6 rounded-full border-4 border-white transition-all duration-300 lg:block dark:border-gray-950 ${
-                                    index % 2 === 0 ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'
-                                } `}
-                            />
-                        </motion.div>
+                        <ExperienceCard key={`timeline-${experience.id}`} experience={experience} index={index} />
                     ))}
                 </div>
             </div>

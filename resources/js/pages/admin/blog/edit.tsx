@@ -1,4 +1,4 @@
-import { BlogEditor } from '@/components/blog-editor';
+import { LazyBlogEditor } from '@/components/lazy';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -283,7 +283,7 @@ export default function EditBlog({ blog }: Props) {
 
                                 <div className="space-y-2">
                                     <Label>Content *</Label>
-                                    <BlogEditor
+                                    <LazyBlogEditor
                                         content={data.content}
                                         onChange={(content) => setData('content', content)}
                                         placeholder="Start writing your blog post..."
