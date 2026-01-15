@@ -17,6 +17,7 @@ return [
     'homepage' => [
         'blogs' => env('CACHE_TTL_HOMEPAGE_BLOGS', 600),
         'projects' => env('CACHE_TTL_HOMEPAGE_PROJECTS', 1800),
+        'projects_limit' => env('HOMEPAGE_PROJECTS_LIMIT', 6),
         'experiences' => env('CACHE_TTL_HOMEPAGE_EXPERIENCES', 3600),
         'expertises' => env('CACHE_TTL_HOMEPAGE_EXPERTISES', 3600),
         'user_profile' => env('CACHE_TTL_HOMEPAGE_USER_PROFILE', 3600),

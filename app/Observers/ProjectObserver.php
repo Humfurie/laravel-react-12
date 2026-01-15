@@ -16,12 +16,13 @@ class ProjectObserver
     }
 
     /**
-     * Clear the project-related caches.
+     * Clear the project-related caches and admin dashboard.
      */
     protected function clearCache(): void
     {
         Cache::forget('projects.featured');
         Cache::forget('homepage.projects');
+        Cache::forget('admin:dashboard');
     }
 
     /**
