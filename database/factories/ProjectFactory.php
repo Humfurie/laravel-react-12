@@ -16,7 +16,6 @@ class ProjectFactory extends Factory
     {
         return [
             'title' => fake()->sentence(3),
-            'slug' => fake()->unique()->slug(),
             'description' => fake()->paragraphs(3, true),
             'short_description' => fake()->sentence(),
             'category' => fake()->randomElement([

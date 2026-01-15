@@ -25,6 +25,7 @@ jobs:
           echo "DB_DATABASE=testing" >> .env
           echo "DB_USERNAME=postgres" >> .env
           echo "DB_PASSWORD=password" >> .env
+          echo "QUEUE_CONNECTION=sync" >> .env
           echo "VITE_APP_NAME=\${APP_NAME}" >> .env
 
       - name: Build and start services
