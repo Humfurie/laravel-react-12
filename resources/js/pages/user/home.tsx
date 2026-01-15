@@ -11,7 +11,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ArrowRight } from 'lucide-react';
 
 import { ExperienceSection } from '@/components/home/sections/ExperienceSection';
-import { JSX } from 'react';
+import { JSX, useMemo } from 'react';
 
 interface Blog {
     id: number;
@@ -166,10 +166,32 @@ export default function Home({
     projectStats,
     profileUser,
 }: Props): JSX.Element {
-    // Combine and dedupe blogs for display
-    const allBlogs = [...primary, ...latest.filter((b) => !primary.find((p) => p.id === b.id))];
+    // Memoize blog deduplication to avoid O(n×m) on every render
+    const allBlogs = useMemo(
+        () => [...primary, ...latest.filter((b) => !primary.find((p) => p.id === b.id))],
+        [primary, latest],
+    );
     const featuredBlog = primary[0];
-    const otherBlogs = allBlogs.filter((b) => b.id !== featuredBlog?.id).slice(0, 5);
+    const otherBlogs = useMemo(() => allBlogs.filter((b) => b.id !== featuredBlog?.id).slice(0, 5), [allBlogs, featuredBlog?.id]);
+
+    // Memoize experience data transformation to avoid creating new objects every render
+    const transformedExperiences = useMemo(
+        () =>
+            experiences.map((exp) => ({
+                id: exp.id,
+                company: exp.company,
+                image_url: exp.image?.url || null,
+                location: exp.location,
+                description: Array.isArray(exp.description) ? exp.description : [],
+                position: exp.position,
+                start_month: exp.start_month,
+                start_year: exp.start_year,
+                end_month: exp.end_month,
+                end_year: exp.end_year,
+                is_current_position: exp.is_current_position,
+            })),
+        [experiences],
+    );
 
     return (
         <>
@@ -211,21 +233,7 @@ export default function Home({
             {projects.length > 0 && <HomeProjects projects={projects} stats={projectStats} />}
 
             <HomeExpertise expertises={expertises} />
-            <ExperienceSection
-                experiences={experiences.map((exp) => ({
-                    id: exp.id,
-                    company: exp.company,
-                    image_url: exp.image?.url || null,
-                    location: exp.location,
-                    description: Array.isArray(exp.description) ? exp.description : [],
-                    position: exp.position,
-                    start_month: exp.start_month,
-                    start_year: exp.start_year,
-                    end_month: exp.end_month,
-                    end_year: exp.end_year,
-                    is_current_position: exp.is_current_position,
-                }))}
-            />
+            <ExperienceSection experiences={transformedExperiences} />
 
             {/* Blog Section - Untitled UI Style */}
             <section className="bg-gray-50 py-16 sm:py-24 dark:bg-gray-950">
