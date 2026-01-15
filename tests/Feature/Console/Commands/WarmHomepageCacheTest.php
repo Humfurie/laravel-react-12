@@ -20,9 +20,9 @@ test('command warms all homepage caches successfully', function () {
     config(['app.admin_user_id' => $admin->id]);
 
     Blog::factory()->published()->count(5)->create();
-    Project::factory()->count(3)->create(['user_id' => $admin->id, 'is_published' => true]);
+    Project::factory()->public()->count(3)->create();
     Experience::factory()->count(2)->create(['user_id' => $admin->id]);
-    Expertise::factory()->count(4)->create(['user_id' => $admin->id]);
+    Expertise::factory()->count(4)->create();
 
     Artisan::call('cache:warm-homepage');
 
@@ -33,13 +33,12 @@ test('command warms all homepage caches successfully', function () {
         ->and(Cache::has(config('cache-ttl.keys.homepage_user_profile')))->toBeTrue();
 });
 
-test('command uses configured admin user id', function () {
-    $wrongUser = User::factory()->create();
+test('command caches public projects', function () {
     $admin = createAdminUser('blog');
     config(['app.admin_user_id' => $admin->id]);
 
-    Project::factory()->count(2)->create(['user_id' => $wrongUser->id, 'is_published' => true]);
-    Project::factory()->count(3)->create(['user_id' => $admin->id, 'is_published' => true]);
+    Project::factory()->public()->count(3)->create();
+    Project::factory()->private()->count(2)->create();
 
     Artisan::call('cache:warm-homepage');
 
@@ -47,15 +46,15 @@ test('command uses configured admin user id', function () {
 
     expect($cachedProjects)->toHaveKey('featured')
         ->and($cachedProjects['featured'])->toHaveCount(3)
-        ->and($cachedProjects['featured']->every(fn($project) => $project->user_id === $admin->id))->toBeTrue();
+        ->and($cachedProjects['featured']->every(fn ($project) => $project->is_public === true))->toBeTrue();
 });
 
-test('command only caches published projects', function () {
+test('command only caches public projects', function () {
     $admin = createAdminUser('blog');
     config(['app.admin_user_id' => $admin->id]);
 
-    Project::factory()->count(2)->create(['user_id' => $admin->id, 'is_published' => true]);
-    Project::factory()->count(3)->create(['user_id' => $admin->id, 'is_published' => false]);
+    Project::factory()->public()->count(2)->create();
+    Project::factory()->private()->count(3)->create();
 
     Artisan::call('cache:warm-homepage');
 
@@ -63,21 +62,23 @@ test('command only caches published projects', function () {
 
     expect($cachedProjects)->toHaveKey('featured')
         ->and($cachedProjects['featured'])->toHaveCount(2)
-        ->and($cachedProjects['featured']->every(fn($project) => $project->is_published === true))->toBeTrue();
+        ->and($cachedProjects['featured']->every(fn ($project) => $project->is_public === true))->toBeTrue();
 });
 
-test('command limits projects to 6 items', function () {
+test('command limits projects to configured limit', function () {
     $admin = createAdminUser('blog');
     config(['app.admin_user_id' => $admin->id]);
 
-    Project::factory()->count(10)->create(['user_id' => $admin->id, 'is_published' => true]);
+    Project::factory()->public()->count(10)->create();
 
     Artisan::call('cache:warm-homepage');
 
     $cachedProjects = Cache::get(config('cache-ttl.keys.homepage_projects'));
 
+    $limit = config('cache-ttl.homepage.projects_limit', 6);
+
     expect($cachedProjects)->toHaveKey('featured')
-        ->and($cachedProjects['featured'])->toHaveCount(6);
+        ->and($cachedProjects['featured'])->toHaveCount($limit);
 });
 
 test('command caches user profile correctly', function () {
@@ -160,5 +161,5 @@ test('command caches experiences for configured admin user', function () {
     $cachedExperiences = Cache::get(config('cache-ttl.keys.homepage_experiences'));
 
     expect($cachedExperiences)->toHaveCount(3)
-        ->and($cachedExperiences->every(fn($exp) => $exp->user_id === $admin->id))->toBeTrue();
+        ->and($cachedExperiences->every(fn ($exp) => $exp->user_id === $admin->id))->toBeTrue();
 });
