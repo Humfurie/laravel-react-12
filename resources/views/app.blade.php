@@ -84,6 +84,12 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v={{ config('app.version', '1.0') }}">
     <link rel="icon" type="image/png" href="{{ asset('logo.png') }}?v={{ config('app.version', '1.0') }}">
 
+    {{-- Preload LCP hero image for faster first paint --}}
+    @if(request()->is('/') || request()->is(''))
+        <link rel="preload" as="image" href="{{ asset('images/humphrey-banner.webp') }}" media="(min-width: 768px)" fetchpriority="high">
+        <link rel="preload" as="image" href="{{ asset('images/humphrey-banner-mb.webp') }}" media="(max-width: 767px)" fetchpriority="high">
+    @endif
+
     <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
     <link rel="dns-prefetch" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600&display=swap" rel="stylesheet" />

@@ -16,11 +16,12 @@ class BlogObserver
     }
 
     /**
-     * Clear the homepage blog cache.
+     * Clear the homepage blog cache and admin dashboard.
      */
     protected function clearCache(): void
     {
         Cache::forget('homepage.blogs');
+        Cache::forget('admin:dashboard');
     }
 
     /**
