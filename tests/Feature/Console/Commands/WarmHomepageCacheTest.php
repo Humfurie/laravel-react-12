@@ -109,11 +109,16 @@ test('command overwrites existing cache', function () {
         ->and($cachedBlogs)->toHaveKeys(['primary', 'latest', 'stats']);
 });
 
-test('command throws exception when admin user not found', function () {
+test('command returns failure when admin user not found', function () {
     config(['app.admin_user_id' => 9999]);
 
-    Artisan::call('cache:warm-homepage');
-})->throws(RuntimeException::class, 'Admin user with ID 9999 not found');
+    $exitCode = Artisan::call('cache:warm-homepage');
+    $output = Artisan::output();
+
+    expect($exitCode)->toBe(1)
+        ->and($output)->toContain('✗')
+        ->and($output)->toContain('failure');
+});
 
 test('command displays progress messages', function () {
     $admin = createAdminUser('blog');

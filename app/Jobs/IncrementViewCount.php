@@ -16,6 +16,7 @@ class IncrementViewCount implements ShouldQueue
     private const ALLOWED_MODELS = [
         'Blog',
         'Project',
+        'Property',
     ];
 
     /**
