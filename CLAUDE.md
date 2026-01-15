@@ -502,3 +502,38 @@ defaults
 - Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test` with a specific
   filename or filter.
   </laravel-boost-guidelines>
+
+## Session Memory
+
+### Latest: 2026-01-16
+**Summary**: Implemented comprehensive cache invalidation system and extracted homepage data fetching into a dedicated service. Fixed CI pipeline failures and created missing factories.
+
+**Files Changed**:
+- `app/Observers/ExperienceObserver.php` - New observer for cache invalidation
+- `app/Observers/ExpertiseObserver.php` - New observer for cache invalidation
+- `app/Observers/UserObserver.php` - New observer for admin profile cache
+- `app/Observers/BlogObserver.php` - Added admin:dashboard cache clearing
+- `app/Observers/ProjectObserver.php` - Added admin:dashboard cache clearing
+- `app/Services/HomepageCacheService.php` - New service extracting data fetching from controllers
+- `app/Console/Commands/WarmHomepageCache.php` - Refactored to use HomepageCacheService
+- `app/Http/Controllers/BlogController.php` - Delegated to HomepageCacheService
+- `app/Providers/AppServiceProvider.php` - Registered new observers
+- `config/cache-ttl.php` - Added projects_limit configuration
+- `config/octane.php` - Fixed conditional Octane class check
+- `docker-compose.prod.yml` - Fixed SSR healthcheck (exit 1 vs exit 0)
+- `.env.example` - Added Octane and cache config variables
+- `database/factories/ProjectFactory.php` - New factory with states
+- `database/factories/ExpertiseFactory.php` - Added default values
+- `tests/Unit/Observers/*` - New observer tests (18 tests)
+- `tests/Unit/Services/HomepageCacheServiceTest.php` - New service tests (9 tests)
+- `tests/Feature/Console/Commands/WarmHomepageCacheTest.php` - Fixed to use correct column names
+
+**Decisions**:
+- Cache invalidation via model observers (not event listeners) - follows existing pattern
+- HomepageCacheService for data fetching, controllers use Cache::remember with service
+- Type-safe comparison `(int) config()` for admin user ID checks
+- Projects use `is_public` column, not `is_published`
+
+**Open Items**:
+- [ ] Consider adding cache tags for more granular invalidation
+- [ ] Add logging to WarmHomepageCache command for production monitoring
