@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\IncrementViewCount;
-use App\Jobs\IncrementViewCount;
 use App\Models\Blog;
 use App\Models\BlogView;
-use App\Services\HomepageCacheService;
-use App\Services\HomepageCacheService;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class BlogController extends Controller
@@ -21,7 +19,6 @@ class BlogController extends Controller
             ->paginate(12);
 
         return Inertia::render('user/blog', [
-            'blogs' => $blogs,
             'blogs' => $blogs,
         ]);
     }
