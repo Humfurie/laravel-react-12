@@ -1,4 +1,4 @@
-import { BlogEditor } from '@/components/blog-editor';
+import { LazyBlogEditor } from '@/components/lazy';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -263,7 +263,7 @@ export default function EditProject({ project, categories, statuses }: Props) {
 
                                 <div className="space-y-2">
                                     <Label>Description *</Label>
-                                    <BlogEditor
+                                    <LazyBlogEditor
                                         content={data.description}
                                         onChange={(content) => setData('description', content)}
                                         placeholder="Detailed project description..."
@@ -500,7 +500,7 @@ export default function EditProject({ project, categories, statuses }: Props) {
                                 <CardDescription>Optional detailed write-up about the project</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <BlogEditor
+                                <LazyBlogEditor
                                     content={data.case_study}
                                     onChange={(content) => setData('case_study', content)}
                                     placeholder="Write your case study here..."
