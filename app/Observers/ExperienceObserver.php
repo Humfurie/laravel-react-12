@@ -20,8 +20,8 @@ class ExperienceObserver
      */
     protected function clearCache(): void
     {
-        Cache::forget('homepage.experiences');
-        Cache::forget('admin:dashboard');
+        Cache::forget(config('cache-ttl.keys.homepage_experiences'));
+        Cache::forget(config('cache-ttl.keys.admin_dashboard'));
     }
 
     /**

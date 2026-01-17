@@ -33,6 +33,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Ensure session is saved before redirect to prevent race condition
+        $request->session()->save();
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

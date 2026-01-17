@@ -39,6 +39,10 @@ php artisan route:cache
 php artisan view:cache  # Cache Blade views (includes email templates, error pages)
 php artisan event:cache 2>/dev/null || echo "Event caching not available"  # Laravel 11+
 
+# Warm homepage caches to prevent cold cache slowdowns on first request
+echo "Warming homepage caches..."
+php artisan cache:warm-homepage --force || echo "Cache warming failed - will warm on first request"
+
 # NOTE: Do NOT clear cache in production - it defeats the purpose!
 # Only clear cache when deploying new code or debugging
 

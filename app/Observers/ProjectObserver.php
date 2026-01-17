@@ -20,9 +20,15 @@ class ProjectObserver
      */
     protected function clearCache(): void
     {
-        Cache::forget('projects.featured');
-        Cache::forget('homepage.projects');
-        Cache::forget('admin:dashboard');
+        // Listing page caches
+        Cache::forget(config('cache-ttl.keys.listing_projects_featured'));
+        Cache::forget(config('cache-ttl.keys.listing_projects_tech_stack'));
+
+        // Homepage cache
+        Cache::forget(config('cache-ttl.keys.homepage_projects'));
+
+        // Admin dashboard cache
+        Cache::forget(config('cache-ttl.keys.admin_dashboard'));
     }
 
     /**
