@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\IncrementViewCount;
 use App\Models\Blog;
 use App\Models\BlogView;
 use App\Services\HomepageCacheService;
-use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class BlogController extends Controller
@@ -29,23 +29,20 @@ class BlogController extends Controller
             abort(404);
         }
 
-        // Increment total view count (legacy)
-        $blog->increment('view_count');
+        // Increment total view count asynchronously (non-blocking)
+        IncrementViewCount::dispatch('Blog', $blog->id);
 
         // Record daily view for trending calculation
         BlogView::recordView($blog->id);
 
         return Inertia::render('user/blog-post', [
-            'blog' => $blog->fresh(), // Get fresh instance with updated view count
+            'blog' => $blog,
         ]);
     }
 
     public function getPrimaryAndLatest()
     {
-        // Cache homepage blog data for 10 minutes
-        return Cache::remember('homepage.blogs', config('cache-ttl.homepage.blogs', 600), function () {
-            return app(HomepageCacheService::class)->getBlogsData();
-        });
+        return app(HomepageCacheService::class)->getCachedBlogsData();
     }
 
     /**

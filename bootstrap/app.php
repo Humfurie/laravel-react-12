@@ -4,6 +4,7 @@ use App\Http\Middleware\AddRequestContext;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Jobs\RefreshCryptoCache;
 use App\Jobs\RefreshStockCache;
 use Illuminate\Auth\AuthenticationException;
@@ -45,6 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'permission' => CheckPermission::class,
+            'guest' => RedirectIfAuthenticated::class,
         ]);
     })
     ->withSchedule(function (Schedule $schedule) {

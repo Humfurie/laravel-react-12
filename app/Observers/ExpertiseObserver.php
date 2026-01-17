@@ -20,8 +20,8 @@ class ExpertiseObserver
      */
     protected function clearCache(): void
     {
-        Cache::forget('homepage.expertises');
-        Cache::forget('admin:dashboard');
+        Cache::forget(config('cache-ttl.keys.homepage_expertises'));
+        Cache::forget(config('cache-ttl.keys.admin_dashboard'));
     }
 
     /**

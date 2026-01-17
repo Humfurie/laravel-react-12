@@ -7,11 +7,132 @@ use App\Models\Experience;
 use App\Models\Expertise;
 use App\Models\Project;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class HomepageCacheService
 {
+    /**
+     * Default lock timeout in seconds.
+     */
+    private const LOCK_TIMEOUT = 10;
+
+    /**
+     * Default lock wait time in seconds.
+     */
+    private const LOCK_WAIT = 5;
+
+    /**
+     * Get cached homepage blogs data with stampede protection.
+     *
+     * @return array{primary: \Illuminate\Support\Collection, latest: \Illuminate\Database\Eloquent\Collection, stats: array{total_posts: int, total_views: int, featured_count: int}}
+     */
+    public function getCachedBlogsData(): array
+    {
+        return $this->rememberWithLock(
+            config('cache-ttl.keys.homepage_blogs'),
+            config('cache-ttl.homepage.blogs'),
+            fn () => $this->getBlogsData()
+        );
+    }
+
+    /**
+     * Get cached homepage projects data with stampede protection.
+     *
+     * @return array{featured: \Illuminate\Database\Eloquent\Collection, stats: array{total_projects: int, live_projects: int}}
+     */
+    public function getCachedProjectsData(): array
+    {
+        return $this->rememberWithLock(
+            config('cache-ttl.keys.homepage_projects'),
+            config('cache-ttl.homepage.projects'),
+            fn () => $this->getProjectsData()
+        );
+    }
+
+    /**
+     * Get cached homepage experiences data with stampede protection.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getCachedExperiencesData()
+    {
+        return $this->rememberWithLock(
+            config('cache-ttl.keys.homepage_experiences'),
+            config('cache-ttl.homepage.experiences'),
+            fn () => $this->getExperiencesData()
+        );
+    }
+
+    /**
+     * Get cached homepage expertises data with stampede protection.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getCachedExpertisesData()
+    {
+        return $this->rememberWithLock(
+            config('cache-ttl.keys.homepage_expertises'),
+            config('cache-ttl.homepage.expertises'),
+            fn () => $this->getExpertisesData()
+        );
+    }
+
+    /**
+     * Get cached admin user profile data with stampede protection.
+     *
+     * @throws RuntimeException
+     */
+    public function getCachedUserProfileData(): User
+    {
+        return $this->rememberWithLock(
+            config('cache-ttl.keys.homepage_user_profile'),
+            config('cache-ttl.homepage.user_profile'),
+            fn () => $this->getUserProfileData()
+        );
+    }
+
+    /**
+     * Cache remember with lock to prevent stampede.
+     *
+     * Uses atomic locking to ensure only one process computes the value
+     * when cache expires. Other processes wait for the lock or return
+     * stale data if available.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $callback
+     * @return T
+     */
+    private function rememberWithLock(string $key, int $ttl, callable $callback): mixed
+    {
+        $cached = Cache::get($key);
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $lock = Cache::lock("{$key}:lock", self::LOCK_TIMEOUT);
+
+        if ($lock->get()) {
+            try {
+                $cached = Cache::get($key);
+                if ($cached !== null) {
+                    return $cached;
+                }
+
+                $value = $callback();
+                Cache::put($key, $value, $ttl);
+
+                return $value;
+            } finally {
+                $lock->release();
+            }
+        }
+
+        return Cache::remember($key, $ttl, $callback);
+    }
+
     /**
      * Get homepage blog data without caching.
      *
