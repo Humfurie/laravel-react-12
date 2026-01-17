@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\IncrementViewCount;
 use App\Models\Project;
+use App\Services\HomepageCacheService;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
@@ -80,28 +81,6 @@ class ProjectController extends Controller
      */
     public function getFeaturedAndStats()
     {
-        return Cache::remember(
-            config('cache-ttl.keys.homepage_projects'),
-            config('cache-ttl.homepage.projects'),
-            function () {
-                $featured = Project::query()
-                    ->public()
-                    ->featured()
-                    ->with(['primaryImage'])
-                    ->orderBy('featured_at', 'desc')
-                    ->take(config('cache-ttl.homepage.projects_limit', 6))
-                    ->get();
-
-                $stats = [
-                    'total_projects' => Project::public()->count(),
-                    'live_projects' => Project::public()->live()->count(),
-                ];
-
-                return [
-                    'featured' => $featured,
-                    'stats' => $stats,
-                ];
-            }
-        );
+        return app(HomepageCacheService::class)->getCachedProjectsData();
     }
 }
