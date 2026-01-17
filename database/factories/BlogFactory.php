@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Blog;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Blog>
@@ -20,19 +19,16 @@ class BlogFactory extends Factory
      */
     public function definition(): array
     {
-        $title = fake()->unique()->sentence(3);
-
         return [
-            'title' => $title,
-            'slug' => Str::slug($title),
+            'title' => fake()->unique()->sentence(3),
             'content' => $this->generateRichContent(),
             'excerpt' => fake()->text(150),
             'status' => fake()->randomElement(['draft', 'published', 'private']),
             'featured_image' => fake()->boolean(30) ? fake()->imageUrl(800, 600, 'technology') : null,
             'meta_data' => [
-                'meta_title' => $title,
+                'meta_title' => fake()->sentence(3),
                 'meta_description' => fake()->text(160),
-                'meta_keywords' => implode(', ', fake()->words(5))
+                'meta_keywords' => implode(', ', fake()->words(5)),
             ],
             'isPrimary' => fake()->boolean(20), // 20% chance of being primary
             'sort_order' => fake()->numberBetween(0, 100),
@@ -49,31 +45,31 @@ class BlogFactory extends Factory
         $paragraphs = [];
 
         // Add opening paragraph
-        $paragraphs[] = '<p>' . fake()->paragraph(4) . '</p>';
+        $paragraphs[] = '<p>'.fake()->paragraph(4).'</p>';
 
         // Add heading
-        $paragraphs[] = '<h2>' . fake()->sentence(3) . '</h2>';
+        $paragraphs[] = '<h2>'.fake()->sentence(3).'</h2>';
 
         // Add more paragraphs
         for ($i = 0; $i < fake()->numberBetween(2, 4); $i++) {
-            $paragraphs[] = '<p>' . fake()->paragraph(6) . '</p>';
+            $paragraphs[] = '<p>'.fake()->paragraph(6).'</p>';
         }
 
         // Sometimes add an image
         if (fake()->boolean(40)) {
-            $paragraphs[] = '<p><img src="' . fake()->imageUrl(600, 400, 'technology') . '" alt="' . fake()->words(3, true) . '" /></p>';
+            $paragraphs[] = '<p><img src="'.fake()->imageUrl(600, 400, 'technology').'" alt="'.fake()->words(3, true).'" /></p>';
         }
 
         // Add another heading
-        $paragraphs[] = '<h3>' . fake()->sentence(2) . '</h3>';
+        $paragraphs[] = '<h3>'.fake()->sentence(2).'</h3>';
 
         // Add list
-        $listItems = array_map(fn($item) => '<li>' . $item . '</li>', fake()->sentences(4));
-        $paragraphs[] = '<ul>' . implode('', $listItems) . '</ul>';
+        $listItems = array_map(fn ($item) => '<li>'.$item.'</li>', fake()->sentences(4));
+        $paragraphs[] = '<ul>'.implode('', $listItems).'</ul>';
 
         // Add final paragraphs
         for ($i = 0; $i < fake()->numberBetween(1, 3); $i++) {
-            $paragraphs[] = '<p>' . fake()->paragraph(5) . '</p>';
+            $paragraphs[] = '<p>'.fake()->paragraph(5).'</p>';
         }
 
         return implode("\n", $paragraphs);
