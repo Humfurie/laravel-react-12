@@ -85,17 +85,17 @@ Route::get('/sitemap-blogs.xml', [SitemapController::class, 'blogs'])->name('sit
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{blog}', [BlogController::class, 'show'])->name('blog.show');
 
-// Property listing pages
-Route::get('/properties', [App\Http\Controllers\PropertyListingController::class, 'index'])->name('properties.list');
-Route::get('/properties/{property}', [App\Http\Controllers\PropertyListingController::class, 'show'])->name('properties.detail');
+// Property listing pages (disabled - using separate Next.js frontend)
+// Route::get('/properties', [App\Http\Controllers\PropertyListingController::class, 'index'])->name('properties.list');
+// Route::get('/properties/{property}', [App\Http\Controllers\PropertyListingController::class, 'show'])->name('properties.detail');
 
-// Giveaway pages
-Route::get('/giveaways', [App\Http\Controllers\GiveawayController::class, 'index'])->name('giveaways.index');
-Route::get('/giveaways/winners', [App\Http\Controllers\GiveawayController::class, 'winners'])->name('giveaways.winners');
-Route::get('/giveaways/{giveaway:slug}', [App\Http\Controllers\GiveawayController::class, 'show'])->name('giveaways.show');
-Route::get('/giveaways/{giveaway:slug}/entries', [App\Http\Controllers\GiveawayController::class, 'entries'])->name('giveaways.entries');
-Route::post('/giveaways/{giveaway:slug}/activate', [App\Http\Controllers\GiveawayController::class, 'activateGiveaway'])->name('giveaways.activate');
-Route::post('/giveaways/{giveaway:slug}/pick-winner', [App\Http\Controllers\GiveawayController::class, 'startGiveaway'])->name('giveaways.pick-winner');
+// Giveaway pages (disabled - using separate Next.js frontend)
+// Route::get('/giveaways', [App\Http\Controllers\GiveawayController::class, 'index'])->name('giveaways.index');
+// Route::get('/giveaways/winners', [App\Http\Controllers\GiveawayController::class, 'winners'])->name('giveaways.winners');
+// Route::get('/giveaways/{giveaway:slug}', [App\Http\Controllers\GiveawayController::class, 'show'])->name('giveaways.show');
+// Route::get('/giveaways/{giveaway:slug}/entries', [App\Http\Controllers\GiveawayController::class, 'entries'])->name('giveaways.entries');
+// Route::post('/giveaways/{giveaway:slug}/activate', [App\Http\Controllers\GiveawayController::class, 'activateGiveaway'])->name('giveaways.activate');
+// Route::post('/giveaways/{giveaway:slug}/pick-winner', [App\Http\Controllers\GiveawayController::class, 'startGiveaway'])->name('giveaways.pick-winner');
 
 // Projects showcase
 Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
@@ -118,7 +118,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('admin')->group(function () {
-        require __DIR__ . '/admin.php';
+        require __DIR__.'/admin.php';
     });
 });
 
@@ -127,8 +127,8 @@ Route::middleware('auth')->group(function () {
     // Create comments (with rate limiting)
     Route::post('/blogs/{blog}/comments', [App\Http\Controllers\CommentController::class, 'store'])
         ->middleware('throttle:10,1'); // 10 per minute
-    Route::post('/giveaways/{giveaway}/comments', [App\Http\Controllers\CommentController::class, 'storeOnGiveaway'])
-        ->middleware('throttle:10,1');
+    // Route::post('/giveaways/{giveaway}/comments', [App\Http\Controllers\CommentController::class, 'storeOnGiveaway'])
+    //     ->middleware('throttle:10,1');
 
     // Update/delete own comments
     Route::put('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'update']);
@@ -139,6 +139,6 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:5,1'); // 5 reports per minute
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
-require __DIR__ . '/user.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
+require __DIR__.'/user.php';
