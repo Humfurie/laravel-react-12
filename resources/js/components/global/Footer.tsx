@@ -1,130 +1,118 @@
-import React, { useState } from 'react';
-import { FaPhone } from 'react-icons/fa';
-import { MdEmail } from 'react-icons/md';
-import Socials from './Socials';
+import { Link } from '@inertiajs/react';
+import { FileText, FolderKanban, Github, Home, Linkedin, Mail, Phone } from 'lucide-react';
+import { useState } from 'react';
+import { FaFacebook, FaInstagram } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 
-interface FooterArr {
-    label: string;
-    url?: string;
-    icon?: React.ReactNode;
-}
+const navLinks = [
+    { label: 'Home', href: '/', icon: Home },
+    { label: 'Projects', href: '/projects', icon: FolderKanban },
+    { label: 'Blog', href: '/blog', icon: FileText },
+];
 
-interface FooterData {
-    title: string;
-    items: FooterArr[];
-}
+const socialLinks = [
+    { label: 'GitHub', href: 'https://github.com/Humfurie', icon: Github },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/humphrey-singculan-09a459153', icon: Linkedin },
+    { label: 'Facebook', href: 'https://www.facebook.com/humphrey123', icon: FaFacebook },
+    { label: 'Instagram', href: 'https://www.instagram.com/humfuree/', icon: FaInstagram },
+    { label: 'X', href: 'https://x.com/Humphfries', icon: FaXTwitter },
+];
 
-const footerData: FooterData[] = [
-    {
-        title: 'Navigate',
-        items: [
-            {
-                label: 'Home',
-                url: '/',
-            },
-            // {
-            //     label: 'About Me',
-            //     url: '/about-me',
-            // },
-            // {
-            //     label: 'Projects',
-            //     url: '/projects',
-            // },
-            // {
-            //     label: 'Blogs',
-            //     url: '/blogs',
-            // },
-        ],
-    },
-    {
-        title: 'Contact Me',
-        items: [
-            {
-                label: 'humfurie@gmail.com',
-                icon: <MdEmail />,
-            },
-            {
-                label: '+63 9397535416',
-                icon: <FaPhone />,
-            },
-        ],
-    },
+const contactInfo = [
+    { label: 'humfurie@gmail.com', icon: Mail },
+    { label: '+63 9397535416', icon: Phone },
 ];
 
 export default function Footer() {
-    const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+    const [copiedText, setCopiedText] = useState<string | null>(null);
 
-    const handleCopy = (text: string, index: number) => {
+    const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
-        setCopiedIndex(index);
-        setTimeout(() => setCopiedIndex(null), 2000); // Reset after 2s
+        setCopiedText(text);
+        setTimeout(() => setCopiedText(null), 2000);
     };
+
     return (
-        <footer className="relative w-full">
-            <div className="bg-brand-black/70 absolute inset-0 z-10 h-full w-full backdrop-blur-[7px]"></div>
-            <picture>
-                <source srcSet="/images/humphrey-footer.webp" media="(min-width: 768px)" />
-                <img
-                    src="/images/humphrey-footer.webp"
-                    alt="Humphrey Footer"
-                    className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-                />
-            </picture>
+        <footer className="border-t border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
+            <div className="container mx-auto px-4 py-12">
+                {/* Main Content - Centered */}
+                <div className="flex flex-col items-center text-center">
+                    {/* Logo & Name */}
+                    <Link href="/" className="mb-6 flex items-center gap-2">
+                        <img src="/logo.png" alt="Logo" className="h-10 w-10" />
+                        <span className="text-xl font-bold text-gray-900 dark:text-white">Humphrey Singculan</span>
+                    </Link>
 
-            <div className="primary-container relative z-10 flex flex-col items-center justify-center gap-8 py-[40px] text-black sm:gap-10 md:flex-row md:items-start md:justify-start md:py-[80px]">
-                {footerData.map((section, index) => (
-                    <div key={index} className="flex w-full flex-col items-center text-center sm:w-[200px] md:items-start md:text-start">
-                        <h5 className="mb-3 text-base font-bold text-white sm:mb-4 sm:text-[18px]">{section.title}</h5>
+                    {/* Tagline */}
+                    <p className="mb-8 max-w-md text-gray-600 dark:text-gray-400">
+                        Software Engineer specializing in Laravel, React, and full-stack development.
+                    </p>
 
-                        <ul className="w-full space-y-2">
-                            {section.items.map((item, i) => (
-                                <li
-                                    key={i}
-                                    className="relative flex cursor-pointer items-center justify-center gap-2 text-sm text-white sm:text-base md:justify-start"
-                                    onClick={() => {
-                                        if (!item.url && item.label) handleCopy(item.label, i);
-                                    }}
-                                >
-                                    {item.icon && <span className="text-lg sm:text-xl">{item.icon}</span>}
-                                    {item.url ? (
-                                        <a href={item.url} className="hover:underline">
-                                            {item.label}
-                                        </a>
-                                    ) : (
-                                        <>
-                                            <span className="break-all hover:underline">{item.label}</span>
-                                            {copiedIndex === i && (
-                                                <span className="bg-brand-orange absolute -top-3 right-0 ml-2 rounded-sm px-2 text-xs text-white">
-                                                    Copied!
-                                                </span>
-                                            )}
-                                        </>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
+                    {/* Navigation Links */}
+                    <nav className="mb-8 flex flex-wrap justify-center gap-6">
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.label}
+                                href={link.href}
+                                className="flex items-center gap-2 text-gray-600 transition-colors hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400"
+                            >
+                                <link.icon className="h-4 w-4" />
+                                <span>{link.label}</span>
+                            </Link>
+                        ))}
+                    </nav>
 
-                        {/* Socials under Contact Me */}
-                        {section.title === 'Contact Me' && (
-                            <div className="mt-4 sm:mt-6">
-                                <Socials />
-                            </div>
-                        )}
+                    {/* Contact Info */}
+                    <div className="mb-8 flex flex-wrap justify-center gap-6">
+                        {contactInfo.map((item) => (
+                            <button
+                                key={item.label}
+                                onClick={() => handleCopy(item.label)}
+                                className="relative flex items-center gap-2 text-gray-600 transition-colors hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400"
+                            >
+                                <item.icon className="h-4 w-4" />
+                                <span>{item.label}</span>
+                                {copiedText === item.label && (
+                                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 rounded bg-orange-500 px-2 py-1 text-xs text-white">
+                                        Copied!
+                                    </span>
+                                )}
+                            </button>
+                        ))}
                     </div>
-                ))}
-            </div>
 
-            <div className="text-brand-black relative z-10 w-full bg-white/70 py-4 text-center backdrop-blur-md sm:py-6">
-                <div className="flex flex-col items-center gap-2 px-4">
-                    <div className="text-sm sm:text-base">© 2025 Humfurie™. All Rights Reserved.</div>
-                    <a
-                        href="https://github.com/Humfurie/laravel-react-12"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-brand-orange hover:text-brand-orange/80 text-xs font-medium underline transition-colors sm:text-sm"
-                    >
-                        View Source Code
-                    </a>
+                    {/* Social Links */}
+                    <div className="mb-8 flex justify-center gap-4">
+                        {socialLinks.map((social) => (
+                            <a
+                                key={social.label}
+                                href={social.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={social.label}
+                                className="rounded-full bg-gray-200 p-2.5 text-gray-600 transition-all hover:bg-orange-500 hover:text-white dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-orange-500 dark:hover:text-white"
+                            >
+                                <social.icon className="h-5 w-5" />
+                            </a>
+                        ))}
+                    </div>
+
+                    {/* Divider */}
+                    <div className="mb-6 h-px w-full max-w-md bg-gray-200 dark:bg-gray-800" />
+
+                    {/* Copyright & Source */}
+                    <div className="flex flex-col items-center gap-2 text-sm text-gray-500 dark:text-gray-500">
+                        <p>© {new Date().getFullYear()} Humphrey Singculan. All rights reserved.</p>
+                        <a
+                            href="https://github.com/Humfurie/laravel-react-12"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300"
+                        >
+                            <Github className="h-4 w-4" />
+                            <span>View Source Code</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </footer>
