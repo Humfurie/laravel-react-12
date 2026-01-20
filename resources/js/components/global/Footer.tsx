@@ -1,13 +1,13 @@
 import { Link } from '@inertiajs/react';
-import { FileText, FolderKanban, Github, Home, Linkedin, Mail, Phone } from 'lucide-react';
+import { Github, Linkedin } from 'lucide-react';
 import { useState } from 'react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 
 const navLinks = [
-    { label: 'Home', href: '/', icon: Home },
-    { label: 'Projects', href: '/projects', icon: FolderKanban },
-    { label: 'Blog', href: '/blog', icon: FileText },
+    { label: 'Home', href: '/' },
+    { label: 'Projects', href: '/projects' },
+    { label: 'Blog', href: '/blog' },
 ];
 
 const socialLinks = [
@@ -18,71 +18,40 @@ const socialLinks = [
     { label: 'X', href: 'https://x.com/Humphfries', icon: FaXTwitter },
 ];
 
-const contactInfo = [
-    { label: 'humfurie@gmail.com', icon: Mail },
-    { label: '+63 9397535416', icon: Phone },
-];
-
 export default function Footer() {
-    const [copiedText, setCopiedText] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
 
-    const handleCopy = (text: string) => {
-        navigator.clipboard.writeText(text);
-        setCopiedText(text);
-        setTimeout(() => setCopiedText(null), 2000);
+    const handleCopyEmail = () => {
+        navigator.clipboard.writeText('humfurie@gmail.com');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     return (
-        <footer className="border-t border-gray-200 bg-gray-50 dark:border-gray-700/50 dark:bg-gray-950">
-            <div className="container mx-auto px-4 py-12">
-                {/* Main Content - Centered */}
-                <div className="flex flex-col items-center text-center">
-                    {/* Logo & Name */}
-                    <Link href="/" className="mb-6 flex items-center gap-2">
-                        <img src="/logo.png" alt="Logo" className="h-10 w-10" />
-                        <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Humphrey Singculan</span>
-                    </Link>
-
-                    {/* Tagline */}
-                    <p className="mb-8 max-w-md text-gray-600 dark:text-gray-300">
-                        Software Engineer specializing in Laravel, React, and full-stack development.
-                    </p>
-
-                    {/* Navigation Links */}
-                    <nav className="mb-8 flex flex-wrap justify-center gap-6">
-                        {navLinks.map((link) => (
-                            <Link
-                                key={link.label}
-                                href={link.href}
-                                className="flex items-center gap-2 text-gray-600 transition-colors hover:text-orange-500 dark:text-gray-300 dark:hover:text-orange-400"
-                            >
-                                <link.icon className="h-4 w-4" />
-                                <span>{link.label}</span>
-                            </Link>
-                        ))}
-                    </nav>
-
-                    {/* Contact Info */}
-                    <div className="mb-8 flex flex-wrap justify-center gap-6">
-                        {contactInfo.map((item) => (
-                            <button
-                                key={item.label}
-                                onClick={() => handleCopy(item.label)}
-                                className="relative flex items-center gap-2 text-gray-600 transition-colors hover:text-orange-500 dark:text-gray-300 dark:hover:text-orange-400"
-                            >
-                                <item.icon className="h-4 w-4" />
-                                <span>{item.label}</span>
-                                {copiedText === item.label && (
-                                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 rounded bg-orange-500 px-2 py-1 text-xs text-white">
-                                        Copied!
-                                    </span>
-                                )}
-                            </button>
-                        ))}
+        <footer className="border-t border-gray-100 bg-white dark:border-gray-800/50 dark:bg-gray-950">
+            <div className="container mx-auto px-6 py-8">
+                <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
+                    {/* Left - Brand */}
+                    <div className="flex items-center gap-6">
+                        <Link href="/" className="text-sm font-medium text-gray-900 dark:text-white">
+                            Humphrey Singculan
+                        </Link>
+                        <span className="hidden text-gray-300 dark:text-gray-700 md:inline">|</span>
+                        <nav className="hidden items-center gap-6 md:flex">
+                            {navLinks.map((link) => (
+                                <Link
+                                    key={link.label}
+                                    href={link.href}
+                                    className="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
+                        </nav>
                     </div>
 
-                    {/* Social Links */}
-                    <div className="mb-8 flex justify-center gap-4">
+                    {/* Right - Social & Email */}
+                    <div className="flex items-center gap-4">
                         {socialLinks.map((social) => (
                             <a
                                 key={social.label}
@@ -90,29 +59,45 @@ export default function Footer() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 aria-label={social.label}
-                                className="rounded-full bg-gray-200 p-2.5 text-gray-600 transition-all hover:bg-orange-500 hover:text-white dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-orange-500 dark:hover:text-white"
+                                className="text-gray-400 transition-colors hover:text-gray-900 dark:text-gray-500 dark:hover:text-white"
                             >
-                                <social.icon className="h-5 w-5" />
+                                <social.icon className="h-4 w-4" />
                             </a>
                         ))}
-                    </div>
-
-                    {/* Divider */}
-                    <div className="mb-6 h-px w-full max-w-md bg-gray-200 dark:bg-gray-700/50" />
-
-                    {/* Copyright & Source */}
-                    <div className="flex flex-col items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                        <p>© {new Date().getFullYear()} Humphrey Singculan. All rights reserved.</p>
-                        <a
-                            href="https://github.com/Humfurie/laravel-react-12"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300"
+                        <span className="text-gray-300 dark:text-gray-700">|</span>
+                        <button
+                            onClick={handleCopyEmail}
+                            className="relative text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                         >
-                            <Github className="h-4 w-4" />
-                            <span>View Source Code</span>
-                        </a>
+                            {copied ? 'Copied!' : 'humfurie@gmail.com'}
+                        </button>
                     </div>
+                </div>
+
+                {/* Mobile Nav */}
+                <nav className="mt-6 flex justify-center gap-6 md:hidden">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.label}
+                            href={link.href}
+                            className="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
+                </nav>
+
+                {/* Bottom */}
+                <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-gray-100 pt-6 text-xs text-gray-400 md:flex-row dark:border-gray-800/50 dark:text-gray-500">
+                    <p>© {new Date().getFullYear()} Humphrey Singculan</p>
+                    <a
+                        href="https://github.com/Humfurie/laravel-react-12"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="transition-colors hover:text-gray-900 dark:hover:text-white"
+                    >
+                        View Source
+                    </a>
                 </div>
             </div>
         </footer>
