@@ -58,16 +58,16 @@ const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
                     {items.map((item, index) => (
                         <div
                             key={index}
-                            className="bg-muted-yellow flex h-[120px] w-full flex-col items-center justify-center rounded-[20px] p-2 text-center sm:h-[150px] sm:rounded-[28px] md:h-[200px] dark:bg-orange-950/30"
+                            className="bg-muted-yellow flex h-[120px] w-full flex-col items-center justify-center rounded-[20px] p-2 text-center sm:h-[150px] sm:rounded-[28px] md:h-[200px] dark:bg-gray-800/80"
                         >
                             {item.imgUrl ? (
                                 <img src={item.imgUrl} alt="About item" className="h-full w-full object-contain" loading="lazy" />
                             ) : (
                                 <>
-                                    <span className="text-brand-orange text-[28px] font-bold sm:text-[40px] lg:text-[60px]">
-                                        {item.count} <span className="text-brand-gray">+</span>
+                                    <span className="text-[28px] font-bold text-orange-500 sm:text-[40px] lg:text-[60px] dark:text-orange-400">
+                                        {item.count} <span className="text-gray-500 dark:text-gray-400">+</span>
                                     </span>
-                                    <span className="text-brand-gray text-xs sm:text-sm md:text-base">{item.label}</span>
+                                    <span className="text-xs text-gray-600 sm:text-sm md:text-base dark:text-gray-300">{item.label}</span>
                                 </>
                             )}
                         </div>
@@ -76,15 +76,8 @@ const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
 
                 {/* Right side: Just static content */}
                 <div className="excerpt w-full md:w-[50%]">
-                    <h4 className="mb-3 w-full text-center font-bold sm:mb-4 sm:text-start">{title}</h4>
+                    <h4 className="mb-3 w-full text-center font-bold text-gray-900 sm:mb-4 sm:text-start dark:text-white">{title}</h4>
                     <p className="mb-6 text-justify text-sm text-gray-600 sm:mb-8 sm:text-base md:text-[18px] dark:text-gray-300">{excerpt}</p>
-                    <div className="flex w-full flex-col items-center justify-center sm:items-start">
-                        {/*<ButtonOne*/}
-                        {/*    type="button"*/}
-                        {/*    text="Know More"*/}
-                        {/*    className="btn-orange text-center max-w-fit"*/}
-                        {/*/>*/}
-                    </div>
                 </div>
             </div>
         </section>
