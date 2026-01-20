@@ -58,7 +58,7 @@ const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
                     {items.map((item, index) => (
                         <div
                             key={index}
-                            className="bg-muted-yellow flex h-[120px] w-full flex-col items-center justify-center rounded-[20px] p-2 text-center sm:h-[150px] sm:rounded-[28px] md:h-[200px] dark:bg-gray-800/80"
+                            className="flex h-[120px] w-full flex-col items-center justify-center rounded-[20px] border-2 border-orange-200 bg-orange-50 p-2 text-center sm:h-[150px] sm:rounded-[28px] md:h-[200px] dark:border-orange-500/30 dark:bg-gray-900"
                         >
                             {item.imgUrl ? (
                                 <img src={item.imgUrl} alt="About item" className="h-full w-full object-contain" loading="lazy" />
