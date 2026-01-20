@@ -1,4 +1,4 @@
-import { Coins, FileText, FolderKanban, Home as HomeIcon, type LucideIcon, Trophy } from 'lucide-react';
+import { FileText, FolderKanban, Home as HomeIcon, type LucideIcon } from 'lucide-react';
 
 export interface NavItem {
     id: string;
@@ -13,23 +13,9 @@ export const publicNavItems: NavItem[] = [
     { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true },
     { id: 'projects', label: 'Projects', icon: FolderKanban, route: '/projects', showIcon: true },
     { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
-    { id: 'giveaways', label: 'Giveaways', icon: Trophy, route: '/giveaways', showIcon: true },
-    { id: 'markets', label: 'Markets', icon: Coins, route: '/markets', showIcon: true },
-];
-
-// Giveaway-specific navigation
-export const giveawayNavItems: NavItem[] = [
-    { id: 'home', label: 'Home', icon: HomeIcon, route: '/', showIcon: true },
-    { id: 'blog', label: 'Blog', icon: FileText, route: '/blog', showIcon: true },
-    { id: 'giveaways', label: 'Giveaways', icon: Trophy, route: '/giveaways', showIcon: true },
 ];
 
 // Helper function to get navigation by page
-export function getNavItemsForPage(page?: string): NavItem[] {
-    switch (page) {
-        case 'giveaways':
-            return giveawayNavItems;
-        default:
-            return publicNavItems;
-    }
+export function getNavItemsForPage(_page?: string): NavItem[] {
+    return publicNavItems;
 }

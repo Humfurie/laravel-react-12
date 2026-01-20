@@ -19,7 +19,8 @@ class SitemapController extends Controller
         ])->render();
 
         return response($xml, 200)
-            ->header('Content-Type', 'application/xml');
+            ->header('Content-Type', 'application/xml')
+            ->header('Cache-Control', 'public, max-age=3600, s-maxage=3600');
     }
 
     public function blogs(): Response
@@ -34,6 +35,7 @@ class SitemapController extends Controller
         ])->render();
 
         return response($xml, 200)
-            ->header('Content-Type', 'application/xml');
+            ->header('Content-Type', 'application/xml')
+            ->header('Cache-Control', 'public, max-age=3600, s-maxage=3600');
     }
 }

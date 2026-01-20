@@ -55,7 +55,11 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
     return (
         <>
             <Head title="Projects">
-                <meta name="description" content="Explore my portfolio of projects - web applications, mobile apps, APIs, libraries, and more." />
+                <meta
+                    name="description"
+                    content="Explore Humphrey Singculan's portfolio of projects - web applications built with Laravel, React, and modern full-stack technologies."
+                />
+                <link rel="canonical" href="https://humfurie.org/projects" />
             </Head>
 
             <div className="min-h-screen bg-[#FAFAF8] dark:bg-gray-900">

@@ -59,11 +59,17 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => {
-        // Don't append app name to auth pages
-        if (title.startsWith('Log in') || title.startsWith('Register') || title.startsWith('Reset') || title.startsWith('Forgot')) {
+        // Don't append suffix to auth pages or homepage (which has full title)
+        if (
+            title.startsWith('Log in') ||
+            title.startsWith('Register') ||
+            title.startsWith('Reset') ||
+            title.startsWith('Forgot') ||
+            title.startsWith('Humphrey Singculan')
+        ) {
             return title;
         }
-        return `${title} ${appName}`;
+        return `${title} | Humphrey Singculan`;
     },
     resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
     setup({ el, App, props }) {

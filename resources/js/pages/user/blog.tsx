@@ -219,8 +219,9 @@ export default function BlogIndex({ blogs }: Props) {
             <Head title="Blog">
                 <meta
                     name="description"
-                    content="Browse through all our articles, tutorials, and insights. Discover the latest trends and best practices in technology and development."
+                    content="Read articles, tutorials, and insights by Humphrey Singculan on software development, Laravel, React, and full-stack engineering."
                 />
+                <link rel="canonical" href="https://humfurie.org/blog" />
 
                 {/* Open Graph Meta Tags for Social Media */}
                 <meta property="og:title" content="Blog - All Posts" />

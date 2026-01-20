@@ -4,6 +4,7 @@ import HomeAboutMe from '@/components/home/sections/HomeAboutMe';
 import HomeBanner from '@/components/home/sections/HomeBanner';
 import HomeExpertise from '@/components/home/sections/HomeExpertise';
 import HomeProjects from '@/components/home/sections/HomeProjects';
+import StructuredData, { schemas } from '@/components/seo/StructuredData';
 import { Badge } from '@/components/ui/badge';
 import type { Project } from '@/types/project';
 import { Head, Link, router } from '@inertiajs/react';
@@ -195,34 +196,40 @@ export default function Home({
 
     return (
         <>
-            <Head title="Portfolio & Blog">
+            <Head title="Humphrey Singculan - Software Engineer | Blog & Portfolio">
                 <meta
                     name="description"
-                    content="Professional portfolio and blog featuring expertise in software development, design, and technology insights."
+                    content="Humphrey Singculan is a Software Engineer specializing in Laravel, React, and full-stack development. Explore projects, blog posts, and professional portfolio."
                 />
 
+                {/* Canonical URL */}
+                <link rel="canonical" href="https://humfurie.org" />
+
                 {/* Open Graph Meta Tags for Social Media */}
-                <meta property="og:title" content="Portfolio & Blog" />
+                <meta property="og:title" content="Humphrey Singculan - Software Engineer | Blog & Portfolio" />
                 <meta
                     property="og:description"
-                    content="Professional portfolio and blog featuring expertise in software development, design, and technology insights."
+                    content="Humphrey Singculan is a Software Engineer specializing in Laravel, React, and full-stack development. Explore projects, blog posts, and professional portfolio."
                 />
                 <meta property="og:type" content="website" />
-                <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
-                <meta property="og:image" content="/images/og-default.jpg" />
+                <meta property="og:url" content="https://humfurie.org" />
+                <meta property="og:image" content="https://humfurie.org/images/og-default.jpg" />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
-                <meta property="og:image:alt" content="Portfolio & Blog - Professional Development Portfolio" />
+                <meta property="og:image:alt" content="Humphrey Singculan - Software Engineer Portfolio" />
 
                 {/* Twitter Card Meta Tags */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Portfolio & Blog" />
+                <meta name="twitter:title" content="Humphrey Singculan - Software Engineer | Blog & Portfolio" />
                 <meta
                     name="twitter:description"
-                    content="Professional portfolio and blog featuring expertise in software development, design, and technology insights."
+                    content="Humphrey Singculan is a Software Engineer specializing in Laravel, React, and full-stack development. Explore projects, blog posts, and professional portfolio."
                 />
-                <meta name="twitter:image" content="/images/og-default.jpg" />
+                <meta name="twitter:image" content="https://humfurie.org/images/og-default.jpg" />
             </Head>
+
+            {/* Structured Data for SEO */}
+            <StructuredData data={[schemas.person(), schemas.website()]} />
 
             <FloatingNav currentPage="home" />
 
