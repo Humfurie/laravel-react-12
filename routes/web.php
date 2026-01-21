@@ -73,6 +73,7 @@ Route::get('/', function () {
             'bio' => $primaryUser->bio,
             'about' => $primaryUser->about,
             'profile_stats' => $primaryUser->profile_stats ?? [],
+            'about_image_path' => $primaryUser->about_image_path,
         ] : null,
     ]));
 })->name('home');

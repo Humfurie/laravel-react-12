@@ -144,9 +144,9 @@ export default function Dashboard({ dashboardData }: DashboardProps) {
 
                 {/* Row 3: Charts */}
                 <div className="grid gap-4 md:grid-cols-2">
-                    <Card className="border-gray-100 dark:border-gray-800">
+                    <Card>
                         <CardHeader className="pb-3">
-                            <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                            <CardTitle className="text-base font-semibold text-card-foreground">
                                 Giveaway Entries (Last 30 Days)
                             </CardTitle>
                         </CardHeader>
@@ -192,9 +192,9 @@ export default function Dashboard({ dashboardData }: DashboardProps) {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-gray-100 dark:border-gray-800">
+                    <Card>
                         <CardHeader className="pb-3">
-                            <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Properties by Status</CardTitle>
+                            <CardTitle className="text-base font-semibold text-card-foreground">Properties by Status</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
@@ -234,9 +234,9 @@ export default function Dashboard({ dashboardData }: DashboardProps) {
 
                 {/* Row 6: Additional Insights */}
                 <div className="grid gap-4 md:grid-cols-2">
-                    <Card className="border-gray-100 dark:border-gray-800">
+                    <Card>
                         <CardHeader className="pb-3">
-                            <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Inquiries by Type</CardTitle>
+                            <CardTitle className="text-base font-semibold text-card-foreground">Inquiries by Type</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
@@ -272,9 +272,9 @@ export default function Dashboard({ dashboardData }: DashboardProps) {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-gray-100 dark:border-gray-800">
+                    <Card>
                         <CardHeader className="pb-3">
-                            <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Content Overview</CardTitle>
+                            <CardTitle className="text-base font-semibold text-card-foreground">Content Overview</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-2 gap-3">

@@ -74,7 +74,7 @@ export function ActionItemsWidget({ inquiriesNeedingFollowUp, giveawaysEndingSoo
     };
 
     return (
-        <Card className="border-gray-100 dark:border-gray-800">
+        <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <div>
                     <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Action Items</CardTitle>

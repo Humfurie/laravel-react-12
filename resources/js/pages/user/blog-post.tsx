@@ -150,7 +150,7 @@ export default function BlogPost({ blog }: Props) {
                 <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
             </Head>
 
-            <div className="min-h-screen bg-[#FAFAF8]">
+            <div className="min-h-screen bg-[#FAFAF8] dark:bg-neutral-950">
                 <FloatingNav currentPage="blog" />
 
                 <main className="pt-20">
@@ -161,7 +161,7 @@ export default function BlogPost({ blog }: Props) {
                             {/* Back Link */}
                             <Link
                                 href="/blog"
-                                className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                                className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                             >
                                 <ArrowLeft className="h-4 w-4" />
                                 Back to all articles
@@ -176,28 +176,28 @@ export default function BlogPost({ blog }: Props) {
                                     </Badge>
                                 )}
                                 {blog.published_at && (
-                                    <span className="flex items-center gap-1 text-sm text-gray-500">
+                                    <span className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
                                         <Calendar className="h-4 w-4" />
                                         {format(new Date(blog.published_at), 'MMMM dd, yyyy')}
                                     </span>
                                 )}
-                                <span className="flex items-center gap-1 text-sm text-gray-500">
+                                <span className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
                                     <Clock className="h-4 w-4" />
                                     {readingTime} min read
                                 </span>
-                                <span className="flex items-center gap-1 text-sm text-gray-500">
+                                <span className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
                                     <Eye className="h-4 w-4" />
                                     {blog.view_count || 0} views
                                 </span>
                             </div>
 
                             {/* Title */}
-                            <h1 className="mb-6 font-serif text-4xl leading-tight font-bold tracking-tight text-gray-900 md:text-5xl lg:text-6xl">
+                            <h1 className="mb-6 font-serif text-4xl leading-tight font-bold tracking-tight text-gray-900 dark:text-white md:text-5xl lg:text-6xl">
                                 {blog.title}
                             </h1>
 
                             {/* Excerpt */}
-                            {blog.excerpt && <p className="mb-8 max-w-3xl text-xl leading-relaxed text-gray-600">{blog.excerpt}</p>}
+                            {blog.excerpt && <p className="mb-8 max-w-3xl text-xl leading-relaxed text-gray-600 dark:text-gray-300">{blog.excerpt}</p>}
 
                             {/* Share Button */}
                             <Button variant="outline" size="sm" onClick={handleShare} className="rounded-full">
@@ -230,9 +230,9 @@ export default function BlogPost({ blog }: Props) {
                                     />
 
                                     {/* Article Body */}
-                                    <div className="rounded-3xl bg-white p-8 shadow-sm md:p-12">
+                                    <div className="rounded-3xl bg-white p-8 shadow-sm dark:bg-neutral-900 dark:shadow-neutral-800/20 md:p-12">
                                         <div
-                                            className="tiptap ProseMirror prose prose-lg prose-gray prose-headings:font-serif prose-headings:font-bold prose-headings:tracking-tight prose-h2:text-3xl prose-h3:text-2xl prose-p:leading-relaxed prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-2xl max-w-none [&_p:empty]:hidden"
+                                            className="tiptap ProseMirror prose prose-lg prose-gray dark:prose-invert prose-headings:font-serif prose-headings:font-bold prose-headings:tracking-tight prose-h2:text-3xl prose-h3:text-2xl prose-p:leading-relaxed prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-2xl max-w-none [&_p:empty]:hidden"
                                             dangerouslySetInnerHTML={{ __html: blog.content }}
                                         />
                                     </div>
@@ -247,14 +247,14 @@ export default function BlogPost({ blog }: Props) {
                                     />
 
                                     {/* Author Card */}
-                                    <div className="mt-12 flex items-center gap-4 rounded-2xl bg-white p-6 shadow-sm">
-                                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-100">
+                                    <div className="mt-12 flex items-center gap-4 rounded-2xl bg-white p-6 shadow-sm dark:bg-neutral-900 dark:shadow-neutral-800/20">
+                                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30">
                                             <img src="/logo.png" alt="Author" className="h-10 w-10" />
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-500">Written by</p>
-                                            <p className="font-semibold text-gray-900">Humfurie</p>
-                                            <p className="text-sm text-gray-500">Software Developer</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">Written by</p>
+                                            <p className="font-semibold text-gray-900 dark:text-white">Humfurie</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">Software Developer</p>
                                         </div>
                                     </div>
                                 </div>
