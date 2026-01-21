@@ -1,11 +1,12 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar';
 import { Link, usePage } from '@inertiajs/react';
 import React, { useMemo } from 'react';
 import type { Auth, NavItem, Permissions } from '@/types';
-import { BookOpen, Briefcase, Building, Code2, FileText, FolderKanban, LayoutGrid, Shield, Trophy, Users } from 'lucide-react';
+import { BookOpen, Briefcase, Building, Code2, FileText, FolderKanban, LayoutGrid, Moon, Shield, Sun, Trophy, Users } from 'lucide-react';
+import { useAppearance } from '@/hooks/use-appearance';
 import AppLogo from './app-logo';
 
 interface SidebarNavItem extends NavItem {
@@ -90,6 +91,16 @@ const footerNavItems: SidebarNavItem[] = [
 
 export function AppSidebar() {
     const { auth } = usePage<AdminPageProps>().props;
+    const { appearance, updateAppearance } = useAppearance();
+
+    const isDark = useMemo(() => {
+        if (typeof window === 'undefined') return appearance === 'dark';
+        return appearance === 'dark' || (appearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }, [appearance]);
+
+    const toggleTheme = () => {
+        updateAppearance(isDark ? 'light' : 'dark');
+    };
 
     const visibleNavItems = useMemo(() => {
         return allNavItems.filter((item) => {
@@ -132,6 +143,22 @@ export function AppSidebar() {
 
             <SidebarFooter>
                 <NavFooter items={footerNavItems} className="mt-auto" />
+                <SidebarGroup className="group-data-[collapsible=icon]:p-0">
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    onClick={toggleTheme}
+                                    className="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100"
+                                    tooltip={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
+                                >
+                                    {isDark ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                                    <span>{isDark ? 'Dark Mode' : 'Light Mode'}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

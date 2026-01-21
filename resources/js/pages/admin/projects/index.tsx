@@ -84,7 +84,7 @@ function ProjectCard({ project }: { project: Project }) {
 
     return (
         <div
-            className={`hover:bg-muted/50 ${can('project', 'update') ? 'cursor-pointer' : 'cursor-default'} rounded-lg border p-4 transition-colors ${project.deleted_at ? 'opacity-50' : ''}`}
+            className={`hover:bg-muted/50 ${can('project', 'update') ? 'cursor-pointer' : 'cursor-default'} rounded-lg border bg-card p-4 transition-colors dark:shadow-lg dark:shadow-white/10 ${project.deleted_at ? 'opacity-50' : ''}`}
             onClick={handleCardClick}
         >
             <div className="flex items-start gap-4">

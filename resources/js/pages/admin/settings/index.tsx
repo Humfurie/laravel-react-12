@@ -262,13 +262,13 @@ export default function Settings({ allSettings }: Props) {
     const getGroupColor = (group: string) => {
         switch (group) {
             case 'files':
-                return 'bg-blue-50 border-blue-100';
+                return 'bg-blue-50 border-blue-100 dark:bg-blue-950 dark:border-blue-900';
             case 'social':
-                return 'bg-purple-50 border-purple-100';
+                return 'bg-purple-50 border-purple-100 dark:bg-purple-950 dark:border-purple-900';
             case 'branding':
-                return 'bg-pink-50 border-pink-100';
+                return 'bg-pink-50 border-pink-100 dark:bg-pink-950 dark:border-pink-900';
             default:
-                return 'bg-gray-50 border-gray-100';
+                return 'bg-gray-50 border-gray-100 dark:bg-gray-900 dark:border-gray-800';
         }
     };
 
@@ -301,7 +301,7 @@ export default function Settings({ allSettings }: Props) {
                     {Object.entries(groupedSettings).map(([group, settings]) => (
                         <div key={group} className={`rounded-lg border p-4 ${getGroupColor(group)}`}>
                             <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-white p-2">{getGroupIcon(group)}</div>
+                                <div className="rounded-lg bg-white p-2 dark:bg-gray-800">{getGroupIcon(group)}</div>
                                 <div>
                                     <p className="text-sm font-medium capitalize">{group.replace(/_/g, ' ')}</p>
                                     <p className="text-2xl font-bold">{settings.length}</p>
@@ -314,8 +314,8 @@ export default function Settings({ allSettings }: Props) {
                 {/* Settings Form */}
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {Object.entries(groupedSettings).map(([group, settingsInGroup]) => (
-                        <div key={group} className="overflow-hidden rounded-lg border bg-white shadow-sm">
-                            <div className="border-b bg-gray-50 p-6">
+                        <div key={group} className="overflow-hidden rounded-lg border bg-card shadow-sm dark:shadow-lg dark:shadow-white/10">
+                            <div className="border-b bg-muted/50 p-6">
                                 <div className="flex items-center gap-3">
                                     {getGroupIcon(group)}
                                     <div>

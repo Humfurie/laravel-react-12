@@ -189,7 +189,7 @@ export default function Edit({ expertise, categories }: Props) {
                             </div>
 
                             {/* Active Status */}
-                            <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-4">
                                 <div className="space-y-0.5">
                                     <Label htmlFor="is_active">Active Status</Label>
                                     <p className="text-muted-foreground text-sm">Display this expertise on the website</p>

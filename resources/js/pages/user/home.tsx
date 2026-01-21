@@ -86,6 +86,7 @@ interface Props {
         bio: string | null;
         about: string | null;
         profile_stats: { label: string; value: string }[];
+        about_image_path: string | null;
     };
 }
 
