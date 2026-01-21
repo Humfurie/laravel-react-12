@@ -57,6 +57,9 @@ class ProfileUpdateRequest extends FormRequest
 
             // Resume upload
             'resume' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:5120'], // 5MB max
+
+            // About image upload
+            'about_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'], // 2MB max
         ];
     }
 

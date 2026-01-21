@@ -324,16 +324,33 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                     </section>
 
                     {/* CTA Section */}
-                    <section className="bg-gray-900 py-16">
+                    <section className="border-t border-gray-100 bg-white py-16 dark:border-gray-800 dark:bg-gray-950">
                         <div className="container mx-auto px-4 text-center">
-                            <h2 className="mb-4 font-serif text-3xl font-bold text-white md:text-4xl">Let's build something amazing</h2>
-                            <p className="mx-auto mb-8 max-w-md text-gray-400">Interested in working together? Let's discuss your next project.</p>
-                            <div className="flex flex-wrap justify-center gap-4">
-                                <Button className="rounded-full bg-white px-8 text-gray-900 hover:bg-gray-100">Get in touch</Button>
-                                <Button variant="outline" className="rounded-full border-white px-8 text-white hover:bg-white/10">
-                                    <Github className="mr-2 h-4 w-4" />
+                            <p className="mb-3 text-sm font-medium tracking-wide text-orange-600 uppercase dark:text-orange-400">
+                                Let's collaborate
+                            </p>
+                            <h2 className="mb-4 text-2xl font-semibold text-gray-900 md:text-3xl dark:text-white">
+                                Have a project in mind?
+                            </h2>
+                            <p className="mx-auto mb-8 max-w-md text-gray-600 dark:text-gray-400">
+                                I'm always open to discussing new projects and opportunities.
+                            </p>
+                            <div className="flex flex-wrap justify-center gap-3">
+                                <a
+                                    href="mailto:humfurie@gmail.com"
+                                    className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+                                >
+                                    Get in touch
+                                </a>
+                                <a
+                                    href="https://github.com/Humfurie"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+                                >
+                                    <Github className="h-4 w-4" />
                                     GitHub
-                                </Button>
+                                </a>
                             </div>
                         </div>
                     </section>

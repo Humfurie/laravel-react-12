@@ -12,6 +12,7 @@ interface ProfileUser {
     bio: string | null;
     about: string | null;
     profile_stats: { label: string; value: string }[];
+    about_image_path: string | null;
 }
 
 interface HomeAboutMeProps {
@@ -36,6 +37,11 @@ const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
     const title = profileUser?.name ? `Hi! I'm ${profileUser.name.split(' ')[0]}` : DEFAULT_ABOUT_DATA.title;
     const excerpt = profileUser?.about || DEFAULT_ABOUT_DATA.excerpt;
 
+    // Determine the image URL - use uploaded image or fallback to default
+    const aboutImageUrl = profileUser?.about_image_path
+        ? `/storage/${profileUser.about_image_path}`
+        : '/images/about-me-item.webp';
+
     // Memoize items array to avoid recreation on every render
     const items = useMemo<AboutItems[]>(() => {
         if (profileUser?.profile_stats && profileUser.profile_stats.length > 0) {
@@ -44,11 +50,11 @@ const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
                     count: stat.value,
                     label: stat.label,
                 })),
-                { imgUrl: '/images/about-me-item.webp' },
+                { imgUrl: aboutImageUrl },
             ];
         }
         return DEFAULT_ABOUT_DATA.items;
-    }, [profileUser?.profile_stats]);
+    }, [profileUser?.profile_stats, aboutImageUrl]);
 
     return (
         <section className="about-me bg-brand-white py-[40px] md:py-[80px] dark:bg-gray-950">

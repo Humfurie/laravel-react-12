@@ -462,14 +462,22 @@ export default function BlogIndex({ blogs }: Props) {
                     </section>
 
                     {/* CTA Section */}
-                    <section className="bg-gray-900 py-16">
+                    <section className="border-t border-gray-100 bg-white py-16 dark:border-gray-800 dark:bg-gray-950">
                         <div className="container mx-auto px-4 text-center">
-                            <h2 className="mb-4 font-serif text-3xl font-bold text-white md:text-4xl">Stay in the loop</h2>
-                            <p className="mx-auto mb-8 max-w-md text-gray-400">
+                            <p className="mb-3 text-sm font-medium tracking-wide text-orange-600 uppercase dark:text-orange-400">
+                                Newsletter
+                            </p>
+                            <h2 className="mb-4 text-2xl font-semibold text-gray-900 md:text-3xl dark:text-white">
+                                Stay in the loop
+                            </h2>
+                            <p className="mx-auto mb-8 max-w-md text-gray-600 dark:text-gray-400">
                                 Get notified about new articles and insights. No spam, just quality content.
                             </p>
-                            <div className="flex flex-wrap justify-center gap-4">
-                                <Button className="rounded-full bg-white px-8 text-gray-900 hover:bg-gray-100" onClick={() => router.visit('/')}>
+                            <div className="flex flex-wrap justify-center gap-3">
+                                <Button
+                                    className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+                                    onClick={() => router.visit('/')}
+                                >
                                     Back to Home
                                 </Button>
                             </div>
