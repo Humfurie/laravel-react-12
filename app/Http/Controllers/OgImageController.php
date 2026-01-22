@@ -33,7 +33,7 @@ class OgImageController extends Controller
 
         return $this->generateImage("og:project:{$slug}", [
             'title' => $project->title,
-            'subtitle' => $project->tagline ?? $project->description ?? '',
+            'subtitle' => $project->short_description ?? $project->description ?? '',
             'type' => 'Project',
             'accentColor' => '#2ECC71',
         ]);
