@@ -74,15 +74,18 @@ class OgImageController extends Controller
      */
     private function generateImage(string $cacheKey, array $params): Response
     {
-        $image = Cache::remember($cacheKey, 86400, function () use ($params) {
+        $image = Cache::remember($cacheKey, 86400, function () use ($cacheKey, $params) {
             $serviceUrl = config('services.og_image.url', 'http://og-image:3001');
 
             try {
                 $response = Http::timeout(3)->get("{$serviceUrl}/generate", $params);
 
                 return $response->successful() ? $response->body() : null;
-            } catch (\Exception $e) {
-                report($e);
+            } catch (\Throwable $e) {
+                logger()->warning("OG image generation failed for {$cacheKey}", [
+                    'error' => $e->getMessage(),
+                    'params' => $params,
+                ]);
 
                 return null;
             }
@@ -102,14 +105,14 @@ class OgImageController extends Controller
      */
     private function fallbackImage(): Response
     {
-        $fallbackPath = public_path('og-default.jpg');
+        $fallbackPath = public_path('logo.png');
 
         if (! file_exists($fallbackPath)) {
             abort(503, 'OG Image service unavailable');
         }
 
         return response(file_get_contents($fallbackPath), 200)
-            ->header('Content-Type', 'image/jpeg')
+            ->header('Content-Type', 'image/png')
             ->header('Cache-Control', 'public, max-age=3600, s-maxage=3600');
     }
 }

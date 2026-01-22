@@ -76,7 +76,7 @@ class ProfileController extends Controller
     /**
      * Delete a file from storage.
      */
-    public function deleteFile(?string $path): void
+    private function deleteFile(?string $path): void
     {
         if (! $path) {
             return;
