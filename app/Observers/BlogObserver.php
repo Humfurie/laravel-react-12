@@ -12,16 +12,24 @@ class BlogObserver
      */
     public function created(Blog $blog): void
     {
-        $this->clearCache();
+        $this->clearCache($blog);
     }
 
     /**
-     * Clear the homepage blog cache and admin dashboard.
+     * Clear the homepage blog cache, admin dashboard, RSS feed, sitemap, and OG image caches.
      */
-    protected function clearCache(): void
+    protected function clearCache(?Blog $blog = null): void
     {
         Cache::forget(config('cache-ttl.keys.homepage_blogs'));
         Cache::forget(config('cache-ttl.keys.admin_dashboard'));
+        Cache::forget('rss:feed');
+        Cache::forget('sitemap:latest_blog');
+        Cache::forget('sitemap:blogs');
+
+        // Clear OG image cache for specific blog
+        if ($blog) {
+            Cache::forget("og:blog:{$blog->slug}");
+        }
     }
 
     /**
@@ -29,7 +37,7 @@ class BlogObserver
      */
     public function updated(Blog $blog): void
     {
-        $this->clearCache();
+        $this->clearCache($blog);
     }
 
     /**
@@ -37,7 +45,7 @@ class BlogObserver
      */
     public function deleted(Blog $blog): void
     {
-        $this->clearCache();
+        $this->clearCache($blog);
     }
 
     /**
@@ -45,7 +53,7 @@ class BlogObserver
      */
     public function restored(Blog $blog): void
     {
-        $this->clearCache();
+        $this->clearCache($blog);
     }
 
     /**
@@ -53,6 +61,6 @@ class BlogObserver
      */
     public function forceDeleted(Blog $blog): void
     {
-        $this->clearCache();
+        $this->clearCache($blog);
     }
 }

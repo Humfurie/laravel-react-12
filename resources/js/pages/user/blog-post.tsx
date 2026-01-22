@@ -1,5 +1,6 @@
 import FloatingNav from '@/components/floating-nav';
 import Footer from '@/components/global/Footer';
+import StructuredData, { schemas } from '@/components/seo/StructuredData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -115,40 +116,31 @@ export default function BlogPost({ blog }: Props) {
                 <meta name="twitter:description" content={String(blog.meta_data?.meta_description || blog.excerpt || '')} />
                 {blog.display_image && <meta name="twitter:image" content={String(blog.display_image)} />}
 
-                {/* Schema.org JSON-LD Structured Data */}
-                <script type="application/ld+json">
-                    {JSON.stringify({
-                        '@context': 'https://schema.org',
-                        '@type': 'BlogPosting',
-                        headline: blog.title,
-                        description: blog.meta_data?.meta_description || blog.excerpt || '',
-                        image: blog.display_image || '',
-                        datePublished: blog.published_at || blog.created_at,
-                        dateModified: blog.updated_at,
-                        author: {
-                            '@type': 'Person',
-                            name: 'Admin',
-                        },
-                        publisher: {
-                            '@type': 'Organization',
-                            name: typeof window !== 'undefined' ? document.title.split(' - ')[0] || 'Blog' : 'Blog',
-                            logo: {
-                                '@type': 'ImageObject',
-                                url: typeof window !== 'undefined' ? `${window.location.origin}/images/logo.png` : '',
-                            },
-                        },
-                        mainEntityOfPage: {
-                            '@type': 'WebPage',
-                            '@id': typeof window !== 'undefined' ? window.location.href : '',
-                        },
-                        keywords: blog.meta_data?.meta_keywords || '',
-                        articleBody: blog.content.replace(/<[^>]*>/g, '').substring(0, 500),
-                    })}
-                </script>
 
                 {/* Canonical URL */}
                 <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
             </Head>
+
+            {/* Structured Data */}
+            <StructuredData
+                data={[
+                    schemas.blogPosting({
+                        headline: blog.title,
+                        description: blog.meta_data?.meta_description || blog.excerpt || undefined,
+                        image: blog.display_image || undefined,
+                        datePublished: blog.published_at || blog.created_at,
+                        dateModified: blog.updated_at,
+                        url: `https://humfurie.org/blog/${blog.slug}`,
+                        keywords: blog.meta_data?.meta_keywords || undefined,
+                        articleBody: blog.content.replace(/<[^>]*>/g, '').substring(0, 500),
+                    }),
+                    schemas.breadcrumbList([
+                        { name: 'Home', url: 'https://humfurie.org' },
+                        { name: 'Blog', url: 'https://humfurie.org/blog' },
+                        { name: blog.title, url: `https://humfurie.org/blog/${blog.slug}` },
+                    ]),
+                ]}
+            />
 
             <div className="min-h-screen bg-[#FAFAF8] dark:bg-neutral-950">
                 <FloatingNav currentPage="blog" />

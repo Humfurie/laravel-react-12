@@ -1,5 +1,6 @@
 import FloatingNav from '@/components/floating-nav';
 import Footer from '@/components/global/Footer';
+import StructuredData, { schemas } from '@/components/seo/StructuredData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Head, Link, router } from '@inertiajs/react';
