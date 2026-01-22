@@ -83,7 +83,7 @@ function GiveawayCard({ giveaway }: { giveaway: Giveaway }) {
     };
 
     return (
-        <div className="group hover:bg-muted/50 cursor-pointer rounded-lg border p-4 transition-colors" onClick={handleEdit}>
+        <div className="group hover:bg-muted/50 cursor-pointer rounded-lg border bg-card p-4 transition-colors dark:shadow-lg dark:shadow-white/10" onClick={handleEdit}>
             <div className="flex gap-4">
                 {giveaway.primary_image_url && (
                     <div className="flex-shrink-0">

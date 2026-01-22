@@ -56,4 +56,34 @@ return [
         'listing_projects_tech_stack' => 'projects.tech_stack',
         'admin_dashboard' => 'admin:dashboard',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | HTTP Cache Headers (Browser & CDN)
+    |--------------------------------------------------------------------------
+    |
+    | Cache-Control header values for public pages.
+    | max_age: browser cache duration (seconds)
+    | s_maxage: CDN/proxy cache duration (seconds)
+    |
+    */
+
+    'http_headers' => [
+        'homepage' => [
+            'max_age' => env('CACHE_HTTP_HOMEPAGE_MAX_AGE', 300),      // 5 min browser
+            's_maxage' => env('CACHE_HTTP_HOMEPAGE_S_MAXAGE', 3600),   // 1 hr CDN
+        ],
+        'blog_listing' => [
+            'max_age' => env('CACHE_HTTP_BLOG_LISTING_MAX_AGE', 300),  // 5 min browser
+            's_maxage' => env('CACHE_HTTP_BLOG_LISTING_S_MAXAGE', 1800), // 30 min CDN
+        ],
+        'blog_post' => [
+            'max_age' => env('CACHE_HTTP_BLOG_POST_MAX_AGE', 300),     // 5 min browser
+            's_maxage' => env('CACHE_HTTP_BLOG_POST_S_MAXAGE', 3600),  // 1 hr CDN
+        ],
+        'projects' => [
+            'max_age' => env('CACHE_HTTP_PROJECTS_MAX_AGE', 300),      // 5 min browser
+            's_maxage' => env('CACHE_HTTP_PROJECTS_S_MAXAGE', 3600),   // 1 hr CDN
+        ],
+    ],
 ];

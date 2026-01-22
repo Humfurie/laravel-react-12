@@ -40,6 +40,7 @@ class User extends Authenticatable implements JWTSubject
         'github_synced_at',
         'social_links',
         'resume_path',
+        'about_image_path',
         'profile_stats',
         'about',
         'headline',
@@ -130,7 +131,7 @@ class User extends Authenticatable implements JWTSubject
     {
         // Cache permissions for 5 minutes to avoid repeated queries
         return Cache::remember(
-            'user_permissions_' . $this->id,
+            'user_permissions_'.$this->id,
             now()->addMinutes(5),
             function () {
                 // Eager load relationships to prevent N+1 queries
@@ -203,7 +204,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function hasGithubLinked(): bool
     {
-        return !empty($this->github_id);
+        return ! empty($this->github_id);
     }
 
     /**
@@ -211,7 +212,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function hasGoogleLinked(): bool
     {
-        return !empty($this->google_id);
+        return ! empty($this->google_id);
     }
 
     /**
@@ -219,7 +220,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function hasFacebookLinked(): bool
     {
-        return !empty($this->facebook_id);
+        return ! empty($this->facebook_id);
     }
 
     /**
