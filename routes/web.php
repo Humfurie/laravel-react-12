@@ -8,75 +8,42 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RssFeedController;
 use App\Http\Controllers\SitemapController;
 use App\Models\Experience;
-use App\Models\Expertise;
-use App\Models\Project;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use App\Services\HomepageCacheService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // Home page - Profile and Portfolio
-Route::get('/', function () {
-    $blogController = new BlogController;
-    $blogs = $blogController->getPrimaryAndLatest();
+Route::get('/', function (HomepageCacheService $homepageService) {
+    // Get cached data using HomepageCacheService
+    $blogs = $homepageService->getCachedBlogsData();
+    $experiences = $homepageService->getCachedExperiencesData();
+    $expertises = $homepageService->getCachedExpertisesData();
+    $projectsData = $homepageService->getCachedProjectsData();
+    $primaryUser = $homepageService->getCachedUserProfileData();
+    $githubStats = $homepageService->getCachedGitHubStats();
 
-    // Cache experiences for 30 minutes (only admin's experiences)
-    $experiences = Cache::remember('homepage.experiences', 1800, function () {
-        return Experience::with('image')
-            ->where('user_id', (int) config('app.admin_user_id'))
-            ->ordered()
-            ->get();
-    });
+    // Map GitHub data to each featured project
+    $projectsWithGitHub = $projectsData['featured']->map(function ($project) use ($homepageService) {
+        $project->github_data = $homepageService->getCachedProjectGitHubData($project);
 
-    // Cache expertises for 30 minutes
-    $expertises = Cache::remember('homepage.expertises', 1800, function () {
-        return Expertise::active()
-            ->ordered()
-            ->get();
-    });
-
-    // Cache featured projects for 10 minutes
-    $projectsData = Cache::remember('homepage.projects', 600, function () {
-        $featured = Project::query()
-            ->public()
-            ->with(['primaryImage'])
-            ->orderByDesc('is_featured')
-            ->orderBy('featured_at', 'desc')
-            ->orderBy('sort_order')
-            ->take(6)
-            ->get();
-
-        $stats = [
-            'total_projects' => Project::public()->count(),
-            'live_projects' => Project::public()->live()->count(),
-        ];
-
-        return [
-            'featured' => $featured,
-            'stats' => $stats,
-        ];
-    });
-
-    // Get primary user profile data for homepage
-    $primaryUser = Cache::remember('homepage.user_profile', 1800, function () {
-        return User::where('email', 'humfurie@gmail.com')->first()
-            ?? User::first();
+        return $project;
     });
 
     return Inertia::render('user/home', array_merge($blogs, [
         'experiences' => $experiences,
         'expertises' => $expertises,
-        'projects' => $projectsData['featured'],
+        'projects' => $projectsWithGitHub,
         'projectStats' => $projectsData['stats'],
-        'profileUser' => $primaryUser ? [
+        'githubStats' => $githubStats,
+        'profileUser' => [
             'name' => $primaryUser->name,
             'headline' => $primaryUser->headline,
             'bio' => $primaryUser->bio,
             'about' => $primaryUser->about,
             'profile_stats' => $primaryUser->profile_stats ?? [],
             'about_image_path' => $primaryUser->about_image_path,
-        ] : null,
+        ],
     ]));
 })->name('home');
 
