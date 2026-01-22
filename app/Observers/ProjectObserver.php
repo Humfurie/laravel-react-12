@@ -45,6 +45,12 @@ class ProjectObserver
      */
     public function updated(Project $project): void
     {
+        // If slug changed, clear cache for old slug too
+        if ($project->wasChanged('slug')) {
+            $oldSlug = $project->getOriginal('slug');
+            Cache::forget("og:project:{$oldSlug}");
+        }
+
         $this->clearCache($project);
     }
 
