@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Permission;
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -22,6 +20,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserSeeder::class,
             SettingsSeeder::class,
+            ProjectCategorySeeder::class,
         ]);
 
         // Only run demo/fake data seeders in local environment
