@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AddRequestContext;
+use App\Http\Middleware\CacheHeaders;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -38,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            CacheHeaders::class,
         ]);
 
         $middleware->api(append: [
@@ -91,7 +93,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             // For other exceptions in production, show generic 500 error
-            if (!app()->environment('local')) {
+            if (! app()->environment('local')) {
                 return inertia('errors/Error', [
                     'status' => 500,
                     'message' => null,
