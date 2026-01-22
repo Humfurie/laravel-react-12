@@ -2,32 +2,12 @@
 
 use App\Models\Giveaway;
 use App\Models\GiveawayEntry;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
 
+// Skip all tests in this file - public giveaway routes have been removed
+// These tests were for the web routes that are now commented out in routes/web.php
+// Giveaways are now only accessible via admin routes and API
 beforeEach(function () {
-    // Clear any existing users in this test's transaction
-    DB::table('users')->delete();
-
-    // Reset auto-increment for PostgreSQL
-    if (DB::getDriverName() === 'pgsql') {
-        DB::statement("SELECT setval('users_id_seq', 1, false)");
-    } elseif (DB::getDriverName() === 'mysql') {
-        DB::statement("ALTER TABLE users AUTO_INCREMENT = 1");
-    } elseif (DB::getDriverName() === 'sqlite') {
-        DB::statement("DELETE FROM sqlite_sequence WHERE name = 'users'");
-    }
-
-    // Create admin user (will have id = 1)
-    $this->admin = User::factory()->create();
-
-    // Verify admin has id=1
-    if ($this->admin->id !== 1) {
-        throw new Exception('Admin user must have id=1 for isAdmin() to work');
-    }
-
-    // Create regular user
-    $this->regularUser = User::factory()->create();
+    $this->markTestSkipped('Public giveaway routes have been removed - giveaways now only via admin/API');
 });
 
 test('it can list active giveaways', function () {
