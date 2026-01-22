@@ -194,18 +194,12 @@ class Project extends Model
 
     public function getCategoryLabelAttribute(): string
     {
-        // Try to get from relationship first
-        if ($this->projectCategory) {
+        // Use eager-loaded relationship to prevent N+1 queries
+        if ($this->relationLoaded('projectCategory') && $this->projectCategory) {
             return $this->projectCategory->name;
         }
 
-        // Fallback to database lookup by slug
-        $category = ProjectCategory::where('slug', $this->category)->first();
-        if ($category) {
-            return $category->name;
-        }
-
-        // Final fallback to legacy constants
+        // Fallback to static mapping (no database queries)
         return match ($this->category) {
             self::CATEGORY_WEB_APP => 'Web Application',
             self::CATEGORY_MOBILE_APP => 'Mobile App',
