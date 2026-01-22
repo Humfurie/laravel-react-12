@@ -75,4 +75,8 @@ return [
         'redirect' => '/auth/google/callback',
     ],
 
+    'og_image' => [
+        'url' => env('OG_IMAGE_SERVICE_URL', 'http://og-image:3001'),
+    ],
+
 ];

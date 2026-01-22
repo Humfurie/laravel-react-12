@@ -42,7 +42,7 @@ function ExpertiseCard({ expertise, canUpdate, canDelete }: { expertise: Experti
     };
 
     return (
-        <div className={`rounded-lg border p-4 transition-colors ${canUpdate ? 'hover:bg-muted/50 cursor-pointer' : ''}`} onClick={handleEdit}>
+        <div className={`rounded-lg border bg-card p-4 transition-colors dark:shadow-lg dark:shadow-white/10 ${canUpdate ? 'hover:bg-muted/50 cursor-pointer' : ''}`} onClick={handleEdit}>
             <div className="flex items-start justify-between gap-4">
                 <div className="flex flex-1 gap-4">
                     {/* Tech Logo */}
@@ -51,7 +51,7 @@ function ExpertiseCard({ expertise, canUpdate, canDelete }: { expertise: Experti
                             <img
                                 src={expertise.image_url}
                                 alt={expertise.name}
-                                className="h-16 w-16 rounded-lg border-2 border-gray-200 object-contain p-2"
+                                className="h-16 w-16 rounded-lg border-2 border-border object-contain p-2"
                             />
                         </div>
                     )}
@@ -142,19 +142,19 @@ export default function Index({ expertises }: Props) {
 
                 {/* Stats */}
                 <div className="grid gap-4 md:grid-cols-4">
-                    <div className="rounded-lg border p-4">
+                    <div className="rounded-lg border bg-card p-4 dark:shadow-lg dark:shadow-white/10">
                         <p className="text-muted-foreground text-sm">Total Expertises</p>
                         <p className="text-2xl font-bold">{expertises.length}</p>
                     </div>
-                    <div className="rounded-lg border p-4">
+                    <div className="rounded-lg border bg-card p-4 dark:shadow-lg dark:shadow-white/10">
                         <p className="text-muted-foreground text-sm">Backend</p>
                         <p className="text-2xl font-bold">{groupedExpertises.be?.length || 0}</p>
                     </div>
-                    <div className="rounded-lg border p-4">
+                    <div className="rounded-lg border bg-card p-4 dark:shadow-lg dark:shadow-white/10">
                         <p className="text-muted-foreground text-sm">Frontend</p>
                         <p className="text-2xl font-bold">{groupedExpertises.fe?.length || 0}</p>
                     </div>
-                    <div className="rounded-lg border p-4">
+                    <div className="rounded-lg border bg-card p-4 dark:shadow-lg dark:shadow-white/10">
                         <p className="text-muted-foreground text-sm">Tools & DevOps</p>
                         <p className="text-2xl font-bold">{groupedExpertises.td?.length || 0}</p>
                     </div>

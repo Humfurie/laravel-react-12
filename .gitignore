@@ -27,3 +27,7 @@ yarn-error.log
 /.playwright-mcp/
 /.vscode/
 /.windsurf/
+/docs
+
+# Documentation (auto-generated)
+docs/

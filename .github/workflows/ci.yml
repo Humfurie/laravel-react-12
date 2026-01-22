@@ -47,6 +47,7 @@ jobs:
           docker compose -f docker-compose.ci.yml exec -T app npm run build
           docker compose -f docker-compose.ci.yml exec -T app php artisan key:generate --ansi
           docker compose -f docker-compose.ci.yml exec -T app php artisan config:cache
+          docker compose -f docker-compose.ci.yml exec -T app php artisan view:clear
           docker compose -f docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed
 
       - name: Debug GD and test a simple image creation
@@ -67,7 +68,7 @@ jobs:
 
       - name: Run tests
         run: |
-          docker compose -f docker-compose.ci.yml exec -T app php artisan test
+          docker compose -f docker-compose.ci.yml exec -T app php -d memory_limit=512M artisan test
 
       - name: Cleanup
         run: docker compose -f docker-compose.ci.yml down -v
