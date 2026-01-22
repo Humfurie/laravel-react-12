@@ -99,6 +99,9 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v={{ config('app.version', '1.0') }}">
     <link rel="icon" type="image/png" href="{{ asset('logo.png') }}?v={{ config('app.version', '1.0') }}">
 
+    {{-- RSS Feed Auto-discovery --}}
+    <link rel="alternate" type="application/rss+xml" title="Humphrey Singculan's Blog" href="{{ url('/feed.xml') }}">
+
     {{-- Preload LCP hero image for faster first paint --}}
     @if(request()->is('/') || request()->is(''))
         <link rel="preload" as="image" href="{{ asset('images/humphrey-banner.webp') }}" media="(min-width: 768px)" fetchpriority="high">

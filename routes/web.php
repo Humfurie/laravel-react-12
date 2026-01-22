@@ -3,7 +3,9 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\OgImageController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\RssFeedController;
 use App\Http\Controllers\SitemapController;
 use App\Models\Experience;
 use App\Models\Expertise;
@@ -80,7 +82,17 @@ Route::get('/', function () {
 
 // Sitemap routes
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages'])->name('sitemap.pages');
 Route::get('/sitemap-blogs.xml', [SitemapController::class, 'blogs'])->name('sitemap.blogs');
+Route::get('/sitemap-projects.xml', [SitemapController::class, 'projects'])->name('sitemap.projects');
+
+// RSS Feed
+Route::get('/feed.xml', [RssFeedController::class, 'rss'])->name('feed.rss');
+
+// OG Image routes
+Route::get('/og-image/blog/{slug}', [OgImageController::class, 'blog'])->name('og-image.blog');
+Route::get('/og-image/project/{slug}', [OgImageController::class, 'project'])->name('og-image.project');
+Route::get('/og-image/page/{name}', [OgImageController::class, 'page'])->name('og-image.page');
 
 // Blog listing page
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');

@@ -3,6 +3,7 @@ import Footer from '@/components/global/Footer';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectFilters } from '@/components/projects/ProjectFilters';
 import { ProjectModal } from '@/components/projects/ProjectModal';
+import StructuredData, { schemas } from '@/components/seo/StructuredData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { Project, ProjectCategory } from '@/types/project';
@@ -61,6 +62,22 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                 />
                 <link rel="canonical" href="https://humfurie.org/projects" />
             </Head>
+
+            {/* Structured Data */}
+            <StructuredData
+                data={[
+                    schemas.collectionPage({
+                        name: 'Projects',
+                        description:
+                            "Explore Humphrey Singculan's portfolio of projects - web applications built with Laravel, React, and modern full-stack technologies.",
+                        url: 'https://humfurie.org/projects',
+                    }),
+                    schemas.breadcrumbList([
+                        { name: 'Home', url: 'https://humfurie.org' },
+                        { name: 'Projects', url: 'https://humfurie.org/projects' },
+                    ]),
+                ]}
+            />
 
             <div className="min-h-screen bg-[#FAFAF8] dark:bg-gray-900">
                 <FloatingNav currentPage="projects" />

@@ -54,7 +54,46 @@ type BlogPostingSchema = WithContext<{
     articleBody?: string;
 }>;
 
-type SchemaData = PersonSchema | WebSiteSchema | BlogPostingSchema;
+type BreadcrumbListSchema = WithContext<{
+    '@type': 'BreadcrumbList';
+    itemListElement: {
+        '@type': 'ListItem';
+        position: number;
+        name: string;
+        item: string;
+    }[];
+}>;
+
+type SoftwareApplicationSchema = WithContext<{
+    '@type': 'SoftwareApplication';
+    name: string;
+    description: string;
+    url?: string;
+    image?: string;
+    applicationCategory: string;
+    operatingSystem: string;
+    dateCreated?: string;
+    author: {
+        '@type': 'Person';
+        name: string;
+        url: string;
+    };
+}>;
+
+type CollectionPageSchema = WithContext<{
+    '@type': 'CollectionPage';
+    name: string;
+    description: string;
+    url: string;
+}>;
+
+type SchemaData =
+    | PersonSchema
+    | WebSiteSchema
+    | BlogPostingSchema
+    | BreadcrumbListSchema
+    | SoftwareApplicationSchema
+    | CollectionPageSchema;
 
 interface StructuredDataProps {
     data: SchemaData | SchemaData[];
@@ -151,5 +190,47 @@ export const schemas = {
         },
         keywords: props.keywords,
         articleBody: props.articleBody,
+    }),
+
+    breadcrumbList: (items: { name: string; url: string }[]): BreadcrumbListSchema => ({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: items.map((item, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: item.name,
+            item: item.url,
+        })),
+    }),
+
+    softwareProject: (props: {
+        name: string;
+        description: string;
+        url?: string;
+        image?: string;
+        dateCreated?: string;
+    }): SoftwareApplicationSchema => ({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: props.name,
+        description: props.description,
+        url: props.url,
+        image: props.image,
+        applicationCategory: 'WebApplication',
+        operatingSystem: 'Web',
+        dateCreated: props.dateCreated,
+        author: {
+            '@type': 'Person',
+            name: 'Humphrey Singculan',
+            url: 'https://humfurie.org',
+        },
+    }),
+
+    collectionPage: (props: { name: string; description: string; url: string }): CollectionPageSchema => ({
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: props.name,
+        description: props.description,
+        url: props.url,
     }),
 };
