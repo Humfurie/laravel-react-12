@@ -47,6 +47,7 @@ jobs:
           docker compose -f docker-compose.ci.yml exec -T app npm run build
           docker compose -f docker-compose.ci.yml exec -T app php artisan key:generate --ansi
           docker compose -f docker-compose.ci.yml exec -T app php artisan config:cache
+          docker compose -f docker-compose.ci.yml exec -T app php artisan view:clear
           docker compose -f docker-compose.ci.yml exec -T app php artisan migrate:fresh --seed
 
       - name: Debug GD and test a simple image creation
