@@ -236,12 +236,12 @@ export default function Home({
 
             <HomeBanner />
             <HomeAboutMe profileUser={profileUser} />
+            <ExperienceSection experiences={transformedExperiences} />
 
             {/* Projects Section */}
             {projects.length > 0 && <HomeProjects projects={projects} stats={projectStats} />}
 
             <HomeExpertise expertises={expertises} />
-            <ExperienceSection experiences={transformedExperiences} />
 
             {/* Blog Section - Untitled UI Style */}
             <section className="bg-gray-50 py-16 sm:py-24 dark:bg-gray-950">
