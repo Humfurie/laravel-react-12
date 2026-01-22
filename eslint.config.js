@@ -56,6 +56,8 @@ export default [
             'bootstrap/ssr',
             // Config files
             'tailwind.config.js',
+            // Separate Node.js services
+            'og-image-service/',
         ],
     },
     prettier, // Turn off all rules that might conflict with Prettier
