@@ -16,6 +16,6 @@ export const publicNavItems: NavItem[] = [
 ];
 
 // Helper function to get navigation by page
-export function getNavItemsForPage(_page?: string): NavItem[] {
+export function getNavItemsForPage(): NavItem[] {
     return publicNavItems;
 }

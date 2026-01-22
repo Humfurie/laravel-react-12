@@ -11,17 +11,17 @@
 @theme {
     --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
 
-    --color-brand-orange: #FC6141;
-    --color-brand-green: #2ECC71;
-    --color-brand-offwhite: #F7F3F1;
+    --color-brand-orange: #fc6141;
+    --color-brand-green: #2ecc71;
+    --color-brand-offwhite: #f7f3f1;
     --color-brand-white: #ffffff;
-    --color-brand-black: #1F1F1F;
-    --color-brand-gray: #4C4C4C;
+    --color-brand-black: #1f1f1f;
+    --color-brand-gray: #4c4c4c;
 
-    --color-muted-orange: #FF8C6B;
-    --color-muted-green: #5DD890;
-    --color-muted-offwhite: #FAF8F5;
-    --color-muted-gray: #8E8E8E;
+    --color-muted-orange: #ff8c6b;
+    --color-muted-green: #5dd890;
+    --color-muted-offwhite: #faf8f5;
+    --color-muted-gray: #8e8e8e;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -136,7 +136,7 @@
     --chart-1: oklch(0.65 0.18 25);
     --chart-2: oklch(0.62 0.18 155);
     --chart-3: oklch(0.55 0.15 280);
-    --chart-4: oklch(0.70 0.12 70);
+    --chart-4: oklch(0.7 0.12 70);
     --chart-5: oklch(0.58 0.15 350);
     --radius: 0.625rem;
     --sidebar: oklch(0.97 0.005 60);
@@ -197,55 +197,55 @@
 /* ======= ADMIN DARK MODE ======= */
 
 /* Admin page containers - apply dark background */
-.dark [data-slot="sidebar-wrapper"] > main .bg-gray-50 {
+.dark [data-slot='sidebar-wrapper'] > main .bg-gray-50 {
     @apply bg-background;
 }
 
 /* Admin cards/panels - apply dark styling with white shadow */
-.dark [data-slot="sidebar-wrapper"] > main .bg-white {
+.dark [data-slot='sidebar-wrapper'] > main .bg-white {
     @apply bg-card text-card-foreground shadow-lg shadow-white/10;
 }
 
 /* Admin borders */
-.dark [data-slot="sidebar-wrapper"] > main .border-gray-100 {
+.dark [data-slot='sidebar-wrapper'] > main .border-gray-100 {
     @apply border-gray-800;
 }
 
-.dark [data-slot="sidebar-wrapper"] > main .border-gray-200 {
+.dark [data-slot='sidebar-wrapper'] > main .border-gray-200 {
     @apply border-gray-700;
 }
 
 /* Admin text colors */
-.dark [data-slot="sidebar-wrapper"] > main .text-gray-900 {
+.dark [data-slot='sidebar-wrapper'] > main .text-gray-900 {
     @apply text-gray-100;
 }
 
-.dark [data-slot="sidebar-wrapper"] > main .text-gray-600 {
+.dark [data-slot='sidebar-wrapper'] > main .text-gray-600 {
     @apply text-gray-400;
 }
 
-.dark [data-slot="sidebar-wrapper"] > main .text-gray-500 {
+.dark [data-slot='sidebar-wrapper'] > main .text-gray-500 {
     @apply text-gray-400;
 }
 
 /* Admin table headers */
-.dark [data-slot="sidebar-wrapper"] > main .bg-gray-50 {
+.dark [data-slot='sidebar-wrapper'] > main .bg-gray-50 {
     @apply bg-gray-900;
 }
 
 /* Admin dividers */
-.dark [data-slot="sidebar-wrapper"] > main .divide-gray-100 > * {
+.dark [data-slot='sidebar-wrapper'] > main .divide-gray-100 > * {
     @apply border-gray-800;
 }
 
 /* Admin hover states */
-.dark [data-slot="sidebar-wrapper"] > main .hover\:bg-gray-50:hover {
+.dark [data-slot='sidebar-wrapper'] > main .hover\:bg-gray-50:hover {
     @apply bg-gray-800;
 }
 
 /* Admin inputs */
-.dark [data-slot="sidebar-wrapper"] > main input.bg-white {
-    @apply bg-gray-800 text-gray-100 border-gray-700;
+.dark [data-slot='sidebar-wrapper'] > main input.bg-white {
+    @apply border-gray-700 bg-gray-800 text-gray-100;
 }
 
 /* ======= GLOBALS ======= */
@@ -294,7 +294,7 @@ h1 span {
     @apply text-brand-orange;
 }
 .input-field {
-    @apply mt-1 w-full rounded-md border border-gray-400 px-4 py-2 focus:ring-2 focus:ring-brand-orange focus:outline-none;
+    @apply focus:ring-brand-orange mt-1 w-full rounded-md border border-gray-400 px-4 py-2 focus:ring-2 focus:outline-none;
 }
 
 /* WebKit scrollbar styles */
@@ -303,7 +303,7 @@ h1 span {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #FC6141; /* Brand orange hex */
+    background-color: #fc6141; /* Brand orange hex */
     border-radius: 8px;
 }
 

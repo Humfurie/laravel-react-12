@@ -3,10 +3,10 @@ import '../css/app.css';
 import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
-import { initializeTheme } from './hooks/use-appearance';
 import ConsentBanner from './components/consent/ConsentBanner';
 import PageLoader from './components/page-loader';
 import PageTransition from './components/page-transition';
+import { initializeTheme } from './hooks/use-appearance';
 
 // Google Analytics page view tracking
 interface GtagEventParams {
@@ -54,8 +54,6 @@ router.on('navigate', () => {
         window.scrollTo({ top: 0, behavior: 'instant' });
     }
 });
-
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => {

@@ -36,13 +36,17 @@ A sidebar ad that sticks to the viewport while scrolling.
 
 1. **Add AdSense Script to HTML Head**
 
-   Edit `resources/views/app.blade.php` and add this in the `<head>` section:
+    Edit `resources/views/app.blade.php` and add this in the `<head>` section:
 
-   ```html
-   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
-   ```
+    ```html
+    <script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+        crossorigin="anonymous"
+    ></script>
+    ```
 
-   Replace `XXXXXXXXXXXXXXXX` with your AdSense Publisher ID.
+    Replace `XXXXXXXXXXXXXXXX` with your AdSense Publisher ID.
 
 2. **Create Ad Units in AdSense Dashboard**
     - Go to https://www.google.com/adsense
@@ -51,26 +55,27 @@ A sidebar ad that sticks to the viewport while scrolling.
 
 3. **Configure Environment Variables** (Optional)
 
-   Add to `.env`:
-   ```
-   ADSENSE_CLIENT_ID=ca-pub-XXXXXXXXXXXXXXXX
-   ADSENSE_BLOG_TOP_SLOT=1234567890
-   ADSENSE_BLOG_SIDEBAR_SLOT=0987654321
-   ADSENSE_RAFFLE_TOP_SLOT=1122334455
-   ```
+    Add to `.env`:
+
+    ```
+    ADSENSE_CLIENT_ID=ca-pub-XXXXXXXXXXXXXXXX
+    ADSENSE_BLOG_TOP_SLOT=1234567890
+    ADSENSE_BLOG_SIDEBAR_SLOT=0987654321
+    ADSENSE_RAFFLE_TOP_SLOT=1122334455
+    ```
 
 4. **Update Components to Use Real Ads**
 
-   Change `testMode={true}` to `testMode={false}` and add your ad IDs:
+    Change `testMode={true}` to `testMode={false}` and add your ad IDs:
 
-   ```tsx
-   <AdBanner
-       adClient={import.meta.env.VITE_ADSENSE_CLIENT_ID}
-       adSlot={import.meta.env.VITE_ADSENSE_BLOG_TOP_SLOT}
-       adFormat="horizontal"
-       testMode={false}
-   />
-   ```
+    ```tsx
+    <AdBanner
+        adClient={import.meta.env.VITE_ADSENSE_CLIENT_ID}
+        adSlot={import.meta.env.VITE_ADSENSE_BLOG_TOP_SLOT}
+        adFormat="horizontal"
+        testMode={false}
+    />
+    ```
 
 ### For Other Ad Networks:
 
