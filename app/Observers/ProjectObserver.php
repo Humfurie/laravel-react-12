@@ -12,13 +12,13 @@ class ProjectObserver
      */
     public function created(Project $project): void
     {
-        $this->clearCache();
+        $this->clearCache($project);
     }
 
     /**
-     * Clear the project-related caches and admin dashboard.
+     * Clear the project-related caches, admin dashboard, sitemap, and OG image caches.
      */
-    protected function clearCache(): void
+    protected function clearCache(?Project $project = null): void
     {
         // Listing page caches
         Cache::forget(config('cache-ttl.keys.listing_projects_featured'));
@@ -29,6 +29,15 @@ class ProjectObserver
 
         // Admin dashboard cache
         Cache::forget(config('cache-ttl.keys.admin_dashboard'));
+
+        // Sitemap caches
+        Cache::forget('sitemap:latest_project');
+        Cache::forget('sitemap:projects');
+
+        // Clear OG image cache for specific project
+        if ($project) {
+            Cache::forget("og:project:{$project->slug}");
+        }
     }
 
     /**
@@ -36,7 +45,13 @@ class ProjectObserver
      */
     public function updated(Project $project): void
     {
-        $this->clearCache();
+        // If slug changed, clear cache for old slug too
+        if ($project->wasChanged('slug')) {
+            $oldSlug = $project->getOriginal('slug');
+            Cache::forget("og:project:{$oldSlug}");
+        }
+
+        $this->clearCache($project);
     }
 
     /**
@@ -44,7 +59,7 @@ class ProjectObserver
      */
     public function deleted(Project $project): void
     {
-        $this->clearCache();
+        $this->clearCache($project);
     }
 
     /**
@@ -52,7 +67,7 @@ class ProjectObserver
      */
     public function restored(Project $project): void
     {
-        $this->clearCache();
+        $this->clearCache($project);
     }
 
     /**
@@ -60,6 +75,6 @@ class ProjectObserver
      */
     public function forceDeleted(Project $project): void
     {
-        $this->clearCache();
+        $this->clearCache($project);
     }
 }

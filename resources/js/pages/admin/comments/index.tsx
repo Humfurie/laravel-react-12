@@ -40,29 +40,29 @@ export default function Index({ stats }: Props) {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-5">
-                    <div className="rounded-lg border p-4">
+                    <div className="rounded-lg border bg-card p-4 dark:shadow-lg dark:shadow-white/10">
                         <h3 className="text-muted-foreground text-sm font-medium">Total</h3>
                         <p className="text-2xl font-bold">{stats.total}</p>
                     </div>
-                    <div className="rounded-lg border p-4">
+                    <div className="rounded-lg border bg-card p-4 dark:shadow-lg dark:shadow-white/10">
                         <h3 className="text-muted-foreground text-sm font-medium">Approved</h3>
                         <p className="text-2xl font-bold">{stats.approved}</p>
                     </div>
-                    <div className="rounded-lg border p-4">
+                    <div className="rounded-lg border bg-card p-4 dark:shadow-lg dark:shadow-white/10">
                         <h3 className="text-muted-foreground text-sm font-medium">Pending</h3>
                         <p className="text-2xl font-bold">{stats.pending}</p>
                     </div>
-                    <div className="rounded-lg border p-4">
+                    <div className="rounded-lg border bg-card p-4 dark:shadow-lg dark:shadow-white/10">
                         <h3 className="text-muted-foreground text-sm font-medium">Hidden</h3>
                         <p className="text-2xl font-bold">{stats.hidden}</p>
                     </div>
-                    <div className="rounded-lg border p-4">
+                    <div className="rounded-lg border bg-card p-4 dark:shadow-lg dark:shadow-white/10">
                         <h3 className="text-muted-foreground text-sm font-medium">Reported</h3>
                         <p className="text-2xl font-bold">{stats.reported}</p>
                     </div>
                 </div>
 
-                <div className="rounded-lg border">
+                <div className="rounded-lg border bg-card dark:shadow-lg dark:shadow-white/10">
                     <div className="p-4">
                         <p className="text-muted-foreground text-sm">TODO: Full comment management UI - See MISSING_FRONTEND_COMPONENTS.md</p>
                     </div>

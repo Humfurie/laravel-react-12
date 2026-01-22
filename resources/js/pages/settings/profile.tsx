@@ -1,7 +1,7 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Facebook, FileText, Github, Globe, Linkedin, Plus, Trash2, Twitter, Upload, X } from 'lucide-react';
+import { Facebook, FileText, Github, Globe, Image, Linkedin, Plus, Trash2, Twitter, Upload, X } from 'lucide-react';
 import { FormEventHandler, useRef } from 'react';
 
 import DeleteUser from '@/components/delete-user';
@@ -45,6 +45,7 @@ type ProfileForm = {
     social_links: SocialLinks;
     profile_stats: ProfileStat[];
     resume: File | null;
+    about_image: File | null;
 };
 
 interface ProfileProps {
@@ -55,6 +56,7 @@ interface ProfileProps {
 export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
     const { auth } = usePage<SharedData>().props;
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const aboutImageInputRef = useRef<HTMLInputElement>(null);
 
     const { data, setData, post, errors, processing, recentlySuccessful } = useForm<ProfileForm>({
         name: auth.user.name,
@@ -66,6 +68,7 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
         social_links: auth.user.social_links || {},
         profile_stats: auth.user.profile_stats || [],
         resume: null,
+        about_image: null,
     });
 
     const submit: FormEventHandler = (e) => {
@@ -115,6 +118,24 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
         setData('resume', null);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
+        }
+    };
+
+    const handleAboutImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setData('about_image', file);
+    };
+
+    const removeAboutImage = () => {
+        router.delete(route('profile.about-image.remove'), {
+            preserveScroll: true,
+        });
+    };
+
+    const clearAboutImageSelection = () => {
+        setData('about_image', null);
+        if (aboutImageInputRef.current) {
+            aboutImageInputRef.current.value = '';
         }
     };
 
@@ -281,6 +302,74 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
                             </Button>
                         </div>
                         <InputError message={errors.profile_stats} />
+                    </div>
+
+                    <Separator />
+
+                    {/* About Section Image */}
+                    <div className="space-y-6">
+                        <HeadingSmall title="About section image" description="Upload an image to display in the about section on your homepage" />
+
+                        <div className="space-y-4">
+                            {auth.user.about_image_path && !data.about_image && (
+                                <div className="flex items-center gap-3 rounded-lg border p-3">
+                                    <div className="relative h-16 w-16 overflow-hidden rounded-lg">
+                                        <img
+                                            src={`/storage/${auth.user.about_image_path}`}
+                                            alt="About section image"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm font-medium">Current image</p>
+                                        <p className="text-muted-foreground text-xs">{auth.user.about_image_path.split('/').pop()}</p>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={removeAboutImage}
+                                        className="text-destructive hover:text-destructive"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
+
+                            {data.about_image && (
+                                <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950">
+                                    <Image className="h-8 w-8 text-green-600" />
+                                    <div className="flex-1">
+                                        <p className="text-sm font-medium">New image selected</p>
+                                        <p className="text-muted-foreground text-xs">{data.about_image.name}</p>
+                                    </div>
+                                    <Button type="button" variant="ghost" size="sm" onClick={clearAboutImageSelection}>
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
+
+                            <div>
+                                <input
+                                    ref={aboutImageInputRef}
+                                    type="file"
+                                    accept=".jpg,.jpeg,.png,.webp"
+                                    onChange={handleAboutImageChange}
+                                    className="hidden"
+                                    id="about-image-upload"
+                                />
+                                <label htmlFor="about-image-upload">
+                                    <Button type="button" variant="outline" asChild>
+                                        <span>
+                                            <Upload className="mr-2 h-4 w-4" />
+                                            {auth.user.about_image_path ? 'Replace image' : 'Upload image'}
+                                        </span>
+                                    </Button>
+                                </label>
+                                <p className="text-muted-foreground mt-2 text-xs">JPG, PNG, or WebP. Max 2MB.</p>
+                            </div>
+                            <InputError message={errors.about_image} />
+                        </div>
                     </div>
 
                     <Separator />

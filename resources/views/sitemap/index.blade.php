@@ -1,35 +1,28 @@
 {!! '<?xml version="1.0" encoding="UTF-8"?>' !!}
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-    {{-- Home Page --}}
-    <url>
-        <loc>{{ $appUrl }}</loc>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    {{-- Static pages sitemap --}}
+    <sitemap>
+        <loc>{{ $appUrl }}/sitemap-pages.xml</loc>
         <lastmod>{{ now()->toIso8601String() }}</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>1.0</priority>
-    </url>
+    </sitemap>
 
-    {{-- Blog Index --}}
-    <url>
-        <loc>{{ $appUrl }}/blog</loc>
-        <lastmod>{{ $blogs->first()?->updated_at?->toIso8601String() ?? now()->toIso8601String() }}</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>0.9</priority>
-    </url>
+    {{-- Blog posts sitemap --}}
+    <sitemap>
+        <loc>{{ $appUrl }}/sitemap-blogs.xml</loc>
+        @if($latestBlog)
+            <lastmod>{{ $latestBlog->updated_at->toIso8601String() }}</lastmod>
+        @else
+            <lastmod>{{ now()->toIso8601String() }}</lastmod>
+        @endif
+    </sitemap>
 
-    {{-- Individual Blog Posts --}}
-    @foreach($blogs as $blog)
-        <url>
-            <loc>{{ $appUrl }}/blog/{{ $blog->slug }}</loc>
-            <lastmod>{{ $blog->updated_at->toIso8601String() }}</lastmod>
-            <changefreq>weekly</changefreq>
-            <priority>0.8</priority>
-            @if($blog->display_image)
-                <image:image>
-                    <image:loc>{{ $blog->display_image }}</image:loc>
-                    <image:title>{{ $blog->title }}</image:title>
-                </image:image>
-            @endif
-        </url>
-    @endforeach
-</urlset>
+    {{-- Projects sitemap --}}
+    <sitemap>
+        <loc>{{ $appUrl }}/sitemap-projects.xml</loc>
+        @if($latestProject)
+            <lastmod>{{ $latestProject->updated_at->toIso8601String() }}</lastmod>
+        @else
+            <lastmod>{{ now()->toIso8601String() }}</lastmod>
+        @endif
+    </sitemap>
+</sitemapindex>
