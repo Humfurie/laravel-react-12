@@ -295,9 +295,11 @@ class HomepageCacheService
             return null;
         }
 
-        return Cache::remember(
-            "project.{$project->id}.github",
-            86400,
+        $cacheKey = sprintf(config('cache-ttl.keys.project_github'), $project->id);
+
+        return $this->rememberWithLock(
+            $cacheKey,
+            config('cache-ttl.homepage.project_github'),
             fn () => [
                 'contributors' => $github->getContributors($repo, 5),
                 'commit_count' => $github->getCommitCount($repo),

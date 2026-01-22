@@ -3,6 +3,7 @@
 use App\Models\Blog;
 use App\Models\Experience;
 use App\Models\Expertise;
+use App\Models\Project;
 use App\Models\User;
 use App\Services\GitHubService;
 use App\Services\HomepageCacheService;
@@ -294,5 +295,166 @@ describe('getCachedGitHubStats', function () {
 
         expect($result1)->toBe($mockData)
             ->and($result2)->toBe($mockData);
+    });
+});
+
+describe('getCachedProjectGitHubData', function () {
+    test('returns null when project has no repo_url or github_repo', function () {
+        $project = Project::factory()->create([
+            'links' => [],
+            'github_repo' => null,
+        ]);
+
+        $result = $this->service->getCachedProjectGitHubData($project);
+
+        expect($result)->toBeNull();
+    });
+
+    test('returns null when repo URL cannot be parsed', function () {
+        $project = Project::factory()->create([
+            'github_repo' => 'not-a-valid-url',
+        ]);
+
+        $this->mock(GitHubService::class, function ($mock) {
+            $mock->shouldReceive('extractRepoFromUrl')
+                ->once()
+                ->andReturn(null);
+        });
+
+        $result = $this->service->getCachedProjectGitHubData($project);
+
+        expect($result)->toBeNull();
+    });
+
+    test('returns data when project has github_repo', function () {
+        $project = Project::factory()->create([
+            'github_repo' => 'https://github.com/owner/repo',
+        ]);
+
+        $mockData = [
+            'contributors' => [['login' => 'user1', 'contributions' => 50]],
+            'commit_count' => 100,
+            'last_commit' => '2024-01-15T12:00:00Z',
+        ];
+
+        $this->mock(GitHubService::class, function ($mock) use ($mockData) {
+            $mock->shouldReceive('extractRepoFromUrl')
+                ->once()
+                ->with('https://github.com/owner/repo')
+                ->andReturn('owner/repo');
+            $mock->shouldReceive('getContributors')
+                ->once()
+                ->with('owner/repo', 5)
+                ->andReturn($mockData['contributors']);
+            $mock->shouldReceive('getCommitCount')
+                ->once()
+                ->with('owner/repo')
+                ->andReturn($mockData['commit_count']);
+            $mock->shouldReceive('getLastCommitDate')
+                ->once()
+                ->with('owner/repo')
+                ->andReturn($mockData['last_commit']);
+        });
+
+        $result = $this->service->getCachedProjectGitHubData($project);
+
+        expect($result)->toBe($mockData);
+    });
+
+    test('returns data when project has repo_url in links', function () {
+        $project = Project::factory()->create([
+            'links' => ['repo_url' => 'https://github.com/owner/linked-repo'],
+            'github_repo' => null,
+        ]);
+
+        $mockData = [
+            'contributors' => [['login' => 'user1', 'contributions' => 50]],
+            'commit_count' => 100,
+            'last_commit' => '2024-01-15T12:00:00Z',
+        ];
+
+        $this->mock(GitHubService::class, function ($mock) use ($mockData) {
+            $mock->shouldReceive('extractRepoFromUrl')
+                ->once()
+                ->with('https://github.com/owner/linked-repo')
+                ->andReturn('owner/linked-repo');
+            $mock->shouldReceive('getContributors')
+                ->once()
+                ->andReturn($mockData['contributors']);
+            $mock->shouldReceive('getCommitCount')
+                ->once()
+                ->andReturn($mockData['commit_count']);
+            $mock->shouldReceive('getLastCommitDate')
+                ->once()
+                ->andReturn($mockData['last_commit']);
+        });
+
+        $result = $this->service->getCachedProjectGitHubData($project);
+
+        expect($result)->toBe($mockData);
+    });
+
+    test('caches the result', function () {
+        $project = Project::factory()->create([
+            'github_repo' => 'https://github.com/owner/repo',
+        ]);
+
+        $mockData = [
+            'contributors' => [['login' => 'user1', 'contributions' => 50]],
+            'commit_count' => 100,
+            'last_commit' => '2024-01-15T12:00:00Z',
+        ];
+
+        $this->mock(GitHubService::class, function ($mock) use ($mockData) {
+            $mock->shouldReceive('extractRepoFromUrl')
+                ->twice() // Called on first and second invocation
+                ->andReturn('owner/repo');
+            $mock->shouldReceive('getContributors')
+                ->once() // Only called once due to caching
+                ->andReturn($mockData['contributors']);
+            $mock->shouldReceive('getCommitCount')
+                ->once()
+                ->andReturn($mockData['commit_count']);
+            $mock->shouldReceive('getLastCommitDate')
+                ->once()
+                ->andReturn($mockData['last_commit']);
+        });
+
+        // First call - should hit GitHub API
+        $result1 = $this->service->getCachedProjectGitHubData($project);
+
+        // Second call - should use cache
+        $result2 = $this->service->getCachedProjectGitHubData($project);
+
+        $cacheKey = sprintf(config('cache-ttl.keys.project_github'), $project->id);
+
+        expect($result1)->toBe($mockData)
+            ->and($result2)->toBe($mockData)
+            ->and(Cache::has($cacheKey))->toBeTrue();
+    });
+
+    test('prefers repo_url over github_repo', function () {
+        $project = Project::factory()->create([
+            'links' => ['repo_url' => 'https://github.com/owner/linked-repo'],
+            'github_repo' => 'https://github.com/owner/github-repo',
+        ]);
+
+        $this->mock(GitHubService::class, function ($mock) {
+            $mock->shouldReceive('extractRepoFromUrl')
+                ->once()
+                ->with('https://github.com/owner/linked-repo') // Should use repo_url
+                ->andReturn('owner/linked-repo');
+            $mock->shouldReceive('getContributors')
+                ->once()
+                ->andReturn([]);
+            $mock->shouldReceive('getCommitCount')
+                ->once()
+                ->andReturn(0);
+            $mock->shouldReceive('getLastCommitDate')
+                ->once()
+                ->andReturn(null);
+        });
+
+        $this->service->getCachedProjectGitHubData($project);
     });
 });
