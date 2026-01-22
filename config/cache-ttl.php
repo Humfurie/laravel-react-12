@@ -22,6 +22,7 @@ return [
         'expertises' => env('CACHE_TTL_HOMEPAGE_EXPERTISES', 3600),
         'user_profile' => env('CACHE_TTL_HOMEPAGE_USER_PROFILE', 3600),
         'github_stats' => env('CACHE_TTL_HOMEPAGE_GITHUB_STATS', 86400), // 24 hours
+        'project_github' => env('CACHE_TTL_PROJECT_GITHUB', 86400), // 24 hours
     ],
 
     /*
@@ -54,6 +55,7 @@ return [
         'homepage_expertises' => 'homepage.expertises',
         'homepage_user_profile' => 'homepage.user_profile',
         'homepage_github_stats' => 'homepage.github_stats',
+        'project_github' => 'project.%d.github', // %d = project ID
         'listing_projects_featured' => 'projects.featured',
         'listing_projects_tech_stack' => 'projects.tech_stack',
         'admin_dashboard' => 'admin:dashboard',
