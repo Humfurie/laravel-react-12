@@ -44,6 +44,7 @@ class Project extends Model
         'tech_stack',
         'links',
         'github_repo',
+        'demo_url',
         'status',
         'is_featured',
         'is_public',
@@ -124,8 +125,8 @@ class Project extends Model
     /**
      * Generate a unique slug from the given title.
      *
-     * @param string $title The title to generate slug from
-     * @param int|null $excludeId ID to exclude from uniqueness check (for updates)
+     * @param  string  $title  The title to generate slug from
+     * @param  int|null  $excludeId  ID to exclude from uniqueness check (for updates)
      */
     protected static function generateUniqueSlug(string $title, ?int $excludeId = null): string
     {
@@ -134,7 +135,7 @@ class Project extends Model
         $counter = 1;
 
         while (static::slugExists($slug, $excludeId)) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 
@@ -144,8 +145,8 @@ class Project extends Model
     /**
      * Check if a slug already exists in the database.
      *
-     * @param string $slug The slug to check
-     * @param int|null $excludeId ID to exclude from the check (for updates)
+     * @param  string  $slug  The slug to check
+     * @param  int|null  $excludeId  ID to exclude from the check (for updates)
      */
     protected static function slugExists(string $slug, ?int $excludeId = null): bool
     {
