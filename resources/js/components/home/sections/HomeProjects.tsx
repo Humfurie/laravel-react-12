@@ -1,3 +1,4 @@
+import GitHubStatsHeader from '@/components/github/GitHubStatsHeader';
 import { Badge } from '@/components/ui/badge';
 import type { Project } from '@/types/project';
 import { Link, router } from '@inertiajs/react';
@@ -13,6 +14,19 @@ interface HomeProjectsProps {
         total_projects: number;
         live_projects: number;
     };
+    githubStats?: {
+        total_contributions: number;
+        commits: number;
+        pull_requests: number;
+        issues: number;
+        calendar: Array<{
+            contributionDays: Array<{
+                contributionCount: number;
+                date: string;
+                color: string;
+            }>;
+        }>;
+    } | null;
 }
 
 // Memoized to prevent re-renders when parent state changes
@@ -291,7 +305,7 @@ const FeaturedProjectCarousel = memo(function FeaturedProjectCarousel({
     );
 });
 
-const HomeProjects = ({ projects, stats }: HomeProjectsProps) => {
+const HomeProjects = ({ projects, stats, githubStats }: HomeProjectsProps) => {
     // Memoize filtered project lists to avoid recalculation on every render
     const featuredProjects = useMemo(() => projects.filter((p) => p.is_featured), [projects]);
     const regularProjects = useMemo(() => projects.slice(0, 6), [projects]);
@@ -316,6 +330,9 @@ const HomeProjects = ({ projects, stats }: HomeProjectsProps) => {
                         A showcase of applications, tools, and systems I've built
                     </p>
                 </div>
+
+                {/* GitHub Stats */}
+                {githubStats && <GitHubStatsHeader githubStats={githubStats} />}
 
                 {/* Featured Carousel */}
                 {featuredProjects.length > 0 && (
