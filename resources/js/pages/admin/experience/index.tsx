@@ -50,7 +50,7 @@ function ExperienceCard({ experience, canUpdate, canDelete }: { experience: Expe
     };
 
     return (
-        <div className={`rounded-lg border p-4 transition-colors ${canUpdate ? 'hover:bg-muted/50 cursor-pointer' : ''}`} onClick={handleEdit}>
+        <div className={`rounded-lg border bg-card p-4 transition-colors dark:shadow-lg dark:shadow-white/10 ${canUpdate ? 'hover:bg-muted/50 cursor-pointer' : ''}`} onClick={handleEdit}>
             <div className="flex items-start justify-between gap-4">
                 <div className="flex flex-1 gap-4">
                     {/* Company Logo */}
@@ -59,7 +59,7 @@ function ExperienceCard({ experience, canUpdate, canDelete }: { experience: Expe
                             <img
                                 src={experience.image_url}
                                 alt={experience.company}
-                                className="h-16 w-16 rounded-full border-2 border-gray-200 object-cover"
+                                className="h-16 w-16 rounded-full border-2 border-border object-cover"
                             />
                         </div>
                     )}

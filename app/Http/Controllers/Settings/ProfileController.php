@@ -37,17 +37,30 @@ class ProfileController extends Controller
         if ($request->hasFile('resume')) {
             // Delete old resume if exists
             if ($user->resume_path) {
-                $this->deleteResume($user->resume_path);
+                $this->deleteFile($user->resume_path);
             }
 
             // Use public disk for local, minio for production
             $disk = app()->environment('local') ? 'public' : 'minio';
-            $path = $request->file('resume')->store('resumes/' . $user->id, $disk);
+            $path = $request->file('resume')->store('resumes/'.$user->id, $disk);
             $validated['resume_path'] = $path;
         }
 
-        // Remove 'resume' from validated data (it's handled separately)
-        unset($validated['resume']);
+        // Handle about image upload
+        if ($request->hasFile('about_image')) {
+            // Delete old image if exists
+            if ($user->about_image_path) {
+                $this->deleteFile($user->about_image_path);
+            }
+
+            // Use public disk for local, minio for production
+            $disk = app()->environment('local') ? 'public' : 'minio';
+            $path = $request->file('about_image')->store('about-images/'.$user->id, $disk);
+            $validated['about_image_path'] = $path;
+        }
+
+        // Remove file fields from validated data (handled separately)
+        unset($validated['resume'], $validated['about_image']);
 
         $user->fill($validated);
 
@@ -61,11 +74,11 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete resume file.
+     * Delete a file from storage.
      */
-    public function deleteResume(?string $path): void
+    private function deleteFile(?string $path): void
     {
-        if (!$path) {
+        if (! $path) {
             return;
         }
 
@@ -83,8 +96,23 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if ($user->resume_path) {
-            $this->deleteResume($user->resume_path);
+            $this->deleteFile($user->resume_path);
             $user->update(['resume_path' => null]);
+        }
+
+        return to_route('profile.edit');
+    }
+
+    /**
+     * Remove about image from profile.
+     */
+    public function removeAboutImage(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($user->about_image_path) {
+            $this->deleteFile($user->about_image_path);
+            $user->update(['about_image_path' => null]);
         }
 
         return to_route('profile.edit');
