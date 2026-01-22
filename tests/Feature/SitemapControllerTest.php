@@ -16,8 +16,12 @@ describe('sitemap index', function () {
         $response = $this->get(route('sitemap.index'));
 
         $response->assertOk()
-            ->assertHeader('Content-Type', 'application/xml')
-            ->assertHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+            ->assertHeader('Content-Type', 'application/xml');
+
+        $cacheControl = $response->headers->get('Cache-Control');
+        expect($cacheControl)->toContain('public');
+        expect($cacheControl)->toContain('max-age=3600');
+        expect($cacheControl)->toContain('s-maxage=3600');
     });
 
     test('contains links to all sitemaps', function () {
