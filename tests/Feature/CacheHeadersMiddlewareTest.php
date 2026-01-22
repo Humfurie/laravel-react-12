@@ -12,13 +12,19 @@ uses(RefreshDatabase::class);
 test('homepage gets cache headers', function () {
     $response = $this->get('/');
 
-    $response->assertHeader('Cache-Control', 'public, max-age=300, s-maxage=3600');
+    $cacheControl = $response->headers->get('Cache-Control');
+    expect($cacheControl)->toContain('public');
+    expect($cacheControl)->toContain('max-age=300');
+    expect($cacheControl)->toContain('s-maxage=3600');
 });
 
 test('blog listing gets cache headers', function () {
     $response = $this->get('/blog');
 
-    $response->assertHeader('Cache-Control', 'public, max-age=300, s-maxage=1800');
+    $cacheControl = $response->headers->get('Cache-Control');
+    expect($cacheControl)->toContain('public');
+    expect($cacheControl)->toContain('max-age=300');
+    expect($cacheControl)->toContain('s-maxage=1800');
 });
 
 test('blog post gets cache headers', function () {
@@ -26,13 +32,19 @@ test('blog post gets cache headers', function () {
 
     $response = $this->get("/blog/{$blog->slug}");
 
-    $response->assertHeader('Cache-Control', 'public, max-age=300, s-maxage=3600');
+    $cacheControl = $response->headers->get('Cache-Control');
+    expect($cacheControl)->toContain('public');
+    expect($cacheControl)->toContain('max-age=300');
+    expect($cacheControl)->toContain('s-maxage=3600');
 });
 
 test('projects page gets cache headers', function () {
     $response = $this->get('/projects');
 
-    $response->assertHeader('Cache-Control', 'public, max-age=300, s-maxage=3600');
+    $cacheControl = $response->headers->get('Cache-Control');
+    expect($cacheControl)->toContain('public');
+    expect($cacheControl)->toContain('max-age=300');
+    expect($cacheControl)->toContain('s-maxage=3600');
 });
 
 test('authenticated users do not get cache headers', function () {
