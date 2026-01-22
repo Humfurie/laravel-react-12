@@ -43,6 +43,7 @@ Route::get('/', function (HomepageCacheService $homepageService) {
             'about' => $primaryUser->about,
             'profile_stats' => $primaryUser->profile_stats ?? [],
             'about_image_path' => $primaryUser->about_image_path,
+            'github_username' => $primaryUser->github_username,
         ],
     ]));
 })->name('home');

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ExpertiseController;
 use App\Http\Controllers\Admin\GiveawayController;
 use App\Http\Controllers\Admin\InquiryController;
 use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\ProjectCategoryController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\RealEstateController;
 use App\Http\Controllers\Admin\RoleController;
@@ -185,6 +186,14 @@ Route::prefix('projects')->name('admin.projects.')->middleware('permission:proje
     Route::post('/{project}/images', [ProjectController::class, 'uploadImage'])->name('images.upload')->middleware('permission:project,update');
     Route::delete('/{project}/images/{image}', [ProjectController::class, 'deleteImage'])->name('images.delete')->middleware('permission:project,update');
     Route::patch('/{project}/images/{image}/primary', [ProjectController::class, 'setPrimaryImage'])->name('images.set-primary')->middleware('permission:project,update');
+});
+
+Route::prefix('project-categories')->name('admin.project-categories.')->middleware('permission:project,viewAny')->group(function () {
+    Route::get('/', [ProjectCategoryController::class, 'index'])->name('index');
+    Route::post('/', [ProjectCategoryController::class, 'store'])->name('store')->middleware('permission:project,create');
+    Route::put('/{projectCategory}', [ProjectCategoryController::class, 'update'])->name('update')->middleware('permission:project,update');
+    Route::delete('/{projectCategory}', [ProjectCategoryController::class, 'destroy'])->name('destroy')->middleware('permission:project,delete');
+    Route::post('/reorder', [ProjectCategoryController::class, 'reorder'])->name('reorder')->middleware('permission:project,update');
 });
 
 Route::prefix('inquiries')->name('inquiries.')->middleware('permission:inquiry,viewAny')->group(function () {

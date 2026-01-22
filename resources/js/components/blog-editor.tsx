@@ -216,7 +216,7 @@ export function BlogEditor({ content = '', onChange, placeholder = 'Start writin
     }, [isMobile, mobileView]);
 
     return (
-        <div className="blog-editor-wrapper">
+        <div className="flex flex-col rounded-lg border">
             <EditorContext.Provider value={{ editor }}>
                 <Toolbar
                     ref={toolbarRef}
@@ -239,7 +239,12 @@ export function BlogEditor({ content = '', onChange, placeholder = 'Start writin
                     )}
                 </Toolbar>
 
-                <EditorContent editor={editor} role="presentation" className="blog-editor-content" style={{ minHeight: '400px' }} />
+                <div
+                    className="blog-editor-content flex min-h-[400px] flex-1 cursor-text flex-col"
+                    onClick={() => editor?.commands.focus()}
+                >
+                    <EditorContent editor={editor} role="presentation" className="flex flex-1 flex-col [&>.tiptap]:flex-1" />
+                </div>
             </EditorContext.Provider>
         </div>
     );

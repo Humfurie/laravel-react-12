@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -41,6 +42,7 @@ class Project extends Model
         'description',
         'short_description',
         'category',
+        'project_category_id',
         'tech_stack',
         'links',
         'github_repo',
@@ -81,16 +83,19 @@ class Project extends Model
         'contributors',
     ];
 
+    /**
+     * Get categories from database.
+     *
+     * @return array<string, string>
+     */
     public static function getCategories(): array
     {
-        return [
-            self::CATEGORY_WEB_APP => 'Web Application',
-            self::CATEGORY_MOBILE_APP => 'Mobile App',
-            self::CATEGORY_API => 'API / Backend',
-            self::CATEGORY_LIBRARY => 'Library / Package',
-            self::CATEGORY_CLI => 'CLI Tool',
-            self::CATEGORY_DESIGN => 'Design System',
-        ];
+        return ProjectCategory::getDropdownOptions();
+    }
+
+    public function projectCategory(): BelongsTo
+    {
+        return $this->belongsTo(ProjectCategory::class);
     }
 
     public static function getStatuses(): array
@@ -189,6 +194,18 @@ class Project extends Model
 
     public function getCategoryLabelAttribute(): string
     {
+        // Try to get from relationship first
+        if ($this->projectCategory) {
+            return $this->projectCategory->name;
+        }
+
+        // Fallback to database lookup by slug
+        $category = ProjectCategory::where('slug', $this->category)->first();
+        if ($category) {
+            return $category->name;
+        }
+
+        // Final fallback to legacy constants
         return match ($this->category) {
             self::CATEGORY_WEB_APP => 'Web Application',
             self::CATEGORY_MOBILE_APP => 'Mobile App',
@@ -196,7 +213,7 @@ class Project extends Model
             self::CATEGORY_LIBRARY => 'Library / Package',
             self::CATEGORY_CLI => 'CLI Tool',
             self::CATEGORY_DESIGN => 'Design System',
-            default => $this->category
+            default => $this->category ?? 'Uncategorized'
         };
     }
 

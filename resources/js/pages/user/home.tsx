@@ -108,6 +108,7 @@ interface Props {
             linkedin?: string;
             calendar?: string;
         } | null;
+        github_username?: string | null;
     };
 }
 
@@ -261,7 +262,14 @@ export default function Home({
             <ExperienceSection experiences={transformedExperiences} />
 
             {/* Projects Section */}
-            {projects.length > 0 && <HomeProjects projects={projects} stats={projectStats} githubStats={githubStats} />}
+            {projects.length > 0 && (
+                <HomeProjects
+                    projects={projects}
+                    stats={projectStats}
+                    githubStats={githubStats}
+                    authorUsername={profileUser?.github_username ?? undefined}
+                />
+            )}
 
             <HomeExpertise expertises={expertises} />
 
