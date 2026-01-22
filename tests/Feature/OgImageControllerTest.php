@@ -61,7 +61,7 @@ describe('blog og image', function () {
         $response = $this->get(route('og-image.blog', 'unavailable-test'));
 
         $response->assertOk()
-            ->assertHeader('Content-Type', 'image/jpeg');
+            ->assertHeader('Content-Type', 'image/png');
     });
 });
 

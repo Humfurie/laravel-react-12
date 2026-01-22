@@ -37,6 +37,12 @@ class BlogObserver
      */
     public function updated(Blog $blog): void
     {
+        // If slug changed, clear cache for old slug too
+        if ($blog->wasChanged('slug')) {
+            $oldSlug = $blog->getOriginal('slug');
+            Cache::forget("og:blog:{$oldSlug}");
+        }
+
         $this->clearCache($blog);
     }
 
