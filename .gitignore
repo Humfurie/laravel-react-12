@@ -28,3 +28,6 @@ yarn-error.log
 /.vscode/
 /.windsurf/
 /docs
+
+# Documentation (auto-generated)
+docs/
