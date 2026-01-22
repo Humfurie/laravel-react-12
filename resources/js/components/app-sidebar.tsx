@@ -1,12 +1,22 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar';
-import { Link, usePage } from '@inertiajs/react';
-import React, { useMemo } from 'react';
-import type { Auth, NavItem, Permissions } from '@/types';
-import { BookOpen, Briefcase, Building, Code2, FileText, FolderKanban, LayoutGrid, Moon, Shield, Sun, Trophy, Users } from 'lucide-react';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from '@/components/ui/sidebar';
 import { useAppearance } from '@/hooks/use-appearance';
+import type { Auth, NavItem, Permissions } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
+import { BookOpen, Briefcase, Building, Code2, FileText, FolderKanban, LayoutGrid, Moon, Shield, Sun, Trophy, Users } from 'lucide-react';
+import { useMemo } from 'react';
 import AppLogo from './app-logo';
 
 interface SidebarNavItem extends NavItem {

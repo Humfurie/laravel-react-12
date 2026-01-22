@@ -1,6 +1,6 @@
 import CategoryDropdown from '@/components/global/CategoryDropdown';
 import SectionTitle from '@/components/global/SectionTitle';
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface CategoryData {
     name: string;
