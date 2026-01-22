@@ -24,7 +24,7 @@ Route::get('/', function () {
     // Cache experiences for 30 minutes (only admin's experiences)
     $experiences = Cache::remember('homepage.experiences', 1800, function () {
         return Experience::with('image')
-            ->where('user_id', 1)
+            ->where('user_id', (int) config('app.admin_user_id'))
             ->ordered()
             ->get();
     });

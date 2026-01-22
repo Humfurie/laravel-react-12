@@ -78,7 +78,7 @@ class OgImageController extends Controller
             $serviceUrl = config('services.og_image.url', 'http://og-image:3001');
 
             try {
-                $response = Http::timeout(10)->get("{$serviceUrl}/generate", $params);
+                $response = Http::timeout(3)->get("{$serviceUrl}/generate", $params);
 
                 return $response->successful() ? $response->body() : null;
             } catch (\Exception $e) {
@@ -89,11 +89,27 @@ class OgImageController extends Controller
         });
 
         if (! $image) {
-            abort(503, 'OG Image service unavailable');
+            return $this->fallbackImage();
         }
 
         return response($image, 200)
             ->header('Content-Type', 'image/png')
             ->header('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    }
+
+    /**
+     * Return static fallback image when OG service is unavailable.
+     */
+    private function fallbackImage(): Response
+    {
+        $fallbackPath = public_path('og-default.jpg');
+
+        if (! file_exists($fallbackPath)) {
+            abort(503, 'OG Image service unavailable');
+        }
+
+        return response(file_get_contents($fallbackPath), 200)
+            ->header('Content-Type', 'image/jpeg')
+            ->header('Cache-Control', 'public, max-age=3600, s-maxage=3600');
     }
 }

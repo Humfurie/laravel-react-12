@@ -9,17 +9,15 @@ use Symfony\Component\HttpFoundation\Response;
 class CacheHeaders
 {
     /**
-     * Cache configuration for public pages.
-     * max-age: browser cache duration (seconds)
-     * s-maxage: CDN/proxy cache duration (seconds)
+     * Route pattern to config key mapping.
      *
-     * @var array<string, array{max_age: int, s_maxage: int}>
+     * @var array<string, string>
      */
-    private array $cacheConfig = [
-        '/' => ['max_age' => 300, 's_maxage' => 3600],           // Homepage: 5min browser, 1hr CDN
-        '/blog' => ['max_age' => 300, 's_maxage' => 1800],       // Blog listing: 5min browser, 30min CDN
-        '/blog/*' => ['max_age' => 300, 's_maxage' => 3600],     // Blog posts: 5min browser, 1hr CDN
-        '/projects' => ['max_age' => 300, 's_maxage' => 3600],   // Projects: 5min browser, 1hr CDN
+    private array $routeConfigMap = [
+        '/' => 'homepage',
+        '/blog' => 'blog_listing',
+        '/blog/*' => 'blog_post',
+        '/projects' => 'projects',
     ];
 
     /**
@@ -64,17 +62,40 @@ class CacheHeaders
         // Normalize path
         $path = '/'.ltrim($path, '/');
 
+        $configKey = $this->findConfigKey($path);
+
+        if (! $configKey) {
+            return null;
+        }
+
+        $config = config("cache-ttl.http_headers.{$configKey}");
+
+        if (! $config) {
+            return null;
+        }
+
+        return [
+            'max_age' => $config['max_age'],
+            's_maxage' => $config['s_maxage'],
+        ];
+    }
+
+    /**
+     * Find the config key for the given path.
+     */
+    private function findConfigKey(string $path): ?string
+    {
         // Check exact match first
-        if (isset($this->cacheConfig[$path])) {
-            return $this->cacheConfig[$path];
+        if (isset($this->routeConfigMap[$path])) {
+            return $this->routeConfigMap[$path];
         }
 
         // Check wildcard patterns
-        foreach ($this->cacheConfig as $pattern => $settings) {
+        foreach ($this->routeConfigMap as $pattern => $configKey) {
             if (str_contains($pattern, '*')) {
                 $regex = str_replace(['/', '*'], ['\/', '.*'], $pattern);
                 if (preg_match('/^'.$regex.'$/', $path)) {
-                    return $settings;
+                    return $configKey;
                 }
             }
         }
