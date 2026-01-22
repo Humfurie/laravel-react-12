@@ -94,6 +94,20 @@ class HomepageCacheService
     }
 
     /**
+     * Get cached GitHub stats for the admin user.
+     *
+     * @return array{total_contributions: int, commits: int, pull_requests: int, issues: int, reviews: int, calendar: array}|null
+     */
+    public function getCachedGitHubStats(): ?array
+    {
+        return $this->rememberWithLock(
+            config('cache-ttl.keys.homepage_github_stats'),
+            config('cache-ttl.homepage.github_stats'),
+            fn () => $this->getGitHubStats()
+        );
+    }
+
+    /**
      * Cache remember with lock to prevent stampede.
      *
      * Uses atomic locking to ensure only one process computes the value
@@ -244,5 +258,20 @@ class HomepageCacheService
         }
 
         return $user;
+    }
+
+    /**
+     * Get GitHub stats without caching.
+     *
+     * @return array{total_contributions: int, commits: int, pull_requests: int, issues: int, reviews: int, calendar: array}|null
+     */
+    public function getGitHubStats(): ?array
+    {
+        $user = User::find(config('app.admin_user_id'));
+        if (! $user?->github_username) {
+            return null;
+        }
+
+        return app(GitHubService::class)->getUserContributions($user->github_username);
     }
 }
