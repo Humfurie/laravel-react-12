@@ -4,6 +4,7 @@ use App\Models\Blog;
 use App\Models\Experience;
 use App\Models\Expertise;
 use App\Models\User;
+use App\Services\GitHubService;
 use App\Services\HomepageCacheService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -171,5 +172,127 @@ describe('getCachedUserProfileData', function () {
         $this->service->getCachedUserProfileData();
 
         expect(Cache::has(config('cache-ttl.keys.homepage_user_profile')))->toBeTrue();
+    });
+});
+
+describe('getGitHubStats', function () {
+    test('returns null when user has no github username', function () {
+        $uniqueAdminId = 99997;
+        $user = User::factory()->create(['id' => $uniqueAdminId, 'github_username' => null]);
+        config(['app.admin_user_id' => $user->id]);
+
+        $result = $this->service->getGitHubStats();
+
+        expect($result)->toBeNull();
+    });
+
+    test('returns null when admin user does not exist', function () {
+        config(['app.admin_user_id' => 999999]);
+
+        $result = $this->service->getGitHubStats();
+
+        expect($result)->toBeNull();
+    });
+
+    test('returns data when user has github username', function () {
+        $uniqueAdminId = 99996;
+        $user = User::factory()->create(['id' => $uniqueAdminId, 'github_username' => 'testuser']);
+        config(['app.admin_user_id' => $user->id]);
+
+        $mockData = [
+            'total_contributions' => 500,
+            'commits' => 400,
+            'pull_requests' => 50,
+            'issues' => 30,
+            'reviews' => 20,
+            'private_contributions' => 100,
+            'calendar' => [],
+            'top_repositories' => [],
+        ];
+
+        $this->mock(GitHubService::class, function ($mock) use ($mockData) {
+            $mock->shouldReceive('getUserContributions')
+                ->once()
+                ->with('testuser')
+                ->andReturn($mockData);
+        });
+
+        $result = $this->service->getGitHubStats();
+
+        expect($result)->toBe($mockData);
+    });
+});
+
+describe('getCachedGitHubStats', function () {
+    test('returns null when user has no github username', function () {
+        $uniqueAdminId = 99995;
+        $user = User::factory()->create(['id' => $uniqueAdminId, 'github_username' => null]);
+        config(['app.admin_user_id' => $user->id]);
+
+        $result = $this->service->getCachedGitHubStats();
+
+        expect($result)->toBeNull();
+    });
+
+    test('caches github stats data', function () {
+        $uniqueAdminId = 99994;
+        $user = User::factory()->create(['id' => $uniqueAdminId, 'github_username' => 'testuser']);
+        config(['app.admin_user_id' => $user->id]);
+
+        $mockData = [
+            'total_contributions' => 500,
+            'commits' => 400,
+            'pull_requests' => 50,
+            'issues' => 30,
+            'reviews' => 20,
+            'private_contributions' => 100,
+            'calendar' => [],
+            'top_repositories' => [],
+        ];
+
+        $this->mock(GitHubService::class, function ($mock) use ($mockData) {
+            $mock->shouldReceive('getUserContributions')
+                ->once()
+                ->with('testuser')
+                ->andReturn($mockData);
+        });
+
+        $result = $this->service->getCachedGitHubStats();
+
+        expect($result)->toBe($mockData)
+            ->and(Cache::has(config('cache-ttl.keys.homepage_github_stats')))->toBeTrue();
+    });
+
+    test('returns cached data on subsequent calls', function () {
+        $uniqueAdminId = 99993;
+        $user = User::factory()->create(['id' => $uniqueAdminId, 'github_username' => 'testuser']);
+        config(['app.admin_user_id' => $user->id]);
+
+        $mockData = [
+            'total_contributions' => 500,
+            'commits' => 400,
+            'pull_requests' => 50,
+            'issues' => 30,
+            'reviews' => 20,
+            'private_contributions' => 100,
+            'calendar' => [],
+            'top_repositories' => [],
+        ];
+
+        $this->mock(GitHubService::class, function ($mock) use ($mockData) {
+            $mock->shouldReceive('getUserContributions')
+                ->once() // Only called once, proving cache is used
+                ->with('testuser')
+                ->andReturn($mockData);
+        });
+
+        // First call - hits the service
+        $result1 = $this->service->getCachedGitHubStats();
+
+        // Second call - should use cache
+        $result2 = $this->service->getCachedGitHubStats();
+
+        expect($result1)->toBe($mockData)
+            ->and($result2)->toBe($mockData);
     });
 });
