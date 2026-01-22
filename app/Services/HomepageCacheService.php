@@ -274,4 +274,35 @@ class HomepageCacheService
 
         return app(GitHubService::class)->getUserContributions($user->github_username);
     }
+
+    /**
+     * Get cached GitHub data for a project.
+     *
+     * @return array{contributors: array, commit_count: int, last_commit: string|null}|null
+     */
+    public function getCachedProjectGitHubData(Project $project): ?array
+    {
+        $repoUrl = $project->links['repo_url'] ?? $project->github_repo ?? null;
+
+        if (! $repoUrl) {
+            return null;
+        }
+
+        $github = app(GitHubService::class);
+        $repo = $github->extractRepoFromUrl($repoUrl);
+
+        if (! $repo) {
+            return null;
+        }
+
+        return Cache::remember(
+            "project.{$project->id}.github",
+            86400,
+            fn () => [
+                'contributors' => $github->getContributors($repo, 5),
+                'commit_count' => $github->getCommitCount($repo),
+                'last_commit' => $github->getLastCommitDate($repo),
+            ]
+        );
+    }
 }
