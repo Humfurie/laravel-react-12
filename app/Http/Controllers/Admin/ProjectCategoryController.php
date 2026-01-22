@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ReorderProjectCategoriesRequest;
+use App\Http\Requests\StoreProjectCategoryRequest;
+use App\Http\Requests\UpdateProjectCategoryRequest;
 use App\Models\ProjectCategory;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,6 +18,8 @@ class ProjectCategoryController extends Controller
 
     public function index(): Response
     {
+        $this->authorize('viewAny', ProjectCategory::class);
+
         $categories = ProjectCategory::ordered()
             ->withCount('projects')
             ->get();
@@ -25,34 +29,18 @@ class ProjectCategoryController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreProjectCategoryRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:project_categories,slug',
-            'description' => 'nullable|string|max:500',
-            'sort_order' => 'nullable|integer|min:0',
-            'is_active' => 'boolean',
-        ]);
-
-        ProjectCategory::create($validated);
+        ProjectCategory::create($request->validated());
 
         return redirect()
             ->route('admin.project-categories.index')
             ->with('success', 'Category created successfully.');
     }
 
-    public function update(Request $request, ProjectCategory $projectCategory): RedirectResponse
+    public function update(UpdateProjectCategoryRequest $request, ProjectCategory $projectCategory): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:project_categories,slug,'.$projectCategory->id,
-            'description' => 'nullable|string|max:500',
-            'sort_order' => 'nullable|integer|min:0',
-            'is_active' => 'boolean',
-        ]);
-
-        $projectCategory->update($validated);
+        $projectCategory->update($request->validated());
 
         return redirect()
             ->route('admin.project-categories.index')
@@ -61,7 +49,8 @@ class ProjectCategoryController extends Controller
 
     public function destroy(ProjectCategory $projectCategory): RedirectResponse
     {
-        // Check if category has projects
+        $this->authorize('delete', $projectCategory);
+
         if ($projectCategory->projects()->exists()) {
             return redirect()
                 ->route('admin.project-categories.index')
@@ -75,15 +64,9 @@ class ProjectCategoryController extends Controller
             ->with('success', 'Category deleted successfully.');
     }
 
-    public function reorder(Request $request): RedirectResponse
+    public function reorder(ReorderProjectCategoriesRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'items' => 'required|array',
-            'items.*.id' => 'required|exists:project_categories,id',
-            'items.*.sort_order' => 'required|integer|min:0',
-        ]);
-
-        foreach ($validated['items'] as $item) {
+        foreach ($request->validated()['items'] as $item) {
             ProjectCategory::where('id', $item['id'])->update(['sort_order' => $item['sort_order']]);
         }
 

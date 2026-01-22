@@ -10,6 +10,27 @@ interface ContributorStackProps {
     maxDisplay?: number;
 }
 
+const DEFAULT_AVATAR = '/images/default-avatar.png';
+
+/**
+ * Validates that a URL is a safe http/https URL.
+ * Prevents XSS via javascript: URLs, data: URIs, or other protocols.
+ */
+function getSafeAvatarUrl(url: string | null): string {
+    if (!url) return DEFAULT_AVATAR;
+
+    try {
+        const parsed = new URL(url);
+        if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+            return url;
+        }
+    } catch {
+        // Invalid URL
+    }
+
+    return DEFAULT_AVATAR;
+}
+
 const ContributorStack = ({ contributors, authorUsername, maxDisplay = 5 }: ContributorStackProps) => {
     if (!contributors || contributors.length === 0) return null;
 
@@ -24,7 +45,7 @@ const ContributorStack = ({ contributors, authorUsername, maxDisplay = 5 }: Cont
                     return (
                         <img
                             key={contributor.login || index}
-                            src={contributor.avatar_url || '/images/default-avatar.png'}
+                            src={getSafeAvatarUrl(contributor.avatar_url)}
                             alt={contributor.login || 'Contributor'}
                             title={`${contributor.login}${isAuthor ? ' (You)' : ''} - ${contributor.contributions} commits`}
                             className={`h-7 w-7 rounded-full border-2 border-white dark:border-gray-900 ${
