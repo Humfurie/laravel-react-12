@@ -39,6 +39,14 @@ class CacheHeaders
             return $response;
         }
 
+        // Don't set public cache for Inertia XHR requests (JSON responses)
+        // These should not be cached by CDN as they differ from full page HTML responses
+        if ($request->header('X-Inertia')) {
+            $response->headers->set('Cache-Control', 'private, no-store');
+
+            return $response;
+        }
+
         $path = $request->path();
         $cacheSettings = $this->getCacheSettings($path);
 
