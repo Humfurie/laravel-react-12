@@ -276,7 +276,99 @@ class HomepageCacheService
     }
 
     /**
-     * Get cached GitHub data for a project.
+     * Get cached GitHub data for multiple projects in a single batch.
+     *
+     * Uses Cache::many() to fetch all cache keys at once, reducing N lookups to 1.
+     *
+     * @param  \Illuminate\Support\Collection  $projects
+     * @return \Illuminate\Support\Collection Projects with github_data attached
+     */
+    public function getCachedProjectsWithGitHubData($projects)
+    {
+        if ($projects->isEmpty()) {
+            return $projects;
+        }
+
+        $github = app(GitHubService::class);
+        $ttl = config('cache-ttl.homepage.project_github');
+
+        // Build cache keys for all projects that have repo URLs
+        $projectRepos = $projects->mapWithKeys(function ($project) use ($github) {
+            $repoUrl = $project->links['repo_url'] ?? $project->github_repo ?? null;
+            $repo = $repoUrl ? $github->extractRepoFromUrl($repoUrl) : null;
+            $cacheKey = sprintf(config('cache-ttl.keys.project_github'), $project->id);
+
+            return [$project->id => ['cache_key' => $cacheKey, 'repo' => $repo]];
+        });
+
+        // Fetch all cache keys at once
+        $cacheKeys = $projectRepos->pluck('cache_key')->toArray();
+        $cachedData = Cache::many($cacheKeys);
+
+        // Process each project
+        return $projects->map(function ($project) use ($projectRepos, $cachedData, $github, $ttl) {
+            $info = $projectRepos[$project->id];
+            $cacheKey = $info['cache_key'];
+            $repo = $info['repo'];
+
+            // No repo URL - no GitHub data
+            if (! $repo) {
+                $project->github_data = null;
+
+                return $project;
+            }
+
+            // Check if we have cached data
+            if ($cachedData[$cacheKey] !== null) {
+                $project->github_data = $cachedData[$cacheKey];
+
+                return $project;
+            }
+
+            // Cache miss - fetch from GitHub API with rate limit handling
+            $project->github_data = $this->fetchAndCacheProjectGitHubData($cacheKey, $repo, $github, $ttl);
+
+            return $project;
+        });
+    }
+
+    /**
+     * Fetch GitHub data for a project and cache it.
+     *
+     * Handles rate limiting gracefully by returning null on failure.
+     *
+     * @return array{contributors: array, commit_count: int, last_commit: string|null}|null
+     */
+    private function fetchAndCacheProjectGitHubData(string $cacheKey, string $repo, GitHubService $github, int $ttl): ?array
+    {
+        try {
+            $data = [
+                'contributors' => $github->getContributors($repo, 5),
+                'commit_count' => $github->getCommitCount($repo),
+                'last_commit' => $github->getLastCommitDate($repo),
+            ];
+
+            Cache::put($cacheKey, $data, $ttl);
+
+            return $data;
+        } catch (\Exception $e) {
+            // Log the error but don't fail the page load
+            \Illuminate\Support\Facades\Log::warning('Failed to fetch GitHub data for project', [
+                'repo' => $repo,
+                'error' => $e->getMessage(),
+            ]);
+
+            // Cache null to prevent repeated failed attempts
+            Cache::put($cacheKey, null, 300); // Cache failure for 5 minutes
+
+            return null;
+        }
+    }
+
+    /**
+     * Get cached GitHub data for a single project.
+     *
+     * @deprecated Use getCachedProjectsWithGitHubData() for batch operations
      *
      * @return array{contributors: array, commit_count: int, last_commit: string|null}|null
      */
@@ -297,14 +389,14 @@ class HomepageCacheService
 
         $cacheKey = sprintf(config('cache-ttl.keys.project_github'), $project->id);
 
-        return $this->rememberWithLock(
-            $cacheKey,
-            config('cache-ttl.homepage.project_github'),
-            fn () => [
-                'contributors' => $github->getContributors($repo, 5),
-                'commit_count' => $github->getCommitCount($repo),
-                'last_commit' => $github->getLastCommitDate($repo),
-            ]
-        );
+        // Check cache first
+        $cached = Cache::get($cacheKey);
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $ttl = config('cache-ttl.homepage.project_github');
+
+        return $this->fetchAndCacheProjectGitHubData($cacheKey, $repo, $github, $ttl);
     }
 }

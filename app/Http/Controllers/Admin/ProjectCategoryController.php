@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateProjectCategoryRequest;
 use App\Models\ProjectCategory;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -66,9 +67,33 @@ class ProjectCategoryController extends Controller
 
     public function reorder(ReorderProjectCategoriesRequest $request): RedirectResponse
     {
-        foreach ($request->validated()['items'] as $item) {
-            ProjectCategory::where('id', $item['id'])->update(['sort_order' => $item['sort_order']]);
-        }
+        // Authorization handled by route middleware (permission:project,update)
+        // Additional check for viewAny since this is a bulk operation
+        $this->authorize('viewAny', ProjectCategory::class);
+
+        $items = $request->validated()['items'];
+
+        // Use transaction and single query with CASE statement for efficiency
+        DB::transaction(function () use ($items) {
+            $cases = [];
+            $ids = [];
+
+            foreach ($items as $item) {
+                $cases[] = "WHEN {$item['id']} THEN {$item['sort_order']}";
+                $ids[] = $item['id'];
+            }
+
+            if (! empty($cases)) {
+                $caseSql = implode(' ', $cases);
+                $idsList = implode(',', $ids);
+
+                DB::statement("
+                    UPDATE project_categories
+                    SET sort_order = CASE id {$caseSql} END
+                    WHERE id IN ({$idsList})
+                ");
+            }
+        });
 
         return back()->with('success', 'Category order updated successfully.');
     }

@@ -23,12 +23,8 @@ Route::get('/', function (HomepageCacheService $homepageService) {
     $primaryUser = $homepageService->getCachedUserProfileData();
     $githubStats = $homepageService->getCachedGitHubStats();
 
-    // Map GitHub data to each featured project
-    $projectsWithGitHub = $projectsData['featured']->map(function ($project) use ($homepageService) {
-        $project->github_data = $homepageService->getCachedProjectGitHubData($project);
-
-        return $project;
-    });
+    // Batch fetch GitHub data for all featured projects (prevents N+1 cache lookups)
+    $projectsWithGitHub = $homepageService->getCachedProjectsWithGitHubData($projectsData['featured']);
 
     return Inertia::render('user/home', array_merge($blogs, [
         'experiences' => $experiences,
