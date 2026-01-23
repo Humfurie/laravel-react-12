@@ -325,8 +325,28 @@ class HomepageCacheService
                 return $project;
             }
 
-            // Cache miss - fetch from GitHub API with rate limit handling
-            $project->github_data = $this->fetchAndCacheProjectGitHubData($cacheKey, $repo, $github, $ttl);
+            // Cache miss - use lock to prevent concurrent API requests for same repo
+            $lock = Cache::lock("fetch_github_{$repo}", 10);
+
+            if ($lock->get()) {
+                try {
+                    // Double-check cache after acquiring lock
+                    $cached = Cache::get($cacheKey);
+                    if ($cached !== null) {
+                        $project->github_data = $cached;
+
+                        return $project;
+                    }
+
+                    $project->github_data = $this->fetchAndCacheProjectGitHubData($cacheKey, $repo, $github, $ttl);
+                } finally {
+                    $lock->release();
+                }
+            } else {
+                // Another process is fetching - wait briefly and check cache
+                usleep(100000); // 100ms
+                $project->github_data = Cache::get($cacheKey);
+            }
 
             return $project;
         });
