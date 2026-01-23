@@ -51,7 +51,21 @@ class ProjectObserver
             Cache::forget("og:project:{$oldSlug}");
         }
 
+        // If github_repo or links changed, clear the project GitHub data cache
+        if ($project->wasChanged(['github_repo', 'links'])) {
+            $this->clearProjectGitHubCache($project);
+        }
+
         $this->clearCache($project);
+    }
+
+    /**
+     * Clear the cached GitHub data for a specific project.
+     */
+    protected function clearProjectGitHubCache(Project $project): void
+    {
+        $cacheKey = sprintf(config('cache-ttl.keys.project_github'), $project->id);
+        Cache::forget($cacheKey);
     }
 
     /**

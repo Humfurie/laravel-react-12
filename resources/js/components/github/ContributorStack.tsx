@@ -41,13 +41,16 @@ const ContributorStack = ({ contributors, authorUsername, maxDisplay = 5 }: Cont
         <div className="flex items-center">
             <div className="flex -space-x-2">
                 {displayContributors.map((contributor, index) => {
-                    const isAuthor = contributor.login === authorUsername;
+                    const isAuthor = contributor.login && contributor.login === authorUsername;
+                    const displayName = contributor.login || 'Contributor';
+                    const titleText = `${displayName}${isAuthor ? ' (You)' : ''} - ${contributor.contributions} commits`;
+
                     return (
                         <img
                             key={contributor.login || index}
                             src={getSafeAvatarUrl(contributor.avatar_url)}
-                            alt={contributor.login || 'Contributor'}
-                            title={`${contributor.login}${isAuthor ? ' (You)' : ''} - ${contributor.contributions} commits`}
+                            alt={displayName}
+                            title={titleText}
                             className={`h-7 w-7 rounded-full border-2 border-white dark:border-gray-900 ${
                                 isAuthor ? 'ring-2 ring-orange-500' : ''
                             }`}
