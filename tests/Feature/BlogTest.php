@@ -9,6 +9,8 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->user = createAdminUser('blog');
+    // Set admin user ID in config for homepage tests
+    config(['app.admin_user_id' => $this->user->id]);
     Storage::fake('minio');
 });
 
@@ -29,11 +31,11 @@ test('authenticated user can create blog post', function () {
         'meta_data' => [
             'meta_title' => 'Test Meta Title',
             'meta_description' => 'Test meta description',
-            'meta_keywords' => 'test, blog, post'
+            'meta_keywords' => 'test, blog, post',
         ],
         'isPrimary' => false,
         'sort_order' => 0,
-        'published_at' => now()->format('Y-m-d H:i:s')
+        'published_at' => now()->format('Y-m-d H:i:s'),
     ];
 
     $this->actingAs($this->user)
@@ -43,7 +45,7 @@ test('authenticated user can create blog post', function () {
     $this->assertDatabaseHas('blogs', [
         'title' => 'Test Blog Post',
         'slug' => 'test-blog-post',
-        'status' => 'published'
+        'status' => 'published',
     ]);
 });
 
@@ -51,7 +53,7 @@ test('blog post auto generates slug from title', function () {
     $blogData = [
         'title' => 'My Amazing Blog Post Title',
         'content' => '<p>Content</p>',
-        'status' => 'draft'
+        'status' => 'draft',
     ];
 
     $this->actingAs($this->user)
@@ -59,8 +61,61 @@ test('blog post auto generates slug from title', function () {
 
     $this->assertDatabaseHas('blogs', [
         'title' => 'My Amazing Blog Post Title',
-        'slug' => 'my-amazing-blog-post-title'
+        'slug' => 'my-amazing-blog-post-title',
     ]);
+});
+
+test('blog post generates unique slug when duplicate title exists', function () {
+    // Create first blog
+    $firstBlog = Blog::factory()->create([
+        'title' => 'Unique Title',
+        'slug' => 'unique-title',
+    ]);
+
+    // Create second blog with same title
+    $secondBlog = Blog::factory()->create([
+        'title' => 'Unique Title',
+    ]);
+
+    // Create third blog with same title
+    $thirdBlog = Blog::factory()->create([
+        'title' => 'Unique Title',
+    ]);
+
+    expect($firstBlog->slug)->toBe('unique-title')
+        ->and($secondBlog->slug)->toBe('unique-title-1')
+        ->and($thirdBlog->slug)->toBe('unique-title-2');
+});
+
+test('blog post slug uniqueness check includes soft deleted blogs', function () {
+    // Create and soft delete a blog
+    $deletedBlog = Blog::factory()->create([
+        'title' => 'Deleted Blog',
+        'slug' => 'deleted-blog',
+    ]);
+    $deletedBlog->delete();
+
+    // Create new blog with same title
+    $newBlog = Blog::factory()->create([
+        'title' => 'Deleted Blog',
+    ]);
+
+    // Should generate unique slug despite original being soft deleted
+    expect($newBlog->slug)->toBe('deleted-blog-1');
+});
+
+test('blog post can update without changing slug when title changes', function () {
+    $blog = Blog::factory()->create([
+        'title' => 'Original Title',
+        'slug' => 'custom-slug',
+    ]);
+
+    $blog->update([
+        'title' => 'New Title',
+        'slug' => 'custom-slug', // Explicitly keeping the slug
+    ]);
+
+    expect($blog->fresh()->slug)->toBe('custom-slug');
 });
 
 test('blog post auto generates meta data from title', function () {
@@ -71,8 +126,8 @@ test('blog post auto generates meta data from title', function () {
         'meta_data' => [
             'meta_title' => '',
             'meta_description' => '',
-            'meta_keywords' => ''
-        ]
+            'meta_keywords' => '',
+        ],
     ];
 
     $this->actingAs($this->user)
@@ -90,7 +145,7 @@ test('authenticated user can update blog post', function () {
     $updateData = [
         'title' => 'Updated Blog Post',
         'content' => '<p>Updated content</p>',
-        'status' => 'published'
+        'status' => 'published',
     ];
 
     $this->actingAs($this->user)
@@ -99,7 +154,7 @@ test('authenticated user can update blog post', function () {
 
     $this->assertDatabaseHas('blogs', [
         'id' => $blog->id,
-        'title' => 'Updated Blog Post'
+        'title' => 'Updated Blog Post',
     ]);
 });
 
@@ -123,7 +178,7 @@ test('authenticated user can restore deleted blog post', function () {
 
     $this->assertDatabaseHas('blogs', [
         'id' => $blog->id,
-        'deleted_at' => null
+        'deleted_at' => null,
     ]);
 });
 
@@ -132,14 +187,14 @@ test('authenticated user can upload blog image', function () {
 
     $response = $this->actingAs($this->user)
         ->post(route('blogs.upload-image'), [
-            'image' => $file
+            'image' => $file,
         ]);
 
     $response->assertOk()
         ->assertJsonStructure([
             'success',
             'url',
-            'path'
+            'path',
         ]);
 
     $responseData = $response->json();
@@ -154,7 +209,7 @@ test('blog post view count increments when viewed', function () {
 
     $this->assertDatabaseHas('blogs', [
         'id' => $blog->id,
-        'view_count' => 6
+        'view_count' => 6,
     ]);
 });
 
@@ -172,8 +227,7 @@ test('published blog posts appear in public listing', function () {
     $response = $this->get(route('blog.index'))
         ->assertOk();
 
-    $response->assertInertia(fn ($page) =>
-    $page->component('user/blog')
+    $response->assertInertia(fn ($page) => $page->component('user/blog')
         ->has('blogs.data', 1)
         ->where('blogs.data.0.id', $publishedBlog->id)
     );
@@ -182,18 +236,17 @@ test('published blog posts appear in public listing', function () {
 test('home page shows primary and latest blogs with stats', function () {
     $primaryBlog = Blog::factory()->published()->create([
         'isPrimary' => true,
-        'view_count' => 100
+        'view_count' => 100,
     ]);
     $regularBlog = Blog::factory()->published()->create([
         'isPrimary' => false,
-        'view_count' => 50
+        'view_count' => 50,
     ]);
 
     $response = $this->get('/')
         ->assertOk();
 
-    $response->assertInertia(fn ($page) =>
-    $page->component('user/home')
+    $response->assertInertia(fn ($page) => $page->component('user/home')
         ->has('primary', 2) // getFeaturedBlogs(3) auto-fills with trending when < 3 manual featured
         ->has('latest')
         ->has('stats')
@@ -206,7 +259,7 @@ test('home page shows primary and latest blogs with stats', function () {
 test('blog extracts display image from content', function () {
     $blog = Blog::factory()->create([
         'featured_image' => null,
-        'content' => '<p>Some text</p><img src="/storage/test-image.jpg" alt="Test"><p>More text</p>'
+        'content' => '<p>Some text</p><img src="/storage/test-image.jpg" alt="Test"><p>More text</p>',
     ]);
 
     expect($blog->display_image)->toBe('/storage/test-image.jpg');
@@ -215,7 +268,7 @@ test('blog extracts display image from content', function () {
 test('blog prioritizes featured image over content image', function () {
     $blog = Blog::factory()->create([
         'featured_image' => '/storage/featured.jpg',
-        'content' => '<p>Some text</p><img src="/storage/content-image.jpg" alt="Test"><p>More text</p>'
+        'content' => '<p>Some text</p><img src="/storage/content-image.jpg" alt="Test"><p>More text</p>',
     ]);
 
     expect($blog->display_image)->toBe('/storage/featured.jpg');
@@ -224,7 +277,7 @@ test('blog prioritizes featured image over content image', function () {
 test('blog returns null display image when no images available', function () {
     $blog = Blog::factory()->create([
         'featured_image' => null,
-        'content' => '<p>Some text without images</p>'
+        'content' => '<p>Some text without images</p>',
     ]);
 
     expect($blog->display_image)->toBeNull();

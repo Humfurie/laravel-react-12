@@ -67,7 +67,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
     };
 
     return (
-        <Card className="border-gray-100 dark:border-gray-800">
+        <Card>
             <CardHeader className="pb-3">
                 <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Recent Activity</CardTitle>
             </CardHeader>

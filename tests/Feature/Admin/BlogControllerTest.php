@@ -10,6 +10,8 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     // Create admin user with blog permissions
     $this->user = createAdminUser('blog');
+    // Set admin user ID in config for homepage tests
+    config(['app.admin_user_id' => $this->user->id]);
 
     Storage::fake('minio');
 });
@@ -19,7 +21,7 @@ test('get primary and latest returns correct structure', function () {
     $primaryBlogs = Blog::factory()->published()->primary()->count(2)->create();
     $regularBlogs = Blog::factory()->published()->count(4)->create(['isPrimary' => false]);
 
-    $controller = new BlogController();
+    $controller = new BlogController;
     $result = $controller->getPrimaryAndLatest();
 
     expect($result)->toHaveKeys(['primary', 'latest', 'stats'])
@@ -34,7 +36,7 @@ test('blog creation sets published at when status is published', function () {
     $blogData = [
         'title' => 'Test Blog',
         'content' => '<p>Content</p>',
-        'status' => 'published'
+        'status' => 'published',
     ];
 
     $this->actingAs($this->user)
@@ -50,7 +52,7 @@ test('blog creation does not set published at for drafts', function () {
     $blogData = [
         'title' => 'Draft Blog',
         'content' => '<p>Content</p>',
-        'status' => 'draft'
+        'status' => 'draft',
     ];
 
     $this->actingAs($this->user)
@@ -68,7 +70,7 @@ test('blog update changes published at when status changes', function () {
     $updateData = [
         'title' => $blog->title,
         'content' => $blog->content,
-        'status' => 'published'
+        'status' => 'published',
     ];
 
     $this->actingAs($this->user)
@@ -111,8 +113,7 @@ test('home page displays blog statistics', function () {
 
     $this->get('/')
         ->assertOk()
-        ->assertInertia(fn ($page) =>
-        $page->component('user/home')
+        ->assertInertia(fn ($page) => $page->component('user/home')
             ->has('stats')
             ->where('stats.total_posts', 5)
             ->where('stats.total_views', 350)
@@ -124,7 +125,7 @@ test('slug generation handles special characters', function () {
     $blogData = [
         'title' => 'How to Use PHP & JavaScript: A Complete Guide!',
         'content' => '<p>Content</p>',
-        'status' => 'draft'
+        'status' => 'draft',
     ];
 
     $this->actingAs($this->user)
@@ -138,14 +139,14 @@ test('meta data is properly stored and retrieved', function () {
     $metaData = [
         'meta_title' => 'Custom SEO Title',
         'meta_description' => 'Custom SEO description for better ranking',
-        'meta_keywords' => 'php, laravel, seo, optimization'
+        'meta_keywords' => 'php, laravel, seo, optimization',
     ];
 
     $blogData = [
         'title' => 'Test Blog',
         'content' => '<p>Content</p>',
         'status' => 'draft',
-        'meta_data' => $metaData
+        'meta_data' => $metaData,
     ];
 
     $this->actingAs($this->user)

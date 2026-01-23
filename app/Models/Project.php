@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -15,16 +16,24 @@ class Project extends Model
 
     // Status Constants
     const STATUS_LIVE = 'live';
+
     const STATUS_ARCHIVED = 'archived';
+
     const STATUS_MAINTENANCE = 'maintenance';
+
     const STATUS_DEVELOPMENT = 'development';
 
     // Category Constants
     const CATEGORY_WEB_APP = 'web_app';
+
     const CATEGORY_MOBILE_APP = 'mobile_app';
+
     const CATEGORY_API = 'api';
+
     const CATEGORY_LIBRARY = 'library';
+
     const CATEGORY_CLI = 'cli';
+
     const CATEGORY_DESIGN = 'design';
 
     protected $fillable = [
@@ -33,9 +42,11 @@ class Project extends Model
         'description',
         'short_description',
         'category',
+        'project_category_id',
         'tech_stack',
         'links',
         'github_repo',
+        'demo_url',
         'status',
         'is_featured',
         'is_public',
@@ -72,16 +83,19 @@ class Project extends Model
         'contributors',
     ];
 
+    /**
+     * Get categories from database.
+     *
+     * @return array<string, string>
+     */
     public static function getCategories(): array
     {
-        return [
-            self::CATEGORY_WEB_APP => 'Web Application',
-            self::CATEGORY_MOBILE_APP => 'Mobile App',
-            self::CATEGORY_API => 'API / Backend',
-            self::CATEGORY_LIBRARY => 'Library / Package',
-            self::CATEGORY_CLI => 'CLI Tool',
-            self::CATEGORY_DESIGN => 'Design System',
-        ];
+        return ProjectCategory::getDropdownOptions();
+    }
+
+    public function projectCategory(): BelongsTo
+    {
+        return $this->belongsTo(ProjectCategory::class);
     }
 
     public static function getStatuses(): array
@@ -102,9 +116,52 @@ class Project extends Model
 
         static::creating(function ($project) {
             if (empty($project->slug)) {
-                $project->slug = Str::slug($project->title);
+                $project->slug = static::generateUniqueSlug($project->title);
             }
         });
+
+        static::updating(function ($project) {
+            if ($project->isDirty('title') && empty($project->slug)) {
+                $project->slug = static::generateUniqueSlug($project->title, $project->id);
+            }
+        });
+    }
+
+    /**
+     * Generate a unique slug from the given title.
+     *
+     * @param  string  $title  The title to generate slug from
+     * @param  int|null  $excludeId  ID to exclude from uniqueness check (for updates)
+     */
+    protected static function generateUniqueSlug(string $title, ?int $excludeId = null): string
+    {
+        $slug = Str::slug($title);
+        $originalSlug = $slug;
+        $counter = 1;
+
+        while (static::slugExists($slug, $excludeId)) {
+            $slug = $originalSlug.'-'.$counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Check if a slug already exists in the database.
+     *
+     * @param  string  $slug  The slug to check
+     * @param  int|null  $excludeId  ID to exclude from the check (for updates)
+     */
+    protected static function slugExists(string $slug, ?int $excludeId = null): bool
+    {
+        $query = static::where('slug', $slug)->withTrashed();
+
+        if ($excludeId !== null) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->exists();
     }
 
     public function getRouteKeyName(): string
@@ -137,6 +194,12 @@ class Project extends Model
 
     public function getCategoryLabelAttribute(): string
     {
+        // Use eager-loaded relationship to prevent N+1 queries
+        if ($this->relationLoaded('projectCategory') && $this->projectCategory) {
+            return $this->projectCategory->name;
+        }
+
+        // Fallback to static mapping (no database queries)
         return match ($this->category) {
             self::CATEGORY_WEB_APP => 'Web Application',
             self::CATEGORY_MOBILE_APP => 'Mobile App',
@@ -144,7 +207,7 @@ class Project extends Model
             self::CATEGORY_LIBRARY => 'Library / Package',
             self::CATEGORY_CLI => 'CLI Tool',
             self::CATEGORY_DESIGN => 'Design System',
-            default => $this->category
+            default => $this->category ?? 'Uncategorized'
         };
     }
 

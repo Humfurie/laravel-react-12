@@ -1,10 +1,13 @@
+import ContributorStack from '@/components/github/ContributorStack';
+import GitHubStatsHeader from '@/components/github/GitHubStatsHeader';
 import { Badge } from '@/components/ui/badge';
 import type { Project } from '@/types/project';
 import { Link, router } from '@inertiajs/react';
-import { motion, useAnimation } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight, Github, Globe } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useInView } from 'react-intersection-observer';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+
+// Stable event handler to prevent inline function recreation
+const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
 
 interface HomeProjectsProps {
     projects: Project[];
@@ -12,37 +15,30 @@ interface HomeProjectsProps {
         total_projects: number;
         live_projects: number;
     };
+    githubStats?: {
+        total_contributions: number;
+        commits: number;
+        pull_requests: number;
+        issues: number;
+        calendar: Array<{
+            contributionDays: Array<{
+                contributionCount: number;
+                date: string;
+                color: string;
+            }>;
+        }>;
+    } | null;
+    authorUsername?: string;
 }
 
-const containerVariants = {
-    hidden: {},
-    show: {
-        transition: {
-            staggerChildren: 0.1,
-        },
-    },
-};
-
-const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: {
-        opacity: 1,
-        y: 0,
-        transition: {
-            duration: 0.4,
-            ease: 'easeOut' as const,
-        },
-    },
-};
-
-function ProjectCard({ project }: { project: Project }) {
-    const handleClick = () => {
+// Memoized to prevent re-renders when parent state changes
+const ProjectCard = memo(function ProjectCard({ project, authorUsername }: { project: Project; authorUsername?: string }) {
+    const handleClick = useCallback(() => {
         router.visit(`/projects`);
-    };
+    }, []);
 
     return (
-        <motion.div variants={cardVariants}>
-            <article
+        <article
                 onClick={handleClick}
                 className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900"
             >
@@ -115,7 +111,7 @@ function ProjectCard({ project }: { project: Project }) {
                                     href={project.links.demo_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
+                                    onClick={stopPropagation}
                                     className="flex items-center gap-1.5 text-xs font-medium text-gray-500 transition-colors hover:text-orange-600 dark:text-gray-400 dark:hover:text-orange-400"
                                 >
                                     <Globe className="h-3.5 w-3.5" />
@@ -127,7 +123,7 @@ function ProjectCard({ project }: { project: Project }) {
                                     href={project.links.repo_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
+                                    onClick={stopPropagation}
                                     className="flex items-center gap-1.5 text-xs font-medium text-gray-500 transition-colors hover:text-orange-600 dark:text-gray-400 dark:hover:text-orange-400"
                                 >
                                     <Github className="h-3.5 w-3.5" />
@@ -136,13 +132,26 @@ function ProjectCard({ project }: { project: Project }) {
                             )}
                         </div>
                     )}
+
+                    {/* Contributors */}
+                    {project.github_data?.contributors && project.github_data.contributors.length > 0 && (
+                        <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-800">
+                            <ContributorStack contributors={project.github_data.contributors} authorUsername={authorUsername} maxDisplay={5} />
+                        </div>
+                    )}
                 </div>
             </article>
-        </motion.div>
     );
-}
+});
 
-function FeaturedProjectCarousel({ projects, onProjectClick }: { projects: Project[]; onProjectClick: (project: Project) => void }) {
+// Memoized carousel component
+const FeaturedProjectCarousel = memo(function FeaturedProjectCarousel({
+    projects,
+    onProjectClick,
+}: {
+    projects: Project[];
+    onProjectClick: (project: Project) => void;
+}) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -256,6 +265,7 @@ function FeaturedProjectCarousel({ projects, onProjectClick }: { projects: Proje
                             src={currentProject.thumbnail_url}
                             alt={currentProject.title}
                             className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                            loading="lazy"
                         />
                     ) : (
                         <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900">
@@ -302,27 +312,17 @@ function FeaturedProjectCarousel({ projects, onProjectClick }: { projects: Proje
             )}
         </div>
     );
-}
+});
 
-const HomeProjects = ({ projects, stats }: HomeProjectsProps) => {
-    const controls = useAnimation();
-    const [ref, inView] = useInView({
-        threshold: 0.1,
-        triggerOnce: true,
-    });
+const HomeProjects = ({ projects, stats, githubStats, authorUsername }: HomeProjectsProps) => {
+    // Memoize filtered project lists to avoid recalculation on every render
+    const featuredProjects = useMemo(() => projects.filter((p) => p.is_featured), [projects]);
+    const regularProjects = useMemo(() => projects.slice(0, 6), [projects]);
 
-    useEffect(() => {
-        if (inView) {
-            controls.start('show');
-        }
-    }, [inView, controls]);
-
-    const featuredProjects = projects.filter((p) => p.is_featured);
-    const regularProjects = projects.slice(0, 6);
-
-    const handleProjectClick = () => {
+    // Stable callback reference
+    const handleProjectClick = useCallback(() => {
         router.visit('/projects');
-    };
+    }, []);
 
     if (projects.length === 0) {
         return null;
@@ -340,6 +340,9 @@ const HomeProjects = ({ projects, stats }: HomeProjectsProps) => {
                     </p>
                 </div>
 
+                {/* GitHub Stats */}
+                {githubStats && <GitHubStatsHeader githubStats={githubStats} />}
+
                 {/* Featured Carousel */}
                 {featuredProjects.length > 0 && (
                     <div className="mb-16">
@@ -348,17 +351,11 @@ const HomeProjects = ({ projects, stats }: HomeProjectsProps) => {
                 )}
 
                 {/* Project Grid */}
-                <motion.div
-                    ref={ref}
-                    className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate={controls}
-                >
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {regularProjects.map((project) => (
-                        <ProjectCard key={project.id} project={project} />
+                        <ProjectCard key={project.id} project={project} authorUsername={authorUsername} />
                     ))}
-                </motion.div>
+                </div>
 
                 {/* Stats Bar */}
                 {stats && (

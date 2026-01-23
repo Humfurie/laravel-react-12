@@ -91,6 +91,7 @@ export interface User {
     social_links?: SocialLinks;
     profile_stats?: ProfileStat[];
     resume_path?: string;
+    about_image_path?: string;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;

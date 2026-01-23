@@ -1,4 +1,4 @@
-import { BlogEditor } from '@/components/blog-editor';
+import { LazyBlogEditor } from '@/components/lazy';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -11,10 +11,11 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
 import { cn } from '@/lib/utils';
+import { slugify } from '@/lib/slugify';
 import type { Project, ProjectCategory, ProjectLinks, ProjectMetrics, ProjectStatus, ProjectTestimonial } from '@/types/project';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
-import { ArrowLeft, CalendarIcon, Plus, Star, Trash2, Upload, X } from 'lucide-react';
+import { ArrowLeft, CalendarIcon, Link2, Link2Off, Plus, Star, Trash2, Upload, X } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
 interface Props {
@@ -50,6 +51,8 @@ export default function EditProject({ project, categories, statuses }: Props) {
     const [startDate, setStartDate] = useState<Date | undefined>(project.started_at ? parseISO(project.started_at) : undefined);
     const [completedDate, setCompletedDate] = useState<Date | undefined>(project.completed_at ? parseISO(project.completed_at) : undefined);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    // Start locked (manual mode) if slug was manually edited, otherwise auto mode
+    const [isSlugLocked, setIsSlugLocked] = useState(() => project.slug !== slugify(project.title));
 
     const { data, setData, post, processing, errors, transform } = useForm<ProjectFormData>({
         title: project.title,
@@ -80,18 +83,25 @@ export default function EditProject({ project, categories, statuses }: Props) {
         github_repo: project.github_repo || '',
     });
 
-    const generateSlug = (title: string) => {
-        return title
-            .toLowerCase()
-            .replace(/[^a-z0-9 -]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim()
-            .substring(0, 255);
+    const handleTitleChange = (value: string) => {
+        setData((prev) => ({
+            ...prev,
+            title: value,
+            slug: isSlugLocked ? prev.slug : slugify(value),
+        }));
     };
 
-    const handleTitleChange = (value: string) => {
-        setData('title', value);
+    const handleSlugChange = (value: string) => {
+        setIsSlugLocked(true);
+        setData('slug', value);
+    };
+
+    const toggleSlugLock = () => {
+        if (isSlugLocked) {
+            // Unlocking - regenerate slug from title
+            setData('slug', slugify(data.title));
+        }
+        setIsSlugLocked(!isSlugLocked);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -99,7 +109,7 @@ export default function EditProject({ project, categories, statuses }: Props) {
 
         transform((data) => ({
             ...data,
-            slug: data.slug || generateSlug(data.title),
+            slug: data.slug || slugify(data.title),
             started_at: startDate ? format(startDate, 'yyyy-MM-dd') : '',
             completed_at: completedDate ? format(completedDate, 'yyyy-MM-dd') : '',
             _method: 'PUT',
@@ -235,14 +245,40 @@ export default function EditProject({ project, categories, statuses }: Props) {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="slug">Slug</Label>
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="slug">Slug</Label>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={toggleSlugLock}
+                                            className="h-6 px-2 text-xs"
+                                            title={isSlugLocked ? 'Click to auto-generate from title' : 'Click to edit manually'}
+                                        >
+                                            {isSlugLocked ? (
+                                                <>
+                                                    <Link2Off className="mr-1 h-3 w-3" />
+                                                    Manual
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Link2 className="mr-1 h-3 w-3" />
+                                                    Auto
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
                                     <Input
                                         id="slug"
                                         value={data.slug}
-                                        onChange={(e) => setData('slug', e.target.value)}
+                                        onChange={(e) => handleSlugChange(e.target.value)}
                                         placeholder="project-url-slug"
-                                        className={errors.slug ? 'border-red-500' : ''}
+                                        className={cn(errors.slug ? 'border-red-500' : '', !isSlugLocked && 'bg-muted')}
+                                        disabled={!isSlugLocked}
                                     />
+                                    <p className="text-muted-foreground text-xs">
+                                        {isSlugLocked ? 'Editing manually. Click "Auto" to sync with title.' : 'Auto-generated from title. Click "Manual" to edit.'}
+                                    </p>
                                     {errors.slug && <p className="text-sm text-red-500">{errors.slug}</p>}
                                 </div>
 
@@ -263,7 +299,7 @@ export default function EditProject({ project, categories, statuses }: Props) {
 
                                 <div className="space-y-2">
                                     <Label>Description *</Label>
-                                    <BlogEditor
+                                    <LazyBlogEditor
                                         content={data.description}
                                         onChange={(content) => setData('description', content)}
                                         placeholder="Detailed project description..."
@@ -500,7 +536,7 @@ export default function EditProject({ project, categories, statuses }: Props) {
                                 <CardDescription>Optional detailed write-up about the project</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <BlogEditor
+                                <LazyBlogEditor
                                     content={data.case_study}
                                     onChange={(content) => setData('case_study', content)}
                                     placeholder="Write your case study here..."

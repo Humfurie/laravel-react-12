@@ -1,4 +1,4 @@
-import { BlogEditor } from '@/components/blog-editor';
+import { LazyBlogEditor } from '@/components/lazy';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,9 +10,10 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
 import { cn } from '@/lib/utils';
+import { slugify } from '@/lib/slugify';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
-import { ArrowLeft, CalendarIcon, Plus, Upload, X } from 'lucide-react';
+import { ArrowLeft, CalendarIcon, Link2, Link2Off, Plus, Upload, X } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
 interface Blog {
@@ -47,6 +48,8 @@ export default function EditBlog({ blog }: Props) {
     const [imageInputType, setImageInputType] = useState<'upload' | 'url'>('url');
     const [imagePreview, setImagePreview] = useState<string>(blog.featured_image || '');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    // Start locked (manual mode) if slug was manually edited, otherwise auto mode
+    const [isSlugLocked, setIsSlugLocked] = useState(() => blog.slug !== slugify(blog.title));
 
     const { data, setData, post, processing, errors, transform } = useForm({
         title: blog.title,
@@ -68,22 +71,25 @@ export default function EditBlog({ blog }: Props) {
         published_at: blog.published_at || '',
     });
 
-    const generateSlug = (title: string) => {
-        return title
-            .toLowerCase()
-            .replace(/[^a-z0-9 -]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim();
-    };
-
     const handleTitleChange = (value: string) => {
         setData((prev) => ({
             ...prev,
             title: value,
-            // Only auto-generate slug if it's currently matching the title pattern
-            slug: prev.slug === generateSlug(prev.title) ? generateSlug(value) : prev.slug,
+            slug: isSlugLocked ? prev.slug : slugify(value),
         }));
+    };
+
+    const handleSlugChange = (value: string) => {
+        setIsSlugLocked(true);
+        setData('slug', value);
+    };
+
+    const toggleSlugLock = () => {
+        if (isSlugLocked) {
+            // Unlocking - regenerate slug from title
+            setData('slug', slugify(data.title));
+        }
+        setIsSlugLocked(!isSlugLocked);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -267,23 +273,49 @@ export default function EditBlog({ blog }: Props) {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="slug">Slug</Label>
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="slug">Slug</Label>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={toggleSlugLock}
+                                            className="h-6 px-2 text-xs"
+                                            title={isSlugLocked ? 'Click to auto-generate from title' : 'Click to edit manually'}
+                                        >
+                                            {isSlugLocked ? (
+                                                <>
+                                                    <Link2Off className="mr-1 h-3 w-3" />
+                                                    Manual
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Link2 className="mr-1 h-3 w-3" />
+                                                    Auto
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
                                     <Input
                                         id="slug"
                                         value={data.slug}
-                                        onChange={(e) => setData('slug', e.target.value)}
+                                        onChange={(e) => handleSlugChange(e.target.value)}
                                         placeholder="post-url-slug"
-                                        className={errors.slug ? 'border-red-500' : ''}
+                                        className={cn(errors.slug ? 'border-red-500' : '', !isSlugLocked && 'bg-muted')}
+                                        disabled={!isSlugLocked}
                                     />
-                                    {errors.slug && <p className="text-sm text-red-500">{errors.slug}</p>}
+                                    <p className="text-muted-foreground text-xs">
+                                        {isSlugLocked ? 'Editing manually. Click "Auto" to sync with title.' : 'Auto-generated from title. Click "Manual" to edit.'}
+                                    </p>
                                     <p className="text-muted-foreground text-xs">
                                         URL: {typeof window !== 'undefined' ? window.location.origin : ''}/blog/{data.slug || 'post-slug'}
                                     </p>
+                                    {errors.slug && <p className="text-sm text-red-500">{errors.slug}</p>}
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label>Content *</Label>
-                                    <BlogEditor
+                                    <LazyBlogEditor
                                         content={data.content}
                                         onChange={(content) => setData('content', content)}
                                         placeholder="Start writing your blog post..."
