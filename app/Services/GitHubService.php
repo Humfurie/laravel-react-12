@@ -36,7 +36,10 @@ class GitHubService
                 // GitHub returns contributor count in Link header
                 return $response ?? 0;
             } catch (Exception $e) {
-                Log::error("GitHub API error getting contributors for {$repo}: ".$e->getMessage());
+                Log::error('GitHub API error getting contributor count', [
+                    'repo' => $repo,
+                    'error' => $e->getMessage(),
+                ]);
 
                 return 0;
             }
@@ -66,18 +69,39 @@ class GitHubService
                     return [
                         'login' => $contributor['login'] ?? null,
                         'id' => $contributor['id'] ?? null,
-                        'avatar_url' => $contributor['avatar_url'] ?? null,
+                        'avatar_url' => $this->validateGitHubAvatarUrl($contributor['avatar_url'] ?? null),
                         'profile_url' => $contributor['html_url'] ?? null,
                         'contributions' => $contributor['contributions'] ?? 0,
                         'type' => $contributor['type'] ?? 'User',
                     ];
                 }, $response);
             } catch (Exception $e) {
-                Log::error("GitHub API error getting contributors for {$repo}: ".$e->getMessage());
+                Log::error('GitHub API error getting contributors', [
+                    'repo' => $repo,
+                    'error' => $e->getMessage(),
+                ]);
 
                 return [];
             }
         });
+    }
+
+    /**
+     * Validate that an avatar URL is from GitHub's CDN.
+     */
+    private function validateGitHubAvatarUrl(?string $url): ?string
+    {
+        if (! $url) {
+            return null;
+        }
+
+        if (! str_starts_with($url, 'https://avatars.githubusercontent.com/')) {
+            Log::warning('Invalid GitHub avatar URL', ['url' => $url]);
+
+            return null;
+        }
+
+        return $url;
     }
 
     /**
@@ -208,7 +232,10 @@ class GitHubService
                     'pushed_at' => $response['pushed_at'] ?? null,
                 ];
             } catch (Exception $e) {
-                Log::error("GitHub API error for {$repo}: ".$e->getMessage());
+                Log::error('GitHub API error getting repo stats', [
+                    'repo' => $repo,
+                    'error' => $e->getMessage(),
+                ]);
 
                 return null;
             }
@@ -242,7 +269,10 @@ class GitHubService
 
                 return $totalDownloads;
             } catch (Exception $e) {
-                Log::error("GitHub API error getting downloads for {$repo}: ".$e->getMessage());
+                Log::error('GitHub API error getting downloads', [
+                    'repo' => $repo,
+                    'error' => $e->getMessage(),
+                ]);
 
                 return 0;
             }
@@ -372,7 +402,10 @@ class GitHubService
                     }, $user['repositories']['nodes'] ?? []),
                 ];
             } catch (Exception $e) {
-                Log::error("GitHub GraphQL error for user {$username}: ".$e->getMessage());
+                Log::error('GitHub GraphQL error getting user contributions', [
+                    'username' => $username,
+                    'error' => $e->getMessage(),
+                ]);
 
                 return null;
             }
@@ -403,7 +436,10 @@ class GitHubService
 
                 return $response ?? 0;
             } catch (Exception $e) {
-                Log::error("GitHub API error getting commit count for {$repo}: ".$e->getMessage());
+                Log::error('GitHub API error getting commit count', [
+                    'repo' => $repo,
+                    'error' => $e->getMessage(),
+                ]);
 
                 return 0;
             }
@@ -429,7 +465,10 @@ class GitHubService
 
                 return $response[0]['commit']['committer']['date'] ?? null;
             } catch (Exception $e) {
-                Log::error("GitHub API error getting last commit for {$repo}: ".$e->getMessage());
+                Log::error('GitHub API error getting last commit', [
+                    'repo' => $repo,
+                    'error' => $e->getMessage(),
+                ]);
 
                 return null;
             }

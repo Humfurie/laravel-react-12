@@ -32,10 +32,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
-            $table->dropForeign(['project_category_id']);
-            $table->dropColumn('project_category_id');
-        });
+        if (Schema::hasColumn('projects', 'project_category_id')) {
+            Schema::table('projects', function (Blueprint $table) {
+                $table->dropForeign(['project_category_id']);
+                $table->dropColumn('project_category_id');
+            });
+        }
 
         Schema::dropIfExists('project_categories');
     }

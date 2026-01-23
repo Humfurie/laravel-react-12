@@ -32,6 +32,8 @@ class ProjectCategoryController extends Controller
 
     public function store(StoreProjectCategoryRequest $request): RedirectResponse
     {
+        $this->authorize('create', ProjectCategory::class);
+
         ProjectCategory::create($request->validated());
 
         return redirect()
@@ -41,6 +43,8 @@ class ProjectCategoryController extends Controller
 
     public function update(UpdateProjectCategoryRequest $request, ProjectCategory $projectCategory): RedirectResponse
     {
+        $this->authorize('update', $projectCategory);
+
         $projectCategory->update($request->validated());
 
         return redirect()
@@ -73,25 +77,11 @@ class ProjectCategoryController extends Controller
 
         $items = $request->validated()['items'];
 
-        // Use transaction and single query with CASE statement for efficiency
+        // Use Eloquent within transaction for safe batch updates
         DB::transaction(function () use ($items) {
-            $cases = [];
-            $ids = [];
-
             foreach ($items as $item) {
-                $cases[] = "WHEN {$item['id']} THEN {$item['sort_order']}";
-                $ids[] = $item['id'];
-            }
-
-            if (! empty($cases)) {
-                $caseSql = implode(' ', $cases);
-                $idsList = implode(',', $ids);
-
-                DB::statement("
-                    UPDATE project_categories
-                    SET sort_order = CASE id {$caseSql} END
-                    WHERE id IN ({$idsList})
-                ");
+                ProjectCategory::where('id', $item['id'])
+                    ->update(['sort_order' => $item['sort_order']]);
             }
         });
 
