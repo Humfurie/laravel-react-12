@@ -1,5 +1,6 @@
 import PermissionFormModal from '@/components/permission-form-modal';
 import AppLayout from '@/layouts/app-layout';
+import { formatForDisplay } from '@/lib/date-utils';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { Edit, Plus, Search, Settings, Shield, Trash2 } from 'lucide-react';
@@ -176,9 +177,7 @@ export default function Permissions({ permissions }: PermissionProps) {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-500">
-                                                {new Date(permission.created_at).toLocaleDateString()}
-                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-500">{formatForDisplay(permission.created_at)}</td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-1">
                                                     <button

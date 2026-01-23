@@ -36,10 +36,12 @@ services:
       - "traefik.http.routers.humfurie.entrypoints=websecure"
       - "traefik.http.routers.humfurie.tls=true"
       - "traefik.http.routers.humfurie.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.humfurie.middlewares=fallback-errors@file"
       - "traefik.http.routers.humfurie-www.rule=Host(`www.humfurie.org`)"
       - "traefik.http.routers.humfurie-www.entrypoints=websecure"
       - "traefik.http.routers.humfurie-www.tls=true"
       - "traefik.http.routers.humfurie-www.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.humfurie-www.middlewares=fallback-errors@file"
     depends_on:
       postgres:
         condition: service_healthy
@@ -100,7 +102,7 @@ services:
           memory: 256M
 
   ssr:
-    image: humfurie-app:latest  # Reuse the same built image!
+    image: humfurie-app:latest
     restart: unless-stopped
     command: node /var/www/html/bootstrap/ssr/ssr.js
     working_dir: /var/www/html
@@ -116,17 +118,41 @@ services:
       app:
         condition: service_started
     healthcheck:
-      test: [ "CMD-SHELL", "node -e \"require('http').get('http://localhost:13714', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\"" ]
+      test: [ "CMD-SHELL", "curl -sf http://localhost:13714/health || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 30s
     deploy:
       resources:
         limits:
-          memory: 512M
-        reservations:
           memory: 256M
+        reservations:
+          memory: 128M
+
+  og-image:
+    build:
+      context: ./og-image-service
+      dockerfile: Dockerfile
+    image: humfurie-og-image:latest
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    networks:
+      - laravel
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
 
 networks:
   laravel:

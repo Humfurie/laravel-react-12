@@ -38,24 +38,28 @@
 
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-        {{-- Open Graph Meta Tags for Social Media --}}
-        <meta property="og:site_name" content="{{ config('app.name', 'Laravel') }}">
-        <meta property="og:type" content="website">
-        <meta property="og:url" content="{{ url()->current() }}">
-        <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
-        @if(config('services.facebook.app_id'))
-            <meta property="fb:app_id" content="{{ config('services.facebook.app_id') }}">
-        @endif
-
-        {{-- Open Graph & Twitter Card Meta Tags --}}
+        {{-- Dynamic Meta Tags - Must be defined before use --}}
         @php
-            // Direct approach: check if this is a giveaway page and fetch data
             $currentPath = request()->path();
             $metaTitle = config('app.name');
             $metaDescription = 'Professional portfolio and blog';
             $metaImage = asset('images/og-default.jpg');
+            $metaType = 'website';
 
-            if (preg_match('#^giveaways/([^/]+)$#', $currentPath, $matches)) {
+            // Blog post pages
+            if (preg_match('#^blog/([^/]+)$#', $currentPath, $matches)) {
+                $slug = $matches[1];
+                $blog = \App\Models\Blog::where('slug', $slug)->first();
+
+                if ($blog) {
+                    $metaTitle = $blog->meta_data['meta_title'] ?? $blog->title;
+                    $metaDescription = $blog->meta_data['meta_description'] ?? $blog->excerpt ?? substr(strip_tags($blog->content), 0, 160);
+                    $metaImage = $blog->display_image ?: asset('images/og-default.jpg');
+                    $metaType = 'article';
+                }
+            }
+            // Giveaway pages
+            elseif (preg_match('#^giveaways/([^/]+)$#', $currentPath, $matches)) {
                 $slug = $matches[1];
                 $giveaway = \App\Models\Giveaway::where('slug', $slug)->first();
 
@@ -66,7 +70,18 @@
                 }
             }
         @endphp
-        <!-- META-DEBUG: title={{ $metaTitle }}, image={{ $metaImage }} -->
+
+        {{-- Robots Meta Tag --}}
+        <meta name="robots" content="index, follow">
+
+        {{-- Open Graph Meta Tags --}}
+        <meta property="og:site_name" content="{{ config('app.name', 'Laravel') }}">
+        <meta property="og:type" content="{{ $metaType }}">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
+        @if(config('services.facebook.app_id'))
+            <meta property="fb:app_id" content="{{ config('services.facebook.app_id') }}">
+        @endif
         <meta property="og:title" content="{{ $metaTitle }}">
         <meta property="og:description" content="{{ $metaDescription }}">
         <meta property="og:image" content="{{ $metaImage }}">
@@ -83,6 +98,15 @@
     {{-- Favicon --}}
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v={{ config('app.version', '1.0') }}">
     <link rel="icon" type="image/png" href="{{ asset('logo.png') }}?v={{ config('app.version', '1.0') }}">
+
+    {{-- RSS Feed Auto-discovery --}}
+    <link rel="alternate" type="application/rss+xml" title="Humphrey Singculan's Blog" href="{{ url('/feed.xml') }}">
+
+    {{-- Preload LCP hero image for faster first paint --}}
+    @if(request()->is('/') || request()->is(''))
+        <link rel="preload" as="image" href="{{ asset('images/humphrey-banner.webp') }}" media="(min-width: 768px)" fetchpriority="high">
+        <link rel="preload" as="image" href="{{ asset('images/humphrey-banner-mb.webp') }}" media="(max-width: 767px)" fetchpriority="high">
+    @endif
 
     <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
     <link rel="dns-prefetch" href="https://fonts.bunny.net">

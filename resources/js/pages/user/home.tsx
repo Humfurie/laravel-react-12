@@ -1,9 +1,12 @@
 import FloatingNav from '@/components/floating-nav';
+import FloatingResumeButton from '@/components/global/FloatingResumeButton';
 import Footer from '@/components/global/Footer';
 import HomeAboutMe from '@/components/home/sections/HomeAboutMe';
 import HomeBanner from '@/components/home/sections/HomeBanner';
+import HomeCTA from '@/components/home/sections/HomeCTA';
 import HomeExpertise from '@/components/home/sections/HomeExpertise';
 import HomeProjects from '@/components/home/sections/HomeProjects';
+import StructuredData, { schemas } from '@/components/seo/StructuredData';
 import { Badge } from '@/components/ui/badge';
 import type { Project } from '@/types/project';
 import { Head, Link, router } from '@inertiajs/react';
@@ -11,7 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ArrowRight } from 'lucide-react';
 
 import { ExperienceSection } from '@/components/home/sections/ExperienceSection';
-import { JSX } from 'react';
+import { JSX, useMemo } from 'react';
 
 interface Blog {
     id: number;
@@ -79,12 +82,33 @@ interface Props {
         total_projects: number;
         live_projects: number;
     };
+    githubStats?: {
+        total_contributions: number;
+        commits: number;
+        pull_requests: number;
+        issues: number;
+        calendar: Array<{
+            contributionDays: Array<{
+                contributionCount: number;
+                date: string;
+                color: string;
+            }>;
+        }>;
+    } | null;
     profileUser?: {
         name: string;
         headline: string | null;
         bio: string | null;
         about: string | null;
         profile_stats: { label: string; value: string }[];
+        about_image_path: string | null;
+        email?: string;
+        resume_path?: string | null;
+        social_links?: {
+            linkedin?: string;
+            calendar?: string;
+        } | null;
+        github_username?: string | null;
     };
 }
 
@@ -164,68 +188,90 @@ export default function Home({
     expertises = [],
     projects = [],
     projectStats,
+    githubStats,
     profileUser,
 }: Props): JSX.Element {
-    // Combine and dedupe blogs for display
-    const allBlogs = [...primary, ...latest.filter((b) => !primary.find((p) => p.id === b.id))];
+    // Memoize blog deduplication to avoid O(n×m) on every render
+    const allBlogs = useMemo(
+        () => [...primary, ...latest.filter((b) => !primary.find((p) => p.id === b.id))],
+        [primary, latest],
+    );
     const featuredBlog = primary[0];
-    const otherBlogs = allBlogs.filter((b) => b.id !== featuredBlog?.id).slice(0, 5);
+    const otherBlogs = useMemo(() => allBlogs.filter((b) => b.id !== featuredBlog?.id).slice(0, 5), [allBlogs, featuredBlog?.id]);
+
+    // Memoize experience data transformation to avoid creating new objects every render
+    const transformedExperiences = useMemo(
+        () =>
+            experiences.map((exp) => ({
+                id: exp.id,
+                company: exp.company,
+                image_url: exp.image?.url || null,
+                location: exp.location,
+                description: Array.isArray(exp.description) ? exp.description : [],
+                position: exp.position,
+                start_month: exp.start_month,
+                start_year: exp.start_year,
+                end_month: exp.end_month,
+                end_year: exp.end_year,
+                is_current_position: exp.is_current_position,
+            })),
+        [experiences],
+    );
 
     return (
         <>
-            <Head title="Portfolio & Blog">
+            <Head title="Humphrey Singculan - Software Engineer | Blog & Portfolio">
                 <meta
                     name="description"
-                    content="Professional portfolio and blog featuring expertise in software development, design, and technology insights."
+                    content="Humphrey Singculan is a Software Engineer specializing in Laravel, React, and full-stack development. Explore projects, blog posts, and professional portfolio."
                 />
 
+                {/* Canonical URL */}
+                <link rel="canonical" href="https://humfurie.org" />
+
                 {/* Open Graph Meta Tags for Social Media */}
-                <meta property="og:title" content="Portfolio & Blog" />
+                <meta property="og:title" content="Humphrey Singculan - Software Engineer | Blog & Portfolio" />
                 <meta
                     property="og:description"
-                    content="Professional portfolio and blog featuring expertise in software development, design, and technology insights."
+                    content="Humphrey Singculan is a Software Engineer specializing in Laravel, React, and full-stack development. Explore projects, blog posts, and professional portfolio."
                 />
                 <meta property="og:type" content="website" />
-                <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
-                <meta property="og:image" content="/images/og-default.jpg" />
+                <meta property="og:url" content="https://humfurie.org" />
+                <meta property="og:image" content="https://humfurie.org/images/og-default.jpg" />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
-                <meta property="og:image:alt" content="Portfolio & Blog - Professional Development Portfolio" />
+                <meta property="og:image:alt" content="Humphrey Singculan - Software Engineer Portfolio" />
 
                 {/* Twitter Card Meta Tags */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Portfolio & Blog" />
+                <meta name="twitter:title" content="Humphrey Singculan - Software Engineer | Blog & Portfolio" />
                 <meta
                     name="twitter:description"
-                    content="Professional portfolio and blog featuring expertise in software development, design, and technology insights."
+                    content="Humphrey Singculan is a Software Engineer specializing in Laravel, React, and full-stack development. Explore projects, blog posts, and professional portfolio."
                 />
-                <meta name="twitter:image" content="/images/og-default.jpg" />
+                <meta name="twitter:image" content="https://humfurie.org/images/og-default.jpg" />
             </Head>
+
+            {/* Structured Data for SEO */}
+            <StructuredData data={[schemas.person(), schemas.website()]} />
 
             <FloatingNav currentPage="home" />
 
             <HomeBanner />
             <HomeAboutMe profileUser={profileUser} />
+            <ExperienceSection experiences={transformedExperiences} />
 
             {/* Projects Section */}
-            {projects.length > 0 && <HomeProjects projects={projects} stats={projectStats} />}
+            {projects.length > 0 && (
+                <HomeProjects
+                    projects={projects}
+                    stats={projectStats}
+                    githubStats={githubStats}
+                    authorUsername={profileUser?.github_username ?? undefined}
+                />
+            )}
 
             <HomeExpertise expertises={expertises} />
-            <ExperienceSection
-                experiences={experiences.map((exp) => ({
-                    id: exp.id,
-                    company: exp.company,
-                    image_url: exp.image?.url || null,
-                    location: exp.location,
-                    description: Array.isArray(exp.description) ? exp.description : [],
-                    position: exp.position,
-                    start_month: exp.start_month,
-                    start_year: exp.start_year,
-                    end_month: exp.end_month,
-                    end_year: exp.end_year,
-                    is_current_position: exp.is_current_position,
-                }))}
-            />
 
             {/* Blog Section - Untitled UI Style */}
             <section className="bg-gray-50 py-16 sm:py-24 dark:bg-gray-950">
@@ -265,7 +311,13 @@ export default function Home({
                 </div>
             </section>
 
+            {/* CTA Section with Contact Links */}
+            <HomeCTA email={profileUser?.email} socialLinks={profileUser?.social_links ?? undefined} />
+
             <Footer />
+
+            {/* Floating Resume Button */}
+            <FloatingResumeButton resumeUrl={profileUser?.resume_path ?? null} />
         </>
     );
 }

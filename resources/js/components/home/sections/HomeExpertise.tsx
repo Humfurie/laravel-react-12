@@ -1,7 +1,6 @@
 import CategoryDropdown from '@/components/global/CategoryDropdown';
 import SectionTitle from '@/components/global/SectionTitle';
-import { AnimatePresence, motion } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface CategoryData {
     name: string;
@@ -29,41 +28,48 @@ const categoriesData: CategoryData[] = [
     { name: 'Tools & DevOps', slug: 'td' },
 ];
 
-const containerVariants = {
-    hidden: {},
-    show: {
-        transition: {
-            staggerChildren: 0.05,
-        },
-    },
-};
+// Category slugs array - defined once at module level
+const CATEGORY_SLUGS = ['all', ...categoriesData.map((cat) => cat.slug)];
 
-const itemVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    show: {
-        opacity: 1,
-        scale: 1,
-        transition: {
-            duration: 0.3,
-            ease: 'easeOut' as const,
-        },
-    },
-};
+// Category name lookup - pure function at module level
+const getCategoryName = (slug: string) => categoriesData.find((cat) => cat.slug === slug)?.name ?? slug;
 
 const HomeExpertise: React.FC<HomeExpertiseProps> = ({ expertises = [] }) => {
     const [activeCategory, setActiveCategory] = useState<string>('all');
-    const [key, setKey] = useState(0);
+    const [isTransitioning, setIsTransitioning] = useState(false);
+    const [displayedData, setDisplayedData] = useState(expertises);
+    const isFirstRender = useRef(true);
 
-    const categories = ['all', ...categoriesData.map((cat) => cat.slug)];
+    // Memoize filter function to avoid recreation on every render
+    const getFilteredData = useCallback(
+        (category: string) => (category === 'all' ? expertises : expertises.filter((item) => item.category_slug === category)),
+        [expertises],
+    );
 
-    const filteredData = activeCategory === 'all' ? expertises : expertises.filter((item) => item.category_slug === activeCategory);
+    const handleCategoryChange = (category: string) => {
+        if (category === activeCategory) return;
 
-    const getCategoryName = (slug: string) => categoriesData.find((cat) => cat.slug === slug)?.name ?? slug;
+        // Start fade out
+        setIsTransitioning(true);
 
-    // Reset animation when category changes
+        // After fade out, update data and fade in
+        setTimeout(() => {
+            setActiveCategory(category);
+            setDisplayedData(getFilteredData(category));
+            // Small delay before fade in for smooth transition
+            requestAnimationFrame(() => {
+                setIsTransitioning(false);
+            });
+        }, 150);
+    };
+
+    // Initialize displayed data
     useEffect(() => {
-        setKey((prevKey) => prevKey + 1);
-    }, [activeCategory]);
+        if (isFirstRender.current) {
+            setDisplayedData(expertises);
+            isFirstRender.current = false;
+        }
+    }, [expertises]);
 
     return (
         <section className="home-expertise bg-brand-white py-[40px] md:py-[80px] dark:bg-gray-900">
@@ -73,40 +79,35 @@ const HomeExpertise: React.FC<HomeExpertiseProps> = ({ expertises = [] }) => {
                 {/* selection */}
                 <div className="pb-[16px] md:pb-[24px]">
                     <CategoryDropdown
-                        categories={categories}
+                        categories={CATEGORY_SLUGS}
                         getCategoryName={getCategoryName}
                         activeCategory={activeCategory}
-                        setActiveCategory={setActiveCategory}
+                        setActiveCategory={handleCategoryChange}
                     />
                 </div>
 
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={key}
-                        className={`grid grid-cols-3 justify-center gap-3 sm:grid-cols-4 sm:gap-4 md:grid-cols-5 md:gap-6 lg:grid-cols-6`}
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="show"
-                        exit="hidden"
-                    >
-                        {filteredData.map((item) => (
-                            <motion.div
-                                key={`${activeCategory}-${item.id}`}
-                                className="flex flex-col items-center text-center"
-                                variants={itemVariants}
-                            >
-                                <img
-                                    src={item.image_url}
-                                    alt={item.name}
-                                    className="bg-brand-white hs-shadow mb-2 h-[50px] w-[50px] rounded-[14px] object-contain p-1.5 sm:h-[80px] sm:w-[80px] sm:rounded-[18px] sm:p-2 md:h-[100px] md:w-[100px] dark:bg-gray-800"
-                                    width={100}
-                                    height={100}
-                                    loading="lazy"
-                                />
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                </AnimatePresence>
+                {/* Grid with CSS fade transition */}
+                <div
+                    className={`grid grid-cols-3 justify-center gap-3 sm:grid-cols-4 sm:gap-4 md:grid-cols-5 md:gap-6 lg:grid-cols-6 transition-all duration-200 ease-out ${
+                        isTransitioning ? 'opacity-0 scale-[0.98]' : 'opacity-100 scale-100'
+                    }`}
+                >
+                    {displayedData.map((item) => (
+                        <div
+                            key={item.id}
+                            className="flex flex-col items-center text-center"
+                        >
+                            <img
+                                src={item.image_url}
+                                alt={item.name}
+                                className="bg-brand-white hs-shadow mb-2 h-[50px] w-[50px] rounded-[14px] object-contain p-1.5 sm:h-[80px] sm:w-[80px] sm:rounded-[18px] sm:p-2 md:h-[100px] md:w-[100px] dark:bg-gray-800"
+                                width={100}
+                                height={100}
+                                loading="lazy"
+                            />
+                        </div>
+                    ))}
+                </div>
             </div>
         </section>
     );

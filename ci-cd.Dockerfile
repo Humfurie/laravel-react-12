@@ -18,7 +18,9 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip opcache
+    && docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip opcache \
+    && echo "short_open_tag=Off" >> /usr/local/etc/php/conf.d/custom.ini \
+    && echo "memory_limit=512M" >> /usr/local/etc/php/conf.d/custom.ini
 
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis

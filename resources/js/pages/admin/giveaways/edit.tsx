@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
+import { formatForDatetimeLocal, formatForDisplay } from '@/lib/date-utils';
 import { Head, router, useForm } from '@inertiajs/react';
 import { CheckCircle2, ExternalLink, Image as ImageIcon, Search, Trash2, Trophy, Upload, Users, XCircle } from 'lucide-react';
 import { FormEventHandler, useMemo, useRef, useState } from 'react';
@@ -64,24 +65,11 @@ interface Props {
 }
 
 export default function Edit({ giveaway }: Props) {
-    // Convert dates to local datetime for datetime-local input
-    const formatDateForInput = (dateString: string) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        // Format to YYYY-MM-DDTHH:mm in local timezone
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    };
-
     const { data, setData, put, processing, errors } = useForm({
         title: giveaway.title,
         description: giveaway.description,
-        start_date: formatDateForInput(giveaway.start_date),
-        end_date: formatDateForInput(giveaway.end_date),
+        start_date: formatForDatetimeLocal(giveaway.start_date),
+        end_date: formatForDatetimeLocal(giveaway.end_date),
         number_of_winners: giveaway.number_of_winners || 1,
         status: giveaway.status,
     });
@@ -529,7 +517,7 @@ export default function Edit({ giveaway }: Props) {
                                                             )}
                                                         </td>
                                                         <td className="text-muted-foreground px-4 py-3 text-sm">
-                                                            {new Date(entry.created_at).toLocaleDateString()}
+                                                            {formatForDisplay(entry.created_at)}
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -643,13 +631,7 @@ export default function Edit({ giveaway }: Props) {
                                                         <p className="text-sm font-medium text-green-800">Prize Claimed</p>
                                                     </div>
                                                     {giveaway.prize_claimed_at && (
-                                                        <p className="mt-1 text-xs text-green-700">
-                                                            {new Date(giveaway.prize_claimed_at).toLocaleDateString('en-US', {
-                                                                year: 'numeric',
-                                                                month: 'long',
-                                                                day: 'numeric',
-                                                            })}
-                                                        </p>
+                                                        <p className="mt-1 text-xs text-green-700">{formatForDisplay(giveaway.prize_claimed_at)}</p>
                                                     )}
                                                 </div>
                                             )}

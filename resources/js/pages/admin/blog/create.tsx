@@ -1,4 +1,4 @@
-import { BlogEditor } from '@/components/blog-editor';
+import { LazyBlogEditor } from '@/components/lazy';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,9 +10,10 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
 import { cn } from '@/lib/utils';
+import { slugify } from '@/lib/slugify';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { ArrowLeft, CalendarIcon, Plus, Upload, X } from 'lucide-react';
+import { ArrowLeft, CalendarIcon, Link2, Link2Off, Plus, Upload, X } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
 type BlogFormData = {
@@ -42,6 +43,7 @@ export default function CreateBlog() {
     const [imageInputType, setImageInputType] = useState<'upload' | 'url'>('url');
     const [imagePreview, setImagePreview] = useState<string>('');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isSlugLocked, setIsSlugLocked] = useState(false);
 
     const { data, setData, post, processing, errors, transform } = useForm<BlogFormData>({
         title: '',
@@ -63,16 +65,6 @@ export default function CreateBlog() {
         published_at: '',
     });
 
-    const generateSlug = (title: string) => {
-        return title
-            .toLowerCase()
-            .replace(/[^a-z0-9 -]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim()
-            .substring(0, 255); // Ensure slug doesn't exceed 255 characters
-    };
-
     const generateKeywords = (title: string) => {
         return title
             .toLowerCase()
@@ -86,13 +78,26 @@ export default function CreateBlog() {
         setData((prev) => ({
             ...prev,
             title: value,
-            slug: prev.slug || generateSlug(value),
+            slug: isSlugLocked ? prev.slug : slugify(value),
             meta_data: {
                 ...prev.meta_data,
                 meta_title: prev.meta_data.meta_title || value,
                 meta_keywords: prev.meta_data.meta_keywords || generateKeywords(value),
             },
         }));
+    };
+
+    const handleSlugChange = (value: string) => {
+        setIsSlugLocked(true);
+        setData('slug', value);
+    };
+
+    const toggleSlugLock = () => {
+        if (isSlugLocked) {
+            // Unlocking - regenerate slug from title
+            setData('slug', slugify(data.title));
+        }
+        setIsSlugLocked(!isSlugLocked);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -102,7 +107,7 @@ export default function CreateBlog() {
 
         transform((data) => ({
             ...data,
-            slug: data.slug || generateSlug(data.title),
+            slug: data.slug || slugify(data.title),
             meta_data: {
                 ...data.meta_data,
                 meta_title: data.meta_data.meta_title || data.title,
@@ -130,7 +135,7 @@ export default function CreateBlog() {
 
         transform((data) => ({
             ...data,
-            slug: data.slug || generateSlug(data.title),
+            slug: data.slug || slugify(data.title),
             meta_data: {
                 ...data.meta_data,
                 meta_title: data.meta_data.meta_title || data.title,
@@ -162,7 +167,7 @@ export default function CreateBlog() {
 
         transform((data) => ({
             ...data,
-            slug: data.slug || generateSlug(data.title),
+            slug: data.slug || slugify(data.title),
             meta_data: {
                 ...data.meta_data,
                 meta_title: data.meta_data.meta_title || data.title,
@@ -274,23 +279,49 @@ export default function CreateBlog() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="slug">Slug</Label>
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="slug">Slug</Label>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={toggleSlugLock}
+                                            className="h-6 px-2 text-xs"
+                                            title={isSlugLocked ? 'Click to auto-generate from title' : 'Click to edit manually'}
+                                        >
+                                            {isSlugLocked ? (
+                                                <>
+                                                    <Link2Off className="mr-1 h-3 w-3" />
+                                                    Manual
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Link2 className="mr-1 h-3 w-3" />
+                                                    Auto
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
                                     <Input
                                         id="slug"
                                         value={data.slug}
-                                        onChange={(e) => setData('slug', e.target.value)}
+                                        onChange={(e) => handleSlugChange(e.target.value)}
                                         placeholder="post-url-slug"
-                                        className={errors.slug ? 'border-red-500' : ''}
+                                        className={cn(errors.slug ? 'border-red-500' : '', !isSlugLocked && 'bg-muted')}
+                                        disabled={!isSlugLocked}
                                     />
-                                    {errors.slug && <p className="text-sm text-red-500">{errors.slug}</p>}
+                                    <p className="text-muted-foreground text-xs">
+                                        {isSlugLocked ? 'Editing manually. Click "Auto" to sync with title.' : 'Auto-generated from title. Click "Manual" to edit.'}
+                                    </p>
                                     <p className="text-muted-foreground text-xs">
                                         URL: {typeof window !== 'undefined' ? window.location.origin : ''}/blog/{data.slug || 'post-slug'}
                                     </p>
+                                    {errors.slug && <p className="text-sm text-red-500">{errors.slug}</p>}
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label>Content *</Label>
-                                    <BlogEditor
+                                    <LazyBlogEditor
                                         content={data.content}
                                         onChange={(content) => setData('content', content)}
                                         placeholder="Start writing your blog post..."

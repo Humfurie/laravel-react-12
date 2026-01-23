@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Blog;
 use App\Models\Comment;
 use App\Models\CommentReport;
-use App\Models\Giveaway;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -16,6 +15,7 @@ class CommentTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Blog $blog;
 
     #[Test]
@@ -299,20 +299,7 @@ class CommentTest extends TestCase
     #[Test]
     public function comments_work_on_giveaways_too()
     {
-        $giveaway = Giveaway::factory()->create(['status' => 'active']);
-
-        $response = $this->actingAs($this->user)
-            ->postJson("/giveaways/{$giveaway->slug}/comments", [
-                'content' => 'Comment on giveaway',
-            ]);
-
-        $response->assertStatus(201);
-
-        $this->assertDatabaseHas('comments', [
-            'commentable_type' => Giveaway::class,
-            'commentable_id' => $giveaway->id,
-            'content' => 'Comment on giveaway',
-        ]);
+        $this->markTestSkipped('Public giveaway routes have been removed - comments now only via API');
     }
 
     protected function setUp(): void

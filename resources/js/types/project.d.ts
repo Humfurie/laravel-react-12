@@ -21,11 +21,39 @@ export interface ProjectLinks {
     play_store_url?: string;
 }
 
+export interface ContributionDay {
+    contributionCount: number;
+    date: string;
+    color: string;
+}
+
+export interface ContributionWeek {
+    contributionDays: ContributionDay[];
+}
+
+export interface ContributionCalendar {
+    calendar: ContributionWeek[];
+    total_contributions: number;
+}
+
 export interface ProjectMetrics {
     users?: number;
     stars?: number;
     downloads?: number;
+    contribution_calendar?: ContributionCalendar;
     custom?: Record<string, string | number>;
+}
+
+export interface GitHubContributor {
+    login: string | null;
+    avatar_url: string | null;
+    contributions: number;
+}
+
+export interface ProjectGitHubData {
+    contributors: GitHubContributor[];
+    commit_count: number;
+    last_commit: string | null;
 }
 
 export interface ProjectTestimonial {
@@ -64,6 +92,7 @@ export interface Project {
     thumbnail_url: string | null;
     images?: ProjectImage[];
     github_repo: string | null;
+    github_data?: ProjectGitHubData | null;
     metrics_synced_at: string | null;
     created_at: string;
     updated_at: string;

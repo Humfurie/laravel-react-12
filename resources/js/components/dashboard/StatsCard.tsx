@@ -12,7 +12,7 @@ export function StatsCard({ title, count, trend, icon }: StatsCardProps) {
     const isPositive = trend >= 0;
 
     return (
-        <Card className="border-gray-100 dark:border-gray-800">
+        <Card>
             <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
                     <div>
