@@ -360,3 +360,13 @@ h1 span {
 .blog-content a {
     @apply text-brand-orange hover:underline;
 }
+
+/* TipTap Editor - make entire area clickable */
+.blog-editor-content .tiptap.ProseMirror {
+    @apply min-h-full flex-1 cursor-text p-4 outline-none;
+}
+
+.blog-editor-content .tiptap.ProseMirror p.is-editor-empty:first-child::before {
+    @apply text-muted-foreground pointer-events-none float-left h-0;
+    content: attr(data-placeholder);
+}

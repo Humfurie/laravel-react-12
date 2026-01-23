@@ -9,6 +9,8 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->user = createAdminUser('blog');
+    // Set admin user ID in config for homepage tests
+    config(['app.admin_user_id' => $this->user->id]);
     Storage::fake('minio');
 });
 
@@ -225,7 +227,7 @@ test('published blog posts appear in public listing', function () {
     $response = $this->get(route('blog.index'))
         ->assertOk();
 
-    $response->assertInertia(fn($page) => $page->component('user/blog')
+    $response->assertInertia(fn ($page) => $page->component('user/blog')
         ->has('blogs.data', 1)
         ->where('blogs.data.0.id', $publishedBlog->id)
     );
@@ -244,7 +246,7 @@ test('home page shows primary and latest blogs with stats', function () {
     $response = $this->get('/')
         ->assertOk();
 
-    $response->assertInertia(fn($page) => $page->component('user/home')
+    $response->assertInertia(fn ($page) => $page->component('user/home')
         ->has('primary', 2) // getFeaturedBlogs(3) auto-fills with trending when < 3 manual featured
         ->has('latest')
         ->has('stats')

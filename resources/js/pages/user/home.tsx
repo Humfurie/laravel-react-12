@@ -1,7 +1,9 @@
 import FloatingNav from '@/components/floating-nav';
+import FloatingResumeButton from '@/components/global/FloatingResumeButton';
 import Footer from '@/components/global/Footer';
 import HomeAboutMe from '@/components/home/sections/HomeAboutMe';
 import HomeBanner from '@/components/home/sections/HomeBanner';
+import HomeCTA from '@/components/home/sections/HomeCTA';
 import HomeExpertise from '@/components/home/sections/HomeExpertise';
 import HomeProjects from '@/components/home/sections/HomeProjects';
 import StructuredData, { schemas } from '@/components/seo/StructuredData';
@@ -80,6 +82,19 @@ interface Props {
         total_projects: number;
         live_projects: number;
     };
+    githubStats?: {
+        total_contributions: number;
+        commits: number;
+        pull_requests: number;
+        issues: number;
+        calendar: Array<{
+            contributionDays: Array<{
+                contributionCount: number;
+                date: string;
+                color: string;
+            }>;
+        }>;
+    } | null;
     profileUser?: {
         name: string;
         headline: string | null;
@@ -87,6 +102,13 @@ interface Props {
         about: string | null;
         profile_stats: { label: string; value: string }[];
         about_image_path: string | null;
+        email?: string;
+        resume_path?: string | null;
+        social_links?: {
+            linkedin?: string;
+            calendar?: string;
+        } | null;
+        github_username?: string | null;
     };
 }
 
@@ -166,6 +188,7 @@ export default function Home({
     expertises = [],
     projects = [],
     projectStats,
+    githubStats,
     profileUser,
 }: Props): JSX.Element {
     // Memoize blog deduplication to avoid O(n×m) on every render
@@ -239,7 +262,14 @@ export default function Home({
             <ExperienceSection experiences={transformedExperiences} />
 
             {/* Projects Section */}
-            {projects.length > 0 && <HomeProjects projects={projects} stats={projectStats} />}
+            {projects.length > 0 && (
+                <HomeProjects
+                    projects={projects}
+                    stats={projectStats}
+                    githubStats={githubStats}
+                    authorUsername={profileUser?.github_username ?? undefined}
+                />
+            )}
 
             <HomeExpertise expertises={expertises} />
 
@@ -281,7 +311,13 @@ export default function Home({
                 </div>
             </section>
 
+            {/* CTA Section with Contact Links */}
+            <HomeCTA email={profileUser?.email} socialLinks={profileUser?.social_links ?? undefined} />
+
             <Footer />
+
+            {/* Floating Resume Button */}
+            <FloatingResumeButton resumeUrl={profileUser?.resume_path ?? null} />
         </>
     );
 }

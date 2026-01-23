@@ -1,3 +1,5 @@
+import ContributorStack from '@/components/github/ContributorStack';
+import GitHubStatsHeader from '@/components/github/GitHubStatsHeader';
 import { Badge } from '@/components/ui/badge';
 import type { Project } from '@/types/project';
 import { Link, router } from '@inertiajs/react';
@@ -13,10 +15,24 @@ interface HomeProjectsProps {
         total_projects: number;
         live_projects: number;
     };
+    githubStats?: {
+        total_contributions: number;
+        commits: number;
+        pull_requests: number;
+        issues: number;
+        calendar: Array<{
+            contributionDays: Array<{
+                contributionCount: number;
+                date: string;
+                color: string;
+            }>;
+        }>;
+    } | null;
+    authorUsername?: string;
 }
 
 // Memoized to prevent re-renders when parent state changes
-const ProjectCard = memo(function ProjectCard({ project }: { project: Project }) {
+const ProjectCard = memo(function ProjectCard({ project, authorUsername }: { project: Project; authorUsername?: string }) {
     const handleClick = useCallback(() => {
         router.visit(`/projects`);
     }, []);
@@ -114,6 +130,13 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
                                     Code
                                 </a>
                             )}
+                        </div>
+                    )}
+
+                    {/* Contributors */}
+                    {project.github_data?.contributors && project.github_data.contributors.length > 0 && (
+                        <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-800">
+                            <ContributorStack contributors={project.github_data.contributors} authorUsername={authorUsername} maxDisplay={5} />
                         </div>
                     )}
                 </div>
@@ -291,7 +314,7 @@ const FeaturedProjectCarousel = memo(function FeaturedProjectCarousel({
     );
 });
 
-const HomeProjects = ({ projects, stats }: HomeProjectsProps) => {
+const HomeProjects = ({ projects, stats, githubStats, authorUsername }: HomeProjectsProps) => {
     // Memoize filtered project lists to avoid recalculation on every render
     const featuredProjects = useMemo(() => projects.filter((p) => p.is_featured), [projects]);
     const regularProjects = useMemo(() => projects.slice(0, 6), [projects]);
@@ -317,6 +340,9 @@ const HomeProjects = ({ projects, stats }: HomeProjectsProps) => {
                     </p>
                 </div>
 
+                {/* GitHub Stats */}
+                {githubStats && <GitHubStatsHeader githubStats={githubStats} />}
+
                 {/* Featured Carousel */}
                 {featuredProjects.length > 0 && (
                     <div className="mb-16">
@@ -327,7 +353,7 @@ const HomeProjects = ({ projects, stats }: HomeProjectsProps) => {
                 {/* Project Grid */}
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {regularProjects.map((project) => (
-                        <ProjectCard key={project.id} project={project} />
+                        <ProjectCard key={project.id} project={project} authorUsername={authorUsername} />
                     ))}
                 </div>
 
