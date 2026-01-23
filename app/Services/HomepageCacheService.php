@@ -94,6 +94,20 @@ class HomepageCacheService
     }
 
     /**
+     * Get cached GitHub stats for the admin user.
+     *
+     * @return array{total_contributions: int, commits: int, pull_requests: int, issues: int, reviews: int, calendar: array}|null
+     */
+    public function getCachedGitHubStats(): ?array
+    {
+        return $this->rememberWithLock(
+            config('cache-ttl.keys.homepage_github_stats'),
+            config('cache-ttl.homepage.github_stats'),
+            fn () => $this->getGitHubStats()
+        );
+    }
+
+    /**
      * Cache remember with lock to prevent stampede.
      *
      * Uses atomic locking to ensure only one process computes the value
@@ -180,7 +194,7 @@ class HomepageCacheService
     {
         $featured = Project::query()
             ->public()
-            ->with(['primaryImage'])
+            ->with(['primaryImage', 'projectCategory'])
             ->orderByDesc('is_featured')
             ->orderBy('featured_at', 'desc')
             ->orderBy('sort_order')
@@ -244,5 +258,165 @@ class HomepageCacheService
         }
 
         return $user;
+    }
+
+    /**
+     * Get GitHub stats without caching.
+     *
+     * @return array{total_contributions: int, commits: int, pull_requests: int, issues: int, reviews: int, calendar: array}|null
+     */
+    public function getGitHubStats(): ?array
+    {
+        $user = User::find(config('app.admin_user_id'));
+        if (! $user?->github_username) {
+            return null;
+        }
+
+        return app(GitHubService::class)->getUserContributions($user->github_username);
+    }
+
+    /**
+     * Get cached GitHub data for multiple projects in a single batch.
+     *
+     * Uses Cache::many() to fetch all cache keys at once, reducing N lookups to 1.
+     *
+     * @param  \Illuminate\Support\Collection  $projects
+     * @return \Illuminate\Support\Collection Projects with github_data attached
+     */
+    public function getCachedProjectsWithGitHubData($projects)
+    {
+        if ($projects->isEmpty()) {
+            return $projects;
+        }
+
+        $github = app(GitHubService::class);
+        $ttl = config('cache-ttl.homepage.project_github');
+
+        // Build cache keys for all projects that have repo URLs
+        $projectRepos = $projects->mapWithKeys(function ($project) use ($github) {
+            $repoUrl = $project->links['repo_url'] ?? $project->github_repo ?? null;
+            $repo = $repoUrl ? $github->extractRepoFromUrl($repoUrl) : null;
+            $cacheKey = sprintf(config('cache-ttl.keys.project_github'), $project->id);
+
+            return [$project->id => ['cache_key' => $cacheKey, 'repo' => $repo]];
+        });
+
+        // Fetch all cache keys at once
+        $cacheKeys = $projectRepos->pluck('cache_key')->toArray();
+        $cachedData = Cache::many($cacheKeys);
+
+        // Process each project
+        return $projects->map(function ($project) use ($projectRepos, $cachedData, $github, $ttl) {
+            $info = $projectRepos[$project->id];
+            $cacheKey = $info['cache_key'];
+            $repo = $info['repo'];
+
+            // No repo URL - no GitHub data
+            if (! $repo) {
+                $project->github_data = null;
+
+                return $project;
+            }
+
+            // Check if we have cached data
+            if ($cachedData[$cacheKey] !== null) {
+                $project->github_data = $cachedData[$cacheKey];
+
+                return $project;
+            }
+
+            // Cache miss - use lock to prevent concurrent API requests for same repo
+            $lock = Cache::lock("fetch_github_{$repo}", 10);
+
+            if ($lock->get()) {
+                try {
+                    // Double-check cache after acquiring lock
+                    $cached = Cache::get($cacheKey);
+                    if ($cached !== null) {
+                        $project->github_data = $cached;
+
+                        return $project;
+                    }
+
+                    $project->github_data = $this->fetchAndCacheProjectGitHubData($cacheKey, $repo, $github, $ttl);
+                } finally {
+                    $lock->release();
+                }
+            } else {
+                // Another process is fetching - wait briefly and check cache
+                usleep(100000); // 100ms
+                $project->github_data = Cache::get($cacheKey);
+            }
+
+            return $project;
+        });
+    }
+
+    /**
+     * Fetch GitHub data for a project and cache it.
+     *
+     * Handles rate limiting gracefully by returning null on failure.
+     *
+     * @return array{contributors: array, commit_count: int, last_commit: string|null}|null
+     */
+    private function fetchAndCacheProjectGitHubData(string $cacheKey, string $repo, GitHubService $github, int $ttl): ?array
+    {
+        try {
+            $data = [
+                'contributors' => $github->getContributors($repo, 5),
+                'commit_count' => $github->getCommitCount($repo),
+                'last_commit' => $github->getLastCommitDate($repo),
+            ];
+
+            Cache::put($cacheKey, $data, $ttl);
+
+            return $data;
+        } catch (\Exception $e) {
+            // Log the error but don't fail the page load
+            \Illuminate\Support\Facades\Log::warning('Failed to fetch GitHub data for project', [
+                'repo' => $repo,
+                'error' => $e->getMessage(),
+            ]);
+
+            // Cache null to prevent repeated failed attempts
+            Cache::put($cacheKey, null, 300); // Cache failure for 5 minutes
+
+            return null;
+        }
+    }
+
+    /**
+     * Get cached GitHub data for a single project.
+     *
+     * @deprecated Use getCachedProjectsWithGitHubData() for batch operations
+     *
+     * @return array{contributors: array, commit_count: int, last_commit: string|null}|null
+     */
+    public function getCachedProjectGitHubData(Project $project): ?array
+    {
+        $repoUrl = $project->links['repo_url'] ?? $project->github_repo ?? null;
+
+        if (! $repoUrl) {
+            return null;
+        }
+
+        $github = app(GitHubService::class);
+        $repo = $github->extractRepoFromUrl($repoUrl);
+
+        if (! $repo) {
+            return null;
+        }
+
+        $cacheKey = sprintf(config('cache-ttl.keys.project_github'), $project->id);
+
+        // Check cache first
+        $cached = Cache::get($cacheKey);
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $ttl = config('cache-ttl.homepage.project_github');
+
+        return $this->fetchAndCacheProjectGitHubData($cacheKey, $repo, $github, $ttl);
     }
 }

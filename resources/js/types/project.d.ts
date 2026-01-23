@@ -44,6 +44,18 @@ export interface ProjectMetrics {
     custom?: Record<string, string | number>;
 }
 
+export interface GitHubContributor {
+    login: string | null;
+    avatar_url: string | null;
+    contributions: number;
+}
+
+export interface ProjectGitHubData {
+    contributors: GitHubContributor[];
+    commit_count: number;
+    last_commit: string | null;
+}
+
 export interface ProjectTestimonial {
     name: string;
     role?: string;
@@ -80,6 +92,7 @@ export interface Project {
     thumbnail_url: string | null;
     images?: ProjectImage[];
     github_repo: string | null;
+    github_data?: ProjectGitHubData | null;
     metrics_synced_at: string | null;
     created_at: string;
     updated_at: string;

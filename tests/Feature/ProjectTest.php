@@ -83,3 +83,19 @@ test('project auto generates slug when title is updated and slug is empty', func
 
     expect($project->fresh()->slug)->toBe('new-title');
 });
+
+test('project can have demo_url', function () {
+    $project = Project::factory()->create([
+        'demo_url' => 'https://demo.example.com',
+    ]);
+
+    expect($project->demo_url)->toBe('https://demo.example.com');
+});
+
+test('project demo_url is nullable', function () {
+    $project = Project::factory()->create([
+        'demo_url' => null,
+    ]);
+
+    expect($project->demo_url)->toBeNull();
+});
