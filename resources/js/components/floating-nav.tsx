@@ -1,5 +1,5 @@
 import { publicNavItems } from '@/config/navigation';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import ThemeToggle from './theme-toggle';
 
@@ -9,6 +9,13 @@ interface FloatingNavProps {
 
 export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) {
     const [activeItem, setActiveItem] = useState(currentPage);
+    const { url } = usePage();
+
+    // URL-based check for current page (more reliable than local state)
+    const isCurrentPage = (href: string) => {
+        const currentPath = url.split('?')[0];
+        return currentPath === href || (currentPath === '/' && href === '/');
+    };
     const [isVisible, setIsVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -42,7 +49,7 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
                     <Link
                         href="/"
                         onClick={(e) => {
-                            if (activeItem === 'home') {
+                            if (isCurrentPage('/')) {
                                 e.preventDefault();
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
                             }
@@ -65,7 +72,7 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
                                     key={item.id}
                                     href={item.route}
                                     onClick={(e) => {
-                                        if (isActive) {
+                                        if (isCurrentPage(item.route)) {
                                             e.preventDefault();
                                             window.scrollTo({ top: 0, behavior: 'smooth' });
                                             return;
@@ -102,7 +109,7 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
                                     key={item.id}
                                     href={item.route}
                                     onClick={(e) => {
-                                        if (isActive) {
+                                        if (isCurrentPage(item.route)) {
                                             e.preventDefault();
                                             window.scrollTo({ top: 0, behavior: 'smooth' });
                                             return;

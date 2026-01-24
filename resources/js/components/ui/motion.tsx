@@ -1,5 +1,3 @@
-'use client';
-
 import { motion, type Variants } from 'framer-motion';
 import { type ComponentProps, type ReactNode } from 'react';
 
@@ -29,21 +27,12 @@ export const slideInRight: Variants = {
     visible: { opacity: 1, x: 0 },
 };
 
-// Stagger container variant
-export const staggerContainer: Variants = {
-    hidden: { opacity: 1 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1,
-            delayChildren: 0.1,
-        },
-    },
-};
+// Check for reduced motion preference
+const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Default transition settings
+// Default transition settings - respects prefers-reduced-motion
 const defaultTransition = {
-    duration: 0.5,
+    duration: prefersReducedMotion ? 0 : 0.5,
     ease: [0.25, 0.1, 0.25, 1] as const, // Custom easing for smooth feel
 };
 
