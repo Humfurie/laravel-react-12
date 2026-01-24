@@ -1,5 +1,6 @@
 import SectionTitle from '@/components/global/SectionTitle';
-import { memo, useEffect, useRef, useState } from 'react';
+import { MotionDiv, MotionStagger, MotionItem } from '@/components/ui/motion';
+import { memo } from 'react';
 
 type Experience = {
     id: number;
@@ -130,44 +131,17 @@ export function calculateDuration(
     }
 }
 
-// Individual experience card with intersection observer - memoized to prevent re-renders
+// Individual experience card - memoized to prevent re-renders
 const ExperienceCard = memo(function ExperienceCard({ experience, index }: { experience: Experience; index: number }) {
-    const [isVisible, setIsVisible] = useState(false);
-    const cardRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    // Add staggered delay based on index
-                    setTimeout(() => {
-                        setIsVisible(true);
-                    }, index * 100);
-                    observer.disconnect();
-                }
-            },
-            { threshold: 0.1, rootMargin: '50px' }
-        );
-
-        if (cardRef.current) {
-            observer.observe(cardRef.current);
-        }
-
-        return () => observer.disconnect();
-    }, [index]);
-
     const isEven = index % 2 === 0;
 
     return (
-        <div
-            ref={cardRef}
-            className={`hs-shadow relative mb-8 w-full cursor-pointer rounded-xl p-4 transition-all duration-500 ease-out sm:p-6 lg:mb-12 dark:bg-gray-900 ${
+        <MotionDiv
+            variant={isEven ? 'slideRight' : 'slideLeft'}
+            delay={index * 0.1}
+            className={`hs-shadow relative mb-8 w-full cursor-pointer rounded-xl p-4 sm:p-6 lg:mb-12 dark:bg-gray-900 ${
                 isEven ? 'lg:mr-8 lg:ml-auto' : 'lg:mr-auto lg:ml-8'
-            } mx-auto lg:mx-0 lg:w-5/12 ${
-                isVisible
-                    ? 'opacity-100 translate-x-0'
-                    : `opacity-0 ${isEven ? 'translate-x-12' : '-translate-x-12'}`
-            }`}
+            } mx-auto lg:mx-0 lg:w-5/12`}
         >
             <div className="mb-4 flex items-center">
                 <div className="mr-3 h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border-2 border-gray-200 bg-gray-100 sm:mr-4 sm:h-16 sm:w-16 dark:border-gray-700 dark:bg-gray-800">
@@ -222,7 +196,7 @@ const ExperienceCard = memo(function ExperienceCard({ experience, index }: { exp
                     isEven ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'
                 }`}
             />
-        </div>
+        </MotionDiv>
     );
 });
 
