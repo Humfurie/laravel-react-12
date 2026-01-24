@@ -8,6 +8,7 @@ import HomeExpertise from '@/components/home/sections/HomeExpertise';
 import HomeProjects from '@/components/home/sections/HomeProjects';
 import StructuredData, { schemas } from '@/components/seo/StructuredData';
 import { Badge } from '@/components/ui/badge';
+import { MotionDiv, MotionStagger, MotionItem } from '@/components/ui/motion';
 import type { Project } from '@/types/project';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
@@ -277,25 +278,31 @@ export default function Home({
             <section className="bg-gray-50 py-16 sm:py-24 dark:bg-gray-950">
                 <div className="container mx-auto px-4">
                     {/* Header */}
-                    <div className="mb-12 text-center">
+                    <MotionDiv className="mb-12 text-center">
                         <span className="text-sm font-semibold tracking-wider text-orange-600 uppercase dark:text-orange-400">Blog</span>
                         <h2 className="mt-3 text-3xl font-bold text-gray-900 sm:text-4xl dark:text-white">Latest Articles</h2>
                         <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
                             Insights, tutorials, and stories about software development, design, and technology.
                         </p>
-                    </div>
+                    </MotionDiv>
 
                     {/* Blog Grid - Untitled UI Layout */}
                     {allBlogs.length > 0 && (
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <MotionStagger staggerDelay={0.1} className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {/* Featured post - spans 2 columns on medium+ screens */}
-                            {featuredBlog && <BlogCard blog={featuredBlog} featured />}
+                            {featuredBlog && (
+                                <MotionItem variant="fadeUp">
+                                    <BlogCard blog={featuredBlog} featured />
+                                </MotionItem>
+                            )}
 
                             {/* Other posts */}
                             {otherBlogs.map((blog) => (
-                                <BlogCard key={String(blog.id)} blog={blog} />
+                                <MotionItem key={String(blog.id)} variant="fadeUp">
+                                    <BlogCard blog={blog} />
+                                </MotionItem>
                             ))}
-                        </div>
+                        </MotionStagger>
                     )}
 
                     {/* View All Button */}

@@ -1,3 +1,4 @@
+import { MotionDiv, MotionStagger, MotionItem } from '@/components/ui/motion';
 import React, { useMemo } from 'react';
 
 interface AboutItems {
@@ -60,10 +61,11 @@ const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
         <section className="about-me bg-brand-white py-[40px] md:py-[80px] dark:bg-gray-950">
             <div className="primary-container flex flex-col items-center gap-[24px] sm:flex-row sm:gap-[32px] lg:gap-[48px]">
                 {/* Left side: Stats cards */}
-                <div className="grid w-full grid-cols-2 gap-3 sm:gap-4 md:w-[50%] md:gap-[28px]">
+                <MotionStagger className="grid w-full grid-cols-2 gap-3 sm:gap-4 md:w-[50%] md:gap-[28px]">
                     {items.map((item, index) => (
-                        <div
+                        <MotionItem
                             key={index}
+                            variant="scaleUp"
                             className="flex h-[120px] w-full flex-col items-center justify-center rounded-[20px] border-2 border-orange-200 bg-orange-50 p-2 text-center sm:h-[150px] sm:rounded-[28px] md:h-[200px] dark:border-orange-500/30 dark:bg-gray-900"
                         >
                             {item.imgUrl ? (
@@ -76,15 +78,15 @@ const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
                                     <span className="text-xs text-gray-600 sm:text-sm md:text-base dark:text-gray-300">{item.label}</span>
                                 </>
                             )}
-                        </div>
+                        </MotionItem>
                     ))}
-                </div>
+                </MotionStagger>
 
                 {/* Right side: Just static content */}
-                <div className="excerpt w-full md:w-[50%]">
+                <MotionDiv delay={0.2} className="excerpt w-full md:w-[50%]">
                     <h4 className="mb-3 w-full text-center font-bold text-gray-900 sm:mb-4 sm:text-start dark:text-white">{title}</h4>
                     <p className="mb-6 text-justify text-sm text-gray-600 sm:mb-8 sm:text-base md:text-[18px] dark:text-gray-300">{excerpt}</p>
-                </div>
+                </MotionDiv>
             </div>
         </section>
     );

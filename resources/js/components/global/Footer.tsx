@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Github, Linkedin } from 'lucide-react';
 import { useState } from 'react';
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
@@ -19,7 +19,21 @@ const socialLinks = [
 ];
 
 export default function Footer() {
+    const { url } = usePage();
     const [copied, setCopied] = useState(false);
+
+    const isCurrentPage = (href: string) => {
+        // Normalize URLs for comparison
+        const currentPath = url.split('?')[0];
+        return currentPath === href || (currentPath === '/' && href === '/');
+    };
+
+    const handleNavClick = (e: React.MouseEvent, href: string) => {
+        if (isCurrentPage(href)) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     const handleCopyEmail = () => {
         navigator.clipboard.writeText('humfurie@gmail.com');
@@ -33,7 +47,11 @@ export default function Footer() {
                 <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
                     {/* Left - Brand */}
                     <div className="flex items-center gap-6">
-                        <Link href="/" className="text-sm font-medium text-gray-900 dark:text-white">
+                        <Link
+                            href="/"
+                            onClick={(e) => handleNavClick(e, '/')}
+                            className="text-sm font-medium text-gray-900 dark:text-white"
+                        >
                             Humphrey Singculan
                         </Link>
                         <span className="hidden text-gray-300 dark:text-gray-700 md:inline">|</span>
@@ -42,6 +60,7 @@ export default function Footer() {
                                 <Link
                                     key={link.label}
                                     href={link.href}
+                                    onClick={(e) => handleNavClick(e, link.href)}
                                     className="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     {link.label}
@@ -80,6 +99,7 @@ export default function Footer() {
                         <Link
                             key={link.label}
                             href={link.href}
+                            onClick={(e) => handleNavClick(e, link.href)}
                             className="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                         >
                             {link.label}
