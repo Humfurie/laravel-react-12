@@ -27,7 +27,7 @@ const HomeCTA = ({ email, socialLinks }: HomeCTAProps) => {
             <div className="primary-container flex min-h-[546px] flex-col items-center gap-[32px] lg:flex-row">
                 {/* Blog Preview */}
                 <div className="from-the-blogs w-full lg:w-[40%]">
-                    <SectionTitle title="From the Blogs" link="/blogs" />
+                    <SectionTitle title="From the Blogs" link="/blog" />
                     <div className="mt-4 flex flex-col items-center justify-center">
                         {blogData.map((blog, index) => (
                             <MyCard key={index} imgUrl={blog.imgUrl} title={blog.title} excerpt={blog.excerpt} />

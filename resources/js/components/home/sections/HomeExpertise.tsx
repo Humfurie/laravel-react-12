@@ -1,5 +1,6 @@
 import CategoryDropdown from '@/components/global/CategoryDropdown';
 import SectionTitle from '@/components/global/SectionTitle';
+import { MotionStagger, MotionItem } from '@/components/ui/motion';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface CategoryData {
@@ -86,28 +87,31 @@ const HomeExpertise: React.FC<HomeExpertiseProps> = ({ expertises = [] }) => {
                     />
                 </div>
 
-                {/* Grid with CSS fade transition */}
-                <div
-                    className={`grid grid-cols-3 justify-center gap-3 sm:grid-cols-4 sm:gap-4 md:grid-cols-5 md:gap-6 lg:grid-cols-6 transition-all duration-200 ease-out ${
-                        isTransitioning ? 'opacity-0 scale-[0.98]' : 'opacity-100 scale-100'
+                {/* Grid with stagger animation */}
+                <MotionStagger
+                    key={activeCategory}
+                    staggerDelay={0.05}
+                    className={`grid grid-cols-3 justify-center gap-3 sm:grid-cols-4 sm:gap-4 md:grid-cols-5 md:gap-6 lg:grid-cols-6 transition-opacity duration-200 ${
+                        isTransitioning ? 'opacity-0' : 'opacity-100'
                     }`}
                 >
                     {displayedData.map((item) => (
-                        <div
+                        <MotionItem
                             key={item.id}
+                            variant="scaleUp"
                             className="flex flex-col items-center text-center"
                         >
                             <img
                                 src={item.image_url}
                                 alt={item.name}
-                                className="bg-brand-white hs-shadow mb-2 h-[50px] w-[50px] rounded-[14px] object-contain p-1.5 sm:h-[80px] sm:w-[80px] sm:rounded-[18px] sm:p-2 md:h-[100px] md:w-[100px] dark:bg-gray-800"
+                                className="bg-brand-white hs-shadow mb-2 h-[50px] w-[50px] rounded-[14px] object-contain p-1.5 transition-transform duration-200 hover:scale-110 sm:h-[80px] sm:w-[80px] sm:rounded-[18px] sm:p-2 md:h-[100px] md:w-[100px] dark:bg-gray-800"
                                 width={100}
                                 height={100}
                                 loading="lazy"
                             />
-                        </div>
+                        </MotionItem>
                     ))}
-                </div>
+                </MotionStagger>
             </div>
         </section>
     );

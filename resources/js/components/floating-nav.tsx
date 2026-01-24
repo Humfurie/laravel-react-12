@@ -1,5 +1,5 @@
 import { publicNavItems } from '@/config/navigation';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import ThemeToggle from './theme-toggle';
 
@@ -9,6 +9,13 @@ interface FloatingNavProps {
 
 export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) {
     const [activeItem, setActiveItem] = useState(currentPage);
+    const { url } = usePage();
+
+    // URL-based check for current page (more reliable than local state)
+    const isCurrentPage = (href: string) => {
+        const currentPath = url.split('?')[0];
+        return currentPath === href || (currentPath === '/' && href === '/');
+    };
     const [isVisible, setIsVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -41,6 +48,12 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
                     {/* Logo with Humfurie - stands out */}
                     <Link
                         href="/"
+                        onClick={(e) => {
+                            if (isCurrentPage('/')) {
+                                e.preventDefault();
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
+                        }}
                         className="group flex shrink-0 items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 shadow-lg backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white hover:shadow-xl dark:bg-gray-900/90 dark:hover:bg-gray-900"
                     >
                         <div className="flex aspect-square size-8 items-center justify-center">
@@ -58,7 +71,14 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
                                 <Link
                                     key={item.id}
                                     href={item.route}
-                                    onClick={() => setActiveItem(item.id)}
+                                    onClick={(e) => {
+                                        if (isCurrentPage(item.route)) {
+                                            e.preventDefault();
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            return;
+                                        }
+                                        setActiveItem(item.id);
+                                    }}
                                     className={`group relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
                                         isActive
                                             ? 'bg-orange-500 text-white shadow-md'
@@ -88,7 +108,14 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
                                 <Link
                                     key={item.id}
                                     href={item.route}
-                                    onClick={() => setActiveItem(item.id)}
+                                    onClick={(e) => {
+                                        if (isCurrentPage(item.route)) {
+                                            e.preventDefault();
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            return;
+                                        }
+                                        setActiveItem(item.id);
+                                    }}
                                     className={`rounded-full p-1.5 transition-all duration-200 active:scale-95 ${
                                         isActive
                                             ? 'bg-orange-500 text-white shadow-md'
