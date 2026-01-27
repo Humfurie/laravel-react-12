@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Jobs\SyncProjectGitHubData;
 use App\Models\Project;
 use Illuminate\Support\Facades\Cache;
 
@@ -13,6 +14,11 @@ class ProjectObserver
     public function created(Project $project): void
     {
         $this->clearCache($project);
+
+        // Dispatch GitHub sync for new projects with repos
+        if ($project->github_repo || !empty($project->links['repo_url'] ?? null)) {
+            SyncProjectGitHubData::dispatch($project);
+        }
     }
 
     /**
