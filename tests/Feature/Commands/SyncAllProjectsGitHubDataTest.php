@@ -10,6 +10,8 @@ uses(RefreshDatabase::class);
 test('dispatches sync jobs for projects with github repos', function () {
     Queue::fake();
 
+    // Observer also dispatches SyncProjectGitHubData on create for projects with github_repo,
+    // so 2 from observer + 2 from command = 4 total
     Project::factory()->create(['github_repo' => 'owner/repo1']);
     Project::factory()->create(['github_repo' => 'owner/repo2']);
     Project::factory()->create(['github_repo' => null, 'links' => null]);
@@ -18,7 +20,7 @@ test('dispatches sync jobs for projects with github repos', function () {
         ->expectsOutputToContain('Dispatching sync jobs for 2 project(s)')
         ->assertSuccessful();
 
-    Queue::assertPushed(SyncProjectGitHubData::class, 2);
+    Queue::assertPushed(SyncProjectGitHubData::class, 4);
 });
 
 test('handles no projects gracefully', function () {
