@@ -16,7 +16,7 @@ class ProjectObserver
         $this->clearCache($project);
 
         if ($project->hasGitHubRepo()) {
-            SyncProjectGitHubData::dispatch($project);
+            SyncProjectGitHubData::dispatch($project)->afterCommit();
         }
     }
 
@@ -61,7 +61,7 @@ class ProjectObserver
             $this->clearProjectGitHubCache($project);
 
             if ($project->hasGitHubRepo()) {
-                SyncProjectGitHubData::dispatch($project);
+                SyncProjectGitHubData::dispatch($project)->afterCommit();
             }
         }
 
