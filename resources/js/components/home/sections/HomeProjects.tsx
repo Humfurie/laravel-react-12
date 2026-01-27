@@ -139,6 +139,32 @@ const ProjectCard = memo(function ProjectCard({ project, authorUsername }: { pro
                             <ContributorStack contributors={project.github_data.contributors} authorUsername={authorUsername} maxDisplay={5} />
                         </div>
                     )}
+
+                    {/* Author badge for non-owner projects */}
+                    {project.author && (
+                        <div className="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3 dark:border-gray-800">
+                            {project.author.avatar_url && (
+                                <img
+                                    src={project.author.avatar_url}
+                                    alt={project.author.login || 'Author'}
+                                    className="h-5 w-5 rounded-full"
+                                />
+                            )}
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                By {project.author.login || 'Unknown'}
+                            </span>
+                            {project.ownership_type === 'deployed' && (
+                                <Badge variant="secondary" className="ml-auto rounded-full text-[10px]">
+                                    Deployed by me
+                                </Badge>
+                            )}
+                            {project.ownership_type === 'contributor' && (
+                                <Badge variant="secondary" className="ml-auto rounded-full text-[10px]">
+                                    Contributor
+                                </Badge>
+                            )}
+                        </div>
+                    )}
                 </div>
             </article>
     );
@@ -336,7 +362,7 @@ const HomeProjects = ({ projects, stats, githubStats, authorUsername }: HomeProj
                     <span className="text-sm font-semibold tracking-wider text-orange-600 uppercase dark:text-orange-400">Portfolio</span>
                     <h2 className="mt-3 text-3xl font-bold text-gray-900 sm:text-4xl dark:text-white">Featured Projects</h2>
                     <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
-                        A showcase of applications, tools, and systems I've built
+                        A showcase of projects I've built, deployed, and contributed to
                     </p>
                 </div>
 

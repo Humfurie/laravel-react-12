@@ -63,6 +63,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Refresh stock data cache every 15 minutes
         $schedule->job(new RefreshStockCache)->everyFifteenMinutes();
+
+        // Sync GitHub data for all projects daily at 3:00 AM
+        $schedule->command('projects:sync-github-data')->dailyAt('03:00');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, Throwable $exception, Request $request) {

@@ -55,6 +55,7 @@ class StoreProjectRequest extends FormRequest
             'completed_at' => ['nullable', 'date', 'after_or_equal:started_at'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
+            'ownership_type' => ['nullable', Rule::in(array_keys(\App\Models\Project::getOwnershipTypes()))],
         ];
     }
 
