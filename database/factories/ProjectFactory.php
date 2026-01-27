@@ -43,6 +43,7 @@ class ProjectFactory extends Factory
             'started_at' => fake()->dateTimeBetween('-2 years', '-6 months'),
             'completed_at' => fake()->optional()->dateTimeBetween('-6 months', 'now'),
             'sort_order' => fake()->numberBetween(1, 100),
+            'ownership_type' => 'owner',
             'view_count' => fake()->numberBetween(0, 1000),
         ];
     }
@@ -87,6 +88,20 @@ class ProjectFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => Project::STATUS_DEVELOPMENT,
+        ]);
+    }
+
+    public function deployed(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'ownership_type' => Project::OWNERSHIP_DEPLOYED,
+        ]);
+    }
+
+    public function contributed(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'ownership_type' => Project::OWNERSHIP_CONTRIBUTOR,
         ]);
     }
 }
