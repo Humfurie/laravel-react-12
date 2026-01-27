@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use App\Jobs\SyncProjectGitHubData;
 use Throwable;
 
 class ProjectController extends Controller
@@ -86,6 +87,11 @@ class ProjectController extends Controller
             return $project;
         });
 
+        // Dispatch GitHub sync if repo is configured
+        if (!empty($project->github_repo) || !empty($project->links['repo_url'])) {
+            SyncProjectGitHubData::dispatch($project);
+        }
+
         return redirect()->route('admin.projects.index')
             ->with('success', 'Project created successfully.');
     }
@@ -155,6 +161,11 @@ class ProjectController extends Controller
                 );
             }
         });
+
+        // Dispatch GitHub sync if repo changed or is configured
+        if ($project->wasChanged(['github_repo', 'links']) || (!empty($project->github_repo) || !empty($project->links['repo_url']))) {
+            SyncProjectGitHubData::dispatch($project->fresh());
+        }
 
         return redirect()->route('admin.projects.index')
             ->with('success', 'Project updated successfully.');
