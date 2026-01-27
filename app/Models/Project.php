@@ -296,11 +296,15 @@ class Project extends Model
             return null;
         }
 
-        $ownerUsername = User::find(config('app.admin_user_id'))?->github_username;
+        static $ownerUsername = null;
+        if ($ownerUsername === null) {
+            $ownerUsername = User::find(config('app.admin_user_id'))?->github_username ?? false;
+        }
+        $username = $ownerUsername ?: null;
 
         // Find top contributor who isn't the site owner
         foreach ($contributors as $contributor) {
-            if (($contributor['login'] ?? null) !== $ownerUsername) {
+            if (($contributor['login'] ?? null) !== $username) {
                 return [
                     'login' => $contributor['login'] ?? null,
                     'avatar_url' => $contributor['avatar_url'] ?? null,
