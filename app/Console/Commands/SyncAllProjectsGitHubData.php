@@ -14,12 +14,7 @@ class SyncAllProjectsGitHubData extends Command
 
     public function handle(): int
     {
-        $projects = Project::query()
-            ->where(function ($query) {
-                $query->whereNotNull('github_repo')
-                    ->orWhereRaw("links->>'repo_url' IS NOT NULL");
-            })
-            ->get();
+        $projects = Project::withGitHubRepo()->get();
 
         if ($projects->isEmpty()) {
             $this->info('No projects with GitHub repos found.');

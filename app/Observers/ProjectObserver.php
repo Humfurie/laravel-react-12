@@ -15,8 +15,7 @@ class ProjectObserver
     {
         $this->clearCache($project);
 
-        // Dispatch GitHub sync for new projects with repos
-        if ($project->github_repo || !empty($project->links['repo_url'] ?? null)) {
+        if ($project->hasGitHubRepo()) {
             SyncProjectGitHubData::dispatch($project);
         }
     }
@@ -57,9 +56,13 @@ class ProjectObserver
             Cache::forget("og:project:{$oldSlug}");
         }
 
-        // If github_repo or links changed, clear the project GitHub data cache
+        // If github_repo or links changed, clear cache and re-sync
         if ($project->wasChanged(['github_repo', 'links'])) {
             $this->clearProjectGitHubCache($project);
+
+            if ($project->hasGitHubRepo()) {
+                SyncProjectGitHubData::dispatch($project);
+            }
         }
 
         $this->clearCache($project);

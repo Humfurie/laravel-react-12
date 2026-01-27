@@ -361,6 +361,19 @@ class Project extends Model
 
     // Static helpers
 
+    public function hasGitHubRepo(): bool
+    {
+        return ! empty($this->github_repo) || ! empty($this->links['repo_url'] ?? null);
+    }
+
+    public function scopeWithGitHubRepo($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNotNull('github_repo')
+                ->orWhereRaw("links->>'repo_url' IS NOT NULL");
+        });
+    }
+
     public function isLive(): bool
     {
         return $this->status === self::STATUS_LIVE;
