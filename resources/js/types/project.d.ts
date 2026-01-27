@@ -66,6 +66,7 @@ export interface ProjectTestimonial {
 
 export type ProjectCategory = 'web_app' | 'mobile_app' | 'api' | 'library' | 'cli' | 'design';
 export type ProjectStatus = 'live' | 'archived' | 'maintenance' | 'development';
+export type ProjectOwnershipType = 'owner' | 'deployed' | 'contributor';
 
 export interface Project {
     id: number;
@@ -81,6 +82,8 @@ export interface Project {
     status_label: string;
     is_featured: boolean;
     is_public: boolean;
+    ownership_type: ProjectOwnershipType;
+    author: { login: string | null; avatar_url: string | null; contributions: number } | null;
     metrics: ProjectMetrics | null;
     case_study: string | null;
     testimonials: ProjectTestimonial[] | null;
@@ -120,4 +123,10 @@ export const PROJECT_STATUS_COLORS: Record<ProjectStatus, string> = {
     development: 'bg-yellow-500',
     maintenance: 'bg-orange-500',
     archived: 'bg-gray-500',
+};
+
+export const PROJECT_OWNERSHIP_TYPES: Record<ProjectOwnershipType, string> = {
+    owner: 'My Projects',
+    deployed: 'Deployed',
+    contributor: 'Contributions',
 };
