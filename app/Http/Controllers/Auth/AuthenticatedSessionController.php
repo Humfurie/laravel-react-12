@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -27,16 +28,19 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request): SymfonyResponse
     {
         $request->authenticate();
 
         $request->session()->regenerate();
 
-        // Ensure session is saved before redirect to prevent race condition
-        $request->session()->save();
-
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Use Inertia::location() to force a full page reload after login.
+        // A standard Inertia XHR redirect (302) can cause a race condition:
+        // the follow-up request may fire before the browser applies the
+        // new session cookie from the Set-Cookie header of the 302 response.
+        return Inertia::location(
+            $request->session()->pull('url.intended', route('dashboard'))
+        );
     }
 
     /**

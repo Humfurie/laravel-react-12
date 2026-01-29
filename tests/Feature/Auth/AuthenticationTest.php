@@ -20,7 +20,25 @@ test('users can authenticate using the login screen', function () {
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    // Non-Inertia requests get a standard 302 redirect
+    $response->assertRedirect(route('dashboard'));
+});
+
+test('login returns Inertia location response for XHR requests', function () {
+    $user = User::factory()->create();
+
+    // Simulate Inertia XHR request
+    $response = $this
+        ->withHeader('X-Inertia', 'true')
+        ->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+    $this->assertAuthenticated();
+    // Inertia::location() returns 409 with X-Inertia-Location header for full page reload
+    $response->assertStatus(409);
+    $response->assertHeader('X-Inertia-Location', route('dashboard'));
 });
 
 test('users can not authenticate with invalid password', function () {
@@ -56,4 +74,23 @@ test('session persists after login', function () {
 
     $response->assertSuccessful();
     $this->assertAuthenticated();
+});
+
+test('login redirects to intended URL via Inertia location', function () {
+    $user = User::factory()->create();
+
+    // Set intended URL in session (accessing protected route redirects to login and stores intended)
+    $this->get('/settings/profile');
+
+    // Simulate Inertia XHR request
+    $response = $this
+        ->withHeader('X-Inertia', 'true')
+        ->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+    $this->assertAuthenticated();
+    $response->assertStatus(409);
+    $response->assertHeader('X-Inertia-Location', route('profile.edit'));
 });

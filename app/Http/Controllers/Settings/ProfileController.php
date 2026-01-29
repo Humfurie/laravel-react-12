@@ -64,6 +64,13 @@ class ProfileController extends Controller
 
         $user->fill($validated);
 
+        // Derive github_username from the GitHub profile URL for API integration.
+        // Validation ensures this is a github.com profile URL.
+        $githubUrl = $validated['social_links']['github'] ?? null;
+        $user->github_username = $githubUrl
+            ? trim(parse_url($githubUrl, PHP_URL_PATH) ?? '', '/')
+            : null;
+
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }

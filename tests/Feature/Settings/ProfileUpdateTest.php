@@ -85,3 +85,105 @@ test('correct password must be provided to delete account', function () {
 
     expect($user->fresh())->not->toBeNull();
 });
+
+test('github_username is extracted from valid github profile URL', function () {
+    $user = User::factory()->create();
+
+    $this
+        ->actingAs($user)
+        ->patch('/settings/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'social_links' => [
+                'github' => 'https://github.com/octocat',
+            ],
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect($user->refresh()->github_username)->toBe('octocat');
+});
+
+test('github_username is extracted from github URL with trailing slash', function () {
+    $user = User::factory()->create();
+
+    $this
+        ->actingAs($user)
+        ->patch('/settings/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'social_links' => [
+                'github' => 'https://github.com/octocat/',
+            ],
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect($user->refresh()->github_username)->toBe('octocat');
+});
+
+test('github_username is cleared when github URL is removed', function () {
+    $user = User::factory()->create(['github_username' => 'octocat']);
+
+    $this
+        ->actingAs($user)
+        ->patch('/settings/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'social_links' => [
+                'github' => null,
+            ],
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect($user->refresh()->github_username)->toBeNull();
+});
+
+test('github URL validation rejects non-github domains', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->from('/settings/profile')
+        ->patch('/settings/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'social_links' => [
+                'github' => 'https://evil.com/octocat',
+            ],
+        ]);
+
+    $response->assertSessionHasErrors('social_links.github');
+});
+
+test('github URL validation rejects URLs with extra path segments', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->from('/settings/profile')
+        ->patch('/settings/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'social_links' => [
+                'github' => 'https://github.com/octocat/repo',
+            ],
+        ]);
+
+    $response->assertSessionHasErrors('social_links.github');
+});
+
+test('github URL validation rejects URLs with query parameters', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->from('/settings/profile')
+        ->patch('/settings/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'social_links' => [
+                'github' => 'https://github.com/octocat?tab=repos',
+            ],
+        ]);
+
+    $response->assertSessionHasErrors('social_links.github');
+});
