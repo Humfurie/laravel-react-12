@@ -36,7 +36,8 @@ class SyncProjectGitHubData implements ShouldQueue
         }
 
         try {
-            $data = $github->getAllMetrics($repo, 10);
+            $maxContributors = (int) config('services.github.max_contributors', 10);
+            $data = $github->getAllMetrics($repo, $maxContributors);
 
             if (! $data) {
                 Log::warning('SyncProjectGitHubData: No data returned', [

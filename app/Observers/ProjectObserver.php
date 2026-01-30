@@ -83,6 +83,7 @@ class ProjectObserver
     public function deleted(Project $project): void
     {
         $this->clearCache($project);
+        $this->clearProjectGitHubCache($project);
     }
 
     /**
@@ -91,6 +92,11 @@ class ProjectObserver
     public function restored(Project $project): void
     {
         $this->clearCache($project);
+
+        // Re-sync GitHub data when project is restored
+        if ($project->hasGitHubRepo()) {
+            SyncProjectGitHubData::dispatch($project)->afterCommit();
+        }
     }
 
     /**
@@ -99,5 +105,6 @@ class ProjectObserver
     public function forceDeleted(Project $project): void
     {
         $this->clearCache($project);
+        $this->clearProjectGitHubCache($project);
     }
 }

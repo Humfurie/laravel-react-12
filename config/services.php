@@ -67,6 +67,7 @@ return [
         'client_id' => env('GITHUB_CLIENT_ID'),
         'client_secret' => env('GITHUB_CLIENT_SECRET'),
         'redirect' => '/auth/github/callback',
+        'max_contributors' => env('GITHUB_MAX_CONTRIBUTORS', 10),
     ],
 
     'google' => [
