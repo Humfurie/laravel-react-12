@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Http\Requests;
+
+use App\Models\Deployment;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class StoreDeploymentRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'title' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:deployments,slug'],
+            'description' => ['nullable', 'string'],
+            'client_name' => ['required', 'string', 'max:255'],
+            'client_type' => ['required', Rule::in(array_keys(Deployment::getClientTypes()))],
+            'industry' => ['nullable', 'string', 'max:100'],
+            'tech_stack' => ['nullable', 'array'],
+            'tech_stack.*' => ['string', 'max:50'],
+            'challenges_solved' => ['nullable', 'array'],
+            'challenges_solved.*' => ['string', 'max:500'],
+            'live_url' => ['required', 'url', 'max:500'],
+            'demo_url' => ['nullable', 'url', 'max:500'],
+            'project_id' => ['nullable', 'exists:projects,id'],
+            'is_featured' => ['boolean'],
+            'is_public' => ['boolean'],
+            'deployed_at' => ['nullable', 'date'],
+            'status' => ['required', Rule::in(array_keys(Deployment::getStatuses()))],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'The deployment title is required.',
+            'client_name.required' => 'The client name is required.',
+            'live_url.required' => 'The live URL is required.',
+            'live_url.url' => 'The live URL must be a valid URL.',
+            'demo_url.url' => 'The demo URL must be a valid URL.',
+        ];
+    }
+}
