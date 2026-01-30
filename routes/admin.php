@@ -196,6 +196,22 @@ Route::prefix('project-categories')->name('admin.project-categories.')->middlewa
     Route::post('/reorder', [ProjectCategoryController::class, 'reorder'])->name('reorder')->middleware('permission:project,update');
 });
 
+Route::prefix('deployments')->name('admin.deployments.')->middleware('permission:deployment,viewAny')->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\DeploymentController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Admin\DeploymentController::class, 'create'])->name('create')->middleware('permission:deployment,create');
+    Route::post('/', [App\Http\Controllers\Admin\DeploymentController::class, 'store'])->name('store')->middleware('permission:deployment,create');
+    Route::get('/{deployment}/edit', [App\Http\Controllers\Admin\DeploymentController::class, 'edit'])->name('edit')->middleware('permission:deployment,view');
+    Route::put('/{deployment}', [App\Http\Controllers\Admin\DeploymentController::class, 'update'])->name('update')->middleware('permission:deployment,update');
+    Route::delete('/{deployment}', [App\Http\Controllers\Admin\DeploymentController::class, 'destroy'])->name('destroy')->middleware('permission:deployment,delete');
+    Route::patch('/{deployment}/restore', [App\Http\Controllers\Admin\DeploymentController::class, 'restore'])->name('restore')->withTrashed()->middleware('permission:deployment,restore');
+    Route::delete('/{deployment}/force', [App\Http\Controllers\Admin\DeploymentController::class, 'forceDestroy'])->name('force-destroy')->middleware('permission:deployment,forceDelete');
+
+    // Image management
+    Route::post('/{deployment}/images', [App\Http\Controllers\Admin\DeploymentController::class, 'uploadImage'])->name('images.upload')->middleware('permission:deployment,update');
+    Route::delete('/{deployment}/images/{image}', [App\Http\Controllers\Admin\DeploymentController::class, 'deleteImage'])->name('images.delete')->middleware('permission:deployment,update');
+    Route::patch('/{deployment}/images/{image}/primary', [App\Http\Controllers\Admin\DeploymentController::class, 'setPrimaryImage'])->name('images.set-primary')->middleware('permission:deployment,update');
+});
+
 Route::prefix('inquiries')->name('inquiries.')->middleware('permission:inquiry,viewAny')->group(function () {
     Route::get('/', [InquiryController::class, 'index'])->name('index');
     Route::get('/{inquiry}', [InquiryController::class, 'show'])->name('show')->middleware('permission:inquiry,view');
