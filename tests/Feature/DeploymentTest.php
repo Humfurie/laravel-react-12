@@ -44,7 +44,7 @@ test('deployment has correct status labels', function () {
     $archived = Deployment::factory()->create(['status' => 'archived']);
 
     expect($active->status_label)->toBe('Active')
-        ->and($maintenance->status_label)->toBe('Maintenance')
+        ->and($maintenance->status_label)->toBe('Under Maintenance')
         ->and($archived->status_label)->toBe('Archived');
 });
 
