@@ -37,6 +37,7 @@ return [
     'listing' => [
         'projects_featured' => env('CACHE_TTL_LISTING_PROJECTS_FEATURED', 1800),
         'projects_tech_stack' => env('CACHE_TTL_LISTING_PROJECTS_TECH_STACK', 1800),
+        'deployments' => env('CACHE_TTL_LISTING_DEPLOYMENTS', 1800),
     ],
 
     /*
