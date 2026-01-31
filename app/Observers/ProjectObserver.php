@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Jobs\SyncProjectGitHubData;
 use App\Models\Project;
 use Illuminate\Support\Facades\Cache;
 
@@ -13,6 +14,10 @@ class ProjectObserver
     public function created(Project $project): void
     {
         $this->clearCache($project);
+
+        if ($project->hasGitHubRepo()) {
+            SyncProjectGitHubData::dispatch($project)->afterCommit();
+        }
     }
 
     /**
@@ -51,9 +56,13 @@ class ProjectObserver
             Cache::forget("og:project:{$oldSlug}");
         }
 
-        // If github_repo or links changed, clear the project GitHub data cache
+        // If github_repo or links changed, clear cache and re-sync
         if ($project->wasChanged(['github_repo', 'links'])) {
             $this->clearProjectGitHubCache($project);
+
+            if ($project->hasGitHubRepo()) {
+                SyncProjectGitHubData::dispatch($project)->afterCommit();
+            }
         }
 
         $this->clearCache($project);
@@ -74,6 +83,7 @@ class ProjectObserver
     public function deleted(Project $project): void
     {
         $this->clearCache($project);
+        $this->clearProjectGitHubCache($project);
     }
 
     /**
@@ -82,6 +92,11 @@ class ProjectObserver
     public function restored(Project $project): void
     {
         $this->clearCache($project);
+
+        // Re-sync GitHub data when project is restored
+        if ($project->hasGitHubRepo()) {
+            SyncProjectGitHubData::dispatch($project)->afterCommit();
+        }
     }
 
     /**
@@ -90,5 +105,6 @@ class ProjectObserver
     public function forceDeleted(Project $project): void
     {
         $this->clearCache($project);
+        $this->clearProjectGitHubCache($project);
     }
 }

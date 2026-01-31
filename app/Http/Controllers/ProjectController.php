@@ -28,12 +28,18 @@ class ProjectController extends Controller
             }
         );
 
-        // Get all public projects for grid
-        $projects = Project::query()
+        // Get all public projects grouped by ownership type
+        $allProjects = Project::query()
             ->public()
             ->with(['primaryImage'])
             ->ordered()
             ->get();
+
+        $grouped = [
+            'owned' => $allProjects->where('ownership_type', Project::OWNERSHIP_OWNER)->values(),
+            'deployed' => $allProjects->where('ownership_type', Project::OWNERSHIP_DEPLOYED)->values(),
+            'contributed' => $allProjects->where('ownership_type', Project::OWNERSHIP_CONTRIBUTOR)->values(),
+        ];
 
         // Get unique tech stack for filter options
         $allTechStack = Cache::remember(
@@ -52,9 +58,10 @@ class ProjectController extends Controller
 
         return Inertia::render('user/projects', [
             'featured' => $featured,
-            'projects' => $projects,
+            'projects' => $grouped,
             'categories' => Project::getCategories(),
             'techStack' => $allTechStack,
+            'ownershipTypes' => Project::getOwnershipTypes(),
         ]);
     }
 

@@ -58,7 +58,7 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const aboutImageInputRef = useRef<HTMLInputElement>(null);
 
-    const { data, setData, post, errors, processing, recentlySuccessful } = useForm<ProfileForm>({
+    const { data, setData, post, transform, errors, processing, recentlySuccessful } = useForm<ProfileForm>({
         name: auth.user.name,
         username: auth.user.username || '',
         email: auth.user.email,
@@ -74,11 +74,10 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
+        transform((data) => ({ ...data, _method: 'PATCH' }));
         post(route('profile.update'), {
             preserveScroll: true,
             forceFormData: true,
-            // @ts-expect-error - Inertia types don't include _method override
-            _method: 'patch',
         });
     };
 
