@@ -196,10 +196,14 @@ export default function CreateBlog() {
             URL.revokeObjectURL(imagePreview);
         }
 
-        // Create preview and set file in form
+        // Create preview and set file in form, clearing URL to avoid duplicate preview
         const previewUrl = URL.createObjectURL(file);
         setImagePreview(previewUrl);
-        setData('featured_image_file', file);
+        setData((prev) => ({
+            ...prev,
+            featured_image: '', // Clear URL when uploading new file
+            featured_image_file: file,
+        }));
     };
 
     const clearFeaturedImage = () => {
@@ -398,8 +402,10 @@ export default function CreateBlog() {
                                         }
                                         placeholder="SEO title (max 60 characters)"
                                         maxLength={60}
+                                        className={errors['meta_data.meta_title'] ? 'border-red-500' : ''}
                                     />
                                     <p className="text-muted-foreground text-xs">{data.meta_data.meta_title.length}/60 characters</p>
+                                    {errors['meta_data.meta_title'] && <p className="text-sm text-red-500">{errors['meta_data.meta_title']}</p>}
                                 </div>
 
                                 <div className="space-y-2">
@@ -416,8 +422,10 @@ export default function CreateBlog() {
                                         placeholder="SEO description (max 160 characters)"
                                         rows={3}
                                         maxLength={160}
+                                        className={errors['meta_data.meta_description'] ? 'border-red-500' : ''}
                                     />
                                     <p className="text-muted-foreground text-xs">{data.meta_data.meta_description.length}/160 characters</p>
+                                    {errors['meta_data.meta_description'] && <p className="text-sm text-red-500">{errors['meta_data.meta_description']}</p>}
                                 </div>
 
                                 <div className="space-y-2">
@@ -432,7 +440,9 @@ export default function CreateBlog() {
                                             })
                                         }
                                         placeholder="keyword1, keyword2, keyword3"
+                                        className={errors['meta_data.meta_keywords'] ? 'border-red-500' : ''}
                                     />
+                                    {errors['meta_data.meta_keywords'] && <p className="text-sm text-red-500">{errors['meta_data.meta_keywords']}</p>}
                                 </div>
                             </CardContent>
                         </Card>
@@ -631,9 +641,14 @@ export default function CreateBlog() {
                                             />
                                             <p className="mt-2 text-xs text-gray-500">Supports: JPG, PNG, GIF, SVG, WEBP (max 5MB)</p>
                                             {data.featured_image_file && (
-                                                <div className="mt-3 flex items-center text-green-600">
-                                                    <Upload className="mr-2 h-4 w-4" />
-                                                    <span className="text-sm">Selected: {data.featured_image_file.name}</span>
+                                                <div className="mt-3 rounded-md border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/30">
+                                                    <div className="flex items-center text-green-700 dark:text-green-400">
+                                                        <Upload className="mr-2 h-4 w-4" />
+                                                        <span className="text-sm font-medium">{data.featured_image_file.name}</span>
+                                                    </div>
+                                                    <p className="mt-1 text-xs text-green-600 dark:text-green-500">
+                                                        Image will be uploaded when you save the post
+                                                    </p>
                                                 </div>
                                             )}
                                         </div>
