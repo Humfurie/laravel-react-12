@@ -58,6 +58,7 @@ return [
         'project_github' => 'project.%d.github', // %d = project ID
         'listing_projects_featured' => 'projects.featured',
         'listing_projects_tech_stack' => 'projects.tech_stack',
+        'listing_deployments' => 'deployments.listing',
         'admin_dashboard' => 'admin:dashboard',
     ],
 

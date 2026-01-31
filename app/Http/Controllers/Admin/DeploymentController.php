@@ -12,7 +12,6 @@ use App\Services\ImageService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Throwable;
 
@@ -22,8 +21,7 @@ class DeploymentController extends Controller
 
     public function __construct(
         private ImageService $imageService
-    ) {
-    }
+    ) {}
 
     public function index()
     {
@@ -71,10 +69,6 @@ class DeploymentController extends Controller
 
         $validated = $request->validated();
 
-        if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['title']);
-        }
-
         $deployment = DB::transaction(function () use ($validated, $request) {
             $deployment = Deployment::create($validated);
 
@@ -121,10 +115,6 @@ class DeploymentController extends Controller
         $this->authorize('update', $deployment);
 
         $validated = $request->validated();
-
-        if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['title']);
-        }
 
         DB::transaction(function () use ($deployment, $validated, $request) {
             $deployment->update($validated);

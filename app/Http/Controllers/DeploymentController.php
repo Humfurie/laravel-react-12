@@ -16,13 +16,13 @@ class DeploymentController extends Controller
             ->get();
     }
 
-    public function show(Deployment $deployment)
+    public function show(string $slug)
     {
-        if (! $deployment->is_public) {
-            abort(404);
-        }
-
-        $deployment->load(['images' => fn ($q) => $q->ordered(), 'project:id,title,slug']);
+        $deployment = Deployment::query()
+            ->public()
+            ->where('slug', $slug)
+            ->with(['images' => fn ($q) => $q->ordered(), 'project:id,title,slug'])
+            ->firstOrFail();
 
         return response()->json([
             'deployment' => $deployment,

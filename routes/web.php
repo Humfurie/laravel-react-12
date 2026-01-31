@@ -77,7 +77,7 @@ Route::get('/api/projects/{project}', [ProjectController::class, 'show'])->name(
 
 // Deployments API for frontend
 Route::get('/api/deployments', [App\Http\Controllers\DeploymentController::class, 'index'])->name('deployments.index');
-Route::get('/api/deployments/{deployment}', [App\Http\Controllers\DeploymentController::class, 'show'])->name('deployments.show');
+Route::get('/api/deployments/{slug}', [App\Http\Controllers\DeploymentController::class, 'show'])->name('deployments.show');
 
 // Public API for experiences
 Route::get('/api/experiences', [ExperienceController::class, 'public'])->name('experiences.public');
