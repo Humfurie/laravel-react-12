@@ -14,7 +14,7 @@ import { slugify } from '@/lib/slugify';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
 import { ArrowLeft, CalendarIcon, Link2, Link2Off, Plus, Upload, X } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface Blog {
     id: number;
@@ -70,6 +70,15 @@ export default function EditBlog({ blog }: Props) {
         sort_order: blog.sort_order,
         published_at: blog.published_at || '',
     });
+
+    // Cleanup blob URLs on unmount to prevent memory leaks
+    useEffect(() => {
+        return () => {
+            if (imagePreview && imagePreview.startsWith('blob:')) {
+                URL.revokeObjectURL(imagePreview);
+            }
+        };
+    }, [imagePreview]);
 
     const handleTitleChange = (value: string) => {
         setData((prev) => ({
@@ -588,6 +597,8 @@ export default function EditBlog({ blog }: Props) {
                                                 checked={imageInputType === 'upload'}
                                                 onChange={() => {
                                                     setImageInputType('upload');
+                                                    // Clear URL state when switching to upload
+                                                    setData('featured_image', '');
                                                     if (fileInputRef.current) fileInputRef.current.value = '';
                                                 }}
                                                 className="mr-2 h-4 w-4 text-orange-600 focus:ring-orange-500"
@@ -600,6 +611,12 @@ export default function EditBlog({ blog }: Props) {
                                                 checked={imageInputType === 'url'}
                                                 onChange={() => {
                                                     setImageInputType('url');
+                                                    // Clean up blob URL and clear file state when switching to URL
+                                                    if (imagePreview && imagePreview.startsWith('blob:')) {
+                                                        URL.revokeObjectURL(imagePreview);
+                                                    }
+                                                    setImagePreview('');
+                                                    setData('featured_image_file', null);
                                                     if (fileInputRef.current) fileInputRef.current.value = '';
                                                 }}
                                                 className="mr-2 h-4 w-4 text-orange-600 focus:ring-orange-500"
@@ -619,6 +636,9 @@ export default function EditBlog({ blog }: Props) {
                                                 className="w-full rounded-lg border border-gray-300 px-4 py-3 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                                             />
                                             <p className="mt-2 text-xs text-gray-500">Supports: JPG, PNG, GIF, SVG, WEBP (max 5MB)</p>
+                                            {errors.featured_image_file && (
+                                                <p className="mt-2 text-sm text-red-500">{errors.featured_image_file}</p>
+                                            )}
                                             {data.featured_image_file && (
                                                 <div className="mt-3 rounded-md border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/30">
                                                     <div className="flex items-center text-green-700 dark:text-green-400">
