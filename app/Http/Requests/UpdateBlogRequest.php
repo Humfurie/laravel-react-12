@@ -59,6 +59,7 @@ class UpdateBlogRequest extends FormRequest
             'status.in' => 'The status must be either draft, published, or private.',
             'meta_data.meta_title.max' => 'Meta title should not exceed 60 characters.',
             'meta_data.meta_description.max' => 'Meta description should not exceed 160 characters.',
+            'meta_data.meta_keywords.max' => 'Meta keywords should not exceed 255 characters.',
         ];
     }
 }
