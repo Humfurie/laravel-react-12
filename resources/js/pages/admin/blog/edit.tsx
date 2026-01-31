@@ -652,27 +652,28 @@ export default function EditBlog({ blog }: Props) {
 
                                     {/* Preview */}
                                     {imagePreview && (
-                                        <div className="mt-4">
-                                            <label className="mb-3 block text-sm font-medium">Preview:</label>
-                                            <div className="flex items-center space-x-4">
-                                                <img
-                                                    src={imagePreview}
-                                                    alt="Featured image preview"
-                                                    className="h-20 w-20 rounded-lg border border-gray-300 object-cover"
-                                                    onError={(e) => {
-                                                        (e.target as HTMLImageElement).src =
-                                                            'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23666">Error</text></svg>';
-                                                    }}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={clearFeaturedImage}
-                                                    className="flex items-center text-sm text-red-600 transition-colors hover:text-red-800"
-                                                >
-                                                    <X className="mr-1 h-4 w-4" />
-                                                    Remove
-                                                </button>
-                                            </div>
+                                        <div className="relative mt-4">
+                                            <label className="mb-3 block text-sm font-medium">
+                                                {data.featured_image_file ? 'New Image Preview:' : 'Current Featured Image:'}
+                                            </label>
+                                            <img
+                                                src={imagePreview}
+                                                alt="Featured image preview"
+                                                className="h-32 w-full rounded-lg border object-cover"
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).src =
+                                                        'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="128"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23666">Image failed to load</text></svg>';
+                                                }}
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size="sm"
+                                                className="absolute top-8 right-2"
+                                                onClick={clearFeaturedImage}
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
                                         </div>
                                     )}
 
