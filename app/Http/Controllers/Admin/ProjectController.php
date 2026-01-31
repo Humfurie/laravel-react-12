@@ -100,6 +100,7 @@ class ProjectController extends Controller
         return Inertia::render('admin/projects/create', [
             'categories' => Project::getCategories(),
             'statuses' => Project::getStatuses(),
+            'ownershipTypes' => Project::getOwnershipTypes(),
         ]);
     }
 
@@ -116,6 +117,7 @@ class ProjectController extends Controller
             'project' => $project,
             'categories' => Project::getCategories(),
             'statuses' => Project::getStatuses(),
+            'ownershipTypes' => Project::getOwnershipTypes(),
         ]);
     }
 

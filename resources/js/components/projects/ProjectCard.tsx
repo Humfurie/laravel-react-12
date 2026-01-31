@@ -197,6 +197,22 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
                         <MiniContributionGraph calendar={project.metrics.contribution_calendar.calendar} />
                     </div>
                 )}
+
+                {/* Author (for non-owner projects) */}
+                {project.author && (
+                    <div className="mt-2 flex items-center gap-2">
+                        {project.author.avatar_url && (
+                            <img
+                                src={project.author.avatar_url}
+                                alt={project.author.login || 'Author'}
+                                className="h-5 w-5 rounded-full"
+                            />
+                        )}
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                            By {project.author.login || 'Unknown'}
+                        </span>
+                    </div>
+                )}
             </div>
         </article>
     );

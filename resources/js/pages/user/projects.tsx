@@ -11,21 +11,48 @@ import { Head, Link } from '@inertiajs/react';
 import { ArrowRight, ArrowUpRight, Code2, Github, Sparkles } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
+type TabKey = 'owned' | 'deployed' | 'contributed';
+
 interface Props {
     featured: Project[];
-    projects: Project[];
+    projects: { owned: Project[]; deployed: Project[]; contributed: Project[] };
     categories: Record<ProjectCategory, string>;
     techStack: string[];
+    ownershipTypes: Record<string, string>;
 }
 
-export default function ProjectsShowcase({ featured, projects, categories, techStack }: Props) {
+function getInitialTab(ownershipTypes: Record<string, string>): TabKey {
+    if (typeof window === 'undefined') return 'owned';
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab && tab in ownershipTypes) return tab as TabKey;
+    return 'owned';
+}
+
+export default function ProjectsShowcase({ featured, projects, categories, techStack, ownershipTypes }: Props) {
+    const [activeTab, setActiveTab] = useState<TabKey>(() => getInitialTab(ownershipTypes));
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedTech, setSelectedTech] = useState<string[]>([]);
 
+    const handleTabChange = useCallback((tab: TabKey) => {
+        setActiveTab(tab);
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
+        window.history.replaceState({}, '', url.toString());
+    }, []);
+
+    const allProjects = useMemo(() => {
+        return [...projects.owned, ...projects.deployed, ...projects.contributed];
+    }, [projects]);
+
+    const activeProjects = useMemo(() => {
+        return projects[activeTab] ?? [];
+    }, [projects, activeTab]);
+
     const filteredProjects = useMemo(() => {
-        return projects.filter((project) => {
+        return activeProjects.filter((project) => {
             if (selectedCategory && project.category !== selectedCategory) {
                 return false;
             }
@@ -37,7 +64,7 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
             }
             return true;
         });
-    }, [projects, selectedCategory, selectedTech]);
+    }, [activeProjects, selectedCategory, selectedTech]);
 
     const handleProjectClick = useCallback((project: Project) => {
         setSelectedProject(project);
@@ -246,15 +273,34 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                     {/* All Projects Section */}
                     <section id="all-projects" className="bg-white py-16 dark:bg-gray-800">
                         <div className="container mx-auto px-4">
-                            {/* Section Header */}
+                            {/* Tab Navigation */}
                             <div className="mb-8">
-                                <div className="mb-4 flex items-center gap-3">
-                                    <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-                                    <h2 className="font-serif text-3xl font-bold text-gray-900 dark:text-white">All Projects</h2>
-                                    <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                                <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
+                                    {(Object.entries(ownershipTypes) as [TabKey, string][]).map(([key, label]) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => handleTabChange(key)}
+                                            className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+                                                activeTab === key
+                                                    ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                                            }`}
+                                        >
+                                            {label}
+                                            <span
+                                                className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold ${
+                                                    activeTab === key
+                                                        ? 'bg-white/20 text-white dark:bg-gray-900/20 dark:text-gray-900'
+                                                        : 'bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
+                                                }`}
+                                            >
+                                                {projects[key]?.length ?? 0}
+                                            </span>
+                                        </button>
+                                    ))}
                                 </div>
                                 <p className="text-center text-gray-500 dark:text-gray-400">
-                                    Browse through {projects.length} project{projects.length !== 1 ? 's' : ''} in my portfolio
+                                    Browse through {activeProjects.length} project{activeProjects.length !== 1 ? 's' : ''}
                                 </p>
                             </div>
 
@@ -314,19 +360,19 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                             <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-8">
                                 <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:p-8 dark:border-gray-700 dark:bg-gray-800">
                                     <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
-                                        {projects.length}
+                                        {allProjects.length}
                                     </div>
                                     <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Projects</div>
                                 </div>
                                 <div className="rounded-3xl bg-[#C5E8D5] p-6 md:p-8 dark:bg-green-900/30">
                                     <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
-                                        {projects.filter((p) => p.status === 'live').length}
+                                        {allProjects.filter((p) => p.status === 'live').length}
                                     </div>
                                     <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Live Projects</div>
                                 </div>
                                 <div className="rounded-3xl bg-[#F5E6D3] p-6 md:p-8 dark:bg-amber-900/30">
                                     <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
-                                        {projects.filter((p) => p.is_featured).length}
+                                        {allProjects.filter((p) => p.is_featured).length}
                                     </div>
                                     <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Featured</div>
                                 </div>

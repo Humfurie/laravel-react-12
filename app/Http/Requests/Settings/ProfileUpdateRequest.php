@@ -44,7 +44,7 @@ class ProfileUpdateRequest extends FormRequest
 
             // Social links
             'social_links' => ['nullable', 'array'],
-            'social_links.github' => ['nullable', 'url', 'max:255'],
+            'social_links.github' => ['nullable', 'url', 'max:255', 'regex:/^https?:\/\/(www\.)?github\.com\/[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?\/?$/'],
             'social_links.linkedin' => ['nullable', 'url', 'max:255'],
             'social_links.facebook' => ['nullable', 'url', 'max:255'],
             'social_links.twitter' => ['nullable', 'url', 'max:255'],
@@ -67,6 +67,7 @@ class ProfileUpdateRequest extends FormRequest
     {
         return [
             'username.regex' => 'Username can only contain lowercase letters, numbers, underscores, and hyphens.',
+            'social_links.github.regex' => 'Please enter a valid GitHub profile URL (e.g., https://github.com/username).',
         ];
     }
 }

@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
 import { cn } from '@/lib/utils';
 import { slugify } from '@/lib/slugify';
-import type { ProjectCategory, ProjectLinks, ProjectMetrics, ProjectStatus, ProjectTestimonial } from '@/types/project';
+import type { ProjectCategory, ProjectLinks, ProjectMetrics, ProjectOwnershipType, ProjectStatus, ProjectTestimonial } from '@/types/project';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { ArrowLeft, CalendarIcon, Link2, Link2Off, Plus, Upload, X } from 'lucide-react';
@@ -21,6 +21,7 @@ import React, { useRef, useState } from 'react';
 interface Props {
     categories: Record<ProjectCategory, string>;
     statuses: Record<ProjectStatus, string>;
+    ownershipTypes: Record<string, string>;
 }
 
 type ProjectFormData = {
@@ -32,6 +33,7 @@ type ProjectFormData = {
     tech_stack: string[];
     links: ProjectLinks;
     status: ProjectStatus;
+    ownership_type: ProjectOwnershipType;
     is_featured: boolean;
     is_public: boolean;
     metrics: ProjectMetrics;
@@ -44,7 +46,7 @@ type ProjectFormData = {
     github_repo: string;
 };
 
-export default function CreateProject({ categories, statuses }: Props) {
+export default function CreateProject({ categories, statuses, ownershipTypes }: Props) {
     const [techInput, setTechInput] = useState('');
     const [imagePreview, setImagePreview] = useState<string>('');
     const [startDate, setStartDate] = useState<Date>();
@@ -65,6 +67,7 @@ export default function CreateProject({ categories, statuses }: Props) {
             docs_url: '',
         },
         status: 'development',
+        ownership_type: 'owner',
         is_featured: false,
         is_public: true,
         metrics: {
@@ -271,7 +274,7 @@ export default function CreateProject({ categories, statuses }: Props) {
                                     {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-3 gap-4">
                                     <div className="space-y-2">
                                         <Label>Category *</Label>
                                         <Select value={data.category} onValueChange={(value: ProjectCategory) => setData('category', value)}>
@@ -304,6 +307,23 @@ export default function CreateProject({ categories, statuses }: Props) {
                                             </SelectContent>
                                         </Select>
                                         {errors.status && <p className="text-sm text-red-500">{errors.status}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Ownership</Label>
+                                        <Select value={data.ownership_type} onValueChange={(value: ProjectOwnershipType) => setData('ownership_type', value)}>
+                                            <SelectTrigger className={errors.ownership_type ? 'border-red-500' : ''}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {Object.entries(ownershipTypes).map(([key, label]) => (
+                                                    <SelectItem key={key} value={key}>
+                                                        {label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.ownership_type && <p className="text-sm text-red-500">{errors.ownership_type}</p>}
                                     </div>
                                 </div>
 

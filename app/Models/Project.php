@@ -36,6 +36,13 @@ class Project extends Model
 
     const CATEGORY_DESIGN = 'design';
 
+    // Ownership Type Constants
+    const OWNERSHIP_OWNER = 'owner';
+
+    const OWNERSHIP_DEPLOYED = 'deployed';
+
+    const OWNERSHIP_CONTRIBUTOR = 'contributor';
+
     protected $fillable = [
         'title',
         'slug',
@@ -58,6 +65,7 @@ class Project extends Model
         'completed_at',
         'featured_at',
         'sort_order',
+        'ownership_type',
         'view_count',
     ];
 
@@ -81,6 +89,7 @@ class Project extends Model
         'category_label',
         'thumbnail_url',
         'contributors',
+        'author',
     ];
 
     /**
@@ -105,6 +114,15 @@ class Project extends Model
             self::STATUS_DEVELOPMENT => 'In Development',
             self::STATUS_MAINTENANCE => 'Under Maintenance',
             self::STATUS_ARCHIVED => 'Archived',
+        ];
+    }
+
+    public static function getOwnershipTypes(): array
+    {
+        return [
+            self::OWNERSHIP_OWNER => 'My Project',
+            self::OWNERSHIP_DEPLOYED => 'Deployed by Me',
+            self::OWNERSHIP_CONTRIBUTOR => 'Contributed To',
         ];
     }
 
@@ -267,6 +285,42 @@ class Project extends Model
         })->toArray();
     }
 
+    public function getAuthorAttribute(): ?array
+    {
+        if ($this->ownership_type === self::OWNERSHIP_OWNER) {
+            return null;
+        }
+
+        $contributors = $this->metrics['contributors'] ?? [];
+        if (empty($contributors)) {
+            return null;
+        }
+
+        static $ownerUsername = null;
+        if ($ownerUsername === null) {
+            $ownerUsername = User::find(config('app.admin_user_id'))?->github_username ?? false;
+        }
+        $username = $ownerUsername ?: null;
+
+        // Find top contributor who isn't the site owner
+        foreach ($contributors as $contributor) {
+            if (($contributor['login'] ?? null) !== $username) {
+                return [
+                    'login' => $contributor['login'] ?? null,
+                    'avatar_url' => $contributor['avatar_url'] ?? null,
+                    'contributions' => $contributor['contributions'] ?? 0,
+                ];
+            }
+        }
+
+        // If all contributors are the owner, return first one
+        return [
+            'login' => $contributors[0]['login'] ?? null,
+            'avatar_url' => $contributors[0]['avatar_url'] ?? null,
+            'contributions' => $contributors[0]['contributions'] ?? 0,
+        ];
+    }
+
     public function scopePublic($query)
     {
         return $query->where('is_public', true);
@@ -294,7 +348,35 @@ class Project extends Model
         return $query->orderBy('sort_order')->orderBy('created_at', 'desc');
     }
 
+    public function scopeOwned($query)
+    {
+        return $query->where('ownership_type', self::OWNERSHIP_OWNER);
+    }
+
+    public function scopeDeployed($query)
+    {
+        return $query->where('ownership_type', self::OWNERSHIP_DEPLOYED);
+    }
+
+    public function scopeContributed($query)
+    {
+        return $query->where('ownership_type', self::OWNERSHIP_CONTRIBUTOR);
+    }
+
     // Static helpers
+
+    public function hasGitHubRepo(): bool
+    {
+        return ! empty($this->github_repo) || ! empty($this->links['repo_url'] ?? null);
+    }
+
+    public function scopeWithGitHubRepo($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNotNull('github_repo')
+                ->orWhereRaw("links->>'repo_url' IS NOT NULL");
+        });
+    }
 
     public function isLive(): bool
     {
