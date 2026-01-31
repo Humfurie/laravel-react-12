@@ -157,3 +157,63 @@ test('meta data is properly stored and retrieved', function () {
         ->and($blog->meta_data['meta_description'])->toBe($metaData['meta_description'])
         ->and($blog->meta_data['meta_keywords'])->toBe($metaData['meta_keywords']);
 });
+
+test('blog creation fails when meta_title exceeds 60 characters', function () {
+    $blogData = [
+        'title' => 'Test Blog',
+        'content' => '<p>Content</p>',
+        'status' => 'draft',
+        'meta_data' => [
+            'meta_title' => str_repeat('a', 61),
+        ],
+    ];
+
+    $this->actingAs($this->user)
+        ->post(route('blogs.store'), $blogData)
+        ->assertSessionHasErrors('meta_data.meta_title');
+});
+
+test('blog creation fails when meta_description exceeds 160 characters', function () {
+    $blogData = [
+        'title' => 'Test Blog',
+        'content' => '<p>Content</p>',
+        'status' => 'draft',
+        'meta_data' => [
+            'meta_description' => str_repeat('a', 161),
+        ],
+    ];
+
+    $this->actingAs($this->user)
+        ->post(route('blogs.store'), $blogData)
+        ->assertSessionHasErrors('meta_data.meta_description');
+});
+
+test('blog creation fails when meta_keywords exceeds 255 characters', function () {
+    $blogData = [
+        'title' => 'Test Blog',
+        'content' => '<p>Content</p>',
+        'status' => 'draft',
+        'meta_data' => [
+            'meta_keywords' => str_repeat('a', 256),
+        ],
+    ];
+
+    $this->actingAs($this->user)
+        ->post(route('blogs.store'), $blogData)
+        ->assertSessionHasErrors('meta_data.meta_keywords');
+});
+
+test('blog update fails when meta_title exceeds 60 characters', function () {
+    $blog = Blog::factory()->draft()->create(['isPrimary' => false]);
+
+    $this->actingAs($this->user)
+        ->put(route('blogs.update', $blog->slug), [
+            'title' => $blog->title,
+            'content' => $blog->content,
+            'status' => 'draft',
+            'meta_data' => [
+                'meta_title' => str_repeat('a', 61),
+            ],
+        ])
+        ->assertSessionHasErrors('meta_data.meta_title');
+});
