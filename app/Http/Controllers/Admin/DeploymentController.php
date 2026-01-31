@@ -159,11 +159,13 @@ class DeploymentController extends Controller
         $deployment = Deployment::withTrashed()->where('slug', $slug)->firstOrFail();
         $this->authorize('forceDelete', $deployment);
 
-        foreach ($deployment->images as $image) {
-            $this->imageService->delete($image);
-        }
+        DB::transaction(function () use ($deployment) {
+            foreach ($deployment->images as $image) {
+                $this->imageService->delete($image);
+            }
 
-        $deployment->forceDelete();
+            $deployment->forceDelete();
+        });
 
         return redirect()->route('admin.deployments.index')
             ->with('success', 'Deployment permanently deleted successfully.');

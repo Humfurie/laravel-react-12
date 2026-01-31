@@ -118,3 +118,93 @@ test('active scope returns only active deployments', function () {
 
     expect(Deployment::active()->count())->toBe(1);
 });
+
+test('guest cannot view deployments index', function () {
+    $this->get(route('admin.deployments.index'))
+        ->assertRedirect(route('login'));
+});
+
+test('guest cannot create deployment', function () {
+    $this->post(route('admin.deployments.store'), [
+        'title' => 'Test',
+        'client_name' => 'Client',
+        'client_type' => 'family',
+        'live_url' => 'https://example.com',
+        'status' => 'active',
+    ])->assertRedirect(route('login'));
+});
+
+test('user without deployment permission cannot view index', function () {
+    // Create a regular user without any admin role/permissions
+    $regularUser = \App\Models\User::factory()->create();
+
+    $this->actingAs($regularUser)
+        ->get(route('admin.deployments.index'))
+        ->assertForbidden();
+});
+
+test('user without deployment permission cannot create', function () {
+    // Create a regular user without any admin role/permissions
+    $regularUser = \App\Models\User::factory()->create();
+
+    $this->actingAs($regularUser)
+        ->post(route('admin.deployments.store'), [
+            'title' => 'Test',
+            'client_name' => 'Client',
+            'client_type' => 'family',
+            'live_url' => 'https://example.com',
+            'status' => 'active',
+        ])->assertForbidden();
+});
+
+test('admin can restore soft deleted deployment', function () {
+    $deployment = Deployment::factory()->create();
+    $deployment->delete();
+
+    expect($deployment->fresh()->deleted_at)->not->toBeNull();
+
+    $this->actingAs($this->user)
+        ->patch(route('admin.deployments.restore', $deployment->slug))
+        ->assertRedirect(route('admin.deployments.index'));
+
+    expect($deployment->fresh()->deleted_at)->toBeNull();
+});
+
+test('admin can force delete deployment', function () {
+    $deployment = Deployment::factory()->create();
+    $slug = $deployment->slug;
+    $deployment->delete();
+
+    $this->actingAs($this->user)
+        ->delete(route('admin.deployments.force-destroy', $slug))
+        ->assertRedirect(route('admin.deployments.index'));
+
+    expect(Deployment::withTrashed()->where('slug', $slug)->exists())->toBeFalse();
+});
+
+test('public api returns only public active deployments', function () {
+    Deployment::factory()->create(['is_public' => true, 'status' => 'active']);
+    Deployment::factory()->create(['is_public' => false, 'status' => 'active']);
+    Deployment::factory()->create(['is_public' => true, 'status' => 'archived']);
+
+    $response = $this->get(route('deployments.index'));
+
+    $response->assertOk();
+    expect(count($response->json()))->toBe(1);
+});
+
+test('public api show returns 404 for private deployment', function () {
+    $deployment = Deployment::factory()->create(['is_public' => false]);
+
+    $this->get(route('deployments.show', $deployment->slug))
+        ->assertNotFound();
+});
+
+test('public api show returns 404 for soft deleted deployment', function () {
+    $deployment = Deployment::factory()->create(['is_public' => true]);
+    $slug = $deployment->slug;
+    $deployment->delete();
+
+    $this->get(route('deployments.show', $slug))
+        ->assertNotFound();
+});

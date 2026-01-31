@@ -58,7 +58,8 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
 
     const filteredProjects = useMemo(() => {
         return activeProjects.filter((project) => {
-            if (selectedCategory && project.category !== selectedCategory) {
+            // Skip category filtering for deployments (they don't have categories)
+            if (activeTab !== 'deployments' && selectedCategory && project.category !== selectedCategory) {
                 return false;
             }
             if (selectedTech.length > 0) {
@@ -69,7 +70,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
             }
             return true;
         });
-    }, [activeProjects, selectedCategory, selectedTech]);
+    }, [activeProjects, selectedCategory, selectedTech, activeTab]);
 
     const handleProjectClick = useCallback((project: Project) => {
         setSelectedProject(project);
