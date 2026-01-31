@@ -75,7 +75,8 @@ class Deployment extends Model
         });
 
         static::updating(function ($deployment) {
-            if ($deployment->isDirty('title') && empty($deployment->slug)) {
+            // Regenerate slug when title changes, unless slug was manually edited
+            if ($deployment->isDirty('title') && ! $deployment->isDirty('slug')) {
                 $deployment->slug = static::generateUniqueSlug($deployment->title, $deployment->id);
             }
         });
