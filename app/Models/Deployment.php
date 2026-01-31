@@ -165,6 +165,11 @@ class Deployment extends Model
 
     public function getThumbnailUrlAttribute(): ?string
     {
+        // Only access if eager loaded to prevent N+1 queries
+        if (! $this->relationLoaded('primaryImage')) {
+            return null;
+        }
+
         $primaryImage = $this->primaryImage;
         if ($primaryImage) {
             return $primaryImage->getThumbnailUrl('medium') ?? $primaryImage->url;
