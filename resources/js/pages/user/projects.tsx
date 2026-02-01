@@ -6,16 +6,18 @@ import { ProjectModal } from '@/components/projects/ProjectModal';
 import StructuredData, { schemas } from '@/components/seo/StructuredData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import type { Deployment } from '@/types/deployment';
 import type { Project, ProjectCategory } from '@/types/project';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowRight, ArrowUpRight, Code2, Github, Sparkles } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
-type TabKey = 'owned' | 'deployed' | 'contributed';
+type TabKey = 'owned' | 'deployments' | 'contributed';
 
 interface Props {
     featured: Project[];
-    projects: { owned: Project[]; deployed: Project[]; contributed: Project[] };
+    projects: { owned: Project[]; contributed: Project[] };
+    deployments: Deployment[];
     categories: Record<ProjectCategory, string>;
     techStack: string[];
     ownershipTypes: Record<string, string>;
@@ -29,7 +31,7 @@ function getInitialTab(ownershipTypes: Record<string, string>): TabKey {
     return 'owned';
 }
 
-export default function ProjectsShowcase({ featured, projects, categories, techStack, ownershipTypes }: Props) {
+export default function ProjectsShowcase({ featured, projects, deployments, categories, techStack, ownershipTypes }: Props) {
     const [activeTab, setActiveTab] = useState<TabKey>(() => getInitialTab(ownershipTypes));
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
@@ -44,16 +46,20 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
     }, []);
 
     const allProjects = useMemo(() => {
-        return [...projects.owned, ...projects.deployed, ...projects.contributed];
+        return [...projects.owned, ...projects.contributed];
     }, [projects]);
 
     const activeProjects = useMemo(() => {
+        if (activeTab === 'deployments') {
+            return deployments as unknown as Project[];
+        }
         return projects[activeTab] ?? [];
-    }, [projects, activeTab]);
+    }, [projects, deployments, activeTab]);
 
     const filteredProjects = useMemo(() => {
         return activeProjects.filter((project) => {
-            if (selectedCategory && project.category !== selectedCategory) {
+            // Skip category filtering for deployments (they don't have categories)
+            if (activeTab !== 'deployments' && selectedCategory && project.category !== selectedCategory) {
                 return false;
             }
             if (selectedTech.length > 0) {
@@ -64,7 +70,7 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
             }
             return true;
         });
-    }, [activeProjects, selectedCategory, selectedTech]);
+    }, [activeProjects, selectedCategory, selectedTech, activeTab]);
 
     const handleProjectClick = useCallback((project: Project) => {
         setSelectedProject(project);
@@ -294,7 +300,7 @@ export default function ProjectsShowcase({ featured, projects, categories, techS
                                                         : 'bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
                                                 }`}
                                             >
-                                                {projects[key]?.length ?? 0}
+                                                {key === 'deployments' ? deployments.length : (projects[key as keyof typeof projects]?.length ?? 0)}
                                             </span>
                                         </button>
                                     ))}

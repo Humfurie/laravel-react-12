@@ -5,7 +5,6 @@ use App\Models\User;
 
 test('projects page groups by ownership type', function () {
     Project::factory()->public()->live()->create(['ownership_type' => 'owner']);
-    Project::factory()->public()->live()->create(['ownership_type' => 'deployed']);
     Project::factory()->public()->live()->create(['ownership_type' => 'contributor']);
 
     $response = $this->get('/projects');
@@ -14,7 +13,6 @@ test('projects page groups by ownership type', function () {
     $response->assertInertia(fn ($page) => $page
         ->component('user/projects')
         ->has('projects.owned', 1)
-        ->has('projects.deployed', 1)
         ->has('projects.contributed', 1)
     );
 });
@@ -56,10 +54,8 @@ test('author accessor returns top non-owner contributor', function () {
 
 test('project scopes filter by ownership type', function () {
     Project::factory()->create(['ownership_type' => 'owner']);
-    Project::factory()->create(['ownership_type' => 'deployed']);
     Project::factory()->create(['ownership_type' => 'contributor']);
 
     expect(Project::owned()->count())->toBe(1);
-    expect(Project::deployed()->count())->toBe(1);
     expect(Project::contributed()->count())->toBe(1);
 });

@@ -39,8 +39,6 @@ class Project extends Model
     // Ownership Type Constants
     const OWNERSHIP_OWNER = 'owner';
 
-    const OWNERSHIP_DEPLOYED = 'deployed';
-
     const OWNERSHIP_CONTRIBUTOR = 'contributor';
 
     protected $fillable = [
@@ -121,7 +119,6 @@ class Project extends Model
     {
         return [
             self::OWNERSHIP_OWNER => 'My Project',
-            self::OWNERSHIP_DEPLOYED => 'Deployed by Me',
             self::OWNERSHIP_CONTRIBUTOR => 'Contributed To',
         ];
     }
@@ -351,11 +348,6 @@ class Project extends Model
     public function scopeOwned($query)
     {
         return $query->where('ownership_type', self::OWNERSHIP_OWNER);
-    }
-
-    public function scopeDeployed($query)
-    {
-        return $query->where('ownership_type', self::OWNERSHIP_DEPLOYED);
     }
 
     public function scopeContributed($query)

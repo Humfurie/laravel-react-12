@@ -3,12 +3,14 @@
 namespace App\Providers;
 
 use App\Models\Blog;
+use App\Models\Deployment;
 use App\Models\Experience;
 use App\Models\Expertise;
 use App\Models\Project;
 use App\Models\ProjectCategory;
 use App\Models\User;
 use App\Observers\BlogObserver;
+use App\Observers\DeploymentObserver;
 use App\Observers\ExperienceObserver;
 use App\Observers\ExpertiseObserver;
 use App\Observers\ProjectCategoryObserver;
@@ -66,6 +68,7 @@ class AppServiceProvider extends ServiceProvider
     private function registerObservers(): void
     {
         Blog::observe(BlogObserver::class);
+        Deployment::observe(DeploymentObserver::class);
         Experience::observe(ExperienceObserver::class);
         Expertise::observe(ExpertiseObserver::class);
         Project::observe(ProjectObserver::class);
