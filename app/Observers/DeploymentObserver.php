@@ -35,7 +35,6 @@ class DeploymentObserver
     protected function clearCache(): void
     {
         Cache::forget(config('cache-ttl.keys.listing_deployments'));
-        Cache::forget(config('cache-ttl.keys.homepage_projects'));
         Cache::forget(config('cache-ttl.keys.admin_dashboard'));
     }
 }
