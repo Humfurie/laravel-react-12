@@ -204,7 +204,7 @@ Route::prefix('deployments')->name('admin.deployments.')->middleware('permission
     Route::put('/{deployment}', [App\Http\Controllers\Admin\DeploymentController::class, 'update'])->name('update')->middleware('permission:deployment,update');
     Route::delete('/{deployment}', [App\Http\Controllers\Admin\DeploymentController::class, 'destroy'])->name('destroy')->middleware('permission:deployment,delete');
     Route::patch('/{deployment}/restore', [App\Http\Controllers\Admin\DeploymentController::class, 'restore'])->name('restore')->withTrashed()->middleware('permission:deployment,restore');
-    Route::delete('/{deployment}/force', [App\Http\Controllers\Admin\DeploymentController::class, 'forceDestroy'])->name('force-destroy')->middleware('permission:deployment,forceDelete');
+    Route::delete('/{deployment}/force', [App\Http\Controllers\Admin\DeploymentController::class, 'forceDestroy'])->name('force-destroy')->withTrashed()->middleware('permission:deployment,forceDelete');
 
     // Image management
     Route::post('/{deployment}/images', [App\Http\Controllers\Admin\DeploymentController::class, 'uploadImage'])->name('images.upload')->middleware('permission:deployment,update');

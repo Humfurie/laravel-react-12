@@ -37,4 +37,15 @@ class UpdateDeploymentRequest extends FormRequest
             'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'The deployment title is required.',
+            'client_name.required' => 'The client name is required.',
+            'live_url.required' => 'The live URL is required.',
+            'live_url.url' => 'The live URL must be a valid URL.',
+            'demo_url.url' => 'The demo URL must be a valid URL.',
+        ];
+    }
 }
