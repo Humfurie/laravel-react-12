@@ -1,6 +1,20 @@
 export type DeploymentStatus = 'active' | 'maintenance' | 'archived';
 export type DeploymentClientType = 'family' | 'friend' | 'business' | 'personal';
 
+export interface DeploymentImage {
+    id: number;
+    name: string;
+    path: string;
+    url: string;
+    is_primary: boolean;
+    order: number;
+    thumbnail_urls: {
+        small?: string;
+        medium?: string;
+        large?: string;
+    };
+}
+
 export interface Deployment {
     id: number;
     title: string;
@@ -18,7 +32,9 @@ export interface Deployment {
     project?: {
         id: number;
         title: string;
+        slug: string;
     };
+    images?: DeploymentImage[];
     is_featured: boolean;
     is_public: boolean;
     deployed_at: string | null;

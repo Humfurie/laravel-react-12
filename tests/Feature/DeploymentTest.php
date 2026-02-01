@@ -1,13 +1,17 @@
 <?php
 
 use App\Models\Deployment;
+use App\Models\Image;
 use App\Models\Project;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->user = createAdminUser('deployment');
+    Storage::fake(config('filesystems.default'));
 });
 
 test('deployment auto generates slug from title', function () {
@@ -207,4 +211,132 @@ test('public api show returns 404 for soft deleted deployment', function () {
 
     $this->get(route('deployments.show', $slug))
         ->assertNotFound();
+});
+
+// Image operation tests
+
+test('admin can upload images to deployment', function () {
+    $deployment = Deployment::factory()->create();
+    $images = [
+        UploadedFile::fake()->image('image1.jpg', 800, 600),
+        UploadedFile::fake()->image('image2.png', 1024, 768),
+    ];
+
+    $response = $this->actingAs($this->user)
+        ->post(route('admin.deployments.images.upload', $deployment), [
+            'images' => $images,
+        ]);
+
+    $response->assertRedirect();
+    expect($deployment->fresh()->images()->count())->toBe(2);
+});
+
+test('image upload validates file types', function () {
+    $deployment = Deployment::factory()->create();
+    $file = UploadedFile::fake()->create('document.pdf', 1024);
+
+    $this->actingAs($this->user)
+        ->post(route('admin.deployments.images.upload', $deployment), [
+            'images' => [$file],
+        ])
+        ->assertSessionHasErrors('images.0');
+});
+
+test('image upload validates file size', function () {
+    $deployment = Deployment::factory()->create();
+    // Create image larger than 5MB limit
+    $file = UploadedFile::fake()->image('large.jpg')->size(6000);
+
+    $this->actingAs($this->user)
+        ->post(route('admin.deployments.images.upload', $deployment), [
+            'images' => [$file],
+        ])
+        ->assertSessionHasErrors('images.0');
+});
+
+test('admin can delete deployment image', function () {
+    $deployment = Deployment::factory()->create();
+    $imagePath = 'deployment-images/test-image.jpg';
+    Storage::disk(config('filesystems.default'))->put($imagePath, 'fake image content');
+
+    $image = Image::factory()->create([
+        'imageable_type' => Deployment::class,
+        'imageable_id' => $deployment->id,
+        'path' => $imagePath,
+    ]);
+
+    $this->actingAs($this->user)
+        ->delete(route('admin.deployments.images.delete', [$deployment, $image]))
+        ->assertRedirect();
+
+    expect(Image::find($image->id))->toBeNull();
+});
+
+test('admin cannot delete image belonging to another deployment', function () {
+    $deployment1 = Deployment::factory()->create();
+    $deployment2 = Deployment::factory()->create();
+    $imagePath = 'deployment-images/test-image-2.jpg';
+    Storage::disk(config('filesystems.default'))->put($imagePath, 'fake image content');
+
+    $image = Image::factory()->create([
+        'imageable_type' => Deployment::class,
+        'imageable_id' => $deployment2->id,
+        'path' => $imagePath,
+    ]);
+
+    $this->actingAs($this->user)
+        ->delete(route('admin.deployments.images.delete', [$deployment1, $image]))
+        ->assertForbidden();
+});
+
+test('admin can set primary image for deployment', function () {
+    $deployment = Deployment::factory()->create();
+    $image1 = Image::factory()->create([
+        'imageable_type' => Deployment::class,
+        'imageable_id' => $deployment->id,
+        'is_primary' => true,
+    ]);
+    $image2 = Image::factory()->create([
+        'imageable_type' => Deployment::class,
+        'imageable_id' => $deployment->id,
+        'is_primary' => false,
+    ]);
+
+    $this->actingAs($this->user)
+        ->patch(route('admin.deployments.images.set-primary', [$deployment, $image2]))
+        ->assertRedirect();
+
+    expect($image2->fresh()->is_primary)->toBeTrue();
+});
+
+test('admin cannot set primary image from another deployment', function () {
+    $deployment1 = Deployment::factory()->create();
+    $deployment2 = Deployment::factory()->create();
+    $image = Image::factory()->create([
+        'imageable_type' => Deployment::class,
+        'imageable_id' => $deployment2->id,
+    ]);
+
+    $this->actingAs($this->user)
+        ->patch(route('admin.deployments.images.set-primary', [$deployment1, $image]))
+        ->assertForbidden();
+});
+
+test('guest cannot upload deployment images', function () {
+    $deployment = Deployment::factory()->create();
+
+    $this->post(route('admin.deployments.images.upload', $deployment), [
+        'images' => [UploadedFile::fake()->image('test.jpg')],
+    ])->assertRedirect(route('login'));
+});
+
+test('guest cannot delete deployment images', function () {
+    $deployment = Deployment::factory()->create();
+    $image = Image::factory()->create([
+        'imageable_type' => Deployment::class,
+        'imageable_id' => $deployment->id,
+    ]);
+
+    $this->delete(route('admin.deployments.images.delete', [$deployment, $image]))
+        ->assertRedirect(route('login'));
 });

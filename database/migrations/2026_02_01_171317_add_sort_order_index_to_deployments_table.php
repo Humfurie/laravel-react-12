@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('deployments', function (Blueprint $table) {
-            $table->index('sort_order');
+            // Drop the existing index and create a composite index for optimal query performance
+            $table->dropIndex(['is_public', 'status']);
+            $table->index(['is_public', 'status', 'sort_order']);
         });
     }
 
@@ -22,7 +24,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('deployments', function (Blueprint $table) {
-            $table->dropIndex(['sort_order']);
+            $table->dropIndex(['is_public', 'status', 'sort_order']);
+            $table->index(['is_public', 'status']);
         });
     }
 };
