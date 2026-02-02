@@ -37,6 +37,7 @@ return [
     'listing' => [
         'projects_featured' => env('CACHE_TTL_LISTING_PROJECTS_FEATURED', 1800),
         'projects_tech_stack' => env('CACHE_TTL_LISTING_PROJECTS_TECH_STACK', 1800),
+        'deployments' => env('CACHE_TTL_LISTING_DEPLOYMENTS', 1800),
     ],
 
     /*
@@ -58,6 +59,7 @@ return [
         'project_github' => 'project.%d.github', // %d = project ID
         'listing_projects_featured' => 'projects.featured',
         'listing_projects_tech_stack' => 'projects.tech_stack',
+        'listing_deployments' => 'deployments.listing',
         'admin_dashboard' => 'admin:dashboard',
     ],
 

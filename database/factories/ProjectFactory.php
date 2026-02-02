@@ -91,13 +91,6 @@ class ProjectFactory extends Factory
         ]);
     }
 
-    public function deployed(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'ownership_type' => Project::OWNERSHIP_DEPLOYED,
-        ]);
-    }
-
     public function contributed(): static
     {
         return $this->state(fn (array $attributes) => [

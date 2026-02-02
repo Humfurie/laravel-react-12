@@ -18,6 +18,7 @@ export interface Permissions {
     blog: ResourcePermissions;
     giveaway: ResourcePermissions;
     project: ResourcePermissions;
+    deployment: ResourcePermissions;
     inquiry: ResourcePermissions;
     user: ResourcePermissions;
     role: ResourcePermissions;
