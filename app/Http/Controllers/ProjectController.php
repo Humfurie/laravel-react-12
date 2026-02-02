@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\IncrementViewCount;
+use App\Models\Deployment;
 use App\Models\Project;
 use App\Services\HomepageCacheService;
 use Illuminate\Support\Facades\Cache;
@@ -37,9 +38,16 @@ class ProjectController extends Controller
 
         $grouped = [
             'owned' => $allProjects->where('ownership_type', Project::OWNERSHIP_OWNER)->values(),
-            'deployed' => $allProjects->where('ownership_type', Project::OWNERSHIP_DEPLOYED)->values(),
             'contributed' => $allProjects->where('ownership_type', Project::OWNERSHIP_CONTRIBUTOR)->values(),
         ];
+
+        // Get public active deployments
+        $deployments = Deployment::query()
+            ->public()
+            ->active()
+            ->with(['primaryImage'])
+            ->ordered()
+            ->get();
 
         // Get unique tech stack for filter options
         $allTechStack = Cache::remember(
@@ -59,9 +67,14 @@ class ProjectController extends Controller
         return Inertia::render('user/projects', [
             'featured' => $featured,
             'projects' => $grouped,
+            'deployments' => $deployments,
             'categories' => Project::getCategories(),
             'techStack' => $allTechStack,
-            'ownershipTypes' => Project::getOwnershipTypes(),
+            'ownershipTypes' => [
+                'owned' => 'My Projects',
+                'deployments' => 'Deployments',
+                'contributed' => 'Contributed To',
+            ],
         ]);
     }
 
