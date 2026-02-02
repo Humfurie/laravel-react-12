@@ -159,9 +159,9 @@ class DeploymentController extends Controller
         $deployment = Deployment::withTrashed()->where('slug', $slug)->firstOrFail();
         $this->authorize('forceDelete', $deployment);
 
-        $deployment->load('images');
-
         DB::transaction(function () use ($deployment) {
+            $deployment->load('images');
+
             foreach ($deployment->images as $image) {
                 $this->imageService->delete($image);
             }

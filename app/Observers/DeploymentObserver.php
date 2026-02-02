@@ -36,5 +36,7 @@ class DeploymentObserver
     {
         Cache::forget(config('cache-ttl.keys.listing_deployments'));
         Cache::forget(config('cache-ttl.keys.admin_dashboard'));
+        Cache::forget('sitemap:latest_deployment');
+        Cache::forget('sitemap:deployments');
     }
 }
