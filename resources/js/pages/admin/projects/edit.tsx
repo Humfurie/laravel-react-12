@@ -110,15 +110,15 @@ export default function EditProject({ project, categories, statuses, ownershipTy
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        transform((data) => ({
+        const formData = {
             ...data,
             slug: data.slug || slugify(data.title),
             started_at: startDate ? format(startDate, 'yyyy-MM-dd') : '',
             completed_at: completedDate ? format(completedDate, 'yyyy-MM-dd') : '',
             _method: 'PUT',
-        }));
+        };
 
-        post(route('admin.projects.update', project.slug), {
+        router.post(route('admin.projects.update', project.slug), formData, {
             forceFormData: true,
             onSuccess: () => {
                 if (imagePreview && imagePreview.startsWith('blob:')) {
