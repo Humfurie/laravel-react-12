@@ -62,13 +62,18 @@ class BlogController extends Controller
             $image = $request->file('featured_image_file');
 
             // Create unique filename
-            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            $filename = time().'_'.Str::random(10).'.'.$image->getClientOriginalExtension();
 
             // Store in MinIO/blog-images directory
             $path = $image->storeAs('blog-images', $filename, 'minio');
 
-            // Set the URL
-            $validated['featured_image'] = Storage::disk('minio')->url($path);
+            // Check if upload succeeded
+            if ($path === false) {
+                throw new \RuntimeException('Failed to upload image to storage. Please check storage configuration.');
+            }
+
+            // Set the URL - use /storage/ path for nginx proxy
+            $validated['featured_image'] = '/storage/'.$path;
         }
 
         // Generate slug if not provided
@@ -77,7 +82,7 @@ class BlogController extends Controller
         }
 
         // Auto-generate meta data if not provided
-        if (!isset($validated['meta_data'])) {
+        if (! isset($validated['meta_data'])) {
             $validated['meta_data'] = [];
         }
         if (empty($validated['meta_data']['meta_title'])) {
@@ -102,7 +107,7 @@ class BlogController extends Controller
         });
 
         // Clear homepage cache when featured status changes
-        if (!empty($validated['isPrimary'])) {
+        if (! empty($validated['isPrimary'])) {
             Cache::forget('homepage.blogs');
         }
 
@@ -113,8 +118,8 @@ class BlogController extends Controller
     private function generateKeywords(string $title): string
     {
         return collect(explode(' ', strtolower($title)))
-            ->filter(fn($word) => strlen($word) > 2)
-            ->map(fn($word) => preg_replace('/[^a-z0-9]/', '', $word))
+            ->filter(fn ($word) => strlen($word) > 2)
+            ->map(fn ($word) => preg_replace('/[^a-z0-9]/', '', $word))
             ->filter()
             ->implode(', ');
     }
@@ -141,20 +146,25 @@ class BlogController extends Controller
         if ($request->hasFile('featured_image_file')) {
             $image = $request->file('featured_image_file');
 
-            // Delete old image if it exists and is stored locally
+            // Delete old image if it exists and is stored in MinIO
             if ($blog->featured_image && str_starts_with($blog->featured_image, '/storage/blog-images/')) {
                 $oldPath = str_replace('/storage/', '', $blog->featured_image);
-                Storage::disk('public')->delete($oldPath);
+                Storage::disk('minio')->delete($oldPath);
             }
 
             // Create unique filename
-            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            $filename = time().'_'.Str::random(10).'.'.$image->getClientOriginalExtension();
 
             // Store in MinIO/blog-images directory
             $path = $image->storeAs('blog-images', $filename, 'minio');
 
-            // Set the URL
-            $validated['featured_image'] = Storage::disk('minio')->url($path);
+            // Check if upload succeeded
+            if ($path === false) {
+                throw new \RuntimeException('Failed to upload image to storage. Please check storage configuration.');
+            }
+
+            // Set the URL - use /storage/ path for nginx proxy
+            $validated['featured_image'] = '/storage/'.$path;
         }
 
         // Generate slug if not provided
@@ -181,7 +191,7 @@ class BlogController extends Controller
         });
 
         // Clear homepage cache when featured status changes
-        if ($wasFeatured || !empty($validated['isPrimary'])) {
+        if ($wasFeatured || ! empty($validated['isPrimary'])) {
             Cache::forget('homepage.blogs');
         }
 
@@ -231,13 +241,21 @@ class BlogController extends Controller
             $image = $request->file('image');
 
             // Create unique filename
-            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            $filename = time().'_'.Str::random(10).'.'.$image->getClientOriginalExtension();
 
             // Store in MinIO/blog-images directory
             $path = $image->storeAs('blog-images', $filename, 'minio');
 
-            // Return the full URL
-            $url = Storage::disk('minio')->url($path);
+            // Check if upload succeeded
+            if ($path === false) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to upload image to storage.',
+                ], 500);
+            }
+
+            // Return the URL using /storage/ path for nginx proxy
+            $url = '/storage/'.$path;
 
             return response()->json([
                 'success' => true,
