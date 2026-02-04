@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Blog;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
 
 class FixBlogImageUrls extends Command
 {
@@ -67,13 +66,9 @@ class FixBlogImageUrls extends Command
         $action = $dryRun ? 'would be updated' : 'updated';
         $this->info("{$updated} blog(s) {$action}");
 
-        // Clear additional caches that might contain image URLs
+        // Note: Cache is cleared automatically by BlogObserver when using save()
         if (! $dryRun && $updated > 0) {
-            Cache::forget('homepage.blogs');
-            Cache::forget(config('cache-ttl.keys.homepage_blogs'));
-            Cache::forget('rss:feed');
-            Cache::forget('sitemap:blogs');
-            $this->info('Cleared related caches');
+            $this->info('Cache cleared automatically via BlogObserver');
         }
 
         return Command::SUCCESS;

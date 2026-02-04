@@ -8,8 +8,8 @@ use App\Http\Requests\UpdateBlogRequest;
 use App\Models\Blog;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -106,10 +106,7 @@ class BlogController extends Controller
             return Blog::create($validated);
         });
 
-        // Clear homepage cache when featured status changes
-        if (! empty($validated['isPrimary'])) {
-            Cache::forget('homepage.blogs');
-        }
+        // Note: Cache is cleared automatically by BlogObserver
 
         return redirect()->route('blogs.index')
             ->with('success', 'Blog created successfully.');
@@ -140,7 +137,12 @@ class BlogController extends Controller
         // Handle direct MinIO URL format (legacy)
         if (preg_match('#^https?://[^/]+/laravel-uploads/(.+)$#', $imageUrl, $matches)) {
             Storage::disk('minio')->delete($matches[1]);
+
+            return;
         }
+
+        // Log unrecognized format for debugging
+        Log::warning('Unrecognized blog image URL format, could not delete', ['url' => $imageUrl]);
     }
 
     public function edit(Blog $blog)
@@ -202,16 +204,11 @@ class BlogController extends Controller
             $validated['featured_until'] = null;
         }
 
-        $wasFeatured = $blog->isPrimary;
-
         DB::transaction(function () use ($blog, $validated) {
             $blog->update($validated);
         });
 
-        // Clear homepage cache when featured status changes
-        if ($wasFeatured || ! empty($validated['isPrimary'])) {
-            Cache::forget('homepage.blogs');
-        }
+        // Note: Cache is cleared automatically by BlogObserver
 
         return redirect()->route('blogs.index')
             ->with('success', 'Blog updated successfully.');
