@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Blog;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class FixBlogImageUrls extends Command
 {
@@ -36,6 +37,7 @@ class FixBlogImageUrls extends Command
         // e.g., https://minio.humfurie.org/laravel-uploads/blog-images/filename.jpg
         $pattern = '#^https?://[^/]+/laravel-uploads/(.+)$#';
 
+        // For dry run, just read without locking
         $blogs = Blog::whereNotNull('featured_image')
             ->where('featured_image', 'like', 'http%')
             ->get();
@@ -52,9 +54,14 @@ class FixBlogImageUrls extends Command
                 $this->line("  New: {$newUrl}");
 
                 if (! $dryRun) {
-                    // Use save() to trigger model observers for cache invalidation
-                    $blog->featured_image = $newUrl;
-                    $blog->save();
+                    // Use transaction with lock to prevent race conditions
+                    DB::transaction(function () use ($blog, $newUrl) {
+                        $lockedBlog = Blog::where('id', $blog->id)->lockForUpdate()->first();
+                        if ($lockedBlog) {
+                            $lockedBlog->featured_image = $newUrl;
+                            $lockedBlog->save();
+                        }
+                    });
                 }
 
                 $updated++;

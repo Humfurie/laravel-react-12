@@ -183,7 +183,9 @@ class BlogController extends Controller
         $validated = $request->validated();
         $oldImage = null;
 
-        // Handle file upload if present - upload FIRST, delete old image AFTER transaction
+        // Handle file upload if present
+        // Order: upload new -> DB transaction -> delete old (prevents data loss)
+        // Trade-off: If transaction fails, orphaned file remains in storage (acceptable vs losing user data)
         if ($request->hasFile('featured_image_file')) {
             $image = $request->file('featured_image_file');
             $filename = $this->generateUniqueFilename($image);
