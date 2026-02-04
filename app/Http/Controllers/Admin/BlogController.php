@@ -8,8 +8,8 @@ use App\Http\Requests\UpdateBlogRequest;
 use App\Models\Blog;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -60,15 +60,14 @@ class BlogController extends Controller
         // Handle file upload if present
         if ($request->hasFile('featured_image_file')) {
             $image = $request->file('featured_image_file');
-
-            // Create unique filename
-            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-
-            // Store in MinIO/blog-images directory
+            $filename = $this->generateUniqueFilename($image);
             $path = $image->storeAs('blog-images', $filename, 'minio');
 
-            // Set the URL
-            $validated['featured_image'] = Storage::disk('minio')->url($path);
+            if ($path === false) {
+                return back()->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
+            }
+
+            $validated['featured_image'] = '/storage/'.$path;
         }
 
         // Generate slug if not provided
@@ -77,7 +76,7 @@ class BlogController extends Controller
         }
 
         // Auto-generate meta data if not provided
-        if (!isset($validated['meta_data'])) {
+        if (! isset($validated['meta_data'])) {
             $validated['meta_data'] = [];
         }
         if (empty($validated['meta_data']['meta_title'])) {
@@ -101,10 +100,7 @@ class BlogController extends Controller
             return Blog::create($validated);
         });
 
-        // Clear homepage cache when featured status changes
-        if (!empty($validated['isPrimary'])) {
-            Cache::forget('homepage.blogs');
-        }
+        // Note: Cache is cleared automatically by BlogObserver
 
         return redirect()->route('blogs.index')
             ->with('success', 'Blog created successfully.');
@@ -113,10 +109,59 @@ class BlogController extends Controller
     private function generateKeywords(string $title): string
     {
         return collect(explode(' ', strtolower($title)))
-            ->filter(fn($word) => strlen($word) > 2)
-            ->map(fn($word) => preg_replace('/[^a-z0-9]/', '', $word))
+            ->filter(fn ($word) => strlen($word) > 2)
+            ->map(fn ($word) => preg_replace('/[^a-z0-9]/', '', $word))
             ->filter()
             ->implode(', ');
+    }
+
+    /**
+     * Generate a unique filename for uploaded images.
+     */
+    private function generateUniqueFilename(\Illuminate\Http\UploadedFile $file): string
+    {
+        return time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+    }
+
+    /**
+     * Delete old image from MinIO storage (handles both URL formats).
+     */
+    private function deleteOldImage(string $imageUrl): void
+    {
+        // Handle /storage/ proxy path format
+        if (str_starts_with($imageUrl, '/storage/blog-images/')) {
+            $path = str_replace('/storage/', '', $imageUrl);
+
+            // Prevent path traversal attacks
+            if (str_contains($path, '..') || ! str_starts_with($path, 'blog-images/')) {
+                Log::warning('Potential path traversal attempt blocked', ['url' => $imageUrl]);
+
+                return;
+            }
+
+            Storage::disk('minio')->delete($path);
+
+            return;
+        }
+
+        // Handle direct MinIO URL format (legacy)
+        if (preg_match('#^https?://[^/]+/laravel-uploads/(.+)$#', $imageUrl, $matches)) {
+            $extractedPath = $matches[1];
+
+            // Prevent path traversal attacks
+            if (str_contains($extractedPath, '..')) {
+                Log::warning('Potential path traversal attempt blocked', ['url' => $imageUrl]);
+
+                return;
+            }
+
+            Storage::disk('minio')->delete($extractedPath);
+
+            return;
+        }
+
+        // Log unrecognized format for debugging
+        Log::warning('Unrecognized blog image URL format, could not delete', ['url' => $imageUrl]);
     }
 
     public function edit(Blog $blog)
@@ -136,25 +181,23 @@ class BlogController extends Controller
         $this->authorize('update', $blog);
 
         $validated = $request->validated();
+        $oldImage = null;
 
         // Handle file upload if present
+        // Order: upload new -> DB transaction -> delete old (prevents data loss)
+        // Trade-off: If transaction fails, orphaned file remains in storage (acceptable vs losing user data)
         if ($request->hasFile('featured_image_file')) {
             $image = $request->file('featured_image_file');
-
-            // Delete old image if it exists and is stored locally
-            if ($blog->featured_image && str_starts_with($blog->featured_image, '/storage/blog-images/')) {
-                $oldPath = str_replace('/storage/', '', $blog->featured_image);
-                Storage::disk('public')->delete($oldPath);
-            }
-
-            // Create unique filename
-            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-
-            // Store in MinIO/blog-images directory
+            $filename = $this->generateUniqueFilename($image);
             $path = $image->storeAs('blog-images', $filename, 'minio');
 
-            // Set the URL
-            $validated['featured_image'] = Storage::disk('minio')->url($path);
+            if ($path === false) {
+                return back()->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
+            }
+
+            // Store old image path to delete after successful transaction
+            $oldImage = $blog->featured_image;
+            $validated['featured_image'] = '/storage/'.$path;
         }
 
         // Generate slug if not provided
@@ -174,16 +217,16 @@ class BlogController extends Controller
             $validated['featured_until'] = null;
         }
 
-        $wasFeatured = $blog->isPrimary;
-
         DB::transaction(function () use ($blog, $validated) {
             $blog->update($validated);
         });
 
-        // Clear homepage cache when featured status changes
-        if ($wasFeatured || !empty($validated['isPrimary'])) {
-            Cache::forget('homepage.blogs');
+        // Delete old image only after successful transaction
+        if ($oldImage) {
+            $this->deleteOldImage($oldImage);
         }
+
+        // Note: Cache is cleared automatically by BlogObserver
 
         return redirect()->route('blogs.index')
             ->with('success', 'Blog updated successfully.');
@@ -229,19 +272,19 @@ class BlogController extends Controller
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-
-            // Create unique filename
-            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-
-            // Store in MinIO/blog-images directory
+            $filename = $this->generateUniqueFilename($image);
             $path = $image->storeAs('blog-images', $filename, 'minio');
 
-            // Return the full URL
-            $url = Storage::disk('minio')->url($path);
+            if ($path === false) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to upload image to storage.',
+                ], 500);
+            }
 
             return response()->json([
                 'success' => true,
-                'url' => $url,
+                'url' => '/storage/'.$path,
                 'path' => $path,
             ]);
         }
