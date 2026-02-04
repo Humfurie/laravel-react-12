@@ -3,6 +3,7 @@
 use App\Http\Controllers\BlogController;
 use App\Models\Blog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
@@ -156,4 +157,71 @@ test('meta data is properly stored and retrieved', function () {
     expect($blog->meta_data['meta_title'])->toBe($metaData['meta_title'])
         ->and($blog->meta_data['meta_description'])->toBe($metaData['meta_description'])
         ->and($blog->meta_data['meta_keywords'])->toBe($metaData['meta_keywords']);
+});
+
+test('featured image upload uses storage prefix', function () {
+    $blogData = [
+        'title' => 'Test Blog With Image',
+        'content' => '<p>Content</p>',
+        'status' => 'draft',
+        'featured_image_file' => UploadedFile::fake()->image('test.jpg'),
+    ];
+
+    $this->actingAs($this->user)
+        ->post(route('blogs.store'), $blogData)
+        ->assertRedirect();
+
+    $blog = Blog::first();
+    expect($blog->featured_image)
+        ->toStartWith('/storage/')
+        ->not->toContain('minio.humfurie.org')
+        ->toContain('blog-images/');
+
+    // Verify file was stored in MinIO
+    Storage::disk('minio')->assertExists(str_replace('/storage/', '', $blog->featured_image));
+});
+
+test('featured image update replaces old image', function () {
+    $blog = Blog::factory()->create([
+        'featured_image' => '/storage/blog-images/old-image.jpg',
+        'isPrimary' => false,
+    ]);
+
+    // Create a fake old image file
+    Storage::disk('minio')->put('blog-images/old-image.jpg', 'old content');
+
+    $updateData = [
+        'title' => $blog->title,
+        'content' => $blog->content,
+        'status' => $blog->status,
+        'featured_image_file' => UploadedFile::fake()->image('new-image.jpg'),
+    ];
+
+    $this->actingAs($this->user)
+        ->put(route('blogs.update', $blog->slug), $updateData)
+        ->assertRedirect();
+
+    $blog->refresh();
+    expect($blog->featured_image)
+        ->toStartWith('/storage/')
+        ->toContain('blog-images/')
+        ->not->toBe('/storage/blog-images/old-image.jpg');
+
+    // Old image should be deleted
+    Storage::disk('minio')->assertMissing('blog-images/old-image.jpg');
+});
+
+test('inline image upload returns storage prefix url', function () {
+    $response = $this->actingAs($this->user)
+        ->post(route('blogs.upload-image'), [
+            'image' => UploadedFile::fake()->image('inline.jpg'),
+        ])
+        ->assertOk()
+        ->assertJson(['success' => true]);
+
+    $url = $response->json('url');
+    expect($url)
+        ->toStartWith('/storage/')
+        ->not->toContain('minio.humfurie.org')
+        ->toContain('blog-images/');
 });

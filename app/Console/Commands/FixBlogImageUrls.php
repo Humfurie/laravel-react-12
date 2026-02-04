@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Blog;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 
 class FixBlogImageUrls extends Command
 {
@@ -52,15 +53,28 @@ class FixBlogImageUrls extends Command
                 $this->line("  New: {$newUrl}");
 
                 if (! $dryRun) {
-                    $blog->update(['featured_image' => $newUrl]);
+                    // Use save() to trigger model observers for cache invalidation
+                    $blog->featured_image = $newUrl;
+                    $blog->save();
                 }
 
                 $updated++;
+            } else {
+                $this->warn("Blog #{$blog->id}: URL doesn't match pattern - {$blog->featured_image}");
             }
         }
 
         $action = $dryRun ? 'would be updated' : 'updated';
         $this->info("{$updated} blog(s) {$action}");
+
+        // Clear additional caches that might contain image URLs
+        if (! $dryRun && $updated > 0) {
+            Cache::forget('homepage.blogs');
+            Cache::forget(config('cache-ttl.keys.homepage_blogs'));
+            Cache::forget('rss:feed');
+            Cache::forget('sitemap:blogs');
+            $this->info('Cleared related caches');
+        }
 
         return Command::SUCCESS;
     }

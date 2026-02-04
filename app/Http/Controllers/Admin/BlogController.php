@@ -69,7 +69,7 @@ class BlogController extends Controller
 
             // Check if upload succeeded
             if ($path === false) {
-                throw new \RuntimeException('Failed to upload image to storage. Please check storage configuration.');
+                return back()->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
             }
 
             // Set the URL - use /storage/ path for nginx proxy
@@ -124,6 +124,25 @@ class BlogController extends Controller
             ->implode(', ');
     }
 
+    /**
+     * Delete old image from MinIO storage (handles both URL formats).
+     */
+    private function deleteOldImage(string $imageUrl): void
+    {
+        // Handle /storage/ proxy path format
+        if (str_starts_with($imageUrl, '/storage/blog-images/')) {
+            $path = str_replace('/storage/', '', $imageUrl);
+            Storage::disk('minio')->delete($path);
+
+            return;
+        }
+
+        // Handle direct MinIO URL format (legacy)
+        if (preg_match('#^https?://[^/]+/laravel-uploads/(.+)$#', $imageUrl, $matches)) {
+            Storage::disk('minio')->delete($matches[1]);
+        }
+    }
+
     public function edit(Blog $blog)
     {
         $this->authorize('update', $blog);
@@ -146,10 +165,9 @@ class BlogController extends Controller
         if ($request->hasFile('featured_image_file')) {
             $image = $request->file('featured_image_file');
 
-            // Delete old image if it exists and is stored in MinIO
-            if ($blog->featured_image && str_starts_with($blog->featured_image, '/storage/blog-images/')) {
-                $oldPath = str_replace('/storage/', '', $blog->featured_image);
-                Storage::disk('minio')->delete($oldPath);
+            // Delete old image if it exists (handle both URL formats)
+            if ($blog->featured_image) {
+                $this->deleteOldImage($blog->featured_image);
             }
 
             // Create unique filename
@@ -160,7 +178,7 @@ class BlogController extends Controller
 
             // Check if upload succeeded
             if ($path === false) {
-                throw new \RuntimeException('Failed to upload image to storage. Please check storage configuration.');
+                return back()->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
             }
 
             // Set the URL - use /storage/ path for nginx proxy
