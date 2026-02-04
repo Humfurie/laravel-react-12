@@ -129,6 +129,14 @@ class BlogController extends Controller
         // Handle /storage/ proxy path format
         if (str_starts_with($imageUrl, '/storage/blog-images/')) {
             $path = str_replace('/storage/', '', $imageUrl);
+
+            // Prevent path traversal attacks
+            if (str_contains($path, '..') || ! str_starts_with($path, 'blog-images/')) {
+                Log::warning('Potential path traversal attempt blocked', ['url' => $imageUrl]);
+
+                return;
+            }
+
             Storage::disk('minio')->delete($path);
 
             return;
@@ -136,7 +144,16 @@ class BlogController extends Controller
 
         // Handle direct MinIO URL format (legacy)
         if (preg_match('#^https?://[^/]+/laravel-uploads/(.+)$#', $imageUrl, $matches)) {
-            Storage::disk('minio')->delete($matches[1]);
+            $extractedPath = $matches[1];
+
+            // Prevent path traversal attacks
+            if (str_contains($extractedPath, '..')) {
+                Log::warning('Potential path traversal attempt blocked', ['url' => $imageUrl]);
+
+                return;
+            }
+
+            Storage::disk('minio')->delete($extractedPath);
 
             return;
         }

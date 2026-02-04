@@ -225,3 +225,41 @@ test('inline image upload returns storage prefix url', function () {
         ->not->toContain('minio.humfurie.org')
         ->toContain('blog-images/');
 });
+
+test('migration command converts minio urls to storage paths', function () {
+    $blog = Blog::factory()->create([
+        'featured_image' => 'https://minio.humfurie.org/laravel-uploads/blog-images/test.jpg',
+        'isPrimary' => false,
+    ]);
+
+    $this->artisan('blogs:fix-image-urls')
+        ->assertSuccessful();
+
+    $blog->refresh();
+    expect($blog->featured_image)->toBe('/storage/blog-images/test.jpg');
+});
+
+test('migration command dry run does not modify database', function () {
+    $originalUrl = 'https://minio.humfurie.org/laravel-uploads/blog-images/test.jpg';
+    $blog = Blog::factory()->create([
+        'featured_image' => $originalUrl,
+        'isPrimary' => false,
+    ]);
+
+    $this->artisan('blogs:fix-image-urls', ['--dry-run' => true])
+        ->assertSuccessful();
+
+    $blog->refresh();
+    expect($blog->featured_image)->toBe($originalUrl);
+});
+
+test('migration command warns about non-matching urls', function () {
+    Blog::factory()->create([
+        'featured_image' => 'https://other-domain.com/some/path/image.jpg',
+        'isPrimary' => false,
+    ]);
+
+    $this->artisan('blogs:fix-image-urls')
+        ->expectsOutputToContain("doesn't match pattern")
+        ->assertSuccessful();
+});
