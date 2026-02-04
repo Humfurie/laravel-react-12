@@ -31,7 +31,7 @@ class StoreBlogRequest extends FormRequest
             'excerpt' => ['nullable', 'string', 'max:500'],
             'status' => ['required', Rule::in([Blog::STATUS_DRAFT, Blog::STATUS_PUBLISHED, Blog::STATUS_PRIVATE])],
             'featured_image' => ['nullable', 'string', 'max:255'],
-            'featured_image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp,svg', 'max:5120'],
+            'featured_image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'], // SVG excluded for XSS security
             'meta_data' => ['nullable', 'array'],
             'meta_data.meta_title' => ['nullable', 'string', 'max:60'],
             'meta_data.meta_description' => ['nullable', 'string', 'max:160'],
