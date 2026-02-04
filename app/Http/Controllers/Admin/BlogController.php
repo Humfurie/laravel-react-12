@@ -60,19 +60,13 @@ class BlogController extends Controller
         // Handle file upload if present
         if ($request->hasFile('featured_image_file')) {
             $image = $request->file('featured_image_file');
-
-            // Create unique filename
-            $filename = time().'_'.Str::random(10).'.'.$image->getClientOriginalExtension();
-
-            // Store in MinIO/blog-images directory
+            $filename = $this->generateUniqueFilename($image);
             $path = $image->storeAs('blog-images', $filename, 'minio');
 
-            // Check if upload succeeded
             if ($path === false) {
                 return back()->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
             }
 
-            // Set the URL - use /storage/ path for nginx proxy
             $validated['featured_image'] = '/storage/'.$path;
         }
 
@@ -119,6 +113,14 @@ class BlogController extends Controller
             ->map(fn ($word) => preg_replace('/[^a-z0-9]/', '', $word))
             ->filter()
             ->implode(', ');
+    }
+
+    /**
+     * Generate a unique filename for uploaded images.
+     */
+    private function generateUniqueFilename(\Illuminate\Http\UploadedFile $file): string
+    {
+        return time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
     }
 
     /**
@@ -179,28 +181,20 @@ class BlogController extends Controller
         $this->authorize('update', $blog);
 
         $validated = $request->validated();
+        $oldImage = null;
 
-        // Handle file upload if present
+        // Handle file upload if present - upload FIRST, delete old image AFTER transaction
         if ($request->hasFile('featured_image_file')) {
             $image = $request->file('featured_image_file');
-
-            // Delete old image if it exists (handle both URL formats)
-            if ($blog->featured_image) {
-                $this->deleteOldImage($blog->featured_image);
-            }
-
-            // Create unique filename
-            $filename = time().'_'.Str::random(10).'.'.$image->getClientOriginalExtension();
-
-            // Store in MinIO/blog-images directory
+            $filename = $this->generateUniqueFilename($image);
             $path = $image->storeAs('blog-images', $filename, 'minio');
 
-            // Check if upload succeeded
             if ($path === false) {
                 return back()->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
             }
 
-            // Set the URL - use /storage/ path for nginx proxy
+            // Store old image path to delete after successful transaction
+            $oldImage = $blog->featured_image;
             $validated['featured_image'] = '/storage/'.$path;
         }
 
@@ -224,6 +218,11 @@ class BlogController extends Controller
         DB::transaction(function () use ($blog, $validated) {
             $blog->update($validated);
         });
+
+        // Delete old image only after successful transaction
+        if ($oldImage) {
+            $this->deleteOldImage($oldImage);
+        }
 
         // Note: Cache is cleared automatically by BlogObserver
 
@@ -271,14 +270,9 @@ class BlogController extends Controller
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-
-            // Create unique filename
-            $filename = time().'_'.Str::random(10).'.'.$image->getClientOriginalExtension();
-
-            // Store in MinIO/blog-images directory
+            $filename = $this->generateUniqueFilename($image);
             $path = $image->storeAs('blog-images', $filename, 'minio');
 
-            // Check if upload succeeded
             if ($path === false) {
                 return response()->json([
                     'success' => false,
@@ -286,12 +280,9 @@ class BlogController extends Controller
                 ], 500);
             }
 
-            // Return the URL using /storage/ path for nginx proxy
-            $url = '/storage/'.$path;
-
             return response()->json([
                 'success' => true,
-                'url' => $url,
+                'url' => '/storage/'.$path,
                 'path' => $path,
             ]);
         }
