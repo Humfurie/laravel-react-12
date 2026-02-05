@@ -109,6 +109,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                         { name: 'Home', url: 'https://humfurie.org' },
                         { name: 'Projects', url: 'https://humfurie.org/projects' },
                     ]),
+                    schemas.organization(),
                 ]}
             />
 

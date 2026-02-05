@@ -1,5 +1,6 @@
 import FloatingNav from '@/components/floating-nav';
 import Footer from '@/components/global/Footer';
+import StructuredData, { schemas } from '@/components/seo/StructuredData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Head, Link, router } from '@inertiajs/react';
@@ -295,8 +296,10 @@ export default function BlogIndex({ blogs }: Props) {
                 </script>
 
                 {/* Canonical URL */}
-                <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href.split('?')[0] : ''} />
+                <link rel="canonical" href="https://humfurie.org/blog" />
             </Head>
+
+            <StructuredData data={[schemas.organization()]} />
 
             <div className="min-h-screen bg-[#FAFAF8] dark:bg-gray-900">
                 <FloatingNav currentPage="blog" />

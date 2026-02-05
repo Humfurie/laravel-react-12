@@ -254,7 +254,7 @@ export default function Home({
             </Head>
 
             {/* Structured Data for SEO */}
-            <StructuredData data={[schemas.person(), schemas.website()]} />
+            <StructuredData data={[schemas.person(), schemas.website(), schemas.organization()]} />
 
             <FloatingNav currentPage="home" />
 
