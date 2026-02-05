@@ -56,7 +56,7 @@ export default function EditProject({ project, categories, statuses, ownershipTy
     // Start locked (manual mode) if slug was manually edited, otherwise auto mode
     const [isSlugLocked, setIsSlugLocked] = useState(() => project.slug !== slugify(project.title));
 
-    const { data, setData, post, processing, errors, transform } = useForm<ProjectFormData>({
+    const { data, setData, processing, errors } = useForm<ProjectFormData>({
         title: project.title,
         slug: project.slug,
         description: project.description,
@@ -118,7 +118,7 @@ export default function EditProject({ project, categories, statuses, ownershipTy
             _method: 'PUT',
         };
 
-        router.post(route('admin.projects.update', project.slug), formData, {
+        router.post(route('admin.projects.update', project.slug), formData as unknown as Parameters<typeof router.post>[1], {
             forceFormData: true,
             onSuccess: () => {
                 if (imagePreview && imagePreview.startsWith('blob:')) {
