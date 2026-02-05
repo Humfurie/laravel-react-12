@@ -55,4 +55,16 @@ PHP 8.4, Laravel 12, Inertia v2, React 19, Tailwind v4, Pest v3
 
 **Open**:
 - [ ] Consider cache tags for granular invalidation
-- [ ] Add logging to WarmHomepageCache for production
+- [x] Add logging to WarmHomepageCache for production (already implemented)
+
+### 2026-02-06
+**Summary**: Housekeeping session — cleaned up stale branches, created project README, preparing SEO improvements.
+
+**Changes**:
+- Deleted 22 merged local branches, pruned 2 stale remote refs
+- Created project README.md
+- Giveaway, crypto, and stock features are commented out / inactive
+
+**Notes**:
+- Active features: Blog, Projects, Deployments, Experiences, Expertise, Real Estate, Comments (backend only), RBAC admin panel
+- Inactive/disabled: Giveaways, Crypto, Stocks (code present but commented out)
