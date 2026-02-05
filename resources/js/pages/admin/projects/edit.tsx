@@ -56,7 +56,7 @@ export default function EditProject({ project, categories, statuses, ownershipTy
     // Start locked (manual mode) if slug was manually edited, otherwise auto mode
     const [isSlugLocked, setIsSlugLocked] = useState(() => project.slug !== slugify(project.title));
 
-    const { data, setData, post, processing, errors, transform } = useForm<ProjectFormData>({
+    const { data, setData, processing, errors } = useForm<ProjectFormData>({
         title: project.title,
         slug: project.slug,
         description: project.description,
@@ -110,15 +110,15 @@ export default function EditProject({ project, categories, statuses, ownershipTy
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        transform((data) => ({
+        const formData = {
             ...data,
             slug: data.slug || slugify(data.title),
             started_at: startDate ? format(startDate, 'yyyy-MM-dd') : '',
             completed_at: completedDate ? format(completedDate, 'yyyy-MM-dd') : '',
             _method: 'PUT',
-        }));
+        };
 
-        post(route('admin.projects.update', project.slug), {
+        router.post(route('admin.projects.update', project.slug), formData as unknown as Parameters<typeof router.post>[1], {
             forceFormData: true,
             onSuccess: () => {
                 if (imagePreview && imagePreview.startsWith('blob:')) {

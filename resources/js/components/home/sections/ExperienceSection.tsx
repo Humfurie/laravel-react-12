@@ -1,5 +1,5 @@
 import SectionTitle from '@/components/global/SectionTitle';
-import { MotionDiv, MotionStagger, MotionItem } from '@/components/ui/motion';
+import { MotionDiv } from '@/components/ui/motion';
 import { memo } from 'react';
 
 type Experience = {
