@@ -25,4 +25,14 @@
             <lastmod>{{ now()->toIso8601String() }}</lastmod>
         @endif
     </sitemap>
+
+    {{-- Deployments sitemap --}}
+    <sitemap>
+        <loc>{{ $appUrl }}/sitemap-deployments.xml</loc>
+        @if($latestDeployment)
+            <lastmod>{{ $latestDeployment->updated_at->toIso8601String() }}</lastmod>
+        @else
+            <lastmod>{{ now()->toIso8601String() }}</lastmod>
+        @endif
+    </sitemap>
 </sitemapindex>
