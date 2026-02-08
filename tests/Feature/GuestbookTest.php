@@ -30,11 +30,12 @@ test('guestbook shows only approved entries', function () {
 test('authenticated user can create guestbook entry', function () {
     $user = User::factory()->create();
 
-    $response = $this->actingAs($user)->post('/guestbook', [
+    $response = $this->actingAs($user)->postJson('/guestbook', [
         'message' => 'Hello from the guestbook!',
     ]);
 
-    $response->assertRedirect();
+    $response->assertStatus(201)
+        ->assertJsonPath('entry.message', 'Hello from the guestbook!');
     $this->assertDatabaseHas('guestbook_entries', [
         'user_id' => $user->id,
         'message' => 'Hello from the guestbook!',
@@ -90,9 +91,10 @@ test('user can delete own guestbook entry', function () {
     $user = User::factory()->create();
     $entry = GuestbookEntry::factory()->create(['user_id' => $user->id]);
 
-    $response = $this->actingAs($user)->delete("/guestbook/{$entry->id}");
+    $response = $this->actingAs($user)->deleteJson("/guestbook/{$entry->id}");
 
-    $response->assertRedirect();
+    $response->assertOk()
+        ->assertJson(['success' => true]);
     $this->assertSoftDeleted('guestbook_entries', ['id' => $entry->id]);
 });
 

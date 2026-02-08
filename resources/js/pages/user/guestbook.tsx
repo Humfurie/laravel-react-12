@@ -1,9 +1,10 @@
 import FloatingNav from '@/components/floating-nav';
 import Footer from '@/components/global/Footer';
 import type { User } from '@/types';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
 import { Github, MessageSquareHeart, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 interface GuestbookEntryData {
     id: number;
@@ -74,35 +75,70 @@ function SignInPrompt() {
     );
 }
 
-function GuestbookForm() {
-    const { data, setData, post, processing, errors, reset } = useForm({ message: '' });
+function GuestbookForm({ onNewEntry }: { onNewEntry: (entry: GuestbookEntryData) => void }) {
+    const [message, setMessage] = useState('');
+    const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState('');
 
-    const submit = (e: React.FormEvent) => {
+    const submit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!data.message.trim() || processing) return;
+        if (!message.trim() || processing) return;
 
-        post('/guestbook', {
-            preserveScroll: true,
-            onSuccess: () => reset('message'),
-        });
+        setProcessing(true);
+        setError('');
+
+        try {
+            const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
+            const res = await fetch('/guestbook', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({ message }),
+            });
+
+            if (res.status === 422) {
+                const data = await res.json();
+                setError(data.errors?.message?.[0] || 'Validation failed.');
+                return;
+            }
+            if (res.status === 429) {
+                setError('Too many messages. Please wait a bit before posting again.');
+                return;
+            }
+            if (!res.ok) {
+                setError('Something went wrong. Please try again.');
+                return;
+            }
+
+            const data = await res.json();
+            onNewEntry(data.entry);
+            setMessage('');
+        } catch {
+            setError('Something went wrong. Please try again.');
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
         <form onSubmit={submit} className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
             <textarea
-                value={data.message}
-                onChange={(e) => setData('message', e.target.value)}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 placeholder="Leave a message, say hello, or share your thoughts..."
                 rows={3}
                 maxLength={500}
                 className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:placeholder-gray-500 dark:focus:border-orange-500/50 dark:focus:bg-gray-800"
             />
-            {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
+            {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
             <div className="mt-3 flex items-center justify-between">
-                <span className="text-xs text-gray-400 dark:text-gray-500">{data.message.length}/500</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500">{message.length}/500</span>
                 <button
                     type="submit"
-                    disabled={processing || !data.message.trim()}
+                    disabled={processing || !message.trim()}
                     className="rounded-xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {processing ? 'Signing...' : 'Sign Guestbook'}
@@ -165,7 +201,11 @@ function GuestbookEntryCard({
             {/* Delete button (own entries only) */}
             {isOwn && (
                 <button
-                    onClick={() => onDelete(entry.id)}
+                    onClick={() => {
+                        if (confirm('Remove your message?')) {
+                            onDelete(entry.id);
+                        }
+                    }}
                     className="shrink-0 self-start rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500 dark:text-gray-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
                     title="Delete message"
                 >
@@ -176,12 +216,37 @@ function GuestbookEntryCard({
     );
 }
 
-export default function Guestbook({ entries }: Props) {
+export default function Guestbook({ entries: initialEntries }: Props) {
     const { auth } = usePage<{ auth: { user: User | null } }>().props;
+    const [entries, setEntries] = useState(initialEntries.data);
+    const [total, setTotal] = useState(initialEntries.total);
+    const [animatingIds, setAnimatingIds] = useState<Set<number>>(new Set());
 
-    const handleDelete = (id: number) => {
-        if (confirm('Remove your message?')) {
-            router.delete(`/guestbook/${id}`, { preserveScroll: true });
+    const handleNewEntry = (entry: GuestbookEntryData) => {
+        setAnimatingIds((prev) => new Set(prev).add(entry.id));
+        setEntries((prev) => [entry, ...prev]);
+        setTotal((prev) => prev + 1);
+    };
+
+    const handleDelete = async (id: number) => {
+        const previousEntries = entries;
+        const previousTotal = total;
+        setEntries((prev) => prev.filter((e) => e.id !== id));
+        setTotal((prev) => prev - 1);
+
+        try {
+            const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
+            const res = await fetch(`/guestbook/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+            });
+            if (!res.ok) throw new Error();
+        } catch {
+            setEntries(previousEntries);
+            setTotal(previousTotal);
         }
     };
 
@@ -201,21 +266,33 @@ export default function Guestbook({ entries }: Props) {
                             <span className="text-orange-500">G</span>uestbook
                         </h1>
                         <p className="mt-2 text-gray-500 dark:text-gray-400">Leave a message, say hello, or share your thoughts.</p>
-                        {entries.total > 0 && (
+                        {total > 0 && (
                             <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
-                                {entries.total} {entries.total === 1 ? 'message' : 'messages'} so far
+                                {total} {total === 1 ? 'message' : 'messages'} so far
                             </p>
                         )}
                     </div>
 
                     {/* Form or Sign-in */}
-                    <div className="mb-8">{auth.user ? <GuestbookForm /> : <SignInPrompt />}</div>
+                    <div className="mb-8">{auth.user ? <GuestbookForm onNewEntry={handleNewEntry} /> : <SignInPrompt />}</div>
 
                     {/* Entries List */}
-                    {entries.data.length > 0 ? (
+                    {entries.length > 0 ? (
                         <div className="space-y-3">
-                            {entries.data.map((entry) => (
-                                <GuestbookEntryCard key={entry.id} entry={entry} currentUserId={auth.user?.id} onDelete={handleDelete} />
+                            {entries.map((entry) => (
+                                <div
+                                    key={entry.id}
+                                    className={animatingIds.has(entry.id) ? 'animate-fade-in-down' : ''}
+                                    onAnimationEnd={() => {
+                                        setAnimatingIds((prev) => {
+                                            const next = new Set(prev);
+                                            next.delete(entry.id);
+                                            return next;
+                                        });
+                                    }}
+                                >
+                                    <GuestbookEntryCard entry={entry} currentUserId={auth.user?.id} onDelete={handleDelete} />
+                                </div>
                             ))}
                         </div>
                     ) : (
@@ -226,15 +303,15 @@ export default function Guestbook({ entries }: Props) {
                     )}
 
                     {/* Pagination */}
-                    {entries.last_page > 1 && (
+                    {initialEntries.last_page > 1 && (
                         <div className="mt-8 flex items-center justify-center gap-2">
-                            {Array.from({ length: entries.last_page }, (_, i) => i + 1).map((page) => (
+                            {Array.from({ length: initialEntries.last_page }, (_, i) => i + 1).map((page) => (
                                 <Link
                                     key={page}
                                     href={`/guestbook?page=${page}`}
                                     preserveScroll
                                     className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                                        page === entries.current_page
+                                        page === initialEntries.current_page
                                             ? 'bg-orange-500 text-white'
                                             : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
                                     }`}
