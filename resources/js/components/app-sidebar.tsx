@@ -15,7 +15,7 @@ import {
 import { useAppearance } from '@/hooks/use-appearance';
 import type { Auth, NavItem, Permissions } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Briefcase, Building, Code2, FileText, FolderKanban, Globe, LayoutGrid, Moon, Shield, Sun, Trophy, Users } from 'lucide-react';
+import { BookOpen, Briefcase, Building, Code2, FileText, FolderKanban, Globe, LayoutGrid, MessageSquareHeart, Moon, Shield, Sun, Trophy, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
 
@@ -76,6 +76,12 @@ const allNavItems: SidebarNavItem[] = [
         href: '/admin/expertises',
         icon: Code2,
         requiredPermission: 'expertise',
+    },
+    {
+        title: 'Guestbook Management',
+        href: '/admin/guestbook',
+        icon: MessageSquareHeart,
+        requiredPermission: 'guestbook-entry',
     },
     {
         title: 'User Management',

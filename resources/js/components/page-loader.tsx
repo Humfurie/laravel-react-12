@@ -33,9 +33,16 @@ export default function PageLoader() {
         let interval: ReturnType<typeof setInterval>;
         let overlayTimeout: ReturnType<typeof setTimeout>;
 
-        const removeStart = router.on('start', () => {
+        const removeStart = router.on('start', (event) => {
             // Skip loader entirely for admin pages
             if (isAdminPage()) {
+                return;
+            }
+
+            // Skip loader for form submissions (POST/PUT/PATCH/DELETE)
+            // Only show for GET navigations (page transitions)
+            const method = event.detail.visit.method;
+            if (method !== 'get') {
                 return;
             }
 

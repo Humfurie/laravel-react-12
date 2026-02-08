@@ -44,6 +44,7 @@ class User extends Authenticatable implements JWTSubject
         'profile_stats',
         'about',
         'headline',
+        'education',
     ];
 
     /**
@@ -64,7 +65,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function isAdmin(): bool
     {
-        return $this->id === 1;
+        return $this->id === (int) config('app.admin_user_id', 1);
     }
 
     public function hasRole(string|array $roles): bool
@@ -153,6 +154,7 @@ class User extends Authenticatable implements JWTSubject
                     'technology',
                     'setting',
                     'about',
+                    'guestbook-entry',
                 ];
 
                 $allPermissions = [];
@@ -180,6 +182,7 @@ class User extends Authenticatable implements JWTSubject
             'github_synced_at' => 'datetime',
             'social_links' => 'array',
             'profile_stats' => 'array',
+            'education' => 'array',
         ];
     }
 
