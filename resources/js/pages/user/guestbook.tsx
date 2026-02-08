@@ -4,7 +4,7 @@ import type { User } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
 import { Github, MessageSquareHeart, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 interface GuestbookEntryData {
     id: number;
@@ -220,7 +220,6 @@ export default function Guestbook({ entries: initialEntries }: Props) {
     const { auth } = usePage<{ auth: { user: User | null } }>().props;
     const [entries, setEntries] = useState(initialEntries.data);
     const [total, setTotal] = useState(initialEntries.total);
-    const initialIds = useRef(new Set(initialEntries.data.map((e) => e.id)));
     const [animatingIds, setAnimatingIds] = useState<Set<number>>(new Set());
 
     const handleNewEntry = (entry: GuestbookEntryData) => {

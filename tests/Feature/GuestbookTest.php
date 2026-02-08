@@ -92,7 +92,8 @@ test('user can delete own guestbook entry', function () {
 
     $response = $this->actingAs($user)->delete("/guestbook/{$entry->id}");
 
-    $response->assertRedirect();
+    $response->assertOk()
+        ->assertJson(['success' => true]);
     $this->assertSoftDeleted('guestbook_entries', ['id' => $entry->id]);
 });
 
