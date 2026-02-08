@@ -42,27 +42,13 @@ class GuestbookController extends Controller
      */
     public function store(StoreGuestbookEntryRequest $request)
     {
-        $entry = GuestbookEntry::create([
+        GuestbookEntry::create([
             'user_id' => $request->user()->id,
             'message' => $request->validated('message'),
             'is_approved' => true,
         ]);
 
-        $entry->load('user');
-
-        return response()->json([
-            'entry' => [
-                'id' => $entry->id,
-                'message' => $entry->message,
-                'created_at' => $entry->created_at->toISOString(),
-                'user' => [
-                    'id' => $entry->user->id,
-                    'name' => $entry->user->name,
-                    'avatar_url' => $entry->user->avatar_url,
-                    'github_username' => $entry->user->github_username,
-                ],
-            ],
-        ], 201);
+        return back();
     }
 
     /**
@@ -74,6 +60,6 @@ class GuestbookController extends Controller
 
         $guestbookEntry->delete();
 
-        return response()->json(['success' => true]);
+        return back();
     }
 }

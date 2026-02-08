@@ -59,7 +59,7 @@ class GuestbookController extends Controller
      */
     public function updateStatus(Request $request, GuestbookEntry $guestbookEntry)
     {
-        $this->authorize('viewAny', GuestbookEntry::class);
+        $this->authorize('update', $guestbookEntry);
 
         $validated = $request->validate([
             'is_approved' => ['required', 'boolean'],
