@@ -31,6 +31,11 @@ class SocialAuthController extends Controller
                 ->withErrors(['provider' => 'Unsupported authentication provider.']);
         }
 
+        // Store intended redirect URL for post-auth navigation (e.g., guestbook)
+        if (request()->has('intended')) {
+            session()->put('url.intended', request()->input('intended'));
+        }
+
         $scopes = $this->getScopes($provider);
 
         return Socialite::driver($provider)
