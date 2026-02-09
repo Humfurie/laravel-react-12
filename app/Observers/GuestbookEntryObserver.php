@@ -52,7 +52,13 @@ class GuestbookEntryObserver
      */
     protected function clearCache(): void
     {
-        Cache::forget(config('cache-ttl.keys.guestbook_entries'));
+        $baseKey = config('cache-ttl.keys.guestbook_entries');
+
+        // Clear all paginated guestbook caches
+        for ($page = 1; $page <= 50; $page++) {
+            Cache::forget($baseKey.'.page.'.$page);
+        }
+
         Cache::forget(config('cache-ttl.keys.admin_dashboard'));
     }
 }
