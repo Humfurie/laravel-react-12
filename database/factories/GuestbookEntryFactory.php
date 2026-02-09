@@ -17,7 +17,7 @@ class GuestbookEntryFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'message' => fake()->paragraph(),
+            'message' => fake()->text(200),
             'is_approved' => true,
         ];
     }

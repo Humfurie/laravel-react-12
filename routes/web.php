@@ -114,6 +114,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:10,1') // 10 per minute
         ->name('guestbook.store');
     Route::delete('/guestbook/{guestbookEntry}', [GuestbookController::class, 'destroy'])
+        ->middleware('throttle:20,1')
         ->name('guestbook.destroy');
 });
 

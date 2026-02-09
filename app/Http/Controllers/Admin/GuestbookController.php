@@ -20,18 +20,21 @@ class GuestbookController extends Controller
     {
         $this->authorize('viewAny', GuestbookEntry::class);
 
+        $validated = $request->validate([
+            'status' => ['nullable', 'in:approved,hidden'],
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+
         $query = GuestbookEntry::query()
             ->with('user')
             ->withTrashed();
 
-        // Filter by approval status
-        if ($request->filled('status')) {
-            $query->where('is_approved', $request->status === 'approved');
+        if (! empty($validated['status'])) {
+            $query->where('is_approved', $validated['status'] === 'approved');
         }
 
-        // Search messages
-        if ($request->filled('search')) {
-            $search = $request->search;
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('message', 'like', '%'.$search.'%')
                     ->orWhereHas('user', fn ($userQuery) => $userQuery->where('name', 'like', '%'.$search.'%')

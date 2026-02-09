@@ -21,8 +21,6 @@ class GuestbookEntry extends Model
         'is_approved' => 'boolean',
     ];
 
-    protected $with = ['user'];
-
     /**
      * Get the user that owns the guestbook entry.
      */
