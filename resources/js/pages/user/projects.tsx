@@ -6,6 +6,7 @@ import { ProjectModal } from '@/components/projects/ProjectModal';
 import StructuredData, { schemas } from '@/components/seo/StructuredData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { MotionDiv, MotionItem, MotionStagger } from '@/components/ui/motion';
 import type { Deployment } from '@/types/deployment';
 import type { Project, ProjectCategory } from '@/types/project';
 import { Head, Link } from '@inertiajs/react';
@@ -119,7 +120,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                     {/* Magazine Hero Section */}
                     <section className="container mx-auto px-4 py-8 md:py-12">
                         {/* Section Header */}
-                        <div className="mb-8 flex items-end justify-between">
+                        <MotionDiv className="mb-8 flex items-end justify-between">
                             <div>
                                 <h1 className="font-serif text-5xl font-bold tracking-tight text-gray-900 md:text-6xl lg:text-7xl dark:text-white">
                                     Best of the
@@ -145,11 +146,11 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                 See all projects
                                 <ArrowRight className="h-4 w-4" />
                             </Link>
-                        </div>
+                        </MotionDiv>
 
                         {/* Featured Grid - Magazine Layout */}
                         {heroProject && (
-                            <div className="grid gap-6 lg:grid-cols-3">
+                            <MotionDiv delay={0.1} className="grid gap-6 lg:grid-cols-3">
                                 {/* Main Featured Card */}
                                 <div className="group cursor-pointer lg:col-span-2" onClick={() => handleProjectClick(heroProject)}>
                                     <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-[#E8E4DC] dark:bg-gray-800">
@@ -272,7 +273,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                            </MotionDiv>
                         )}
                     </section>
 
@@ -329,16 +330,17 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
 
                             {/* Projects Grid - Magazine Style */}
                             {filteredProjects.length > 0 ? (
-                                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                                <MotionStagger staggerDelay={0.05} className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                                     {filteredProjects.map((project, index) => (
-                                        <ProjectCard
-                                            key={project.id}
-                                            project={project}
-                                            onClick={() => handleProjectClick(project)}
-                                            size={index === 0 && !selectedCategory && selectedTech.length === 0 ? 'large' : 'normal'}
-                                        />
+                                        <MotionItem key={project.id} variant="fadeUp">
+                                            <ProjectCard
+                                                project={project}
+                                                onClick={() => handleProjectClick(project)}
+                                                size={index === 0 && !selectedCategory && selectedTech.length === 0 ? 'large' : 'normal'}
+                                            />
+                                        </MotionItem>
                                     ))}
-                                </div>
+                                </MotionStagger>
                             ) : (
                                 <div className="py-16 text-center">
                                     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
@@ -363,38 +365,38 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                     {/* Stats Section - Magazine Style */}
                     <section className="bg-[#FAFAF8] py-16 dark:bg-gray-900">
                         <div className="container mx-auto px-4">
-                            <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-8">
-                                <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:p-8 dark:border-gray-700 dark:bg-gray-800">
+                            <MotionStagger staggerDelay={0.1} className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-8">
+                                <MotionItem variant="scaleUp" className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:p-8 dark:border-gray-700 dark:bg-gray-800">
                                     <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
                                         {allProjects.length}
                                     </div>
                                     <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Projects</div>
-                                </div>
-                                <div className="rounded-3xl bg-[#C5E8D5] p-6 md:p-8 dark:bg-green-900/30">
+                                </MotionItem>
+                                <MotionItem variant="scaleUp" className="rounded-3xl bg-[#C5E8D5] p-6 md:p-8 dark:bg-green-900/30">
                                     <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
                                         {allProjects.filter((p) => p.status === 'live').length}
                                     </div>
                                     <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Live Projects</div>
-                                </div>
-                                <div className="rounded-3xl bg-[#F5E6D3] p-6 md:p-8 dark:bg-amber-900/30">
+                                </MotionItem>
+                                <MotionItem variant="scaleUp" className="rounded-3xl bg-[#F5E6D3] p-6 md:p-8 dark:bg-amber-900/30">
                                     <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
                                         {allProjects.filter((p) => p.is_featured).length}
                                     </div>
                                     <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Featured</div>
-                                </div>
-                                <div className="rounded-3xl bg-[#E8E4DC] p-6 md:p-8 dark:bg-gray-700">
+                                </MotionItem>
+                                <MotionItem variant="scaleUp" className="rounded-3xl bg-[#E8E4DC] p-6 md:p-8 dark:bg-gray-700">
                                     <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
                                         {techStack.length}
                                     </div>
                                     <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Technologies</div>
-                                </div>
-                            </div>
+                                </MotionItem>
+                            </MotionStagger>
                         </div>
                     </section>
 
                     {/* CTA Section */}
                     <section className="border-t border-gray-100 bg-white py-16 dark:border-gray-800 dark:bg-gray-950">
-                        <div className="container mx-auto px-4 text-center">
+                        <MotionDiv className="container mx-auto px-4 text-center">
                             <p className="mb-3 text-sm font-medium tracking-wide text-orange-600 uppercase dark:text-orange-400">
                                 Let's collaborate
                             </p>
@@ -421,7 +423,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                     GitHub
                                 </a>
                             </div>
-                        </div>
+                        </MotionDiv>
                     </section>
                 </main>
 
