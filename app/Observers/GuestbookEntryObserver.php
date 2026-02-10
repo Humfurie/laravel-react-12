@@ -58,7 +58,5 @@ class GuestbookEntryObserver
         for ($page = 1; $page <= 50; $page++) {
             Cache::forget($baseKey.'.page.'.$page);
         }
-
-        Cache::forget(config('cache-ttl.keys.admin_dashboard'));
     }
 }
