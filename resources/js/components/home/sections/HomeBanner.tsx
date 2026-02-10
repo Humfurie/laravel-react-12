@@ -1,4 +1,5 @@
 import Socials from '@/components/global/Socials';
+import { MotionDiv } from '@/components/ui/motion';
 import { useState } from 'react';
 import { TbDownload } from 'react-icons/tb';
 
@@ -33,16 +34,20 @@ const HomeBanner = () => {
 
             {/* Text Content */}
             <div className="primary-container absolute inset-0 z-20 flex h-full w-full flex-col items-center justify-center px-4 text-center">
-                <h1
-                    dangerouslySetInnerHTML={{ __html: bannerData.title }}
-                    className="text-brand-white text-[40px] font-[700] tracking-[4px] sm:text-[60px] sm:tracking-[8px] md:text-[70px] md:tracking-[16px] lg:text-[80px] xl:text-[100px]"
-                />
-                <p className="mt-2 text-[16px] text-white sm:text-[20px] md:text-[24px] lg:text-[28px] xl:text-[32px]">{bannerData.subTitle}</p>
-                <Socials className="mb-[16px] py-[16px]" />
+                <MotionDiv delay={0.3}>
+                    <h1
+                        dangerouslySetInnerHTML={{ __html: bannerData.title }}
+                        className="text-brand-white text-[40px] font-[700] tracking-[4px] sm:text-[60px] sm:tracking-[8px] md:text-[70px] md:tracking-[16px] lg:text-[80px] xl:text-[100px]"
+                    />
+                </MotionDiv>
+                <MotionDiv delay={0.5} variant="fadeIn">
+                    <p className="mt-2 text-[16px] text-white sm:text-[20px] md:text-[24px] lg:text-[28px] xl:text-[32px]">{bannerData.subTitle}</p>
+                </MotionDiv>
+                <MotionDiv delay={0.7} variant="fadeIn">
+                    <Socials className="mb-[16px] py-[16px]" />
+                </MotionDiv>
                 <p className="mb-4 text-xs text-white sm:text-sm">TEMPORARY WEBSITE | SELF-HOSTED IN LOCAL SERVER</p>
-                <div className="align-center hs-bg-white absolute bottom-[40px] flex justify-center gap-6 sm:bottom-[70px]">
-                    {/*<ButtonOne text="Projects" type="button" className="btn-orange" icon={<RiArrowRightDoubleLine className="text-[20px]" />} />*/}
-
+                <MotionDiv delay={0.9} variant="fadeUp" className="align-center hs-bg-white absolute bottom-[40px] flex justify-center gap-6 sm:bottom-[70px]">
                     <a
                         href="/resume.pdf"
                         download="Humphrey_Resume.pdf"
@@ -51,7 +56,7 @@ const HomeBanner = () => {
                         <TbDownload className="text-base sm:text-lg" />
                         Resume
                     </a>
-                </div>
+                </MotionDiv>
             </div>
         </section>
     );

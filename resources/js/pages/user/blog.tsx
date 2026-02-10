@@ -2,6 +2,7 @@ import FloatingNav from '@/components/floating-nav';
 import Footer from '@/components/global/Footer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { MotionDiv, MotionItem, MotionStagger } from '@/components/ui/motion';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
 import { ArrowRight, ArrowUpRight, BookOpen, Calendar, Eye, Sparkles } from 'lucide-react';
@@ -305,7 +306,7 @@ export default function BlogIndex({ blogs }: Props) {
                     {/* Magazine Hero Section */}
                     <section className="container mx-auto px-4 py-8 md:py-12">
                         {/* Section Header */}
-                        <div className="mb-8 flex items-end justify-between">
+                        <MotionDiv className="mb-8 flex items-end justify-between">
                             <div>
                                 <h1 className="font-serif text-5xl font-bold tracking-tight text-gray-900 md:text-6xl lg:text-7xl dark:text-white">
                                     Best of the
@@ -331,11 +332,11 @@ export default function BlogIndex({ blogs }: Props) {
                                 See all posts
                                 <ArrowRight className="h-4 w-4" />
                             </Link>
-                        </div>
+                        </MotionDiv>
 
                         {/* Featured Grid - Magazine Layout */}
                         {featuredPost && (
-                            <div className="grid gap-6 lg:grid-cols-3">
+                            <MotionDiv delay={0.1} className="grid gap-6 lg:grid-cols-3">
                                 {/* Main Featured Card */}
                                 <BlogCard blog={featuredPost} size="featured" />
 
@@ -397,7 +398,7 @@ export default function BlogIndex({ blogs }: Props) {
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                            </MotionDiv>
                         )}
                     </section>
 
@@ -430,11 +431,13 @@ export default function BlogIndex({ blogs }: Props) {
                             ) : (
                                 <>
                                     {/* Blog Grid - Magazine Style */}
-                                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                                    <MotionStagger staggerDelay={0.05} className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                                         {blogs.data.map((blog, index) => (
-                                            <BlogCard key={blog.id} blog={blog} size={index === 0 ? 'large' : 'normal'} />
+                                            <MotionItem key={blog.id} variant="fadeUp">
+                                                <BlogCard blog={blog} size={index === 0 ? 'large' : 'normal'} />
+                                            </MotionItem>
                                         ))}
-                                    </div>
+                                    </MotionStagger>
 
                                     {/* Pagination - Magazine Style */}
                                     {blogs.last_page > 1 && (
@@ -463,7 +466,7 @@ export default function BlogIndex({ blogs }: Props) {
 
                     {/* CTA Section */}
                     <section className="border-t border-gray-100 bg-white py-16 dark:border-gray-800 dark:bg-gray-950">
-                        <div className="container mx-auto px-4 text-center">
+                        <MotionDiv className="container mx-auto px-4 text-center">
                             <p className="mb-3 text-sm font-medium tracking-wide text-orange-600 uppercase dark:text-orange-400">
                                 Newsletter
                             </p>
@@ -481,7 +484,7 @@ export default function BlogIndex({ blogs }: Props) {
                                     Back to Home
                                 </Button>
                             </div>
-                        </div>
+                        </MotionDiv>
                     </section>
                 </main>
 

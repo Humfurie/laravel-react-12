@@ -219,6 +219,14 @@ Route::prefix('inquiries')->name('inquiries.')->middleware('permission:inquiry,v
     Route::delete('/{inquiry}', [InquiryController::class, 'destroy'])->name('destroy')->middleware('permission:inquiry,delete');
 });
 
+Route::prefix('guestbook')->name('admin.guestbook.')->middleware('permission:guestbook-entry,viewAny')->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\GuestbookController::class, 'index'])->name('index');
+    Route::patch('/{guestbookEntry}/status', [App\Http\Controllers\Admin\GuestbookController::class, 'updateStatus'])->name('update-status')->middleware('permission:guestbook-entry,update');
+    Route::delete('/{guestbookEntry}', [App\Http\Controllers\Admin\GuestbookController::class, 'destroy'])->name('destroy')->middleware('permission:guestbook-entry,delete');
+    Route::patch('/{guestbookEntry}/restore', [App\Http\Controllers\Admin\GuestbookController::class, 'restore'])->name('restore')->withTrashed()->middleware('permission:guestbook-entry,restore');
+    Route::delete('/{guestbookEntry}/force', [App\Http\Controllers\Admin\GuestbookController::class, 'forceDestroy'])->name('force-destroy')->withTrashed()->middleware('permission:guestbook-entry,forceDelete');
+});
+
 // Admin comment routes - isAdmin() checked in controller/policy
 Route::prefix('comments')->name('admin.comments.')->group(function () {
     Route::get('/', [App\Http\Controllers\Admin\CommentController::class, 'index'])->name('index');

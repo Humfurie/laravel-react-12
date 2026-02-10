@@ -3,8 +3,10 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\GuestbookController;
 use App\Http\Controllers\OgImageController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ResumeController;
 use App\Http\Controllers\RssFeedController;
 use App\Http\Controllers\SitemapController;
 use App\Models\Experience;
@@ -82,6 +84,12 @@ Route::get('/api/deployments/{slug}', [App\Http\Controllers\DeploymentController
 // Public API for experiences
 Route::get('/api/experiences', [ExperienceController::class, 'public'])->name('experiences.public');
 
+// Guestbook
+Route::get('/guestbook', [GuestbookController::class, 'index'])->name('guestbook.index');
+
+// Resume
+Route::get('/resume', [ResumeController::class, 'index'])->name('resume.index');
+
 Route::middleware(['auth'])->group(function () {
     // Debug route to check experience data
     Route::get('/debug-experiences', function () {
@@ -98,6 +106,16 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->group(function () {
         require __DIR__.'/admin.php';
     });
+});
+
+// Guestbook routes (authenticated users only)
+Route::middleware('auth')->group(function () {
+    Route::post('/guestbook', [GuestbookController::class, 'store'])
+        ->middleware('throttle:10,1') // 10 per minute
+        ->name('guestbook.store');
+    Route::delete('/guestbook/{guestbookEntry}', [GuestbookController::class, 'destroy'])
+        ->middleware('throttle:20,1')
+        ->name('guestbook.destroy');
 });
 
 // Comment routes (authenticated users only)

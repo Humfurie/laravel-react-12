@@ -27,6 +27,7 @@ export interface Permissions {
     expertise: ResourcePermissions;
     skills: ResourcePermissions;
     technology: ResourcePermissions;
+    'guestbook-entry': ResourcePermissions;
 }
 
 export interface Auth {
