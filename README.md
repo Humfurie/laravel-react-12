@@ -5,814 +5,267 @@ SEO optimization, GDPR-compliant consent management, and production-ready Docker
 
 **Live Site:** [https://humfurie.org](https://humfurie.org)
 
-test user:
-
-[https://humfurie.org/login](https://humfurie.org/login)
-
-note: this won't do a thing, it can only view
-
-user: test@gmail.com
-
-pass:password123
-
 ---
 
-## ✨ Features
+## Features
 
-### 🎯 Core Modules
+### Core Modules
 
-#### 📝 Blog System
+#### Blog System
 
-- Rich text editor (Tiptap) with image uploads
+- Rich text editor (TipTap v3) with image uploads
 - SEO-optimized with dynamic meta tags, Schema.org JSON-LD, and sitemaps
 - Server-side rendering (SSR) for instant content delivery
-- Slug-based URLs for better SEO
-- View count tracking and analytics
-- Featured/primary post system
-- Draft/published/private status workflow
+- Slug-based URLs, view count tracking, tag/category filtering
+- Featured/primary post system with draft/published/private workflow
 - Auto-generated excerpts and meta descriptions
-- Image management with featured images
-- Tag system for content organization
 
-#### 💼 Experience Portfolio
+#### Projects Showcase
 
-- Dynamic experience timeline
-- Image uploads for projects/experiences
-- Drag-and-drop ordering
+- GitHub-integrated projects with metrics sync
+- Tech stack tagging and project categories
+- Ownership types (owner/contributor) with tabbed UI
+- Featured projects on homepage
+- Multi-image galleries with primary image selection
+- Status tracking (live, development, maintenance, archived)
+
+#### Deployments
+
+- Client portfolio showcase with status tracking
+- Client type classification (family, friend, business, personal)
+- Tech stack and challenges solved documentation
+- Industry classification and featured deployments
+- Multi-image galleries with reordering
+
+#### Experience & Expertise Portfolio
+
+- Dynamic experience timeline with image uploads
+- Drag-and-drop ordering for expertise entries
 - Soft delete with restore functionality
 - Public API for portfolio display
-- Responsive grid layouts
 
-#### 🎁 Giveaway System
+#### Comments System
 
-- Public giveaway campaigns with entry forms
-- Multi-image upload for prizes (primary + gallery)
-- Random winner selection with animated reveal
-- Phone number normalization (+63 format)
-- Entry validation (unique phone per giveaway)
-- Status workflow (draft → active → ended)
-- Admin winner selection interface
-- Entry list with search and filtering
-- Public winners page
-- AdSense-safe animations (no gambling themes)
-- Permission-based admin access
+- Nested comments on blog posts (max 3 levels deep)
+- Comment reports with moderation workflow
+- Admin bulk actions (approve, hide, delete)
+- Rate limiting and XSS prevention
+- Backend complete, frontend in progress
 
-#### 🔐 Admin Panel
+#### Real Estate Module
 
-- Role-based access control with policies
-- Blog post management (CRUD)
-- Experience management (CRUD)
-- Giveaway management (CRUD)
-- Winner selection with animations
-- Image upload and management
-- Real-time preview
-- Permission-based features
+- Property listings with pricing and financing options
+- Developer and project management
+- Property inquiries with status tracking
+- Search and filtering API
 
-### 🚀 SEO & Marketing
+#### Admin Panel
 
-#### Search Engine Optimization
+- Role-based access control (Spatie Permissions)
+- Full CRUD for all content types
+- Permission hierarchies with dynamic checking
+- User and role management
+- Comment moderation with bulk actions
+- Inquiry management
 
-- **Dynamic sitemap.xml** - Auto-updates with published content
-- **Schema.org structured data** - BlogPosting, Article, CollectionPage
-- **Canonical tags** - Prevents duplicate content penalties
-- **Open Graph tags** - Social media sharing optimization
-- **Twitter Cards** - Enhanced Twitter sharing
-- **robots.txt** - Search engine crawl management
-- **ads.txt** - AdSense publisher verification
-- **Breadcrumb markup** - Improved navigation for search engines
+### SEO & Performance
 
-#### Google Consent Mode v2 (GDPR/CCPA Compliant)
+- Dynamic XML sitemaps (`/sitemap.xml`, `/sitemap-blogs.xml`, `/sitemap-projects.xml`, `/sitemap-pages.xml`)
+- RSS feed (`/feed.xml`)
+- Dynamic OG image generation for blogs, projects, and pages
+- Schema.org structured data (BlogPosting, Article, CollectionPage, BreadcrumbList)
+- Homepage cache warming with model observer invalidation
+- Redis caching with configurable TTLs
 
-- 3-choice consent banner:
-    - ✅ Accept All
-    - ❌ Reject All
-    - ⚙️ Manage Options (granular control)
-- Automatic compliance with privacy regulations
-- Non-personalized ads support (maintains revenue even with rejections)
+### Privacy & Compliance
+
+- Google Consent Mode v2 (GDPR/CCPA compliant)
+- 3-choice consent banner (Accept All, Reject All, Manage Options)
+- Non-personalized ads support
 - LocalStorage-based consent persistence
 
-#### Ad Monetization
+### Design & UX
 
-- Google AdSense ready
-- Reusable `AdSlot` component
-- Multiple placement types (banner, sidebar, in-content, sticky)
-- Consent-aware ad serving
-- Support for Mediavine, AdThrive, and custom networks
-
-### 🎨 Design & UX
-
-#### UI Components
-
-- Radix UI primitives (accessible, unstyled components)
-- Tailwind CSS v4 for styling
-- Framer Motion for animations
-- Lucide React icons
-- shadcn/ui inspired component library
-- Dark mode support
-- Responsive design (mobile-first)
-
-#### User Experience
-
-- Floating navigation with auto-hide on scroll
-- Smooth page transitions (Inertia.js)
-- Progressive enhancement
-- Optimistic UI updates
-- Loading states and skeletons
-- Toast notifications
+- Radix UI primitives with shadcn/ui components
+- Tailwind CSS v4 with dark mode support
+- Framer Motion animations
+- Smooth scroll animations and page transitions (Inertia.js)
+- GitHub contribution graph with tooltips
+- Responsive mobile-first design
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Backend
 
-- **Laravel 12** - PHP framework
-- **PHP 8.4** - Latest PHP version
+- **Laravel 12** (PHP 8.4)
 - **PostgreSQL 17** - Primary database
 - **Redis** - Cache, sessions, queues
-- **Laravel Sanctum** - API authentication
-- **Spatie Permissions** - Role management
+- **Spatie Permissions** - Role-based access control
+- **Laravel Socialite** - Social auth (GitHub, Google, Facebook)
+- **Intervention Image** - Image processing
+- **JWT Auth** - API authentication
+- **Pest v3** - Testing framework
 - **Laravel Pint** - Code formatting (PSR-12)
-- **Pest PHP v3** - Testing framework
 
 ### Frontend
 
-- **React 19** - UI library
+- **React 19** with TypeScript 5.7
 - **Inertia.js v2** - SPA without API
-- **TypeScript 5.7** - Type safety
 - **Tailwind CSS v4** - Utility-first CSS
-- **Vite 6** - Build tool
-- **Tiptap 3** - Rich text editor
-- **Radix UI** - Accessible components
+- **Vite 6** - Build tool with HMR
+- **TipTap v3** - Rich text editor
+- **Radix UI** - Accessible component primitives
 - **Framer Motion** - Animations
-- **date-fns** - Date utilities
 - **Recharts** - Data visualization
+- **dnd-kit** - Drag and drop
+- **Leaflet** - Maps
 
-### DevOps & Infrastructure
+### Infrastructure
 
-- **Docker** - Containerization
-- **Docker Compose** - Multi-container orchestration
+- **Docker** + **Docker Compose** - Containerization
 - **Nginx** - Web server
-- **Supervisor** - Process management
-- **Traefik** - Reverse proxy with SSL
-- **Let's Encrypt** - Free SSL certificates
+- **Supervisor** - Process management (queue workers)
+- **Traefik** - Reverse proxy with Let's Encrypt SSL
+- **MinIO** - S3-compatible file storage
 - **Laravel Sail** - Development environment
 
-### Development Tools
-
-- **ESLint 9** - JavaScript linting
-- **Prettier 3** - Code formatting
-- **Playwright** - E2E testing
-- **TypeScript** - Static typing
-- **Vite HMR** - Hot module replacement
-- **Laravel Telescope** - Debugging (optional)
-
-### IDEs & AI Assistants
-
-- **PhpStorm** - Primary PHP IDE with Laravel plugin
-- **Claude Code** - AI-powered terminal assistant for development
-- **AI Assistant (JetBrains)** - Integrated AI coding assistant
-- **Windsurf** - AI-first code editor
-
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-humfurie.org/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── Admin/          # Admin panel controllers
-│   │   │   │   ├── BlogController.php
-│   │   │   │   ├── ExperienceController.php
-│   │   │   │   └── GiveawayController.php
-│   │   │   ├── Api/            # API controllers
-│   │   │   │   └── GiveawayController.php
-│   │   │   ├── User/           # Public controllers
-│   │   │   │   └── BlogController.php
-│   │   │   ├── ExperienceController.php
-│   │   │   ├── GiveawayController.php
-│   │   │   └── SitemapController.php
-│   │   ├── Requests/           # Form validation
-│   │   └── Middleware/
-│   ├── Models/
-│   │   ├── Blog.php
-│   │   ├── Experience.php
-│   │   ├── Giveaway.php
-│   │   ├── GiveawayEntry.php
-│   │   └── User.php
-│   ├── Policies/               # Authorization
-│   │   ├── BlogPolicy.php
-│   │   ├── ExperiencePolicy.php
-│   │   └── GiveawayPolicy.php
-│   └── Traits/
-│       └── HasDynamicPermissions.php
-│
-├── resources/
-│   ├── js/
-│   │   ├── components/
-│   │   │   ├── ads/            # Ad integration components
-│   │   │   │   ├── AdSlot.tsx
-│   │   │   │   └── AdBanner.tsx
-│   │   │   ├── consent/        # GDPR consent management
-│   │   │   │   ├── ConsentBanner.tsx
-│   │   │   │   └── ConsentModal.tsx
-│   │   │   ├── giveaway/       # Giveaway components
-│   │   │   │   └── WinnerAnnouncement.tsx
-│   │   │   ├── global/         # Shared components
-│   │   │   │   └── Footer.tsx
-│   │   │   └── ui/             # shadcn/ui components
-│   │   ├── pages/
-│   │   │   ├── admin/          # Admin pages
-│   │   │   │   ├── blog/
-│   │   │   │   ├── giveaways/
-│   │   │   │   │   ├── index.tsx
-│   │   │   │   │   ├── create.tsx
-│   │   │   │   │   ├── edit.tsx
-│   │   │   │   │   └── winner-selection.tsx
-│   │   │   │   └── dashboard.tsx
-│   │   │   ├── giveaways/      # Public giveaway pages
-│   │   │   │   ├── index.tsx
-│   │   │   │   ├── show.tsx
-│   │   │   │   ├── entries.tsx
-│   │   │   │   └── winners.tsx
-│   │   │   └── user/           # Public pages
-│   │   │       ├── home.tsx
-│   │   │       ├── blog.tsx
-│   │   │       └── blog-post.tsx
-│   │   └── app.tsx             # Inertia.js entry point
-│   │
-│   └── views/
-│       ├── app.blade.php       # Main layout
-│       └── sitemap/            # XML sitemaps
-│
-├── routes/
-│   ├── web.php                 # Public routes
-│   ├── admin.php               # Admin routes
-│   └── api.php
-│
-├── database/
-│   ├── migrations/             # Database schema
-│   ├── factories/              # Test data factories
-│   └── seeders/                # Database seeders
-│
-├── tests/
-│   ├── Feature/                # Feature tests
-│   └── Unit/                   # Unit tests
-│
-├── docker/
-│   └── production/
-│       └── Dockerfile          # Production container
-│
-├── .docker/
-│   ├── nginx.prod.conf         # Nginx configuration
-│   ├── supervisord.prod.conf   # Process manager config
-│   └── startup.prod.sh         # Container startup script
-│
-├── public/
-│   ├── robots.txt              # Search engine directives
-│   ├── ads.txt                 # AdSense verification
-│   └── storage/                # Symlink to storage/app/public
-│
-├── storage/
-│   └── app/
-│       └── public/             # Public file uploads
-│           ├── blog-images/
-│           └── experiences/
-│
-├── docker-compose.prod.yml     # Production Docker setup
-├── .env.production             # Production environment
-└── README.md                   # This file
+app/
+├── Console/Commands/    # Artisan commands (cache warming, GitHub sync)
+├── Http/Controllers/
+│   ├── Admin/           # Admin panel controllers
+│   └── Api/             # REST API controllers
+├── Models/              # Eloquent models (~28)
+├── Observers/           # Cache invalidation observers
+├── Policies/            # Authorization policies
+├── Services/            # Business logic (cache, GitHub, images)
+└── Traits/              # Reusable model traits
+
+resources/js/
+├── pages/
+│   ├── admin/           # Admin panel pages
+│   │   ├── blog/        # Blog management
+│   │   ├── projects/    # Project management
+│   │   ├── deployments/ # Deployment management
+│   │   ├── comments/    # Comment moderation
+│   │   └── ...
+│   └── user/            # Public-facing pages
+│       ├── home.tsx     # Portfolio homepage
+│       ├── blog.tsx     # Blog listing
+│       ├── blog-post.tsx # Blog detail
+│       └── projects.tsx # Projects showcase
+├── components/
+│   ├── tiptap-ui/       # Rich text editor UI
+│   ├── consent/         # GDPR consent management
+│   └── ui/              # shadcn/ui components
+└── app.tsx              # Inertia entry point
+
+routes/
+├── web.php              # Public routes
+├── admin.php            # Admin routes (permission-protected)
+├── api.php              # REST API (v1)
+├── auth.php             # Authentication
+├── settings.php         # User settings
+└── user.php             # User profile
 ```
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- **PHP 8.4+**
-- **Composer 2+**
-- **Node.js 20 LTS**
-- **PostgreSQL 17** (or Docker)
-- **Redis** (or Docker)
+- Docker & Docker Compose (recommended)
+- Or: PHP 8.4+, Node.js 20+, PostgreSQL 17, Redis
 
 ### Development Setup (Laravel Sail)
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Humfurie/laravel-react-12.git
-   cd laravel-react-12
-   ```
-
-2. **Copy environment file:**
-   ```bash
-   cp .env.example .env
-   ```
-
-3. **Start Laravel Sail (Docker development environment):**
-   ```bash
-   ./vendor/bin/sail up -d
-   ```
-
-   Or use the alias:
-   ```bash
-   sail up -d
-   ```
-
-4. **Install dependencies (inside Sail container):**
-   ```bash
-   sail composer install
-   sail npm install
-   ```
-
-5. **Generate application key:**
-   ```bash
-   sail artisan key:generate
-   ```
-
-6. **Run migrations and seeders:**
-   ```bash
-   sail artisan migrate --seed
-   ```
-
-7. **Create storage symlink:**
-   ```bash
-   sail artisan storage:link
-   ```
-
-8. **Start Vite dev server:**
-   ```bash
-   sail npm run dev
-   ```
-
-9. **Access the application:**
-    - Frontend: http://localhost
-    - Admin: http://localhost/admin
-    - Mailpit (email testing): http://localhost:8025
-    - Database: localhost:5432 (PostgreSQL)
-
-### Alternative: Local Development (without Sail)
-
-If you prefer running PHP/Node locally instead of Docker:
-
-1. **Install dependencies:**
-   ```bash
-   composer install
-   npm install
-   ```
-
-2. **Configure database in `.env`:**
-   ```env
-   DB_CONNECTION=pgsql
-   DB_HOST=127.0.0.1
-   DB_PORT=5432
-   DB_DATABASE=humfurie
-   DB_USERNAME=postgres
-   DB_PASSWORD=your_password
-   ```
-
-3. **Run migrations:**
-   ```bash
-   php artisan migrate --seed
-   php artisan storage:link
-   ```
-
-4. **Start development servers:**
-   ```bash
-   # Terminal 1: Laravel dev server
-   php artisan serve
-
-   # Terminal 2: Vite dev server (HMR)
-   npm run dev
-   ```
-
----
-
-## 🐳 Production Deployment (Docker)
-
-### Build and Deploy
-
 ```bash
-# Build and start production containers
-docker-compose -f docker-compose.prod.yml --env-file .env.production up --build -d
-
-# View logs
-docker-compose -f docker-compose.prod.yml logs -f app
-
-# Stop containers
-docker-compose -f docker-compose.prod.yml down
+git clone https://github.com/Humfurie/laravel-react-12.git
+cd laravel-react-12
+cp .env.example .env
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate --seed
+./vendor/bin/sail artisan storage:link
+npm install && npm run dev
 ```
 
-### What Happens on Container Start
-
-The startup script (`.docker/startup.prod.sh`) automatically:
-
-1. ✅ Waits for database to be ready
-2. ✅ Runs database migrations
-3. ✅ Creates storage symlink (`php artisan storage:link`)
-4. ✅ Caches config, routes, views for performance
-5. ✅ Starts Nginx, PHP-FPM, and queue workers
-
-### Production Services
-
-| Service        | Container                 | Port | Description             |
-|----------------|---------------------------|------|-------------------------|
-| **App**        | Laravel + Nginx + PHP-FPM | 80   | Main application        |
-| **PostgreSQL** | postgres:17               | 5432 | Database                |
-| **Redis**      | redis:alpine              | 6379 | Cache, sessions, queues |
-| **Traefik**    | External                  | 443  | Reverse proxy with SSL  |
-
-### SSL & Domain
-
-- **Domain:** humfurie.org
-- **SSL:** Let's Encrypt (automatic renewal via Traefik)
-- **WWW redirect:** www.humfurie.org → humfurie.org
-
----
-
-## 💻 Development Workflow
-
-### Recommended IDE Setup
-
-**Primary Development:**
-
-- **PhpStorm** with Laravel plugin for backend development
-    - Laravel Idea plugin
-    - PHP Inspections (EA Extended)
-    - Database tools integration
-    - Git integration
-
-**AI-Assisted Coding:**
-
-- **Claude Code** for terminal-based development tasks
-    - Code generation and refactoring
-    - Testing and debugging
-    - Documentation writing
-    - Git operations
-
-- **AI Assistant (JetBrains)** for in-IDE assistance
-    - Code completion and suggestions
-    - Bug fixing and optimization
-    - Code explanations
-
-- **Windsurf** for AI-first editing experience
-    - Multi-file refactoring
-    - Codebase understanding
-    - Intelligent code search
+Access at: http://localhost
 
 ### Quick Commands
 
 ```bash
-# Development (Sail)
-sail up -d              # Start containers
-sail artisan tinker     # Laravel REPL
-sail npm run dev        # Start Vite dev server
-sail composer test      # Run tests
-sail artisan pint       # Format PHP code
+# All-in-one dev server (app, queue, logs, vite)
+composer dev
 
-# Production
-docker-compose -f docker-compose.prod.yml --env-file .env.production up --build -d
-```
+# Run tests
+./vendor/bin/sail artisan test
 
----
+# Run specific tests
+./vendor/bin/sail artisan test --filter=BlogTest
 
-## 🧪 Testing
+# Code formatting
+./vendor/bin/pint --dirty
 
-### Run All Tests
-
-```bash
-php artisan test
-```
-
-### Run Specific Test File
-
-```bash
-php artisan test tests/Feature/BlogTest.php
-```
-
-### Run with Filter
-
-```bash
-php artisan test --filter=testBlogCreation
-```
-
-### Test Coverage
-
-```bash
-php artisan test --coverage
-```
-
-### Code Quality
-
-```bash
-# Format PHP code
-vendor/bin/pint
-
-# Lint TypeScript/React
+# Lint & type check
 npm run lint
-
-# Format frontend code
-npm run format
+npm run types
 ```
 
 ---
 
-## 📊 Key Features Breakdown
+## Production Deployment
 
-### Blog Module
-
-**Models:** `Blog`, `User`
-**Controllers:** `Admin\BlogController`, `User\BlogController`
-**Routes:** `/blog`, `/blog/{slug}`, `/admin/blogs`
-
-**Features:**
-
-- Rich text editing with Tiptap
-- Image uploads (featured + inline)
-- SEO metadata (title, description, keywords)
-- Auto-generated slugs and excerpts
-- View count tracking
-- Primary/featured posts
-- Soft deletes with restore
-- Publication scheduling
-- Status workflow (draft → published)
-
-**Database Schema:**
-
-```sql
-blogs
-:
-  - id, title, slug (unique)
-  - content (longText)
-  - excerpt, featured_image
-  - meta_data (JSON)
-  - status, isPrimary
-  - view_count
-  - published_at
-  - soft deletes, timestamps
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production up --build -d
 ```
 
-### Experience Module
+The startup script automatically handles migrations, caching, storage links, and starts Nginx + PHP-FPM + queue workers.
 
-**Models:** `Experience`, `Image`
-**Controllers:** `ExperienceController`
-**Routes:** `/api/experiences`, `/admin/experiences`
-
-**Features:**
-
-- Timeline/portfolio display
-- Image uploads for projects
-- Drag-and-drop ordering
-- Rich text descriptions
-- Public API for frontend
-- Admin CRUD interface
-
-**Database Schema:**
-
-```sql
-experiences
-:
-  - id, title
-  - description (JSON - Tiptap format)
-  - sort_order
-  - image_id (nullable)
-  - soft deletes, timestamps
-
-images:
-  - id, name, path
-  - imageable (polymorphic)
-```
-
-### Giveaway Module
-
-**Models:** `Giveaway`, `GiveawayEntry`, `Image`
-**Controllers:** `GiveawayController`, `Admin\GiveawayController`, `Api\GiveawayController`
-**Routes:** `/giveaways`, `/giveaways/{slug}`, `/admin/giveaways`, `/api/v1/giveaways/{slug}/enter`
-**Policy:** `GiveawayPolicy` (auto-discovered, uses `HasDynamicPermissions` trait)
-
-**Features:**
-
-- Public giveaway listing and detail pages
-- Entry form with validation (name, phone, Facebook URL)
-- Phone number normalization (09XXXXXXXXX → +639XXXXXXXXX)
-- Unique phone per giveaway constraint
-- Random winner selection algorithm
-- Animated winner reveal (AdSense-safe, no gambling themes)
-- Multi-image upload (primary + gallery)
-- Status workflow: draft → active → ended
-- Admin CRUD interface
-- Winner selection page with live animation
-- Entry management (view, search, export)
-- Public winners history page
-- Permission-based access control
-
-**Database Schema:**
-
-```sql
-giveaways
-:
-  - id, title, slug (unique)
-  - description (text)
-  - start_date, end_date
-  - status (draft|active|ended)
-  - winner_id (nullable, FK to giveaway_entries)
-  - prize_claimed (boolean)
-  - prize_claimed_at (timestamp)
-  - rejection_reason (text, nullable)
-  - soft deletes, timestamps
-
-giveaway_entries:
-  - id, giveaway_id (FK)
-  - name, phone (unique per giveaway), facebook_url
-  - status (pending|winner|rejected)
-  - is_winner (boolean)
-  - won_at (timestamp)
-  - timestamps
-
-images:
-  - id, name, path, url
-  - imageable (polymorphic: giveaway)
-  - is_primary (boolean)
-  - order (integer)
-```
-
-**Permissions Required:**
-
-- `giveaway.viewAny` - View giveaway list in admin
-- `giveaway.view` - View single giveaway details
-- `giveaway.create` - Create new giveaways
-- `giveaway.update` - Edit giveaways & select winners
-- `giveaway.delete` - Delete giveaways
-
-**Animation Features:**
-
-- **Selecting State**: Spinning sparkles, floating particles, pulsing borders, progress bar
-- **Winner Announced**: Sparkle particles, bouncing gift icon, animated name reveal
-- **Grand Reveal Modal**: Large trophy with glow rings, fireworks, celebration emojis
-- **AdSense-Safe**: No casino/slot machine themes, uses gift/celebration imagery
-
-### SEO System
-
-**Sitemaps:**
-
-- `/sitemap.xml` - Main sitemap (home, blog index, all posts)
-- `/sitemap-blogs.xml` - Blog-specific sitemap with images
-
-**Schema.org Types:**
-
-- `BlogPosting` - Individual blog posts
-- `CollectionPage` - Blog listing
-- `ItemList` - Blog post collection
-- `BreadcrumbList` - Navigation breadcrumbs
-
-**Meta Tags:**
-
-- Dynamic `<title>` and `<meta description>`
-- Open Graph for social sharing
-- Twitter Cards
-- Canonical URLs
-- Article metadata (published/modified dates)
-
-### Consent Management
-
-**Component:** `ConsentBanner` + `ConsentModal`
-**Storage:** LocalStorage (`gdpr_consent`, `gdpr_consent_timestamp`)
-
-**Cookie Categories:**
-
-1. **Essential** (always granted)
-    - Functionality storage
-    - Security storage
-    - Personalization storage
-
-2. **Optional** (user choice)
-    - Ad storage
-    - Ad user data
-    - Ad personalization
-    - Analytics storage
-
-**Compliance:**
-
-- GDPR (Europe) ✅
-- CCPA (California) ✅
-- ePrivacy Directive ✅
+| Service        | Port | Description             |
+|----------------|------|-------------------------|
+| **App**        | 80   | Laravel + Nginx + PHP-FPM |
+| **PostgreSQL** | 5432 | Database                |
+| **Redis**      | 6379 | Cache, sessions, queues |
+| **Traefik**    | 443  | Reverse proxy with SSL  |
 
 ---
 
-## 🔧 Configuration
+## Testing
 
-### Environment Variables
+All tests use Pest v3 with 50+ test files covering admin CRUD, API endpoints, authentication, authorization, cache invalidation, model relationships, and more.
 
-**Production (`.env.production`):**
+```bash
+# All tests
+./vendor/bin/sail artisan test
 
-```env
-APP_NAME=Humphrey
-APP_ENV=production
-APP_URL=https://humfurie.org
-APP_DEBUG=false
+# With coverage
+./vendor/bin/sail artisan test --coverage
 
-DB_CONNECTION=pgsql
-DB_HOST=postgres
-DB_DATABASE=laravel
-
-SESSION_DOMAIN=.humfurie.org
-TRUSTED_PROXIES=*
-FORCE_HTTPS=true
-
-QUEUE_CONNECTION=redis
-CACHE_DRIVER=redis
-SESSION_DRIVER=redis
-```
-
-### Google Services
-
-**AdSense:**
-
-1. Add Publisher ID to `public/ads.txt`
-2. Add AdSense script to `resources/views/app.blade.php`
-3. Configure ad slots in components
-
-**Analytics (Optional):**
-
-```env
-GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
-```
-
-### Email (Optional)
-
-```env
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.mailtrap.io
-MAIL_PORT=2525
-MAIL_USERNAME=
-MAIL_PASSWORD=
-MAIL_FROM_ADDRESS=hello@humfurie.org
-MAIL_FROM_NAME="${APP_NAME}"
+# Code quality
+./vendor/bin/pint          # PHP formatting
+npm run lint               # TypeScript/React linting
+npm run format             # Prettier formatting
 ```
 
 ---
 
-## 📚 Documentation
-
-- **[AD_INTEGRATION_GUIDE.md](./AD_INTEGRATION_GUIDE.md)** - Google AdSense setup and ad placement
-- **[CONSENT_MANAGEMENT.md](./CONSENT_MANAGEMENT.md)** - GDPR/CCPA compliance guide
-- **[DOCKER_PRODUCTION_FIX.md](./DOCKER_PRODUCTION_FIX.md)** - Storage persistence in Docker
-- **[Laravel Docs](https://laravel.com/docs/12.x)**
-- **[Inertia.js Docs](https://inertiajs.com/)**
-- **[React Docs](https://react.dev/)**
-
----
-
-## 🤝 Contributing
-
-This is a personal portfolio project. However, if you find bugs or have suggestions:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📝 License
-
-This project is proprietary and confidential. All rights reserved.
-
----
-
-## 👨‍💻 Author
+## Author
 
 **Humphrey Singculan**
 
 - Website: [humfurie.org](https://humfurie.org)
-- Email: humfurie@gmail.com
 - GitHub: [@Humfurie](https://github.com/Humfurie)
 
 ---
 
-## 🙏 Acknowledgments
+## License
 
-### Frameworks & Libraries
-
-- **Laravel** - Taylor Otwell and the Laravel team
-- **React** - Meta and the React team
-- **Inertia.js** - Jonathan Reinink
-- **Tailwind CSS** - Adam Wathan and Tailwind Labs
-- **shadcn/ui** - Component design inspiration
-- **Radix UI** - Accessible component primitives
-- **Tiptap** - Rich text editing
-- **Lucide** - Icon library
-
-### Development Tools
-
-- **PhpStorm** - JetBrains for the best PHP IDE
-- **Claude Code** - Anthropic for AI-powered development assistance
-- **AI Assistant** - JetBrains for intelligent code completion
-- **Windsurf** - Codeium for AI-first editing experience
-
----
-
-Made by Humphrey Singculan
+This project is proprietary and confidential. All rights reserved.

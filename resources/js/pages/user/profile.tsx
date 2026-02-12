@@ -63,7 +63,18 @@ export default function Profile({ user, contributedProjects }: ProfileProps) {
 
     return (
         <>
-            <Head title={`${user.name} (@${user.username})`} />
+            <Head title={`${user.name} (@${user.username})`}>
+                <meta name="description" content={`${user.name}'s developer profile — GitHub contributions, projects, and open source activity.`} />
+                <meta property="og:title" content={`${user.name} (@${user.username})`} />
+                <meta property="og:description" content={`${user.name}'s developer profile — GitHub contributions, projects, and open source activity.`} />
+                <meta property="og:type" content="profile" />
+                <meta property="og:url" content={`https://humfurie.org/u/${user.username}`} />
+                <meta property="og:image" content={user.avatar_url || 'https://humfurie.org/images/og-default.jpg'} />
+                <meta name="twitter:card" content="summary" />
+                <meta name="twitter:title" content={`${user.name} (@${user.username})`} />
+                <meta name="twitter:description" content={`${user.name}'s developer profile — GitHub contributions, projects, and open source activity.`} />
+                <link rel="canonical" href={`https://humfurie.org/u/${user.username}`} />
+            </Head>
 
             <div className="bg-background min-h-screen">
                 <div className="mx-auto max-w-4xl px-4 py-8">

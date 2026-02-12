@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Blog;
+use App\Models\Deployment;
 use App\Models\Project;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -30,7 +31,8 @@ describe('sitemap index', function () {
         $response->assertOk()
             ->assertSee('sitemap-pages.xml')
             ->assertSee('sitemap-blogs.xml')
-            ->assertSee('sitemap-projects.xml');
+            ->assertSee('sitemap-projects.xml')
+            ->assertSee('sitemap-deployments.xml');
     });
 
     test('includes latest blog modification date', function () {
@@ -146,5 +148,42 @@ describe('projects sitemap', function () {
         // This test verifies the query uses with('primaryImage')
         // If N+1 existed, this would generate 6 queries instead of 2
         $this->get(route('sitemap.projects'))->assertOk();
+    });
+});
+
+describe('deployments sitemap', function () {
+    test('returns xml response', function () {
+        $response = $this->get('/sitemap-deployments.xml');
+
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'application/xml');
+    });
+
+    test('contains public active deployment urls', function () {
+        Deployment::factory()->create(['slug' => 'sitemap-test-deployment']);
+
+        $response = $this->get('/sitemap-deployments.xml');
+
+        $response->assertOk()
+            ->assertSee('sitemap-test-deployment');
+    });
+
+    test('excludes non-public deployments', function () {
+        Deployment::factory()->create(['slug' => 'private-deploy', 'is_public' => false]);
+        Deployment::factory()->create(['slug' => 'public-deploy', 'is_public' => true]);
+
+        $response = $this->get('/sitemap-deployments.xml');
+
+        $response->assertOk()
+            ->assertDontSee('private-deploy')
+            ->assertSee('public-deploy');
+    });
+
+    test('caches deployment sitemap', function () {
+        Deployment::factory()->create();
+
+        $this->get('/sitemap-deployments.xml');
+
+        expect(Cache::has('sitemap:deployments'))->toBeTrue();
     });
 });

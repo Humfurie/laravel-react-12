@@ -48,6 +48,7 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.i
 Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages'])->name('sitemap.pages');
 Route::get('/sitemap-blogs.xml', [SitemapController::class, 'blogs'])->name('sitemap.blogs');
 Route::get('/sitemap-projects.xml', [SitemapController::class, 'projects'])->name('sitemap.projects');
+Route::get('/sitemap-deployments.xml', [SitemapController::class, 'deployments'])->name('sitemap.deployments');
 
 // RSS Feed
 Route::get('/feed.xml', [RssFeedController::class, 'rss'])->name('feed.rss');
