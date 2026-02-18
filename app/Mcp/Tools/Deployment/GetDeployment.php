@@ -23,9 +23,13 @@ class GetDeployment extends Tool
 
     public function handle(array $arguments): ToolResult
     {
+        if (! isset($arguments['id']) && ! isset($arguments['slug'])) {
+            return ToolResult::error('Either id or slug is required.');
+        }
+
         $deployment = isset($arguments['id'])
             ? Deployment::with('primaryImage')->find($arguments['id'])
-            : Deployment::with('primaryImage')->where('slug', $arguments['slug'] ?? '')->first();
+            : Deployment::with('primaryImage')->where('slug', $arguments['slug'])->first();
 
         if (! $deployment) {
             return ToolResult::error('Deployment not found.');

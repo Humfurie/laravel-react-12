@@ -9,6 +9,7 @@ use App\Models\Experience;
 use App\Models\Expertise;
 use App\Models\GuestbookEntry;
 use App\Models\Project;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\ToolInputSchema;
 use Laravel\Mcp\Server\Tools\ToolResult;
@@ -17,7 +18,7 @@ class GetDashboardStats extends Tool
 {
     public function description(): string
     {
-        return 'Get dashboard statistics: counts and summaries for all content types on the portfolio site.';
+        return 'Get dashboard statistics: counts and summaries for all content types on the portfolio site. Cached for 60 seconds.';
     }
 
     public function schema(ToolInputSchema $schema): ToolInputSchema
@@ -27,7 +28,7 @@ class GetDashboardStats extends Tool
 
     public function handle(array $arguments): ToolResult
     {
-        return ToolResult::json([
+        $stats = Cache::remember('mcp:dashboard-stats', 60, fn () => [
             'blogs' => [
                 'total' => Blog::count(),
                 'published' => Blog::published()->count(),
@@ -69,5 +70,7 @@ class GetDashboardStats extends Tool
                 'pending' => Comment::where('status', 'pending')->count(),
             ],
         ]);
+
+        return ToolResult::json($stats);
     }
 }

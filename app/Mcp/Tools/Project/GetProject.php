@@ -23,9 +23,13 @@ class GetProject extends Tool
 
     public function handle(array $arguments): ToolResult
     {
+        if (! isset($arguments['id']) && ! isset($arguments['slug'])) {
+            return ToolResult::error('Either id or slug is required.');
+        }
+
         $project = isset($arguments['id'])
             ? Project::with(['primaryImage', 'projectCategory'])->find($arguments['id'])
-            : Project::with(['primaryImage', 'projectCategory'])->where('slug', $arguments['slug'] ?? '')->first();
+            : Project::with(['primaryImage', 'projectCategory'])->where('slug', $arguments['slug'])->first();
 
         if (! $project) {
             return ToolResult::error('Project not found.');

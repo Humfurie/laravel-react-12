@@ -11,14 +11,14 @@ class ModerateComment extends Tool
 {
     public function description(): string
     {
-        return 'Moderate a comment: approve, reject, or soft-delete it.';
+        return 'Moderate a comment: approve, hide (reject), or soft-delete it.';
     }
 
     public function schema(ToolInputSchema $schema): ToolInputSchema
     {
         return $schema
             ->integer('id')->description('Comment ID')->required()
-            ->string('action')->description('Action: approve, reject, delete')->required();
+            ->string('action')->description('Action: approve, hide, delete')->required();
     }
 
     public function handle(array $arguments): ToolResult
@@ -30,9 +30,9 @@ class ModerateComment extends Tool
 
         return match ($arguments['action']) {
             'approve' => $this->setStatus($comment, 'approved'),
-            'reject' => $this->setStatus($comment, 'rejected'),
+            'hide' => $this->setStatus($comment, 'hidden'),
             'delete' => $this->softDelete($comment),
-            default => ToolResult::error("Invalid action '{$arguments['action']}'. Use: approve, reject, delete."),
+            default => ToolResult::error("Invalid action '{$arguments['action']}'. Use: approve, hide, delete."),
         };
     }
 

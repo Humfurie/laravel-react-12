@@ -82,7 +82,7 @@ return [
 
     'mcp' => [
         'api_key' => env('MCP_API_KEY'),
-        'allowed_ips' => env('MCP_ALLOWED_IPS') ? explode(',', env('MCP_ALLOWED_IPS')) : [],
+        'allowed_ips' => env('MCP_ALLOWED_IPS') ? array_map('trim', explode(',', env('MCP_ALLOWED_IPS'))) : [],
     ],
 
 ];

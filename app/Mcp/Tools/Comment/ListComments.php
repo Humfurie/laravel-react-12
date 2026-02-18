@@ -34,10 +34,15 @@ class ListComments extends Tool
         }
 
         if (isset($arguments['commentable_type'])) {
-            $type = match ($arguments['commentable_type']) {
+            $allowedTypes = [
                 'blog' => 'App\\Models\\Blog',
-                default => $arguments['commentable_type'],
-            };
+            ];
+            $type = $allowedTypes[$arguments['commentable_type']] ?? null;
+
+            if (! $type) {
+                return ToolResult::error("Invalid commentable_type '{$arguments['commentable_type']}'. Allowed: ".implode(', ', array_keys($allowedTypes)));
+            }
+
             $query->where('commentable_type', $type);
 
             if (isset($arguments['commentable_id'])) {

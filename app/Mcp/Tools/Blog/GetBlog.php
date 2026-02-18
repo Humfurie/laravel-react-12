@@ -23,9 +23,13 @@ class GetBlog extends Tool
 
     public function handle(array $arguments): ToolResult
     {
+        if (! isset($arguments['id']) && ! isset($arguments['slug'])) {
+            return ToolResult::error('Either id or slug is required.');
+        }
+
         $blog = isset($arguments['id'])
             ? Blog::with('image')->find($arguments['id'])
-            : Blog::with('image')->where('slug', $arguments['slug'] ?? '')->first();
+            : Blog::with('image')->where('slug', $arguments['slug'])->first();
 
         if (! $blog) {
             return ToolResult::error('Blog not found.');

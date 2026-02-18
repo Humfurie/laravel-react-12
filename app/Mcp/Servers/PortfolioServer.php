@@ -40,14 +40,7 @@ class PortfolioServer extends Server
 
     public string $serverVersion = '1.0.0';
 
-    public string $instructions = <<<'INSTRUCTIONS'
-    This MCP server provides full read/write access to Humphrey's portfolio site.
-    You can manage blog posts, projects, deployments, experiences, expertise items,
-    guestbook entries, and comments. Use list/get tools to read data, create/update
-    tools to modify data, and delete tools to remove items. Dashboard stats provide
-    an overview of site content. All write operations validate input using the same
-    rules as the web admin panel.
-    INSTRUCTIONS;
+    public string $instructions = 'This MCP server provides full read/write access to Humphrey\'s portfolio site. You can manage blog posts, projects, deployments, experiences, expertise items, guestbook entries, and comments. Use list/get tools to read data, create/update tools to modify data, and delete tools to remove items. Dashboard stats provide an overview of site content. All write operations validate input using the same rules as the web admin panel.';
 
     public array $tools = [
         // Blog
