@@ -54,6 +54,8 @@ class GuestbookEntryObserver
     {
         $baseKey = config('cache-ttl.keys.guestbook_entries');
 
+        Cache::forget($baseKey);
+
         // Clear all paginated guestbook caches
         for ($page = 1; $page <= 50; $page++) {
             Cache::forget($baseKey.'.page.'.$page);

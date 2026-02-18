@@ -18,6 +18,19 @@
                 "artisan",
                 "boost:mcp"
             ]
+        },
+        "portfolio": {
+            "type": "stdio",
+            "command": "docker",
+            "args": [
+                "exec",
+                "-i",
+                "laravel-react-12-laravel.test-1",
+                "php",
+                "artisan",
+                "mcp:start",
+                "portfolio"
+            ]
         }
     }
 }
