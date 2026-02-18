@@ -80,4 +80,9 @@ return [
         'url' => env('OG_IMAGE_SERVICE_URL', 'http://og-image:3001'),
     ],
 
+    'mcp' => [
+        'api_key' => env('MCP_API_KEY'),
+        'allowed_ips' => env('MCP_ALLOWED_IPS') ? explode(',', env('MCP_ALLOWED_IPS')) : [],
+    ],
+
 ];
