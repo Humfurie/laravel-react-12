@@ -38,6 +38,7 @@ class McpOAuthController extends Controller
             'response_types_supported' => ['code'],
             'code_challenge_methods_supported' => ['S256'],
             'grant_types_supported' => ['authorization_code'],
+            'token_endpoint_auth_methods_supported' => ['client_secret_post'],
         ]);
     }
 
@@ -53,13 +54,17 @@ class McpOAuthController extends Controller
             'redirect_uris.*' => 'required|url',
         ]);
 
+        $plainSecret = Str::random(64);
+
         $client = McpOAuthClient::create([
             'name' => $validated['client_name'],
+            'secret_hash' => hash('sha256', $plainSecret),
             'redirect_uris' => $validated['redirect_uris'],
         ]);
 
         return response()->json([
             'client_id' => $client->id,
+            'client_secret' => $plainSecret,
             'client_name' => $client->name,
             'redirect_uris' => $client->redirect_uris,
         ], 201);
@@ -149,9 +154,23 @@ class McpOAuthController extends Controller
             'grant_type' => 'required|in:authorization_code',
             'code' => 'required|string',
             'client_id' => 'required|uuid',
+            'client_secret' => 'nullable|string',
             'code_verifier' => 'required|string',
             'redirect_uri' => 'required|url',
         ]);
+
+        // Validate client exists and authenticate if it has a secret
+        $client = McpOAuthClient::find($request->client_id);
+
+        if (! $client) {
+            return response()->json(['error' => 'invalid_client', 'error_description' => 'Unknown client.'], 401);
+        }
+
+        if ($client->secret_hash) {
+            if (! $request->client_secret || ! hash_equals($client->secret_hash, hash('sha256', $request->client_secret))) {
+                return response()->json(['error' => 'invalid_client', 'error_description' => 'Client authentication failed.'], 401);
+            }
+        }
 
         // Retrieve and consume the authorization code (single-use)
         $codeData = Cache::pull("mcp-oauth-code:{$request->code}");

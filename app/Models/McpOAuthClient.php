@@ -12,7 +12,7 @@ class McpOAuthClient extends Model
 
     protected $table = 'mcp_oauth_clients';
 
-    protected $fillable = ['name', 'redirect_uris'];
+    protected $fillable = ['name', 'secret_hash', 'redirect_uris'];
 
     protected function casts(): array
     {

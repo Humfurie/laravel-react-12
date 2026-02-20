@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('mcp_oauth_clients', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
+            $table->string('secret_hash', 64)->nullable();
             $table->json('redirect_uris');
             $table->timestamps();
         });

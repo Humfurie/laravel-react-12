@@ -30,16 +30,23 @@ it('returns OAuth authorization server metadata', function () {
 
 // ─── Client Registration ──────────────────────────────────────────
 
-it('registers a new OAuth client', function () {
-    $this->postJson('/oauth/register', [
+it('registers a new OAuth client with secret', function () {
+    $response = $this->postJson('/oauth/register', [
         'client_name' => 'Claude AI',
         'redirect_uris' => ['https://claude.ai/callback'],
-    ])
-        ->assertStatus(201)
-        ->assertJsonStructure(['client_id', 'client_name', 'redirect_uris'])
+    ]);
+
+    $response->assertStatus(201)
+        ->assertJsonStructure(['client_id', 'client_secret', 'client_name', 'redirect_uris'])
         ->assertJsonFragment(['client_name' => 'Claude AI']);
 
-    expect(McpOAuthClient::where('name', 'Claude AI')->exists())->toBeTrue();
+    $client = McpOAuthClient::where('name', 'Claude AI')->first();
+    expect($client)->not->toBeNull();
+    expect($client->secret_hash)->not->toBeNull();
+
+    // Verify the returned secret hashes to the stored hash
+    $returnedSecret = $response->json('client_secret');
+    expect(hash_equals($client->secret_hash, hash('sha256', $returnedSecret)))->toBeTrue();
 });
 
 it('rejects client registration with missing fields', function () {
@@ -211,6 +218,86 @@ it('rejects token exchange with expired or invalid code', function () {
         'redirect_uri' => 'http://localhost/callback',
     ])->assertStatus(400)
         ->assertJsonFragment(['error' => 'invalid_grant']);
+});
+
+// ─── Client Secret Validation ────────────────────────────────────
+
+it('exchanges token with valid client_secret for confidential client', function () {
+    $user = User::factory()->create();
+    $plainSecret = 'test-client-secret-value';
+    $client = McpOAuthClient::create([
+        'name' => 'Confidential Client',
+        'secret_hash' => hash('sha256', $plainSecret),
+        'redirect_uris' => ['http://localhost/callback'],
+    ]);
+
+    $codeVerifier = bin2hex(random_bytes(32));
+    $codeChallenge = rtrim(strtr(base64_encode(hash('sha256', $codeVerifier, true)), '+/', '-_'), '=');
+
+    $authCode = bin2hex(random_bytes(32));
+    Cache::put("mcp-oauth-code:{$authCode}", [
+        'client_id' => $client->id,
+        'user_id' => $user->id,
+        'redirect_uri' => 'http://localhost/callback',
+        'code_challenge' => $codeChallenge,
+        'code_challenge_method' => 'S256',
+    ], now()->addMinutes(5));
+
+    $this->postJson('/oauth/token', [
+        'grant_type' => 'authorization_code',
+        'code' => $authCode,
+        'client_id' => $client->id,
+        'client_secret' => $plainSecret,
+        'code_verifier' => $codeVerifier,
+        'redirect_uri' => 'http://localhost/callback',
+    ])->assertStatus(200)
+        ->assertJsonStructure(['access_token', 'token_type', 'expires_in']);
+});
+
+it('rejects token exchange with wrong client_secret', function () {
+    $client = McpOAuthClient::create([
+        'name' => 'Confidential Client',
+        'secret_hash' => hash('sha256', 'real-secret'),
+        'redirect_uris' => ['http://localhost/callback'],
+    ]);
+
+    $this->postJson('/oauth/token', [
+        'grant_type' => 'authorization_code',
+        'code' => 'any-code',
+        'client_id' => $client->id,
+        'client_secret' => 'wrong-secret',
+        'code_verifier' => 'anything',
+        'redirect_uri' => 'http://localhost/callback',
+    ])->assertStatus(401)
+        ->assertJsonFragment(['error' => 'invalid_client']);
+});
+
+it('rejects token exchange with missing client_secret for confidential client', function () {
+    $client = McpOAuthClient::create([
+        'name' => 'Confidential Client',
+        'secret_hash' => hash('sha256', 'real-secret'),
+        'redirect_uris' => ['http://localhost/callback'],
+    ]);
+
+    $this->postJson('/oauth/token', [
+        'grant_type' => 'authorization_code',
+        'code' => 'any-code',
+        'client_id' => $client->id,
+        'code_verifier' => 'anything',
+        'redirect_uri' => 'http://localhost/callback',
+    ])->assertStatus(401)
+        ->assertJsonFragment(['error' => 'invalid_client']);
+});
+
+it('rejects token exchange with nonexistent client_id', function () {
+    $this->postJson('/oauth/token', [
+        'grant_type' => 'authorization_code',
+        'code' => 'any-code',
+        'client_id' => '00000000-0000-0000-0000-000000000000',
+        'code_verifier' => 'anything',
+        'redirect_uri' => 'http://localhost/callback',
+    ])->assertStatus(401)
+        ->assertJsonFragment(['error' => 'invalid_client']);
 });
 
 it('rejects token exchange with mismatched client_id', function () {
