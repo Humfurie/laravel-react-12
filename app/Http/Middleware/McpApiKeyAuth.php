@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\McpOAuthToken;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -35,33 +36,42 @@ class McpApiKeyAuth
             abort(429, 'Too many requests.');
         }
 
-        $apiKey = config('services.mcp.api_key');
-
-        // If no API key configured, remote access is completely disabled
-        if (! $apiKey) {
-            Log::error('MCP API key not configured — remote access is disabled.');
-
-            abort(503, 'Service unavailable.');
-        }
-
         $token = $request->bearerToken();
 
-        if (! $token || ! hash_equals($apiKey, $token)) {
+        if (! $token) {
             RateLimiter::hit($rateLimitKey, 60);
-
-            Log::warning('MCP authentication failed', [
-                'ip' => $ip,
-                'has_token' => (bool) $token,
-            ]);
-
             abort(401, 'Unauthorized.');
         }
 
-        // Clear rate limiter on successful auth
-        RateLimiter::clear($rateLimitKey);
+        // Try API key auth first
+        $apiKey = config('services.mcp.api_key');
+        if ($apiKey && hash_equals($apiKey, $token)) {
+            RateLimiter::clear($rateLimitKey);
+            Log::info('MCP request authenticated via API key', ['ip' => $ip]);
 
-        Log::info('MCP request authenticated', ['ip' => $ip]);
+            return $next($request);
+        }
 
-        return $next($request);
+        // Try OAuth token auth
+        $tokenHash = hash('sha256', $token);
+        $oauthToken = McpOAuthToken::where('token_hash', $tokenHash)
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if ($oauthToken) {
+            RateLimiter::clear($rateLimitKey);
+            Log::info('MCP request authenticated via OAuth', ['ip' => $ip, 'user_id' => $oauthToken->user_id]);
+
+            return $next($request);
+        }
+
+        RateLimiter::hit($rateLimitKey, 60);
+
+        Log::warning('MCP authentication failed', [
+            'ip' => $ip,
+            'has_token' => true,
+        ]);
+
+        abort(401, 'Unauthorized.');
     }
 }
