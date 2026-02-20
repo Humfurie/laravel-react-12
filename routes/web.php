@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\GuestbookController;
+use App\Http\Controllers\McpOAuthController;
 use App\Http\Controllers\OgImageController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ResumeController;
@@ -135,6 +136,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/comments/{comment}/report', [App\Http\Controllers\CommentController::class, 'report'])
         ->middleware('throttle:5,1'); // 5 reports per minute
 });
+
+// MCP OAuth2 discovery endpoints
+Route::get('/.well-known/oauth-protected-resource', [McpOAuthController::class, 'discovery']);
+Route::get('/.well-known/oauth-authorization-server', [McpOAuthController::class, 'metadata']);
+
+// MCP OAuth2 endpoints
+Route::post('/oauth/register', [McpOAuthController::class, 'register'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::get('/oauth/authorize', [McpOAuthController::class, 'showAuthorization'])->middleware('auth');
+Route::post('/oauth/authorize', [McpOAuthController::class, 'approveAuthorization'])->middleware('auth');
+Route::post('/oauth/token', [McpOAuthController::class, 'token'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

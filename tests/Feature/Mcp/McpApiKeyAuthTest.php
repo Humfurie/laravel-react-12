@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\McpOAuthClient;
+use App\Models\McpOAuthToken;
+use App\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
 
 beforeEach(function () {
@@ -36,14 +39,16 @@ it('allows requests with a valid bearer token', function () {
     ], ['Authorization' => 'Bearer test-secret-key'])->assertStatus(200);
 });
 
-it('returns 503 when no API key is configured', function () {
+it('rejects invalid token when no API key is configured', function () {
     config(['services.mcp.api_key' => null]);
 
+    // With no API key, the middleware falls through to OAuth token check
+    // which also fails — resulting in 401 (not 503, since OAuth is still available)
     $this->postJson('/mcp/portfolio', [
         'jsonrpc' => '2.0',
         'method' => 'tools/list',
         'id' => 1,
-    ], ['Authorization' => 'Bearer some-key'])->assertStatus(503);
+    ], ['Authorization' => 'Bearer some-key'])->assertStatus(401);
 });
 
 it('blocks IPs not in the allowlist', function () {
@@ -130,4 +135,54 @@ it('clears rate limit on successful auth', function () {
             'id' => 1,
         ], ['Authorization' => 'Bearer wrong-key'])->assertStatus(401);
     }
+});
+
+// ─── OAuth Token Auth ─────────────────────────────────────────────
+
+it('authenticates with a valid OAuth token', function () {
+    config(['services.mcp.api_key' => null]);
+
+    $user = User::factory()->create();
+    $client = McpOAuthClient::create([
+        'name' => 'Test Client',
+        'redirect_uris' => ['http://localhost/callback'],
+    ]);
+
+    $plainToken = 'test-oauth-token-string';
+    McpOAuthToken::create([
+        'client_id' => $client->id,
+        'user_id' => $user->id,
+        'token_hash' => hash('sha256', $plainToken),
+        'expires_at' => now()->addDay(),
+    ]);
+
+    $this->postJson('/mcp/portfolio', [
+        'jsonrpc' => '2.0',
+        'method' => 'tools/list',
+        'id' => 1,
+    ], ['Authorization' => "Bearer {$plainToken}"])->assertStatus(200);
+});
+
+it('rejects an expired OAuth token', function () {
+    config(['services.mcp.api_key' => null]);
+
+    $user = User::factory()->create();
+    $client = McpOAuthClient::create([
+        'name' => 'Test Client',
+        'redirect_uris' => ['http://localhost/callback'],
+    ]);
+
+    $plainToken = 'expired-oauth-token';
+    McpOAuthToken::create([
+        'client_id' => $client->id,
+        'user_id' => $user->id,
+        'token_hash' => hash('sha256', $plainToken),
+        'expires_at' => now()->subHour(),
+    ]);
+
+    $this->postJson('/mcp/portfolio', [
+        'jsonrpc' => '2.0',
+        'method' => 'tools/list',
+        'id' => 1,
+    ], ['Authorization' => "Bearer {$plainToken}"])->assertStatus(401);
 });
