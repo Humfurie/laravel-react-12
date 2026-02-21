@@ -1,14 +1,17 @@
 <?php
 
+use App\Http\Controllers\McpController;
 use App\Mcp\Servers\PortfolioServer;
-use Laravel\Mcp\Server\Facades\Mcp;
+use Illuminate\Support\Facades\Route;
+use Laravel\Mcp\Facades\Mcp;
 
 // Remote: HTTP transport (claude.ai) — accessible at POST /mcp/portfolio
-// Protected by: bearer token auth + rate limiting (60 req/min)
-Mcp::web('portfolio', PortfolioServer::class)
+// Custom controller for Octane/Swoole compatibility (fixes response offset bug)
+Route::post('mcp/portfolio', McpController::class)
     ->middleware(['mcp.auth', 'throttle:60,1'])
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
+Route::get('mcp/portfolio', fn () => response(status: 405));
+
 // Local: stdio transport (Claude Code) — start with: php artisan mcp:start portfolio
-// No auth needed — runs as a trusted local process
 Mcp::local('portfolio', PortfolioServer::class);

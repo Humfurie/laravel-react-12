@@ -4,16 +4,17 @@ use App\Mcp\Tools\Image\UploadImageFromUrl;
 use App\Models\Blog;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Mcp\Server\Tools\ToolResult;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 
-function callUploadTool(array $arguments): ToolResult
+function callUploadTool(array $arguments): Response
 {
-    return (new UploadImageFromUrl)->handle($arguments);
+    return (new UploadImageFromUrl)->handle(new Request($arguments));
 }
 
-function uploadToolData(ToolResult $result): array
+function uploadToolData(Response $result): array
 {
-    return json_decode($result->content[0]->text, true);
+    return json_decode((string) $result->content(), true);
 }
 
 // ─── Validation ──────────────────────────────────────────────────
@@ -21,15 +22,15 @@ function uploadToolData(ToolResult $result): array
 it('rejects non-HTTPS URLs', function () {
     $result = callUploadTool(['url' => 'http://example.com/image.jpg']);
 
-    expect($result->isError)->toBeTrue();
-    expect($result->content[0]->text)->toContain('HTTPS');
+    expect($result->isError())->toBeTrue();
+    expect((string) $result->content())->toContain('HTTPS');
 });
 
 it('rejects URLs without a scheme', function () {
     $result = callUploadTool(['url' => 'example.com/image.jpg']);
 
-    expect($result->isError)->toBeTrue();
-    expect($result->content[0]->text)->toContain('HTTPS');
+    expect($result->isError())->toBeTrue();
+    expect((string) $result->content())->toContain('HTTPS');
 });
 
 it('rejects invalid content types', function () {
@@ -43,8 +44,8 @@ it('rejects invalid content types', function () {
 
     $result = callUploadTool(['url' => 'https://example.com/file.pdf']);
 
-    expect($result->isError)->toBeTrue();
-    expect($result->content[0]->text)->toContain('Invalid content type');
+    expect($result->isError())->toBeTrue();
+    expect((string) $result->content())->toContain('Invalid content type');
 });
 
 it('rejects oversized images', function () {
@@ -60,8 +61,8 @@ it('rejects oversized images', function () {
 
     $result = callUploadTool(['url' => 'https://example.com/huge.jpg']);
 
-    expect($result->isError)->toBeTrue();
-    expect($result->content[0]->text)->toContain('5MB');
+    expect($result->isError())->toBeTrue();
+    expect((string) $result->content())->toContain('5MB');
 });
 
 // ─── Download failures ──────────────────────────────────────────
@@ -75,8 +76,8 @@ it('handles download failure gracefully', function () {
 
     $result = callUploadTool(['url' => 'https://example.com/missing.jpg']);
 
-    expect($result->isError)->toBeTrue();
-    expect($result->content[0]->text)->toContain('404');
+    expect($result->isError())->toBeTrue();
+    expect((string) $result->content())->toContain('404');
 });
 
 // ─── Successful upload ──────────────────────────────────────────
@@ -95,7 +96,7 @@ it('downloads and stores an image successfully', function () {
     $result = callUploadTool(['url' => 'https://example.com/photo.png']);
     $data = uploadToolData($result);
 
-    expect($result->isError)->toBeFalse();
+    expect($result->isError())->toBeFalse();
     expect($data['path'])->toStartWith('/storage/blog-images/');
     expect($data['path'])->toEndWith('.png');
     expect($data['size'])->toBe(strlen($fakeImageContent));
@@ -119,7 +120,7 @@ it('handles Content-Type with charset parameter', function () {
     $result = callUploadTool(['url' => 'https://example.com/photo.jpg']);
     $data = uploadToolData($result);
 
-    expect($result->isError)->toBeFalse();
+    expect($result->isError())->toBeFalse();
     expect($data['mime_type'])->toBe('image/jpeg');
 });
 
@@ -142,7 +143,7 @@ it('associates uploaded image with a blog by ID', function () {
     ]);
     $data = uploadToolData($result);
 
-    expect($result->isError)->toBeFalse();
+    expect($result->isError())->toBeFalse();
     expect($data['blog_updated'])->toBeTrue();
     expect($blog->fresh()->featured_image)->toBe($data['path']);
 });
@@ -164,7 +165,7 @@ it('associates uploaded image with a blog by slug', function () {
     ]);
     $data = uploadToolData($result);
 
-    expect($result->isError)->toBeFalse();
+    expect($result->isError())->toBeFalse();
     expect($data['blog_updated'])->toBeTrue();
     expect($blog->fresh()->featured_image)->toBe($data['path']);
 });
@@ -184,6 +185,6 @@ it('succeeds even when blog_id does not exist', function () {
     ]);
     $data = uploadToolData($result);
 
-    expect($result->isError)->toBeFalse();
+    expect($result->isError())->toBeFalse();
     expect($data['blog_updated'])->toBeFalse();
 });

@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Project;
 
 use App\Models\Project;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class DeleteProject extends Tool
 {
@@ -14,25 +15,26 @@ class DeleteProject extends Tool
         return 'Soft-delete a project by ID. The project can be restored later.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->integer('id')->description('Project ID to delete')->required();
+        return [
+            'id' => $schema->integer()->description('Project ID to delete')->required(),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        $project = Project::find($arguments['id']);
+        $project = Project::find($request->get('id'));
         if (! $project) {
-            return ToolResult::error('Project not found.');
+            return Response::error('Project not found.');
         }
 
         $title = $project->title;
         $project->delete();
 
-        return ToolResult::json([
+        return Response::json([
             'message' => "Project '{$title}' soft-deleted successfully.",
-            'id' => $arguments['id'],
+            'id' => $request->get('id'),
         ]);
     }
 }
