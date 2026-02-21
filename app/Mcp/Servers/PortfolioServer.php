@@ -37,6 +37,8 @@ use Laravel\Mcp\Server;
 
 class PortfolioServer extends Server
 {
+    public int $defaultPaginationLength = 50;
+
     protected string $name = 'Humphrey Portfolio';
 
     protected string $version = '1.0.0';
