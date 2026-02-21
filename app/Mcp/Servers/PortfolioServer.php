@@ -27,6 +27,7 @@ use App\Mcp\Tools\Expertise\ListExpertises;
 use App\Mcp\Tools\Expertise\UpdateExpertise;
 use App\Mcp\Tools\Guestbook\ListGuestbookEntries;
 use App\Mcp\Tools\Guestbook\ModerateGuestbookEntry;
+use App\Mcp\Tools\Image\UploadImageFromUrl;
 use App\Mcp\Tools\Project\CreateProject;
 use App\Mcp\Tools\Project\DeleteProject;
 use App\Mcp\Tools\Project\GetProject;
@@ -77,6 +78,8 @@ class PortfolioServer extends Server
         // Comment
         ListComments::class,
         ModerateComment::class,
+        // Image
+        UploadImageFromUrl::class,
         // Dashboard
         GetDashboardStats::class,
     ];
