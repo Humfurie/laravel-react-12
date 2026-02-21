@@ -87,13 +87,25 @@ type CollectionPageSchema = WithContext<{
     url: string;
 }>;
 
+type OrganizationSchema = WithContext<{
+    '@type': 'Organization';
+    name: string;
+    url: string;
+    logo: {
+        '@type': 'ImageObject';
+        url: string;
+    };
+    sameAs?: string[];
+}>;
+
 type SchemaData =
     | PersonSchema
     | WebSiteSchema
     | BlogPostingSchema
     | BreadcrumbListSchema
     | SoftwareApplicationSchema
-    | CollectionPageSchema;
+    | CollectionPageSchema
+    | OrganizationSchema;
 
 interface StructuredDataProps {
     data: SchemaData | SchemaData[];
@@ -232,5 +244,20 @@ export const schemas = {
         name: props.name,
         description: props.description,
         url: props.url,
+    }),
+
+    organization: (): OrganizationSchema => ({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'Humphrey Singculan',
+        url: 'https://humfurie.org',
+        logo: {
+            '@type': 'ImageObject',
+            url: 'https://humfurie.org/images/logo.png',
+        },
+        sameAs: [
+            'https://github.com/Humfurie',
+            'https://www.linkedin.com/in/humphrey-singculan-09a459153',
+        ],
     }),
 };
