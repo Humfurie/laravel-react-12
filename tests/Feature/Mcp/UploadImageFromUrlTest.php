@@ -171,15 +171,10 @@ it('associates uploaded image with a blog by slug', function () {
     expect($blog->fresh()->featured_image)->toBe($data['path']);
 });
 
-it('skips blog that already has a featured image', function () {
+it('skips blog that already has a featured image without downloading', function () {
     $blog = Blog::factory()->published()->create(['featured_image' => '/storage/existing.jpg']);
 
-    Http::fake([
-        'https://example.com/new.webp' => Http::response('webp-data', 200, [
-            'Content-Type' => 'image/webp',
-        ]),
-    ]);
-
+    Http::fake();
     Storage::fake('minio');
 
     $result = callUploadTool([
@@ -190,7 +185,9 @@ it('skips blog that already has a featured image', function () {
 
     expect($result->isError())->toBeFalse();
     expect($data['blog_updated'])->toBe('skipped');
+    expect($data['path'])->toBeNull();
     expect($blog->fresh()->featured_image)->toBe('/storage/existing.jpg');
+    Http::assertNothingSent();
 });
 
 it('succeeds even when blog_id does not exist', function () {
@@ -237,15 +234,10 @@ it('associates uploaded image with an expertise by ID', function () {
     expect($expertise->fresh()->image)->toBe($data['path']);
 });
 
-it('skips expertise that already has an image', function () {
+it('skips expertise that already has an image without downloading', function () {
     $expertise = Expertise::factory()->create(['image' => '/storage/existing-icon.png']);
 
-    Http::fake([
-        'https://example.com/new-icon.png' => Http::response('png-data', 200, [
-            'Content-Type' => 'image/png',
-        ]),
-    ]);
-
+    Http::fake();
     Storage::fake('minio');
 
     $result = callUploadTool([
@@ -256,7 +248,9 @@ it('skips expertise that already has an image', function () {
 
     expect($result->isError())->toBeFalse();
     expect($data['expertise_updated'])->toBe('skipped');
+    expect($data['path'])->toBeNull();
     expect($expertise->fresh()->image)->toBe('/storage/existing-icon.png');
+    Http::assertNothingSent();
 });
 
 it('succeeds even when expertise_id does not exist', function () {

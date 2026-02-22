@@ -46,6 +46,43 @@ class UploadImageFromUrl extends Tool
             return Response::error('URL must use HTTPS.');
         }
 
+        // Resolve targets before any I/O to avoid orphaned files in storage
+        $blogId = $request->get('blog_id');
+        $blogSlug = $request->get('blog_slug');
+        $expertiseId = $request->get('expertise_id');
+
+        $blog = null;
+        if ($blogId || $blogSlug) {
+            $blog = $blogId
+                ? Blog::find($blogId)
+                : Blog::where('slug', $blogSlug)->first();
+
+            if ($blog?->featured_image) {
+                return Response::json([
+                    'path' => null,
+                    'size' => 0,
+                    'mime_type' => null,
+                    'blog_updated' => 'skipped',
+                    'expertise_updated' => false,
+                ]);
+            }
+        }
+
+        $expertise = null;
+        if ($expertiseId) {
+            $expertise = Expertise::find($expertiseId);
+
+            if ($expertise?->image) {
+                return Response::json([
+                    'path' => null,
+                    'size' => 0,
+                    'mime_type' => null,
+                    'blog_updated' => false,
+                    'expertise_updated' => 'skipped',
+                ]);
+            }
+        }
+
         try {
             $response = Http::timeout(15)->maxRedirects(3)->get($url);
         } catch (\Throwable $e) {
@@ -71,7 +108,6 @@ class UploadImageFromUrl extends Tool
 
         $extension = self::ALLOWED_MIME_TYPES[$mimeType];
         $filename = time().'_'.Str::random(10).'.'.$extension;
-        $expertiseId = $request->get('expertise_id');
         $directory = $expertiseId ? 'images/techstack' : 'blog-images';
         $storagePath = $directory.'/'.$filename;
 
@@ -83,38 +119,16 @@ class UploadImageFromUrl extends Tool
 
         $publicPath = '/storage/'.$storagePath;
 
-        $blogId = $request->get('blog_id');
-        $blogSlug = $request->get('blog_slug');
         $blogUpdated = false;
-
-        if ($blogId || $blogSlug) {
-            $blog = $blogId
-                ? Blog::find($blogId)
-                : Blog::where('slug', $blogSlug)->first();
-
-            if ($blog) {
-                if ($blog->featured_image) {
-                    $blogUpdated = 'skipped';
-                } else {
-                    $blog->update(['featured_image' => $publicPath]);
-                    $blogUpdated = true;
-                }
-            }
+        if ($blog) {
+            $blog->update(['featured_image' => $publicPath]);
+            $blogUpdated = true;
         }
 
         $expertiseUpdated = false;
-
-        if ($expertiseId) {
-            $expertise = Expertise::find($expertiseId);
-
-            if ($expertise) {
-                if ($expertise->image) {
-                    $expertiseUpdated = 'skipped';
-                } else {
-                    $expertise->update(['image' => $publicPath]);
-                    $expertiseUpdated = true;
-                }
-            }
+        if ($expertise) {
+            $expertise->update(['image' => $publicPath]);
+            $expertiseUpdated = true;
         }
 
         return Response::json([
