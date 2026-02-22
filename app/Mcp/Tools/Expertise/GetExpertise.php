@@ -12,7 +12,7 @@ class GetExpertise extends Tool
 {
     public function description(): string
     {
-        return 'Get a single expertise/skill item by ID.';
+        return 'Get a single expertise/skill item by ID, including inactive items (for admin use).';
     }
 
     public function schema(JsonSchema $schema): array
