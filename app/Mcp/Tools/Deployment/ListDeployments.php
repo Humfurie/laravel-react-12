@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Deployment;
 
 use App\Models\Deployment;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class ListDeployments extends Tool
 {
@@ -14,36 +15,37 @@ class ListDeployments extends Tool
         return 'List deployments with optional filtering by status, client type, and visibility.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->string('status')->description('Filter by status: active, maintenance, archived')
-            ->string('client_type')->description('Filter by client type: family, friend, business, personal')
-            ->boolean('is_public')->description('Filter by visibility')
-            ->integer('page')->description('Page number (default: 1)')
-            ->integer('per_page')->description('Items per page (default: 15, max: 50)');
+        return [
+            'status' => $schema->string()->description('Filter by status: active, maintenance, archived'),
+            'client_type' => $schema->string()->description('Filter by client type: family, friend, business, personal'),
+            'is_public' => $schema->boolean()->description('Filter by visibility'),
+            'page' => $schema->integer()->description('Page number (default: 1)'),
+            'per_page' => $schema->integer()->description('Items per page (default: 15, max: 50)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
         $query = Deployment::query()->with('primaryImage');
 
-        if (isset($arguments['status'])) {
-            $query->where('status', $arguments['status']);
+        if ($request->has('status')) {
+            $query->where('status', $request->get('status'));
         }
 
-        if (isset($arguments['client_type'])) {
-            $query->where('client_type', $arguments['client_type']);
+        if ($request->has('client_type')) {
+            $query->where('client_type', $request->get('client_type'));
         }
 
-        if (isset($arguments['is_public'])) {
-            $query->where('is_public', $arguments['is_public']);
+        if ($request->has('is_public')) {
+            $query->where('is_public', $request->get('is_public'));
         }
 
-        $perPage = min($arguments['per_page'] ?? 15, 50);
-        $deployments = $query->ordered()->paginate($perPage, ['*'], 'page', $arguments['page'] ?? 1);
+        $perPage = min($request->get('per_page', 15), 50);
+        $deployments = $query->ordered()->paginate($perPage, ['*'], 'page', $request->get('page', 1));
 
-        return ToolResult::json([
+        return Response::json([
             'data' => $deployments->map(fn ($d) => [
                 'id' => $d->id,
                 'title' => $d->title,

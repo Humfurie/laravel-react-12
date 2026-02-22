@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Expertise;
 
 use App\Models\Expertise;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class ListExpertises extends Tool
 {
@@ -14,28 +15,29 @@ class ListExpertises extends Tool
         return 'List expertise/skill items. Optionally filter by category (be=Backend, fe=Frontend, td=Tools & DevOps).';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->string('category')->description('Filter by category slug: be, fe, td')
-            ->boolean('active_only')->description('Only show active items (default: true)');
+        return [
+            'category' => $schema->string()->description('Filter by category slug: be, fe, td'),
+            'active_only' => $schema->boolean()->description('Only show active items (default: true)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
         $query = Expertise::query()->ordered();
 
-        if (($arguments['active_only'] ?? true) !== false) {
+        if ($request->get('active_only', true) !== false) {
             $query->active();
         }
 
-        if (isset($arguments['category'])) {
-            $query->byCategory($arguments['category']);
+        if ($request->has('category')) {
+            $query->byCategory($request->get('category'));
         }
 
         $expertises = $query->get();
 
-        return ToolResult::json([
+        return Response::json([
             'data' => $expertises->map(fn ($e) => [
                 'id' => $e->id,
                 'name' => $e->name,

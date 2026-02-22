@@ -3,7 +3,7 @@
 namespace App\Mcp\Concerns;
 
 use Illuminate\Support\Facades\Validator;
-use Laravel\Mcp\Server\Tools\ToolResult;
+use Laravel\Mcp\Response;
 
 trait FormRequestValidator
 {
@@ -13,7 +13,7 @@ trait FormRequestValidator
      * @param  array<string, mixed>  $arguments
      * @param  class-string  $formRequestClass
      * @param  array<int, string>  $excludeRules  Rules to exclude (e.g. file upload fields)
-     * @return array{0: array<string, mixed>, 1: null}|array{0: null, 1: ToolResult}
+     * @return array{0: array<string, mixed>, 1: null}|array{0: null, 1: Response}
      */
     protected function validateWith(array $arguments, string $formRequestClass, array $excludeRules = []): array
     {
@@ -27,7 +27,7 @@ trait FormRequestValidator
         $validator = Validator::make($arguments, $rules);
 
         if ($validator->fails()) {
-            return [null, ToolResult::error('Validation failed: '.json_encode($validator->errors()->toArray()))];
+            return [null, Response::error('Validation failed: '.json_encode($validator->errors()->toArray()))];
         }
 
         return [$validator->validated(), null];

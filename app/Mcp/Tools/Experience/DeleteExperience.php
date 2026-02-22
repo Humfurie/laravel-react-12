@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Experience;
 
 use App\Models\Experience;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class DeleteExperience extends Tool
 {
@@ -14,25 +15,26 @@ class DeleteExperience extends Tool
         return 'Soft-delete an experience entry by ID.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->integer('id')->description('Experience ID to delete')->required();
+        return [
+            'id' => $schema->integer()->description('Experience ID to delete')->required(),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        $experience = Experience::find($arguments['id']);
+        $experience = Experience::find($request->get('id'));
         if (! $experience) {
-            return ToolResult::error('Experience not found.');
+            return Response::error('Experience not found.');
         }
 
         $label = "{$experience->position} at {$experience->company}";
         $experience->delete();
 
-        return ToolResult::json([
+        return Response::json([
             'message' => "Experience '{$label}' soft-deleted successfully.",
-            'id' => $arguments['id'],
+            'id' => $request->get('id'),
         ]);
     }
 }

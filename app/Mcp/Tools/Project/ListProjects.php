@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Project;
 
 use App\Models\Project;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class ListProjects extends Tool
 {
@@ -14,41 +15,42 @@ class ListProjects extends Tool
         return 'List projects with optional filtering by status, visibility, and category.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->string('status')->description('Filter by status: live, archived, maintenance, development')
-            ->boolean('is_public')->description('Filter by visibility')
-            ->boolean('is_featured')->description('Filter by featured status')
-            ->string('ownership_type')->description('Filter by ownership: owner, contributor')
-            ->integer('page')->description('Page number (default: 1)')
-            ->integer('per_page')->description('Items per page (default: 15, max: 50)');
+        return [
+            'status' => $schema->string()->description('Filter by status: live, archived, maintenance, development'),
+            'is_public' => $schema->boolean()->description('Filter by visibility'),
+            'is_featured' => $schema->boolean()->description('Filter by featured status'),
+            'ownership_type' => $schema->string()->description('Filter by ownership: owner, contributor'),
+            'page' => $schema->integer()->description('Page number (default: 1)'),
+            'per_page' => $schema->integer()->description('Items per page (default: 15, max: 50)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
         $query = Project::query()->with(['primaryImage', 'projectCategory']);
 
-        if (isset($arguments['status'])) {
-            $query->where('status', $arguments['status']);
+        if ($request->has('status')) {
+            $query->where('status', $request->get('status'));
         }
 
-        if (isset($arguments['is_public'])) {
-            $query->where('is_public', $arguments['is_public']);
+        if ($request->has('is_public')) {
+            $query->where('is_public', $request->get('is_public'));
         }
 
-        if (isset($arguments['is_featured'])) {
-            $query->where('is_featured', $arguments['is_featured']);
+        if ($request->has('is_featured')) {
+            $query->where('is_featured', $request->get('is_featured'));
         }
 
-        if (isset($arguments['ownership_type'])) {
-            $query->where('ownership_type', $arguments['ownership_type']);
+        if ($request->has('ownership_type')) {
+            $query->where('ownership_type', $request->get('ownership_type'));
         }
 
-        $perPage = min($arguments['per_page'] ?? 15, 50);
-        $projects = $query->ordered()->paginate($perPage, ['*'], 'page', $arguments['page'] ?? 1);
+        $perPage = min($request->get('per_page', 15), 50);
+        $projects = $query->ordered()->paginate($perPage, ['*'], 'page', $request->get('page', 1));
 
-        return ToolResult::json([
+        return Response::json([
             'data' => $projects->map(fn ($p) => [
                 'id' => $p->id,
                 'title' => $p->title,

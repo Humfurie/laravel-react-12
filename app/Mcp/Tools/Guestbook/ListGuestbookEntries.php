@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Guestbook;
 
 use App\Models\GuestbookEntry;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class ListGuestbookEntries extends Tool
 {
@@ -14,29 +15,30 @@ class ListGuestbookEntries extends Tool
         return 'List guestbook entries with optional filtering by approval status.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->boolean('approved_only')->description('Only show approved entries')
-            ->boolean('pending_only')->description('Only show pending (unapproved) entries')
-            ->integer('page')->description('Page number (default: 1)')
-            ->integer('per_page')->description('Items per page (default: 15, max: 50)');
+        return [
+            'approved_only' => $schema->boolean()->description('Only show approved entries'),
+            'pending_only' => $schema->boolean()->description('Only show pending (unapproved) entries'),
+            'page' => $schema->integer()->description('Page number (default: 1)'),
+            'per_page' => $schema->integer()->description('Items per page (default: 15, max: 50)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
         $query = GuestbookEntry::with('user')->latestFirst();
 
-        if (! empty($arguments['approved_only'])) {
+        if (! empty($request->get('approved_only'))) {
             $query->approved();
-        } elseif (! empty($arguments['pending_only'])) {
+        } elseif (! empty($request->get('pending_only'))) {
             $query->where('is_approved', false);
         }
 
-        $perPage = min($arguments['per_page'] ?? 15, 50);
-        $entries = $query->paginate($perPage, ['*'], 'page', $arguments['page'] ?? 1);
+        $perPage = min($request->get('per_page', 15), 50);
+        $entries = $query->paginate($perPage, ['*'], 'page', $request->get('page', 1));
 
-        return ToolResult::json([
+        return Response::json([
             'data' => $entries->map(fn ($entry) => [
                 'id' => $entry->id,
                 'message' => $entry->message,

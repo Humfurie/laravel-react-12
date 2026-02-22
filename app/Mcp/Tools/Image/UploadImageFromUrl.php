@@ -3,12 +3,13 @@
 namespace App\Mcp\Tools\Image;
 
 use App\Models\Blog;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class UploadImageFromUrl extends Tool
 {
@@ -26,43 +27,44 @@ class UploadImageFromUrl extends Tool
         return 'Upload an image from a URL to storage. Use this to set blog featured images from real URLs instead of fabricating paths.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->string('url')->description('HTTPS image URL to download')->required()
-            ->integer('blog_id')->description('Blog ID to attach image to (optional)')
-            ->string('blog_slug')->description('Blog slug to attach image to (optional)');
+        return [
+            'url' => $schema->string()->description('HTTPS image URL to download')->required(),
+            'blog_id' => $schema->integer()->description('Blog ID to attach image to (optional)'),
+            'blog_slug' => $schema->string()->description('Blog slug to attach image to (optional)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        $url = $arguments['url'] ?? '';
+        $url = $request->get('url', '');
 
         if (! str_starts_with($url, 'https://')) {
-            return ToolResult::error('URL must use HTTPS.');
+            return Response::error('URL must use HTTPS.');
         }
 
         try {
             $response = Http::timeout(15)->maxRedirects(3)->get($url);
         } catch (\Throwable $e) {
-            return ToolResult::error('Failed to download image: '.$e->getMessage());
+            return Response::error('Failed to download image: '.$e->getMessage());
         }
 
         if (! $response->successful()) {
-            return ToolResult::error('Download failed with HTTP status '.$response->status().'.');
+            return Response::error('Download failed with HTTP status '.$response->status().'.');
         }
 
         $contentType = $response->header('Content-Type');
         $mimeType = strtolower(explode(';', $contentType)[0]);
 
         if (! isset(self::ALLOWED_MIME_TYPES[$mimeType])) {
-            return ToolResult::error("Invalid content type: {$mimeType}. Allowed: jpeg, png, gif, webp.");
+            return Response::error("Invalid content type: {$mimeType}. Allowed: jpeg, png, gif, webp.");
         }
 
         $body = $response->body();
 
         if (strlen($body) > self::MAX_SIZE_BYTES) {
-            return ToolResult::error('Image exceeds 5MB size limit.');
+            return Response::error('Image exceeds 5MB size limit.');
         }
 
         $extension = self::ALLOWED_MIME_TYPES[$mimeType];
@@ -72,13 +74,13 @@ class UploadImageFromUrl extends Tool
         $stored = Storage::disk('minio')->put($storagePath, $body);
 
         if (! $stored) {
-            return ToolResult::error('Failed to store image in MinIO.');
+            return Response::error('Failed to store image in MinIO.');
         }
 
         $publicPath = '/storage/'.$storagePath;
 
-        $blogId = $arguments['blog_id'] ?? null;
-        $blogSlug = $arguments['blog_slug'] ?? null;
+        $blogId = $request->get('blog_id');
+        $blogSlug = $request->get('blog_slug');
         $blogUpdated = false;
 
         if ($blogId || $blogSlug) {
@@ -92,7 +94,7 @@ class UploadImageFromUrl extends Tool
             }
         }
 
-        return ToolResult::json([
+        return Response::json([
             'path' => $publicPath,
             'size' => strlen($body),
             'mime_type' => $mimeType,

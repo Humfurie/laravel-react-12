@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Blog;
 
 use App\Models\Blog;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class GetBlog extends Tool
 {
@@ -14,28 +15,29 @@ class GetBlog extends Tool
         return 'Get a single blog post by ID or slug, including full content.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->integer('id')->description('Blog ID')
-            ->string('slug')->description('Blog slug (alternative to ID)');
+        return [
+            'id' => $schema->integer()->description('Blog ID'),
+            'slug' => $schema->string()->description('Blog slug (alternative to ID)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        if (! isset($arguments['id']) && ! isset($arguments['slug'])) {
-            return ToolResult::error('Either id or slug is required.');
+        if (! $request->has('id') && ! $request->has('slug')) {
+            return Response::error('Either id or slug is required.');
         }
 
-        $blog = isset($arguments['id'])
-            ? Blog::with('image')->find($arguments['id'])
-            : Blog::with('image')->where('slug', $arguments['slug'])->first();
+        $blog = $request->has('id')
+            ? Blog::with('image')->find($request->get('id'))
+            : Blog::with('image')->where('slug', $request->get('slug'))->first();
 
         if (! $blog) {
-            return ToolResult::error('Blog not found.');
+            return Response::error('Blog not found.');
         }
 
-        return ToolResult::json([
+        return Response::json([
             'id' => $blog->id,
             'title' => $blog->title,
             'slug' => $blog->slug,

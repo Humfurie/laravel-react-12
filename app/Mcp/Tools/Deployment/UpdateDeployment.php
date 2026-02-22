@@ -3,11 +3,12 @@
 namespace App\Mcp\Tools\Deployment;
 
 use App\Models\Deployment;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class UpdateDeployment extends Tool
 {
@@ -16,36 +17,37 @@ class UpdateDeployment extends Tool
         return 'Update an existing deployment by ID. Only provided fields will be updated.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->integer('id')->description('Deployment ID to update')->required()
-            ->string('title')->description('Deployment title')
-            ->string('slug')->description('URL slug')
-            ->string('description')->description('Full description')
-            ->string('client_name')->description('Client name')
-            ->string('client_type')->description('Client type: family, friend, business, personal')
-            ->string('industry')->description('Client industry')
-            ->raw('tech_stack', ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'Array of technology names'])
-            ->raw('challenges_solved', ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'Array of challenges solved'])
-            ->string('live_url')->description('Live URL')
-            ->string('demo_url')->description('Demo URL')
-            ->integer('project_id')->description('Associated project ID')
-            ->boolean('is_featured')->description('Whether deployment is featured')
-            ->boolean('is_public')->description('Whether deployment is publicly visible')
-            ->string('deployed_at')->description('Deployment date (YYYY-MM-DD)')
-            ->string('status')->description('Status: active, maintenance, archived')
-            ->integer('sort_order')->description('Sort order');
+        return [
+            'id' => $schema->integer()->description('Deployment ID to update')->required(),
+            'title' => $schema->string()->description('Deployment title'),
+            'slug' => $schema->string()->description('URL slug'),
+            'description' => $schema->string()->description('Full description'),
+            'client_name' => $schema->string()->description('Client name'),
+            'client_type' => $schema->string()->description('Client type: family, friend, business, personal'),
+            'industry' => $schema->string()->description('Client industry'),
+            'tech_stack' => $schema->array()->description('Array of technology names'),
+            'challenges_solved' => $schema->array()->description('Array of challenges solved'),
+            'live_url' => $schema->string()->description('Live URL'),
+            'demo_url' => $schema->string()->description('Demo URL'),
+            'project_id' => $schema->integer()->description('Associated project ID'),
+            'is_featured' => $schema->boolean()->description('Whether deployment is featured'),
+            'is_public' => $schema->boolean()->description('Whether deployment is publicly visible'),
+            'deployed_at' => $schema->string()->description('Deployment date (YYYY-MM-DD)'),
+            'status' => $schema->string()->description('Status: active, maintenance, archived'),
+            'sort_order' => $schema->integer()->description('Sort order'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        $deployment = Deployment::find($arguments['id']);
+        $deployment = Deployment::find($request->get('id'));
         if (! $deployment) {
-            return ToolResult::error('Deployment not found.');
+            return Response::error('Deployment not found.');
         }
 
-        $data = collect($arguments)->except('id')->toArray();
+        $data = collect($request->all())->except('id')->toArray();
 
         $rules = [
             'title' => ['sometimes', 'string', 'max:255'],
@@ -70,12 +72,12 @@ class UpdateDeployment extends Tool
 
         $validator = Validator::make($data, $rules);
         if ($validator->fails()) {
-            return ToolResult::error('Validation failed: '.json_encode($validator->errors()->toArray()));
+            return Response::error('Validation failed: '.json_encode($validator->errors()->toArray()));
         }
 
         $deployment->update($validator->validated());
 
-        return ToolResult::json([
+        return Response::json([
             'message' => "Deployment '{$deployment->title}' updated successfully.",
             'id' => $deployment->id,
             'slug' => $deployment->slug,

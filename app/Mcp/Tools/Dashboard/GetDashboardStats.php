@@ -9,10 +9,11 @@ use App\Models\Experience;
 use App\Models\Expertise;
 use App\Models\GuestbookEntry;
 use App\Models\Project;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Cache;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class GetDashboardStats extends Tool
 {
@@ -21,12 +22,12 @@ class GetDashboardStats extends Tool
         return 'Get dashboard statistics: counts and summaries for all content types on the portfolio site. Cached for 60 seconds.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema;
+        return [];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
         $stats = Cache::remember('mcp:dashboard-stats', 60, fn () => [
             'blogs' => [
@@ -71,6 +72,6 @@ class GetDashboardStats extends Tool
             ],
         ]);
 
-        return ToolResult::json($stats);
+        return Response::json($stats);
     }
 }

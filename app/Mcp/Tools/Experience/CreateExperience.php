@@ -5,9 +5,10 @@ namespace App\Mcp\Tools\Experience;
 use App\Http\Requests\StoreExperienceRequest;
 use App\Mcp\Concerns\FormRequestValidator;
 use App\Models\Experience;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class CreateExperience extends Tool
 {
@@ -18,24 +19,25 @@ class CreateExperience extends Tool
         return 'Create a new work experience entry. Required: position, company, location, description, start_month, start_year.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->string('position')->description('Job position/title')->required()
-            ->string('company')->description('Company name')->required()
-            ->string('location')->description('Work location')->required()
-            ->raw('description', ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'Array of description bullet points'])->required()
-            ->integer('start_month')->description('Start month (0=Jan, 11=Dec)')->required()
-            ->integer('start_year')->description('Start year (e.g. 2024)')->required()
-            ->integer('end_month')->description('End month (0=Jan, 11=Dec)')
-            ->integer('end_year')->description('End year')
-            ->boolean('is_current_position')->description('Whether this is a current position')
-            ->integer('display_order')->description('Display order (lower = first)');
+        return [
+            'position' => $schema->string()->description('Job position/title')->required(),
+            'company' => $schema->string()->description('Company name')->required(),
+            'location' => $schema->string()->description('Work location')->required(),
+            'description' => $schema->array()->description('Array of description bullet points')->required(),
+            'start_month' => $schema->integer()->description('Start month (0=Jan, 11=Dec)')->required(),
+            'start_year' => $schema->integer()->description('Start year (e.g. 2024)')->required(),
+            'end_month' => $schema->integer()->description('End month (0=Jan, 11=Dec)'),
+            'end_year' => $schema->integer()->description('End year'),
+            'is_current_position' => $schema->boolean()->description('Whether this is a current position'),
+            'display_order' => $schema->integer()->description('Display order (lower = first)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        [$validated, $error] = $this->validateWith($arguments, StoreExperienceRequest::class, ['image']);
+        [$validated, $error] = $this->validateWith($request->all(), StoreExperienceRequest::class, ['image']);
         if ($error) {
             return $error;
         }
@@ -43,7 +45,7 @@ class CreateExperience extends Tool
         $validated['user_id'] = config('app.admin_user_id');
         $experience = Experience::create($validated);
 
-        return ToolResult::json([
+        return Response::json([
             'message' => "Experience '{$experience->position} at {$experience->company}' created successfully.",
             'id' => $experience->id,
         ]);

@@ -3,11 +3,12 @@
 namespace App\Mcp\Tools\Expertise;
 
 use App\Models\Expertise;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class CreateExpertise extends Tool
 {
@@ -16,19 +17,20 @@ class CreateExpertise extends Tool
         return 'Create a new expertise/skill item. Required: name, category_slug.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->string('name')->description('Expertise name (e.g. "Laravel", "React")')->required()
-            ->string('category_slug')->description('Category: be (Backend), fe (Frontend), td (Tools & DevOps)')->required()
-            ->string('image')->description('Image path or URL')
-            ->integer('order')->description('Display order (lower = first)')
-            ->boolean('is_active')->description('Whether this item is active (default: true)');
+        return [
+            'name' => $schema->string()->description('Expertise name (e.g. "Laravel", "React")')->required(),
+            'category_slug' => $schema->string()->description('Category: be (Backend), fe (Frontend), td (Tools & DevOps)')->required(),
+            'image' => $schema->string()->description('Image path or URL'),
+            'order' => $schema->integer()->description('Display order (lower = first)'),
+            'is_active' => $schema->boolean()->description('Whether this item is active (default: true)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        $validator = Validator::make($arguments, [
+        $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'category_slug' => ['required', Rule::in(['be', 'fe', 'td'])],
             'image' => ['nullable', 'string', 'max:500'],
@@ -37,7 +39,7 @@ class CreateExpertise extends Tool
         ]);
 
         if ($validator->fails()) {
-            return ToolResult::error('Validation failed: '.json_encode($validator->errors()->toArray()));
+            return Response::error('Validation failed: '.json_encode($validator->errors()->toArray()));
         }
 
         $data = $validator->validated();
@@ -47,7 +49,7 @@ class CreateExpertise extends Tool
 
         $expertise = Expertise::create($data);
 
-        return ToolResult::json([
+        return Response::json([
             'message' => "Expertise '{$expertise->name}' created successfully.",
             'id' => $expertise->id,
         ]);

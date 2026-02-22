@@ -71,8 +71,8 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, Throwable $exception, Request $request) {
-            // Skip API requests
-            if ($request->is('api/*')) {
+            // Skip API and MCP requests — they expect JSON, not Inertia HTML
+            if ($request->is('api/*', 'mcp/*')) {
                 return $response;
             }
 

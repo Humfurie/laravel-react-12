@@ -3,11 +3,12 @@
 namespace App\Mcp\Tools\Blog;
 
 use App\Models\Blog;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class UpdateBlog extends Tool
 {
@@ -16,32 +17,33 @@ class UpdateBlog extends Tool
         return 'Update an existing blog post by ID. Only provided fields will be updated.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->integer('id')->description('Blog ID to update')->required()
-            ->string('title')->description('Blog title')
-            ->string('content')->description('Blog content (HTML)')
-            ->string('status')->description('Status: draft, published, private')
-            ->string('slug')->description('URL slug')
-            ->string('excerpt')->description('Short excerpt (max 500 chars)')
-            ->string('featured_image')->description('Featured image URL')
-            ->raw('meta_data', ['type' => 'object', 'description' => 'SEO metadata'])
-            ->raw('tags', ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'Array of tag strings'])
-            ->boolean('isPrimary')->description('Whether this is a featured/primary post')
-            ->string('featured_until')->description('Featured until date (ISO 8601)')
-            ->integer('sort_order')->description('Sort order')
-            ->string('published_at')->description('Publish date (ISO 8601)');
+        return [
+            'id' => $schema->integer()->description('Blog ID to update')->required(),
+            'title' => $schema->string()->description('Blog title'),
+            'content' => $schema->string()->description('Blog content (HTML)'),
+            'status' => $schema->string()->description('Status: draft, published, private'),
+            'slug' => $schema->string()->description('URL slug'),
+            'excerpt' => $schema->string()->description('Short excerpt (max 500 chars)'),
+            'featured_image' => $schema->string()->description('Featured image URL'),
+            'meta_data' => $schema->object()->description('SEO metadata'),
+            'tags' => $schema->array()->description('Array of tag strings'),
+            'isPrimary' => $schema->boolean()->description('Whether this is a featured/primary post'),
+            'featured_until' => $schema->string()->description('Featured until date (ISO 8601)'),
+            'sort_order' => $schema->integer()->description('Sort order'),
+            'published_at' => $schema->string()->description('Publish date (ISO 8601)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        $blog = Blog::find($arguments['id']);
+        $blog = Blog::find($request->get('id'));
         if (! $blog) {
-            return ToolResult::error('Blog not found.');
+            return Response::error('Blog not found.');
         }
 
-        $data = collect($arguments)->except('id')->toArray();
+        $data = collect($request->all())->except('id')->toArray();
 
         $rules = [
             'title' => ['sometimes', 'string', 'max:255'],
@@ -64,12 +66,12 @@ class UpdateBlog extends Tool
 
         $validator = Validator::make($data, $rules);
         if ($validator->fails()) {
-            return ToolResult::error('Validation failed: '.json_encode($validator->errors()->toArray()));
+            return Response::error('Validation failed: '.json_encode($validator->errors()->toArray()));
         }
 
         $blog->update($validator->validated());
 
-        return ToolResult::json([
+        return Response::json([
             'message' => "Blog '{$blog->title}' updated successfully.",
             'id' => $blog->id,
             'slug' => $blog->slug,

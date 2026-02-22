@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Project;
 
 use App\Models\Project;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class GetProject extends Tool
 {
@@ -14,28 +15,29 @@ class GetProject extends Tool
         return 'Get a single project by ID or slug, including full description and case study.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->integer('id')->description('Project ID')
-            ->string('slug')->description('Project slug (alternative to ID)');
+        return [
+            'id' => $schema->integer()->description('Project ID'),
+            'slug' => $schema->string()->description('Project slug (alternative to ID)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        if (! isset($arguments['id']) && ! isset($arguments['slug'])) {
-            return ToolResult::error('Either id or slug is required.');
+        if (! $request->has('id') && ! $request->has('slug')) {
+            return Response::error('Either id or slug is required.');
         }
 
-        $project = isset($arguments['id'])
-            ? Project::with(['primaryImage', 'projectCategory'])->find($arguments['id'])
-            : Project::with(['primaryImage', 'projectCategory'])->where('slug', $arguments['slug'])->first();
+        $project = $request->has('id')
+            ? Project::with(['primaryImage', 'projectCategory'])->find($request->get('id'))
+            : Project::with(['primaryImage', 'projectCategory'])->where('slug', $request->get('slug'))->first();
 
         if (! $project) {
-            return ToolResult::error('Project not found.');
+            return Response::error('Project not found.');
         }
 
-        return ToolResult::json([
+        return Response::json([
             'id' => $project->id,
             'title' => $project->title,
             'slug' => $project->slug,

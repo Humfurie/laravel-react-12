@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Deployment;
 
 use App\Models\Deployment;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class GetDeployment extends Tool
 {
@@ -14,28 +15,29 @@ class GetDeployment extends Tool
         return 'Get a single deployment by ID or slug, including full description and challenges solved.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->integer('id')->description('Deployment ID')
-            ->string('slug')->description('Deployment slug (alternative to ID)');
+        return [
+            'id' => $schema->integer()->description('Deployment ID'),
+            'slug' => $schema->string()->description('Deployment slug (alternative to ID)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        if (! isset($arguments['id']) && ! isset($arguments['slug'])) {
-            return ToolResult::error('Either id or slug is required.');
+        if (! $request->has('id') && ! $request->has('slug')) {
+            return Response::error('Either id or slug is required.');
         }
 
-        $deployment = isset($arguments['id'])
-            ? Deployment::with('primaryImage')->find($arguments['id'])
-            : Deployment::with('primaryImage')->where('slug', $arguments['slug'])->first();
+        $deployment = $request->has('id')
+            ? Deployment::with('primaryImage')->find($request->get('id'))
+            : Deployment::with('primaryImage')->where('slug', $request->get('slug'))->first();
 
         if (! $deployment) {
-            return ToolResult::error('Deployment not found.');
+            return Response::error('Deployment not found.');
         }
 
-        return ToolResult::json([
+        return Response::json([
             'id' => $deployment->id,
             'title' => $deployment->title,
             'slug' => $deployment->slug,
