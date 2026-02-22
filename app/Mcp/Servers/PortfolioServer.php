@@ -19,10 +19,12 @@ use App\Mcp\Tools\Deployment\ListDeployments;
 use App\Mcp\Tools\Deployment\UpdateDeployment;
 use App\Mcp\Tools\Experience\CreateExperience;
 use App\Mcp\Tools\Experience\DeleteExperience;
+use App\Mcp\Tools\Experience\GetExperience;
 use App\Mcp\Tools\Experience\ListExperiences;
 use App\Mcp\Tools\Experience\UpdateExperience;
 use App\Mcp\Tools\Expertise\CreateExpertise;
 use App\Mcp\Tools\Expertise\DeleteExpertise;
+use App\Mcp\Tools\Expertise\GetExpertise;
 use App\Mcp\Tools\Expertise\ListExpertises;
 use App\Mcp\Tools\Expertise\UpdateExpertise;
 use App\Mcp\Tools\Guestbook\ListGuestbookEntries;
@@ -60,11 +62,13 @@ class PortfolioServer extends Server
         DeleteProject::class,
         // Experience
         ListExperiences::class,
+        GetExperience::class,
         CreateExperience::class,
         UpdateExperience::class,
         DeleteExperience::class,
         // Expertise
         ListExpertises::class,
+        GetExpertise::class,
         CreateExpertise::class,
         UpdateExpertise::class,
         DeleteExpertise::class,
