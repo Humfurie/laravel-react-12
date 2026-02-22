@@ -2,6 +2,7 @@
 
 use App\Mcp\Tools\Image\UploadImageFromUrl;
 use App\Models\Blog;
+use App\Models\Expertise;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Mcp\Server\Tools\ToolResult;
@@ -126,7 +127,7 @@ it('handles Content-Type with charset parameter', function () {
 // ─── Blog association ───────────────────────────────────────────
 
 it('associates uploaded image with a blog by ID', function () {
-    $blog = Blog::factory()->published()->create();
+    $blog = Blog::factory()->published()->create(['featured_image' => null]);
 
     Http::fake([
         'https://example.com/featured.webp' => Http::response('webp-data', 200, [
@@ -148,7 +149,7 @@ it('associates uploaded image with a blog by ID', function () {
 });
 
 it('associates uploaded image with a blog by slug', function () {
-    $blog = Blog::factory()->published()->create(['slug' => 'my-test-blog']);
+    $blog = Blog::factory()->published()->create(['slug' => 'my-test-blog', 'featured_image' => null]);
 
     Http::fake([
         'https://example.com/featured.gif' => Http::response('gif-data', 200, [
@@ -169,6 +170,28 @@ it('associates uploaded image with a blog by slug', function () {
     expect($blog->fresh()->featured_image)->toBe($data['path']);
 });
 
+it('skips blog that already has a featured image', function () {
+    $blog = Blog::factory()->published()->create(['featured_image' => '/storage/existing.jpg']);
+
+    Http::fake([
+        'https://example.com/new.webp' => Http::response('webp-data', 200, [
+            'Content-Type' => 'image/webp',
+        ]),
+    ]);
+
+    Storage::fake('minio');
+
+    $result = callUploadTool([
+        'url' => 'https://example.com/new.webp',
+        'blog_id' => $blog->id,
+    ]);
+    $data = uploadToolData($result);
+
+    expect($result->isError)->toBeFalse();
+    expect($data['blog_updated'])->toBe('skipped');
+    expect($blog->fresh()->featured_image)->toBe('/storage/existing.jpg');
+});
+
 it('succeeds even when blog_id does not exist', function () {
     Http::fake([
         'https://example.com/photo.jpg' => Http::response('image-data', 200, [
@@ -186,4 +209,70 @@ it('succeeds even when blog_id does not exist', function () {
 
     expect($result->isError)->toBeFalse();
     expect($data['blog_updated'])->toBeFalse();
+});
+
+// ─── Expertise association ──────────────────────────────────────
+
+it('associates uploaded image with an expertise by ID', function () {
+    $expertise = Expertise::factory()->create(['image' => null]);
+
+    Http::fake([
+        'https://example.com/icon.png' => Http::response('png-data', 200, [
+            'Content-Type' => 'image/png',
+        ]),
+    ]);
+
+    Storage::fake('minio');
+
+    $result = callUploadTool([
+        'url' => 'https://example.com/icon.png',
+        'expertise_id' => $expertise->id,
+    ]);
+    $data = uploadToolData($result);
+
+    expect($result->isError)->toBeFalse();
+    expect($data['expertise_updated'])->toBeTrue();
+    expect($data['path'])->toStartWith('/storage/images/techstack/');
+    expect($expertise->fresh()->image)->toBe($data['path']);
+});
+
+it('skips expertise that already has an image', function () {
+    $expertise = Expertise::factory()->create(['image' => '/storage/existing-icon.png']);
+
+    Http::fake([
+        'https://example.com/new-icon.png' => Http::response('png-data', 200, [
+            'Content-Type' => 'image/png',
+        ]),
+    ]);
+
+    Storage::fake('minio');
+
+    $result = callUploadTool([
+        'url' => 'https://example.com/new-icon.png',
+        'expertise_id' => $expertise->id,
+    ]);
+    $data = uploadToolData($result);
+
+    expect($result->isError)->toBeFalse();
+    expect($data['expertise_updated'])->toBe('skipped');
+    expect($expertise->fresh()->image)->toBe('/storage/existing-icon.png');
+});
+
+it('succeeds even when expertise_id does not exist', function () {
+    Http::fake([
+        'https://example.com/icon.png' => Http::response('png-data', 200, [
+            'Content-Type' => 'image/png',
+        ]),
+    ]);
+
+    Storage::fake('minio');
+
+    $result = callUploadTool([
+        'url' => 'https://example.com/icon.png',
+        'expertise_id' => 99999,
+    ]);
+    $data = uploadToolData($result);
+
+    expect($result->isError)->toBeFalse();
+    expect($data['expertise_updated'])->toBeFalse();
 });

@@ -3,6 +3,7 @@
 namespace App\Mcp\Tools\Image;
 
 use App\Models\Blog;
+use App\Models\Expertise;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -23,7 +24,7 @@ class UploadImageFromUrl extends Tool
 
     public function description(): string
     {
-        return 'Upload an image from a URL to storage. Use this to set blog featured images from real URLs instead of fabricating paths.';
+        return 'Upload an image from a URL to storage. Use this to set blog featured images or expertise icons from real URLs instead of fabricating paths. Will not overwrite existing images — returns "skipped" if one already exists.';
     }
 
     public function schema(ToolInputSchema $schema): ToolInputSchema
@@ -31,7 +32,8 @@ class UploadImageFromUrl extends Tool
         return $schema
             ->string('url')->description('HTTPS image URL to download')->required()
             ->integer('blog_id')->description('Blog ID to attach image to (optional)')
-            ->string('blog_slug')->description('Blog slug to attach image to (optional)');
+            ->string('blog_slug')->description('Blog slug to attach image to (optional)')
+            ->integer('expertise_id')->description('Expertise ID to attach image to (optional, stores in images/techstack/)');
     }
 
     public function handle(array $arguments): ToolResult
@@ -67,7 +69,9 @@ class UploadImageFromUrl extends Tool
 
         $extension = self::ALLOWED_MIME_TYPES[$mimeType];
         $filename = time().'_'.Str::random(10).'.'.$extension;
-        $storagePath = 'blog-images/'.$filename;
+        $expertiseId = $arguments['expertise_id'] ?? null;
+        $directory = $expertiseId ? 'images/techstack' : 'blog-images';
+        $storagePath = $directory.'/'.$filename;
 
         $stored = Storage::disk('minio')->put($storagePath, $body);
 
@@ -87,8 +91,27 @@ class UploadImageFromUrl extends Tool
                 : Blog::where('slug', $blogSlug)->first();
 
             if ($blog) {
-                $blog->update(['featured_image' => $publicPath]);
-                $blogUpdated = true;
+                if ($blog->featured_image) {
+                    $blogUpdated = 'skipped';
+                } else {
+                    $blog->update(['featured_image' => $publicPath]);
+                    $blogUpdated = true;
+                }
+            }
+        }
+
+        $expertiseUpdated = false;
+
+        if ($expertiseId) {
+            $expertise = Expertise::find($expertiseId);
+
+            if ($expertise) {
+                if ($expertise->image) {
+                    $expertiseUpdated = 'skipped';
+                } else {
+                    $expertise->update(['image' => $publicPath]);
+                    $expertiseUpdated = true;
+                }
             }
         }
 
@@ -97,6 +120,7 @@ class UploadImageFromUrl extends Tool
             'size' => strlen($body),
             'mime_type' => $mimeType,
             'blog_updated' => $blogUpdated,
+            'expertise_updated' => $expertiseUpdated,
         ]);
     }
 }
