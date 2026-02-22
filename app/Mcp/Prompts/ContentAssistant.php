@@ -2,34 +2,35 @@
 
 namespace App\Mcp\Prompts;
 
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Prompt;
 use Laravel\Mcp\Server\Prompts\Argument;
-use Laravel\Mcp\Server\Prompts\Arguments;
-use Laravel\Mcp\Server\Prompts\PromptResult;
 
 class ContentAssistant extends Prompt
 {
     protected string $description = 'Get AI assistance for creating or improving portfolio content.';
 
-    public function arguments(): Arguments
+    public function arguments(): array
     {
-        return (new Arguments)
-            ->add(new Argument(
+        return [
+            new Argument(
                 name: 'task',
                 description: 'What to help with: write_blog, improve_description, suggest_tags, review_content, write_case_study',
                 required: true,
-            ))
-            ->add(new Argument(
+            ),
+            new Argument(
                 name: 'context',
                 description: 'Additional context like a project title, existing content to improve, or topic to write about',
                 required: false,
-            ));
+            ),
+        ];
     }
 
-    public function handle(array $arguments): PromptResult
+    public function handle(Request $request): Response
     {
-        $task = $arguments['task'] ?? 'write_blog';
-        $context = $arguments['context'] ?? '';
+        $task = $request->get('task', 'write_blog');
+        $context = $request->get('context', '');
 
         $prompt = match ($task) {
             'write_blog' => $this->writeBlogPrompt($context),
@@ -40,7 +41,7 @@ class ContentAssistant extends Prompt
             default => "Help me with the following task for my portfolio site: {$task}. Context: {$context}",
         };
 
-        return new PromptResult($prompt, "Content assistance for: {$task}");
+        return Response::text($prompt);
     }
 
     private function writeBlogPrompt(string $context): string

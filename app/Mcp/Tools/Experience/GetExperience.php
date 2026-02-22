@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Experience;
 
 use App\Models\Experience;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class GetExperience extends Tool
 {
@@ -14,23 +15,24 @@ class GetExperience extends Tool
         return 'Get a single work experience by ID, including full description.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->integer('id')->description('Experience ID')->required();
+        return [
+            'id' => $schema->integer()->description('Experience ID')->required(),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
         $experience = Experience::with('image')
             ->where('user_id', config('app.admin_user_id'))
-            ->find($arguments['id']);
+            ->find($request->get('id'));
 
         if (! $experience) {
-            return ToolResult::error('Experience not found.');
+            return Response::error('Experience not found.');
         }
 
-        return ToolResult::json([
+        return Response::json([
             'id' => $experience->id,
             'position' => $experience->position,
             'company' => $experience->company,

@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Experience;
 
 use App\Models\Experience;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class ListExperiences extends Tool
 {
@@ -14,25 +15,26 @@ class ListExperiences extends Tool
         return 'List work experiences ordered by display order. Optionally filter by current positions only.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->boolean('current_only')->description('Only show current positions');
+        return [
+            'current_only' => $schema->boolean()->description('Only show current positions'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
         $query = Experience::with('image')
             ->where('user_id', config('app.admin_user_id'))
             ->ordered();
 
-        if (! empty($arguments['current_only'])) {
+        if (! empty($request->get('current_only'))) {
             $query->current();
         }
 
         $experiences = $query->get();
 
-        return ToolResult::json([
+        return Response::json([
             'data' => $experiences->map(fn ($exp) => [
                 'id' => $exp->id,
                 'position' => $exp->position,

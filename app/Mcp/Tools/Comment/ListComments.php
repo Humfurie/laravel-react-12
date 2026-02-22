@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Comment;
 
 use App\Models\Comment;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class ListComments extends Tool
 {
@@ -14,50 +15,51 @@ class ListComments extends Tool
         return 'List comments with optional filtering by status and commentable type.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->string('status')->description('Filter by status: approved, pending, rejected')
-            ->string('commentable_type')->description('Filter by type: blog (App\\Models\\Blog)')
-            ->integer('commentable_id')->description('Filter by commentable ID (requires commentable_type)')
-            ->boolean('root_only')->description('Only show root comments (no replies)')
-            ->integer('page')->description('Page number (default: 1)')
-            ->integer('per_page')->description('Items per page (default: 15, max: 50)');
+        return [
+            'status' => $schema->string()->description('Filter by status: approved, pending, rejected'),
+            'commentable_type' => $schema->string()->description('Filter by type: blog (App\\Models\\Blog)'),
+            'commentable_id' => $schema->integer()->description('Filter by commentable ID (requires commentable_type)'),
+            'root_only' => $schema->boolean()->description('Only show root comments (no replies)'),
+            'page' => $schema->integer()->description('Page number (default: 1)'),
+            'per_page' => $schema->integer()->description('Items per page (default: 15, max: 50)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
         $query = Comment::with('user');
 
-        if (isset($arguments['status'])) {
-            $query->where('status', $arguments['status']);
+        if ($request->has('status')) {
+            $query->where('status', $request->get('status'));
         }
 
-        if (isset($arguments['commentable_type'])) {
+        if ($request->has('commentable_type')) {
             $allowedTypes = [
                 'blog' => 'App\\Models\\Blog',
             ];
-            $type = $allowedTypes[$arguments['commentable_type']] ?? null;
+            $type = $allowedTypes[$request->get('commentable_type')] ?? null;
 
             if (! $type) {
-                return ToolResult::error("Invalid commentable_type '{$arguments['commentable_type']}'. Allowed: ".implode(', ', array_keys($allowedTypes)));
+                return Response::error("Invalid commentable_type '{$request->get('commentable_type')}'. Allowed: ".implode(', ', array_keys($allowedTypes)));
             }
 
             $query->where('commentable_type', $type);
 
-            if (isset($arguments['commentable_id'])) {
-                $query->where('commentable_id', $arguments['commentable_id']);
+            if ($request->has('commentable_id')) {
+                $query->where('commentable_id', $request->get('commentable_id'));
             }
         }
 
-        if (! empty($arguments['root_only'])) {
+        if (! empty($request->get('root_only'))) {
             $query->rootComments();
         }
 
-        $perPage = min($arguments['per_page'] ?? 15, 50);
-        $comments = $query->orderByDesc('created_at')->paginate($perPage, ['*'], 'page', $arguments['page'] ?? 1);
+        $perPage = min($request->get('per_page', 15), 50);
+        $comments = $query->orderByDesc('created_at')->paginate($perPage, ['*'], 'page', $request->get('page', 1));
 
-        return ToolResult::json([
+        return Response::json([
             'data' => $comments->map(fn ($c) => [
                 'id' => $c->id,
                 'content' => $c->content,

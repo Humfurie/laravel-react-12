@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Deployment;
 
 use App\Models\Deployment;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class DeleteDeployment extends Tool
 {
@@ -14,25 +15,26 @@ class DeleteDeployment extends Tool
         return 'Soft-delete a deployment by ID. The deployment can be restored later.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->integer('id')->description('Deployment ID to delete')->required();
+        return [
+            'id' => $schema->integer()->description('Deployment ID to delete')->required(),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        $deployment = Deployment::find($arguments['id']);
+        $deployment = Deployment::find($request->get('id'));
         if (! $deployment) {
-            return ToolResult::error('Deployment not found.');
+            return Response::error('Deployment not found.');
         }
 
         $title = $deployment->title;
         $deployment->delete();
 
-        return ToolResult::json([
+        return Response::json([
             'message' => "Deployment '{$title}' soft-deleted successfully.",
-            'id' => $arguments['id'],
+            'id' => $request->get('id'),
         ]);
     }
 }

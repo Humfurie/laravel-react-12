@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Blog;
 
 use App\Models\Blog;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class ListBlogs extends Tool
 {
@@ -14,38 +15,39 @@ class ListBlogs extends Tool
         return 'List blog posts with optional filtering by status, tag, and pagination.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->string('status')->description('Filter by status: draft, published, private')
-            ->string('tag')->description('Filter by tag name')
-            ->string('search')->description('Search in title and content')
-            ->integer('page')->description('Page number (default: 1)')
-            ->integer('per_page')->description('Items per page (default: 15, max: 50)');
+        return [
+            'status' => $schema->string()->description('Filter by status: draft, published, private'),
+            'tag' => $schema->string()->description('Filter by tag name'),
+            'search' => $schema->string()->description('Search in title and content'),
+            'page' => $schema->integer()->description('Page number (default: 1)'),
+            'per_page' => $schema->integer()->description('Items per page (default: 15, max: 50)'),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
         $query = Blog::query()->with('image');
 
-        if (isset($arguments['status'])) {
-            $query->where('status', $arguments['status']);
+        if ($request->has('status')) {
+            $query->where('status', $request->get('status'));
         }
 
-        if (isset($arguments['tag'])) {
-            $query->whereJsonContains('tags', $arguments['tag']);
+        if ($request->has('tag')) {
+            $query->whereJsonContains('tags', $request->get('tag'));
         }
 
-        if (isset($arguments['search'])) {
-            $search = $arguments['search'];
+        if ($request->has('search')) {
+            $search = $request->get('search');
             $query->where(fn ($q) => $q->where('title', 'ilike', "%{$search}%")
                 ->orWhere('content', 'ilike', "%{$search}%"));
         }
 
-        $perPage = min($arguments['per_page'] ?? 15, 50);
-        $blogs = $query->orderByDesc('published_at')->paginate($perPage, ['*'], 'page', $arguments['page'] ?? 1);
+        $perPage = min($request->get('per_page', 15), 50);
+        $blogs = $query->orderByDesc('published_at')->paginate($perPage, ['*'], 'page', $request->get('page', 1));
 
-        return ToolResult::json([
+        return Response::json([
             'data' => $blogs->map(fn ($blog) => [
                 'id' => $blog->id,
                 'title' => $blog->title,
