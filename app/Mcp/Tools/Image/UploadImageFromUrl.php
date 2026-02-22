@@ -25,16 +25,16 @@ class UploadImageFromUrl extends Tool
 
     public function description(): string
     {
-        return 'Upload an image from a URL to storage. Use this to set blog featured images or expertise icons from real URLs instead of fabricating paths. Will not overwrite existing images — returns "skipped" if one already exists.';
+        return 'Upload an image from a URL to storage. Use this to set blog featured images or expertise icons from real URLs instead of fabricating paths. Provide blog_id/blog_slug OR expertise_id, not both. Will not overwrite existing images — returns "skipped" if one already exists. Status fields return: "updated", "skipped", "not_found", or "none".';
     }
 
     public function schema(JsonSchema $schema): array
     {
         return [
             'url' => $schema->string()->description('HTTPS image URL to download')->required(),
-            'blog_id' => $schema->integer()->description('Blog ID to attach image to (optional)'),
-            'blog_slug' => $schema->string()->description('Blog slug to attach image to (optional)'),
-            'expertise_id' => $schema->integer()->description('Expertise ID to attach image to (optional, stores in images/techstack/)'),
+            'blog_id' => $schema->integer()->description('Blog ID to attach image to (mutually exclusive with expertise_id)'),
+            'blog_slug' => $schema->string()->description('Blog slug to attach image to (mutually exclusive with expertise_id)'),
+            'expertise_id' => $schema->integer()->description('Expertise ID to attach image to (mutually exclusive with blog_id/blog_slug, stores in images/techstack/)'),
         ];
     }
 
@@ -50,9 +50,14 @@ class UploadImageFromUrl extends Tool
         $blogId = $request->get('blog_id');
         $blogSlug = $request->get('blog_slug');
         $expertiseId = $request->get('expertise_id');
+        $hasBlogTarget = $blogId || $blogSlug;
+
+        if ($hasBlogTarget && $expertiseId) {
+            return Response::error('Provide blog_id/blog_slug or expertise_id, not both.');
+        }
 
         $blog = null;
-        if ($blogId || $blogSlug) {
+        if ($hasBlogTarget) {
             $blog = $blogId
                 ? Blog::find($blogId)
                 : Blog::where('slug', $blogSlug)->first();
@@ -60,10 +65,10 @@ class UploadImageFromUrl extends Tool
             if ($blog?->featured_image) {
                 return Response::json([
                     'path' => null,
-                    'size' => 0,
+                    'size' => null,
                     'mime_type' => null,
                     'blog_updated' => 'skipped',
-                    'expertise_updated' => false,
+                    'expertise_updated' => 'none',
                 ]);
             }
         }
@@ -75,9 +80,9 @@ class UploadImageFromUrl extends Tool
             if ($expertise?->image) {
                 return Response::json([
                     'path' => null,
-                    'size' => 0,
+                    'size' => null,
                     'mime_type' => null,
-                    'blog_updated' => false,
+                    'blog_updated' => 'none',
                     'expertise_updated' => 'skipped',
                 ]);
             }
@@ -108,7 +113,7 @@ class UploadImageFromUrl extends Tool
 
         $extension = self::ALLOWED_MIME_TYPES[$mimeType];
         $filename = time().'_'.Str::random(10).'.'.$extension;
-        $directory = $expertiseId ? 'images/techstack' : 'blog-images';
+        $directory = $expertise ? 'images/techstack' : 'blog-images';
         $storagePath = $directory.'/'.$filename;
 
         $stored = Storage::disk('minio')->put($storagePath, $body);
@@ -119,16 +124,16 @@ class UploadImageFromUrl extends Tool
 
         $publicPath = '/storage/'.$storagePath;
 
-        $blogUpdated = false;
+        $blogUpdated = $hasBlogTarget ? 'not_found' : 'none';
         if ($blog) {
             $blog->update(['featured_image' => $publicPath]);
-            $blogUpdated = true;
+            $blogUpdated = 'updated';
         }
 
-        $expertiseUpdated = false;
+        $expertiseUpdated = $expertiseId ? 'not_found' : 'none';
         if ($expertise) {
             $expertise->update(['image' => $publicPath]);
-            $expertiseUpdated = true;
+            $expertiseUpdated = 'updated';
         }
 
         return Response::json([

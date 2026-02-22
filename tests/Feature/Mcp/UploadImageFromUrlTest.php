@@ -49,6 +49,17 @@ it('rejects invalid content types', function () {
     expect((string) $result->content())->toContain('Invalid content type');
 });
 
+it('rejects providing both blog_id and expertise_id', function () {
+    $result = callUploadTool([
+        'url' => 'https://example.com/photo.jpg',
+        'blog_id' => 1,
+        'expertise_id' => 1,
+    ]);
+
+    expect($result->isError())->toBeTrue();
+    expect((string) $result->content())->toContain('not both');
+});
+
 it('rejects oversized images', function () {
     $oversizedBody = str_repeat('x', 6 * 1024 * 1024); // 6MB
 
@@ -102,7 +113,7 @@ it('downloads and stores an image successfully', function () {
     expect($data['path'])->toEndWith('.png');
     expect($data['size'])->toBe(strlen($fakeImageContent));
     expect($data['mime_type'])->toBe('image/png');
-    expect($data['blog_updated'])->toBeFalse();
+    expect($data['blog_updated'])->toBe('none');
 
     // Verify file was stored
     $storagePath = str_replace('/storage/', '', $data['path']);
@@ -145,7 +156,7 @@ it('associates uploaded image with a blog by ID', function () {
     $data = uploadToolData($result);
 
     expect($result->isError())->toBeFalse();
-    expect($data['blog_updated'])->toBeTrue();
+    expect($data['blog_updated'])->toBe('updated');
     expect($blog->fresh()->featured_image)->toBe($data['path']);
 });
 
@@ -167,7 +178,7 @@ it('associates uploaded image with a blog by slug', function () {
     $data = uploadToolData($result);
 
     expect($result->isError())->toBeFalse();
-    expect($data['blog_updated'])->toBeTrue();
+    expect($data['blog_updated'])->toBe('updated');
     expect($blog->fresh()->featured_image)->toBe($data['path']);
 });
 
@@ -206,7 +217,7 @@ it('succeeds even when blog_id does not exist', function () {
     $data = uploadToolData($result);
 
     expect($result->isError())->toBeFalse();
-    expect($data['blog_updated'])->toBeFalse();
+    expect($data['blog_updated'])->toBe('not_found');
 });
 
 // ─── Expertise association ──────────────────────────────────────
@@ -229,7 +240,7 @@ it('associates uploaded image with an expertise by ID', function () {
     $data = uploadToolData($result);
 
     expect($result->isError())->toBeFalse();
-    expect($data['expertise_updated'])->toBeTrue();
+    expect($data['expertise_updated'])->toBe('updated');
     expect($data['path'])->toStartWith('/storage/images/techstack/');
     expect($expertise->fresh()->image)->toBe($data['path']);
 });
@@ -253,7 +264,7 @@ it('skips expertise that already has an image without downloading', function () 
     Http::assertNothingSent();
 });
 
-it('succeeds even when expertise_id does not exist', function () {
+it('stores in blog-images when expertise_id does not exist', function () {
     Http::fake([
         'https://example.com/icon.png' => Http::response('png-data', 200, [
             'Content-Type' => 'image/png',
@@ -269,5 +280,6 @@ it('succeeds even when expertise_id does not exist', function () {
     $data = uploadToolData($result);
 
     expect($result->isError())->toBeFalse();
-    expect($data['expertise_updated'])->toBeFalse();
+    expect($data['expertise_updated'])->toBe('not_found');
+    expect($data['path'])->toStartWith('/storage/blog-images/');
 });
