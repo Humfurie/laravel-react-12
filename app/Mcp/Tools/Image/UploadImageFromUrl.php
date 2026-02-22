@@ -25,7 +25,7 @@ class UploadImageFromUrl extends Tool
 
     public function description(): string
     {
-        return 'Upload an image from a URL to storage. Use this to set blog featured images or expertise icons from real URLs instead of fabricating paths. Provide blog_id/blog_slug OR expertise_id, not both. Will not overwrite existing images — returns "skipped" if one already exists. Status fields return: "updated", "skipped", "not_found", or "none".';
+        return 'Upload an image from a URL to storage. Use this to set blog featured images or expertise icons from real URLs instead of fabricating paths. Provide blog_id/blog_slug OR expertise_id, not both. Returns error if the specified target does not exist. Will not overwrite existing images — returns "skipped" if one already exists. Status fields return: "updated", "skipped", or "none".';
     }
 
     public function schema(JsonSchema $schema): array
@@ -62,7 +62,11 @@ class UploadImageFromUrl extends Tool
                 ? Blog::find($blogId)
                 : Blog::where('slug', $blogSlug)->first();
 
-            if ($blog?->featured_image) {
+            if (! $blog) {
+                return Response::error('Blog not found.');
+            }
+
+            if ($blog->featured_image) {
                 return Response::json([
                     'path' => null,
                     'size' => null,
@@ -77,7 +81,11 @@ class UploadImageFromUrl extends Tool
         if ($expertiseId) {
             $expertise = Expertise::find($expertiseId);
 
-            if ($expertise?->image) {
+            if (! $expertise) {
+                return Response::error('Expertise not found.');
+            }
+
+            if ($expertise->image) {
                 return Response::json([
                     'path' => null,
                     'size' => null,
@@ -124,13 +132,13 @@ class UploadImageFromUrl extends Tool
 
         $publicPath = '/storage/'.$storagePath;
 
-        $blogUpdated = $hasBlogTarget ? 'not_found' : 'none';
+        $blogUpdated = 'none';
         if ($blog) {
             $blog->update(['featured_image' => $publicPath]);
             $blogUpdated = 'updated';
         }
 
-        $expertiseUpdated = $expertiseId ? 'not_found' : 'none';
+        $expertiseUpdated = 'none';
         if ($expertise) {
             $expertise->update(['image' => $publicPath]);
             $expertiseUpdated = 'updated';

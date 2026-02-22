@@ -60,6 +60,17 @@ it('rejects providing both blog_id and expertise_id', function () {
     expect((string) $result->content())->toContain('not both');
 });
 
+it('rejects providing both blog_slug and expertise_id', function () {
+    $result = callUploadTool([
+        'url' => 'https://example.com/photo.jpg',
+        'blog_slug' => 'my-post',
+        'expertise_id' => 1,
+    ]);
+
+    expect($result->isError())->toBeTrue();
+    expect((string) $result->content())->toContain('not both');
+});
+
 it('rejects oversized images', function () {
     $oversizedBody = str_repeat('x', 6 * 1024 * 1024); // 6MB
 
@@ -201,23 +212,24 @@ it('skips blog that already has a featured image without downloading', function 
     Http::assertNothingSent();
 });
 
-it('succeeds even when blog_id does not exist', function () {
-    Http::fake([
-        'https://example.com/photo.jpg' => Http::response('image-data', 200, [
-            'Content-Type' => 'image/jpeg',
-        ]),
-    ]);
-
-    Storage::fake('minio');
-
+it('returns error when blog_id does not exist', function () {
     $result = callUploadTool([
         'url' => 'https://example.com/photo.jpg',
         'blog_id' => 99999,
     ]);
-    $data = uploadToolData($result);
 
-    expect($result->isError())->toBeFalse();
-    expect($data['blog_updated'])->toBe('not_found');
+    expect($result->isError())->toBeTrue();
+    expect((string) $result->content())->toContain('Blog not found');
+});
+
+it('returns error when blog_slug does not exist', function () {
+    $result = callUploadTool([
+        'url' => 'https://example.com/photo.jpg',
+        'blog_slug' => 'nonexistent-slug',
+    ]);
+
+    expect($result->isError())->toBeTrue();
+    expect((string) $result->content())->toContain('Blog not found');
 });
 
 // ─── Expertise association ──────────────────────────────────────
@@ -264,22 +276,12 @@ it('skips expertise that already has an image without downloading', function () 
     Http::assertNothingSent();
 });
 
-it('stores in blog-images when expertise_id does not exist', function () {
-    Http::fake([
-        'https://example.com/icon.png' => Http::response('png-data', 200, [
-            'Content-Type' => 'image/png',
-        ]),
-    ]);
-
-    Storage::fake('minio');
-
+it('returns error when expertise_id does not exist', function () {
     $result = callUploadTool([
         'url' => 'https://example.com/icon.png',
         'expertise_id' => 99999,
     ]);
-    $data = uploadToolData($result);
 
-    expect($result->isError())->toBeFalse();
-    expect($data['expertise_updated'])->toBe('not_found');
-    expect($data['path'])->toStartWith('/storage/blog-images/');
+    expect($result->isError())->toBeTrue();
+    expect((string) $result->content())->toContain('Expertise not found');
 });
