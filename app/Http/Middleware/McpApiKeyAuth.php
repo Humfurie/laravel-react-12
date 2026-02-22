@@ -40,6 +40,7 @@ class McpApiKeyAuth
 
         if (! $token) {
             RateLimiter::hit($rateLimitKey, 60);
+
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
