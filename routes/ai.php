@@ -13,5 +13,5 @@ Route::post('mcp/portfolio', McpController::class)
 
 Route::get('mcp/portfolio', fn () => response('', 405, ['Allow' => 'POST']));
 
-// Local: stdio transport (Claude Code) — start with: php artisan mcp:start portfolio
+// Local: stdio transport (Claude Code) — no auth needed, runs as a trusted local process
 Mcp::local('portfolio', PortfolioServer::class);
