@@ -11,7 +11,7 @@ Route::post('mcp/portfolio', McpController::class)
     ->middleware(['mcp.auth', 'throttle:60,1'])
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
-Route::get('mcp/portfolio', fn () => response(status: 405));
+Route::get('mcp/portfolio', fn () => response('', 405, ['Allow' => 'POST']));
 
 // Local: stdio transport (Claude Code) — start with: php artisan mcp:start portfolio
 Mcp::local('portfolio', PortfolioServer::class);

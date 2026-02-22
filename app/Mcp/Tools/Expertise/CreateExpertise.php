@@ -30,9 +30,7 @@ class CreateExpertise extends Tool
 
     public function handle(Request $request): Response
     {
-        $arguments = $request->all();
-
-        $validator = Validator::make($arguments, [
+        $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'category_slug' => ['required', Rule::in(['be', 'fe', 'td'])],
             'image' => ['nullable', 'string', 'max:500'],

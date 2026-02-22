@@ -37,7 +37,8 @@ use Laravel\Mcp\Server;
 
 class PortfolioServer extends Server
 {
-    public int $defaultPaginationLength = 50;
+    // Must be >= total tool count to avoid cursor-based pagination
+    public int $defaultPaginationLength = 100;
 
     protected string $name = 'Humphrey Portfolio';
 

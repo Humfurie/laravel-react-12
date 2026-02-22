@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Mcp\Servers\PortfolioServer;
-use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Laravel\Mcp\Server\Transport\HttpTransport;
@@ -17,7 +16,7 @@ class McpController extends Controller
             (string) $request->header('MCP-Session-Id'),
         );
 
-        $server = Container::getInstance()->make(PortfolioServer::class, [
+        $server = app(PortfolioServer::class, [
             'transport' => $transport,
         ]);
 
