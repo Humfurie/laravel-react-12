@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Expertise;
 
 use App\Models\Expertise;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class DeleteExpertise extends Tool
 {
@@ -14,25 +15,26 @@ class DeleteExpertise extends Tool
         return 'Permanently delete an expertise/skill item by ID.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->integer('id')->description('Expertise ID to delete')->required();
+        return [
+            'id' => $schema->integer()->description('Expertise ID to delete')->required(),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        $expertise = Expertise::find($arguments['id']);
+        $expertise = Expertise::find($request->get('id'));
         if (! $expertise) {
-            return ToolResult::error('Expertise not found.');
+            return Response::error('Expertise not found.');
         }
 
         $name = $expertise->name;
         $expertise->delete();
 
-        return ToolResult::json([
+        return Response::json([
             'message' => "Expertise '{$name}' deleted successfully.",
-            'id' => $arguments['id'],
+            'id' => $request->get('id'),
         ]);
     }
 }

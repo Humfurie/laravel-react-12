@@ -26,21 +26,21 @@ class McpApiKeyAuth
         if (! empty($allowedIps) && ! in_array($ip, $allowedIps, true)) {
             Log::warning('MCP access denied — IP not in allowlist', ['ip' => $ip]);
 
-            abort(403, 'Forbidden.');
+            return response()->json(['error' => 'Forbidden'], 403);
         }
 
         // Rate limit authentication attempts
         if (RateLimiter::tooManyAttempts($rateLimitKey, self::MAX_ATTEMPTS)) {
             Log::warning('MCP rate limit exceeded', ['ip' => $ip]);
 
-            abort(429, 'Too many requests.');
+            return response()->json(['error' => 'Too many requests'], 429);
         }
 
         $token = $request->bearerToken();
 
         if (! $token) {
             RateLimiter::hit($rateLimitKey, 60);
-            abort(401, 'Unauthorized.');
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         // Try API key auth first
@@ -72,6 +72,6 @@ class McpApiKeyAuth
             'has_token' => true,
         ]);
 
-        abort(401, 'Unauthorized.');
+        return response()->json(['error' => 'Unauthorized'], 401);
     }
 }

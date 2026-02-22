@@ -35,7 +35,7 @@ php artisan storage:link --force
 # Cache configuration for better performance
 echo "Caching configuration..."
 php artisan config:cache
-php artisan route:cache
+php artisan route:cache || echo "Route caching failed - running without route cache"
 php artisan view:cache  # Cache Blade views (includes email templates, error pages)
 php artisan event:cache 2>/dev/null || echo "Event caching not available"  # Laravel 11+
 

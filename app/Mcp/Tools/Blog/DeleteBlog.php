@@ -3,9 +3,10 @@
 namespace App\Mcp\Tools\Blog;
 
 use App\Models\Blog;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
-use Laravel\Mcp\Server\Tools\ToolInputSchema;
-use Laravel\Mcp\Server\Tools\ToolResult;
 
 class DeleteBlog extends Tool
 {
@@ -14,25 +15,26 @@ class DeleteBlog extends Tool
         return 'Soft-delete a blog post by ID. The post can be restored later.';
     }
 
-    public function schema(ToolInputSchema $schema): ToolInputSchema
+    public function schema(JsonSchema $schema): array
     {
-        return $schema
-            ->integer('id')->description('Blog ID to delete')->required();
+        return [
+            'id' => $schema->integer()->description('Blog ID to delete')->required(),
+        ];
     }
 
-    public function handle(array $arguments): ToolResult
+    public function handle(Request $request): Response
     {
-        $blog = Blog::find($arguments['id']);
+        $blog = Blog::find($request->get('id'));
         if (! $blog) {
-            return ToolResult::error('Blog not found.');
+            return Response::error('Blog not found.');
         }
 
         $title = $blog->title;
         $blog->delete();
 
-        return ToolResult::json([
+        return Response::json([
             'message' => "Blog '{$title}' soft-deleted successfully.",
-            'id' => $arguments['id'],
+            'id' => $request->get('id'),
         ]);
     }
 }
