@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\PropertyController;
 use Illuminate\Support\Facades\Route;
 
 // Health check endpoint
-Route::get('health', fn () => response()->json(['statusCode' => 200]));
+Route::get('health', fn () => response()->json(['status' => 'healthy', 'timestamp' => now()->toIso8601String(), 'service' => 'humfurie']));
 
 // Authentication routes (public)
 Route::prefix('v1/auth')->group(function () {
