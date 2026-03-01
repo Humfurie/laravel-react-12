@@ -1,5 +1,6 @@
 import FloatingNav from '@/components/floating-nav';
 import Footer from '@/components/global/Footer';
+import ScrollProgress from '@/components/global/ScrollProgress';
 import StructuredData, { schemas } from '@/components/seo/StructuredData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -148,6 +149,7 @@ export default function BlogPost({ blog }: Props) {
             />
 
             <div className="min-h-screen bg-[#FAFAF8] dark:bg-neutral-950">
+                <ScrollProgress />
                 <FloatingNav currentPage="blog" />
 
                 <main className="pt-20">

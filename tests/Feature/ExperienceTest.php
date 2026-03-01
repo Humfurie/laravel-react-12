@@ -20,9 +20,9 @@ test('can list experiences for authenticated user', function () {
     $this->actingAs($this->user)
         ->get(route('admin.experiences.index'))
         ->assertOk()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('admin/experience/index')
-            ->has('experiences', 3)
+            ->has('experiences.data', 3)
         );
 });
 
@@ -45,7 +45,7 @@ test('can display create experience form', function () {
     $this->actingAs($this->user)
         ->get(route('admin.experiences.create'))
         ->assertOk()
-        ->assertInertia(fn($page) => $page->component('admin/experience/create'));
+        ->assertInertia(fn ($page) => $page->component('admin/experience/create'));
 });
 
 test('can store a new experience', function () {
@@ -133,7 +133,7 @@ test('can display edit experience form', function () {
     $this->actingAs($this->user)
         ->get(route('admin.experiences.edit', $experience))
         ->assertOk()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('admin/experience/edit')
             ->has('experience')
         );
@@ -255,6 +255,55 @@ test('orders experiences by display order and date', function () {
         ->and($experiences->last()->id)->toBe($exp1->id);
 });
 
+// --- Admin Search & Pagination ---
+
+test('admin experience index searches by company', function () {
+    Experience::factory()->create(['user_id' => $this->user->id, 'company' => 'Google']);
+    Experience::factory()->create(['user_id' => $this->user->id, 'company' => 'Microsoft']);
+
+    $this->actingAs($this->user)
+        ->get(route('admin.experiences.index', ['search' => 'Google']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('experiences.data', 1)
+            ->where('experiences.data.0.company', 'Google')
+        );
+});
+
+test('admin experience index searches by position', function () {
+    Experience::factory()->create(['user_id' => $this->user->id, 'position' => 'Senior Developer']);
+    Experience::factory()->create(['user_id' => $this->user->id, 'position' => 'Junior Designer']);
+
+    $this->actingAs($this->user)
+        ->get(route('admin.experiences.index', ['search' => 'Developer']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('experiences.data', 1)
+            ->where('experiences.data.0.position', 'Senior Developer')
+        );
+});
+
+test('admin experience index paginates results', function () {
+    Experience::factory()->count(15)->create(['user_id' => $this->user->id]);
+
+    $this->actingAs($this->user)
+        ->get(route('admin.experiences.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('experiences.data', 10)
+            ->where('experiences.last_page', 2)
+        );
+});
+
+test('admin experience index passes filters back to frontend', function () {
+    $this->actingAs($this->user)
+        ->get(route('admin.experiences.index', ['search' => 'test']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('filters.search', 'test')
+        );
+});
+
 test('guests cannot access admin experience routes', function () {
     $experience = Experience::factory()->create();
 
@@ -285,7 +334,7 @@ test('authenticated users with experience permissions can access debug experienc
     $this->actingAs($userWithPermissions)
         ->get('/debug-experiences')
         ->assertOk()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('debug-experiences')
             ->has('experiences', 3)
         );

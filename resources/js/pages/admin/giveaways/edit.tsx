@@ -215,7 +215,7 @@ export default function Edit({ giveaway }: Props) {
                         <Badge
                             className={
                                 giveaway.status === 'active'
-                                    ? 'bg-green-100 text-green-800'
+                                    ? 'bg-[#E4EDE8] text-[#1B3D2F] dark:bg-[#162820] dark:text-[#5AAF7E]'
                                     : giveaway.status === 'draft'
                                       ? 'bg-yellow-100 text-yellow-800'
                                       : 'bg-gray-100 text-gray-800'
@@ -507,7 +507,7 @@ export default function Edit({ giveaway }: Props) {
                                                                     href={entry.screenshot_url}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="inline-flex items-center gap-1 text-green-600 hover:underline"
+                                                                    className="inline-flex items-center gap-1 text-[#2A5E44] hover:underline dark:text-[#5AAF7E]"
                                                                 >
                                                                     <ImageIcon className="h-4 w-4" />
                                                                     View
@@ -545,7 +545,7 @@ export default function Edit({ giveaway }: Props) {
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-muted-foreground text-sm">Status</span>
-                                    <Badge className={giveaway.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                                    <Badge className={giveaway.is_active ? 'bg-[#E4EDE8] text-[#1B3D2F] dark:bg-[#162820] dark:text-[#5AAF7E]' : 'bg-gray-100 text-gray-800'}>
                                         {giveaway.is_active ? 'Active' : 'Inactive'}
                                     </Badge>
                                 </div>
@@ -603,7 +603,7 @@ export default function Edit({ giveaway }: Props) {
                                                         }}
                                                         disabled={submittingClaim}
                                                         size="sm"
-                                                        className="w-full bg-green-600 hover:bg-green-700 sm:flex-1"
+                                                        className="w-full bg-[#2A5E44] hover:bg-[#1B3D2F] sm:flex-1"
                                                     >
                                                         <CheckCircle2 className="mr-2 h-4 w-4" />
                                                         Claimed
@@ -625,13 +625,13 @@ export default function Edit({ giveaway }: Props) {
                                             )}
 
                                             {giveaway.prize_claimed && (
-                                                <div className="rounded-md border border-green-300 bg-green-100 p-3">
+                                                <div className="rounded-md border border-[#E4EDE8] bg-[#E4EDE8]/50 p-3">
                                                     <div className="flex items-center gap-2">
-                                                        <CheckCircle2 className="h-4 w-4 text-green-700" />
-                                                        <p className="text-sm font-medium text-green-800">Prize Claimed</p>
+                                                        <CheckCircle2 className="h-4 w-4 text-[#2A5E44] dark:text-[#5AAF7E]" />
+                                                        <p className="text-sm font-medium text-[#1B3D2F] dark:text-[#5AAF7E]">Prize Claimed</p>
                                                     </div>
                                                     {giveaway.prize_claimed_at && (
-                                                        <p className="mt-1 text-xs text-green-700">{formatForDisplay(giveaway.prize_claimed_at)}</p>
+                                                        <p className="mt-1 text-xs text-[#2A5E44] dark:text-[#5AAF7E]">{formatForDisplay(giveaway.prize_claimed_at)}</p>
                                                     )}
                                                 </div>
                                             )}

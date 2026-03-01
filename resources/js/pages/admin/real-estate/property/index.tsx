@@ -120,7 +120,7 @@ export default function PropertyIndex({ properties }: PropertyIndexProps) {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'available':
-                return 'bg-green-100 text-green-800';
+                return 'bg-[#E4EDE8] text-[#1B3D2F] dark:bg-[#162820] dark:text-[#5AAF7E]';
             case 'reserved':
                 return 'bg-yellow-100 text-yellow-800';
             case 'sold':

@@ -279,7 +279,7 @@ export default function WinnerSelection({ giveaway }: Props) {
                                                                     href={entry.screenshot_url}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="flex items-center gap-1 text-xs text-green-600 hover:underline"
+                                                                    className="flex items-center gap-1 text-xs text-[#2A5E44] hover:underline dark:text-[#5AAF7E]"
                                                                 >
                                                                     <ImageIcon className="h-3 w-3" />
                                                                     View Screenshot

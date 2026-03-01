@@ -1,5 +1,7 @@
 import SectionTitle from '@/components/global/SectionTitle';
-import { MotionDiv } from '@/components/ui/motion';
+import { MotionDiv, MotionStagger, MotionItem } from '@/components/ui/motion';
+import { Link } from '@inertiajs/react';
+import { ArrowRight } from 'lucide-react';
 import { memo } from 'react';
 
 type Experience = {
@@ -131,93 +133,75 @@ export function calculateDuration(
     }
 }
 
-// Individual experience card - memoized to prevent re-renders
-const ExperienceCard = memo(function ExperienceCard({ experience, index }: { experience: Experience; index: number }) {
-    const isEven = index % 2 === 0;
+/** Format a year range like "2024 — Present" or "2023 — 2024" */
+function formatYearRange(exp: Experience): string {
+    const start = exp.start_year;
+    const end = exp.is_current_position ? 'Present' : exp.end_year;
+    return `${start} — ${end}`;
+}
 
+/** Format the month range like "Jun 2024 — Present" */
+function formatMonthRange(exp: Experience): string {
+    const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const start = `${SHORT_MONTHS[exp.start_month]} ${exp.start_year}`;
+    const end = exp.is_current_position ? 'Present' : `${SHORT_MONTHS[exp.end_month!]} ${exp.end_year}`;
+    return `${start} — ${end}`;
+}
+
+// Individual experience row - clean list item layout matching prototype
+const ExperienceItem = memo(function ExperienceItem({ experience }: { experience: Experience }) {
     return (
-        <MotionDiv
-            variant={isEven ? 'slideRight' : 'slideLeft'}
-            delay={index * 0.1}
-            className={`hs-shadow relative mb-8 w-full cursor-pointer rounded-xl p-4 sm:p-6 lg:mb-12 dark:bg-gray-900 ${
-                isEven ? 'lg:mr-8 lg:ml-auto' : 'lg:mr-auto lg:ml-8'
-            } mx-auto lg:mx-0 lg:w-5/12`}
+        <MotionItem
+            variant="fadeUp"
+            className="grid grid-cols-1 gap-2 border-b border-[#E5E4E0] py-9 transition-all duration-300 hover:pl-3 md:grid-cols-[160px_1fr] md:gap-10 dark:border-[#2A4A3A]"
         >
-            <div className="mb-4 flex items-center">
-                <div className="mr-3 h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border-2 border-gray-200 bg-gray-100 sm:mr-4 sm:h-16 sm:w-16 dark:border-gray-700 dark:bg-gray-800">
-                    <img
-                        src={experience.image_url || '/default-company.png'}
-                        alt={experience.company}
-                        className="h-full w-full object-cover"
-                        width={64}
-                        height={64}
-                        loading="lazy"
-                    />
-                </div>
-                <div className="min-w-0 flex-1">
-                    <p className="text-brand-orange mb-1 text-lg leading-tight font-semibold sm:text-xl md:text-[28px]">
-                        {experience.position}
+            {/* Date column */}
+            <div className="pt-0.5 text-[0.82rem] leading-snug text-[#9E9E95] md:pt-1">
+                <span className="font-display text-[1.3rem] font-normal text-[#1A1A1A] dark:text-[#E8E6E1] md:block">
+                    {formatYearRange(experience)}
+                </span>
+                <span className="ml-2 md:ml-0">{formatMonthRange(experience)}</span>
+            </div>
+
+            {/* Info column */}
+            <div>
+                <p className="font-display text-[28px] font-light text-[#1B3D2F] sm:text-[32px] md:text-[38px] dark:text-[#E8E6E1]">{experience.position}</p>
+                <div className="mt-1 text-[0.92rem] font-medium text-[#E8945A]">{experience.company}</div>
+                <div className="mt-1.5 text-[0.82rem] text-[#9E9E95]">{experience.location}</div>
+                {experience.description.length > 0 && (
+                    <p className="mt-3 max-w-[560px] text-[0.9rem] leading-[1.7] text-[#6B6B63] dark:text-[#9E9E95]">
+                        {experience.description[0]}
                     </p>
-                    <p className="text-brand-gray text-xs sm:text-sm">{experience.company}</p>
-                </div>
+                )}
             </div>
-            <p className="text-brand-gray mb-3 flex items-center text-xs sm:text-sm">{experience.location}</p>
-
-            <div className="text-brand-gray mb-4 flex flex-col gap-1 rounded-lg bg-gray-50 p-2 text-xs sm:flex-row sm:justify-between sm:p-3 sm:text-sm dark:bg-gray-800 dark:text-gray-300">
-                <span className="mb-1 sm:mb-0">
-                    {formatMonthYear(experience.start_month, experience.start_year)} -{' '}
-                    {experience.is_current_position ? 'Present' : formatMonthYear(experience.end_month!, experience.end_year!)}
-                </span>
-                <span className="text-brand-orange">
-                    {calculateDuration(
-                        experience.start_month,
-                        experience.start_year,
-                        experience.end_month,
-                        experience.end_year,
-                        experience.is_current_position,
-                    )}
-                </span>
-            </div>
-
-            <div className="text-brand-gray text-sm sm:text-base">
-                <ul className="space-y-2">
-                    {experience.description.map((point, i) => (
-                        <li key={i} className="flex items-start leading-relaxed">
-                            <span className="bg-brand-orange mt-2 mr-2 h-1.5 w-1.5 flex-shrink-0 rounded-full sm:mr-3 sm:h-2 sm:w-2" />
-                            <span className="flex-1">{point}</span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            {/* Timeline dot */}
-            <div
-                className={`bg-brand-orange absolute top-[13%] hidden h-6 w-6 rounded-full border-4 border-white transition-all duration-300 lg:block dark:border-gray-950 ${
-                    isEven ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'
-                }`}
-            />
-        </MotionDiv>
+        </MotionItem>
     );
 });
 
 export const ExperienceSection = ({ experiences = fallbackExperiences }: ExperienceSectionProps) => {
     return (
-        <section id="experience" className="relative overflow-hidden bg-white py-20 dark:bg-gray-950">
-            <SectionTitle title={'Experience'} />
-
+        <section className="bg-[#F3F1EC] py-[clamp(80px,12vw,160px)] dark:bg-[#0F1A15]">
             <div className="primary-container">
-                <div className="text-brand-gray mb-12 w-full text-center dark:text-gray-300">
-                    My professional journey in the tech industry.
+                {/* Header row: title left, resume link right */}
+                <div className="mb-[clamp(48px,6vw,80px)] flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-end">
+                    <SectionTitle title="Experience" heading="Where I've worked" />
+                    <Link
+                        href="/resume"
+                        className="inline-flex shrink-0 items-center gap-2 text-[0.85rem] font-medium text-[#1B3D2F] transition-colors hover:text-[#E8945A] dark:text-[#5AAF7E] dark:hover:text-[#E8945A]"
+                    >
+                        View full resume
+                        <ArrowRight className="h-4 w-4" />
+                    </Link>
                 </div>
 
-                <div className="relative mx-auto mt-12 mb-12 w-full lg:mt-[80px]">
-                    {/* Vertical line */}
-                    <div className="bg-brand-orange absolute top-0 bottom-0 left-1/2 hidden w-px -translate-x-1/2 transform lg:block" />
-
-                    {experiences.map((experience, index) => (
-                        <ExperienceCard key={`timeline-${experience.id}`} experience={experience} index={index} />
+                {/* Experience list */}
+                <MotionStagger staggerDelay={0.1} className="flex flex-col">
+                    {/* Top border on first item */}
+                    <div className="border-t border-[#E5E4E0] dark:border-[#2A4A3A]" />
+                    {experiences.map((experience) => (
+                        <ExperienceItem key={`exp-${experience.id}`} experience={experience} />
                     ))}
-                </div>
+                </MotionStagger>
             </div>
         </section>
     );

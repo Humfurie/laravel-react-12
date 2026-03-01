@@ -21,26 +21,44 @@ class ProjectController extends Controller
 
     public function __construct(
         private ImageService $imageService
-    )
-    {
-    }
+    ) {}
 
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Project::class);
 
-        $projects = Project::query()
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'in:all,live,development,maintenance,archived,deleted'],
+        ]);
+
+        $query = Project::query()
             ->withTrashed()
-            ->with(['primaryImage'])
-            ->orderBy('sort_order')
+            ->with(['primaryImage']);
+
+        if (! empty($validated['search'])) {
+            $query->where('title', 'ilike', '%'.$validated['search'].'%');
+        }
+
+        if (! empty($validated['status']) && $validated['status'] !== 'all') {
+            if ($validated['status'] === 'deleted') {
+                $query->whereNotNull('deleted_at');
+            } else {
+                $query->whereNull('deleted_at')->where('status', $validated['status']);
+            }
+        }
+
+        $projects = $query->orderBy('sort_order')
             ->orderBy('updated_at', 'desc')
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
 
         return Inertia::render('admin/projects/index', [
             'projects' => $projects,
+            'filters' => $request->only(['search', 'status']),
             'categories' => Project::getCategories(),
             'statuses' => Project::getStatuses(),
             'can' => [
@@ -66,7 +84,7 @@ class ProjectController extends Controller
         }
 
         // Set featured_at if marking as featured
-        if (!empty($validated['is_featured'])) {
+        if (! empty($validated['is_featured'])) {
             $validated['featured_at'] = now();
         }
 
@@ -111,7 +129,7 @@ class ProjectController extends Controller
     {
         $this->authorize('update', $project);
 
-        $project->load(['images' => fn($q) => $q->ordered()]);
+        $project->load(['images' => fn ($q) => $q->ordered()]);
 
         return Inertia::render('admin/projects/edit', [
             'project' => $project,
@@ -138,7 +156,7 @@ class ProjectController extends Controller
         }
 
         // Set featured_at if marking as featured for the first time
-        if (!empty($validated['is_featured']) && !$project->is_featured) {
+        if (! empty($validated['is_featured']) && ! $project->is_featured) {
             $validated['featured_at'] = now();
         }
 
@@ -224,7 +242,7 @@ class ProjectController extends Controller
             'project-images'
         );
 
-        return back()->with('success', count($images) . ' image(s) uploaded successfully.');
+        return back()->with('success', count($images).' image(s) uploaded successfully.');
     }
 
     /**

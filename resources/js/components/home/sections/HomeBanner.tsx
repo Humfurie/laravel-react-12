@@ -1,61 +1,108 @@
-import Socials from '@/components/global/Socials';
 import { MotionDiv } from '@/components/ui/motion';
+import { Link } from '@inertiajs/react';
+import { ArrowRight } from 'lucide-react';
 import { useState } from 'react';
-import { TbDownload } from 'react-icons/tb';
 
-const bannerData = {
-    title: '<span>H</span>UMPHREY',
-    subTitle: 'Software Developer',
-    mobileImgSrc: '/images/humphrey-banner-mb.webp',
-    imgSrc: '/images/humphrey-banner.webp',
-};
+interface HomeBannerProps {
+    stats?: { label: string; value: string }[];
+}
 
-const HomeBanner = () => {
+const HomeBanner = ({ stats }: HomeBannerProps) => {
     const [loaded, setLoaded] = useState(false);
 
+    const bannerStats = stats?.length
+        ? [
+              { value: stats.find((s) => s.label === 'Years')?.value ?? '3+', label: 'Years exp.' },
+              { value: stats.find((s) => s.label === 'Projects')?.value ?? '15+', label: 'Projects' },
+              { value: stats.find((s) => s.label === 'Live Sites')?.value ?? '9', label: 'Deployments' },
+          ]
+        : [
+              { value: '3+', label: 'Years exp.' },
+              { value: '15+', label: 'Projects' },
+              { value: '9', label: 'Deployments' },
+          ];
+
     return (
-        <section className="home-banner from-brand-green to-brand-offwhite relative min-h-screen bg-gradient-to-t">
-            {/* Responsive Banner Image */}
-            <picture>
-                <source srcSet={bannerData.imgSrc} media="(min-width: 768px)" />
-                <img
-                    src={bannerData.mobileImgSrc}
-                    alt="Humphrey Banner"
-                    width="1920"
-                    height="1080"
-                    onLoad={() => setLoaded(true)}
-                    className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
-                    style={{ opacity: loaded ? 1 : 0 }}
-                    fetchPriority="high"
-                />
-            </picture>
+        <section className="relative flex min-h-screen items-center pt-[72px]">
+            {/* Subtle background gradients */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute -top-[20%] -right-[10%] h-[600px] w-[600px] rounded-full bg-[#FDF5EE] opacity-60 blur-[120px] dark:opacity-20" />
+                <div className="absolute -bottom-[20%] -left-[10%] h-[500px] w-[500px] rounded-full bg-[#E4EDE8] opacity-50 blur-[120px] dark:opacity-15" />
+            </div>
 
-            <div className="bg-brand-black/60 absolute inset-0 z-10 backdrop-blur-[1.5px]" />
+            <div className="primary-container relative z-10 grid items-center gap-10 md:grid-cols-2 md:gap-[clamp(40px,6vw,100px)]">
+                {/* Left: Text content */}
+                <MotionDiv delay={0.2} className="order-2 md:order-1">
+                    <span className="text-[0.82rem] font-medium tracking-[0.15em] uppercase text-[#E8945A]">
+                        Software Developer
+                    </span>
 
-            {/* Text Content */}
-            <div className="primary-container absolute inset-0 z-20 flex h-full w-full flex-col items-center justify-center px-4 text-center">
-                <MotionDiv delay={0.3}>
-                    <h1
-                        dangerouslySetInnerHTML={{ __html: bannerData.title }}
-                        className="text-brand-white text-[40px] font-[700] tracking-[4px] sm:text-[60px] sm:tracking-[8px] md:text-[70px] md:tracking-[16px] lg:text-[80px] xl:text-[100px]"
-                    />
+                    <h1 className="mt-4 font-display text-[clamp(3rem,6vw,5.5rem)] leading-[1.05] font-light text-[#1B3D2F] dark:text-[#E8E6E1]">
+                        Crafting{' '}
+                        <em className="not-italic text-[#2A5E44] dark:text-[#5AAF7E]">digital experiences</em> with
+                        precision
+                    </h1>
+
+                    <p className="mt-6 max-w-[480px] text-[1.05rem] leading-relaxed text-[#6B6B63] dark:text-[#9E9E95]">
+                        Full-stack developer specializing in Laravel & React, building elegant and performant web
+                        applications that make a difference.
+                    </p>
+
+                    <div className="mt-8 flex flex-wrap gap-4">
+                        <Link
+                            href="/projects"
+                            className="inline-flex items-center gap-2 rounded-full bg-[#1A1A1A] px-7 py-3 text-[0.88rem] font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#1B3D2F] hover:shadow-[0_8px_24px_rgba(27,61,47,0.25)] dark:bg-[#5AAF7E] dark:text-[#0F1A15] dark:hover:bg-[#4A9F6E]"
+                        >
+                            View Projects
+                            <ArrowRight className="h-4 w-4" />
+                        </Link>
+                        <Link
+                            href="/guestbook"
+                            className="inline-flex items-center gap-2 rounded-full border border-[#E5E4E0] bg-transparent px-7 py-3 text-[0.88rem] font-medium text-[#1A1A1A] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#1B3D2F] hover:text-[#1B3D2F] dark:border-[#2A4A3A] dark:text-[#E8E6E1] dark:hover:border-[#5AAF7E] dark:hover:text-[#5AAF7E]"
+                        >
+                            Get in Touch
+                        </Link>
+                    </div>
                 </MotionDiv>
-                <MotionDiv delay={0.5} variant="fadeIn">
-                    <p className="mt-2 text-[16px] text-white sm:text-[20px] md:text-[24px] lg:text-[28px] xl:text-[32px]">{bannerData.subTitle}</p>
-                </MotionDiv>
-                <MotionDiv delay={0.7} variant="fadeIn">
-                    <Socials className="mb-[16px] py-[16px]" />
-                </MotionDiv>
-                <p className="mb-4 text-xs text-white sm:text-sm">TEMPORARY WEBSITE | SELF-HOSTED IN LOCAL SERVER</p>
-                <MotionDiv delay={0.9} variant="fadeUp" className="align-center hs-bg-white absolute bottom-[40px] flex justify-center gap-6 sm:bottom-[70px]">
-                    <a
-                        href="/resume.pdf"
-                        download="Humphrey_Resume.pdf"
-                        className="hs-btn align-center flex items-center gap-2 text-center text-sm sm:text-base"
-                    >
-                        <TbDownload className="text-base sm:text-lg" />
-                        Resume
-                    </a>
+
+                {/* Right: Hero image + stats overlay */}
+                <MotionDiv delay={0.4} variant="fadeIn" className="order-1 md:order-2">
+                    <div className="relative">
+                        {/* Decorative accent box behind image */}
+                        <div className="pointer-events-none absolute -bottom-5 -left-5 z-0 hidden h-[200px] w-[200px] rounded-xl border border-[#E8945A] opacity-35 md:block dark:border-[#5AAF7E] dark:opacity-25" />
+
+                        <div className="relative z-[1] aspect-[4/5] overflow-hidden rounded-xl">
+                            <picture>
+                                <source srcSet="/images/humphrey-banner.webp" media="(min-width: 768px)" />
+                                <img
+                                    src="/images/humphrey-banner-mb.webp"
+                                    alt="Humphrey - Software Developer"
+                                    width="600"
+                                    height="750"
+                                    onLoad={() => setLoaded(true)}
+                                    className="h-full w-full object-cover transition-opacity duration-700 [filter:grayscale(20%)_contrast(1.05)]"
+                                    style={{ opacity: loaded ? 1 : 0 }}
+                                    fetchPriority="high"
+                                />
+                            </picture>
+                        </div>
+
+                        {/* Stats overlay card */}
+                        <div className="absolute -right-4 -bottom-8 z-[2] rounded-xl border border-[#E5E4E0] bg-white/95 px-7 py-5 shadow-lg backdrop-blur-sm md:-left-10 md:bottom-8 md:right-auto dark:border-[#2A4A3A] dark:bg-[#162820]/95">
+                            <div className="flex gap-8">
+                                {bannerStats.map((stat) => (
+                                    <div key={stat.label} className="text-center">
+                                        <div className="font-display text-[1.6rem] font-medium text-[#1B3D2F] dark:text-[#E8E6E1]">
+                                            {stat.value}
+                                        </div>
+                                        <div className="text-[0.72rem] text-[#6B6B63] dark:text-[#9E9E95]">
+                                            {stat.label}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </MotionDiv>
             </div>
         </section>

@@ -1,11 +1,6 @@
-import { MotionDiv, MotionStagger, MotionItem } from '@/components/ui/motion';
+import SectionTitle from '@/components/global/SectionTitle';
+import { MotionDiv } from '@/components/ui/motion';
 import React, { useMemo } from 'react';
-
-interface AboutItems {
-    count?: string;
-    label?: string;
-    imgUrl?: string;
-}
 
 interface ProfileUser {
     name: string;
@@ -20,72 +15,50 @@ interface HomeAboutMeProps {
     profileUser?: ProfileUser;
 }
 
-// Default fallback data - defined once at module level
-const DEFAULT_ABOUT_DATA = {
-    title: "Hi! I'm Humphrey",
-    excerpt:
-        "I'm passionate about becoming a full-stack developer with a strong interest in server-side technologies. I'm enthusiastic about learning and always eager to expand my knowledge in this field. I believe in continuous improvement and enjoy tackling challenges to enhance my skills.",
-    items: [
-        { count: '2', label: 'years of experience' },
-        { count: '100', label: 'cups of coffee' },
-        { count: 'lol', label: 'can crack eggs but not jokes' },
-        { imgUrl: '/images/about-me-item.webp' },
-    ] as AboutItems[],
-};
+const DEFAULT_STATS = [
+    { value: '3+', label: 'Years' },
+    { value: '15+', label: 'Projects' },
+    { value: '9', label: 'Live Sites' },
+    { value: '500+', label: 'Commits' },
+];
+
+const DEFAULT_BIO =
+    "I'm passionate about building elegant, performant web applications with modern technologies. With a strong focus on Laravel and React, I create full-stack solutions that solve real problems and deliver exceptional user experiences.";
 
 const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
-    // Use profile data if available, otherwise use defaults
-    const title = profileUser?.name ? `Hi! I'm ${profileUser.name.split(' ')[0]}` : DEFAULT_ABOUT_DATA.title;
-    const excerpt = profileUser?.about || DEFAULT_ABOUT_DATA.excerpt;
+    const bio = profileUser?.about || DEFAULT_BIO;
 
-    // Determine the image URL - use uploaded image or fallback to default
-    const aboutImageUrl = profileUser?.about_image_path
-        ? `/storage/${profileUser.about_image_path}`
-        : '/images/about-me-item.webp';
-
-    // Memoize items array to avoid recreation on every render
-    const items = useMemo<AboutItems[]>(() => {
+    const stats = useMemo(() => {
         if (profileUser?.profile_stats && profileUser.profile_stats.length > 0) {
-            return [
-                ...profileUser.profile_stats.map((stat) => ({
-                    count: stat.value,
-                    label: stat.label,
-                })),
-                { imgUrl: aboutImageUrl },
-            ];
+            return profileUser.profile_stats.map((s) => ({ value: s.value, label: s.label }));
         }
-        return DEFAULT_ABOUT_DATA.items;
-    }, [profileUser?.profile_stats, aboutImageUrl]);
+        return DEFAULT_STATS;
+    }, [profileUser?.profile_stats]);
 
     return (
-        <section className="about-me bg-brand-white py-[40px] md:py-[80px] dark:bg-gray-950">
-            <div className="primary-container flex flex-col items-center gap-[24px] sm:flex-row sm:gap-[32px] lg:gap-[48px]">
-                {/* Left side: Stats cards */}
-                <MotionStagger className="grid w-full grid-cols-2 gap-3 sm:gap-4 md:w-[50%] md:gap-[28px]">
-                    {items.map((item, index) => (
-                        <MotionItem
-                            key={index}
-                            variant="scaleUp"
-                            className="flex h-[120px] w-full flex-col items-center justify-center rounded-[20px] border-2 border-orange-200 bg-orange-50 p-2 text-center sm:h-[150px] sm:rounded-[28px] md:h-[200px] dark:border-orange-500/30 dark:bg-gray-900"
-                        >
-                            {item.imgUrl ? (
-                                <img src={item.imgUrl} alt="About item" className="h-full w-full object-contain" loading="lazy" />
-                            ) : (
-                                <>
-                                    <span className="text-[28px] font-bold text-orange-500 sm:text-[40px] lg:text-[60px] dark:text-orange-400">
-                                        {item.count} <span className="text-gray-500 dark:text-gray-400">+</span>
-                                    </span>
-                                    <span className="text-xs text-gray-600 sm:text-sm md:text-base dark:text-gray-300">{item.label}</span>
-                                </>
-                            )}
-                        </MotionItem>
-                    ))}
-                </MotionStagger>
+        <section className="py-[clamp(80px,12vw,160px)]">
+            <div className="primary-container grid items-center gap-12 md:grid-cols-2 md:gap-16">
+                {/* Left: Text content */}
+                <MotionDiv>
+                    <SectionTitle title="About" heading="A developer who cares about the craft" />
+                    <p className="mt-4 text-base leading-relaxed text-[#6B6B63] dark:text-[#9E9E95]">{bio}</p>
+                </MotionDiv>
 
-                {/* Right side: Just static content */}
-                <MotionDiv delay={0.2} className="excerpt w-full md:w-[50%]">
-                    <h4 className="mb-3 w-full text-center font-bold text-gray-900 sm:mb-4 sm:text-start dark:text-white">{title}</h4>
-                    <p className="mb-6 text-justify text-sm text-gray-600 sm:mb-8 sm:text-base md:text-[18px] dark:text-gray-300">{excerpt}</p>
+                {/* Right: Stats grid — bordered 2×2 container */}
+                <MotionDiv delay={0.3} className="overflow-hidden rounded-xl border border-[#E5E4E0] bg-[#E5E4E0] dark:border-[#2A4A3A] dark:bg-[#2A4A3A]">
+                    <div className="grid grid-cols-2 gap-px">
+                        {stats.map((stat, index) => (
+                            <div
+                                key={index}
+                                className="flex flex-col items-center justify-center bg-white p-7 text-center transition-colors duration-300 hover:bg-[#FDF5EE] dark:bg-[#162820] dark:hover:bg-[#1E3A2D]"
+                            >
+                                <span className="font-display text-[2rem] font-medium text-[#1B3D2F] dark:text-[#5AAF7E]">
+                                    {stat.value}
+                                </span>
+                                <span className="mt-1 text-[0.82rem] text-[#6B6B63] dark:text-[#9E9E95]">{stat.label}</span>
+                            </div>
+                        ))}
+                    </div>
                 </MotionDiv>
             </div>
         </section>

@@ -11,11 +11,12 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { useAppearance } from '@/hooks/use-appearance';
 import type { Auth, NavItem, Permissions } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Briefcase, Building, Code2, FileText, FolderKanban, Globe, LayoutGrid, MessageSquareHeart, Moon, Shield, Sun, Trophy, Users } from 'lucide-react';
+import { BookOpen, Briefcase, Building, Code2, ExternalLink, FileText, FolderKanban, Globe, Home, LayoutGrid, MessageSquareHeart, Moon, Shield, Sun, Trophy, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
 
@@ -114,6 +115,7 @@ const footerNavItems: SidebarNavItem[] = [
 export function AppSidebar() {
     const { auth } = usePage<AdminPageProps>().props;
     const { appearance, updateAppearance } = useAppearance();
+    const { setOpenMobile, isMobile } = useSidebar();
 
     const isDark = useMemo(() => {
         if (typeof window === 'undefined') return appearance === 'dark';
@@ -151,7 +153,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard">
+                            <Link href="/dashboard" onClick={() => isMobile && setOpenMobile(false)}>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -165,6 +167,21 @@ export function AppSidebar() {
 
             <SidebarFooter>
                 <NavFooter items={footerNavItems} className="mt-auto" />
+                <SidebarGroup className="group-data-[collapsible=icon]:p-0">
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton asChild tooltip="View Site">
+                                    <Link href="/" onClick={() => isMobile && setOpenMobile(false)}>
+                                        <Home className="h-5 w-5" />
+                                        <span>View Site</span>
+                                        <ExternalLink className="ml-auto h-3.5 w-3.5 opacity-50" />
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
                 <SidebarGroup className="group-data-[collapsible=icon]:p-0">
                     <SidebarGroupContent>
                         <SidebarMenu>

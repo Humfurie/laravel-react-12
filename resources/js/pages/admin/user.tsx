@@ -2,7 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Edit as EditIcon, Plus, Search, Shield, Trash2, UserCog, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -33,23 +33,45 @@ interface User {
 }
 
 interface UserProps {
-    users: User[];
+    users: {
+        data: User[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    filters: {
+        search?: string;
+        role?: string;
+    };
     roles: Role[];
     can: {
         create: boolean;
     };
 }
 
-export default function UserManagement({ users, roles, can }: UserProps) {
-    const [searchQuery, setSearchQuery] = useState('');
+export default function UserManagement({ users, filters, roles, can }: UserProps) {
+    const [search, setSearch] = useState(filters.search || '');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const isInitialMount = useRef(true);
 
-    const filteredUsers = users.filter(
-        (user) => user.name.toLowerCase().includes(searchQuery.toLowerCase()) || user.email.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        const timeout = setTimeout(() => {
+            router.get('/admin/users', { search: search || undefined, role: filters.role }, { preserveState: true, replace: true });
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [search]);
+
+    const handleRoleFilter = (role: string | undefined) => {
+        router.get('/admin/users', { search: filters.search, role }, { preserveState: true, replace: true });
+    };
 
     const handleEditUser = (user: User) => {
         setSelectedUser(user);
@@ -93,7 +115,7 @@ export default function UserManagement({ users, roles, can }: UserProps) {
                                     <UserCog className="h-6 w-6 text-blue-600" />
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-2xl font-bold text-gray-900">{users.filter((u) => !u.deleted_at).length}</p>
+                                    <p className="text-2xl font-bold text-gray-900">{users.data.filter((u) => !u.deleted_at).length}</p>
                                     <p className="text-sm text-gray-500">Active Users</p>
                                 </div>
                             </div>
@@ -108,7 +130,7 @@ export default function UserManagement({ users, roles, can }: UserProps) {
                                     <Trash2 className="h-6 w-6 text-red-600" />
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-2xl font-bold text-gray-900">{users.filter((u) => u.deleted_at).length}</p>
+                                    <p className="text-2xl font-bold text-gray-900">{users.data.filter((u) => u.deleted_at).length}</p>
                                     <p className="text-sm text-gray-500">Deleted Users</p>
                                 </div>
                             </div>
@@ -131,42 +153,59 @@ export default function UserManagement({ users, roles, can }: UserProps) {
                     </div>
                 </div>
 
+                {/* Filters */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            onClick={() => handleRoleFilter(undefined)}
+                            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                                !filters.role
+                                    ? 'bg-[#1B3D2F] text-white dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                            }`}
+                        >
+                            All
+                        </button>
+                        {roles.map((role) => (
+                            <button
+                                key={role.slug}
+                                onClick={() => handleRoleFilter(role.slug)}
+                                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                                    filters.role === role.slug
+                                        ? 'bg-[#1B3D2F] text-white dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                                }`}
+                            >
+                                {role.name}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search users..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="rounded-lg border border-gray-200 bg-white py-1.5 pr-4 pl-9 text-sm focus:border-[#5AAF7E] focus:ring-2 focus:ring-[#5AAF7E]/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                            />
+                        </div>
+                        {can.create && (
+                            <button
+                                onClick={() => setIsCreateModalOpen(true)}
+                                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md"
+                            >
+                                <Plus className="h-4 w-4" />
+                                Add User
+                            </button>
+                        )}
+                    </div>
+                </div>
+
                 {/* User Table */}
                 <div className="relative flex-1 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
                     <div className="flex h-full flex-col">
-                        {/* Table Header */}
-                        <div className="border-b border-gray-100 bg-white p-6">
-                            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                                <div>
-                                    <h2 className="text-xl font-semibold text-gray-900">User Management</h2>
-                                    <p className="mt-1 text-sm text-gray-600">Manage users and their roles</p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    {/* Search Bar */}
-                                    <div className="relative">
-                                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            placeholder="Search users..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-64 rounded-xl border border-gray-200 bg-white py-2.5 pr-4 pl-10 text-sm transition-colors focus:border-blue-300 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-                                        />
-                                    </div>
-                                    {/* Add User Button */}
-                                    {can.create && (
-                                        <button
-                                            onClick={() => setIsCreateModalOpen(true)}
-                                            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md"
-                                        >
-                                            <Plus className="h-4 w-4" />
-                                            Add User
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
                         {/* Table Content */}
                         <div className="flex-1 overflow-auto bg-white">
                             <table className="w-full">
@@ -180,7 +219,7 @@ export default function UserManagement({ users, roles, can }: UserProps) {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100 bg-white">
-                                    {filteredUsers.map((user) => (
+                                    {users.data.map((user) => (
                                         <tr
                                             key={user.id}
                                             className={`group transition-colors ${user.deleted_at ? 'bg-red-50 opacity-60' : 'hover:bg-gray-50'}`}
@@ -225,7 +264,7 @@ export default function UserManagement({ users, roles, can }: UserProps) {
                                                         Deleted
                                                     </span>
                                                 ) : user.email_verified_at ? (
-                                                    <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                                                    <span className="inline-flex items-center rounded-full bg-[#E4EDE8] px-2.5 py-0.5 text-xs font-medium text-[#1B3D2F]">
                                                         Verified
                                                     </span>
                                                 ) : (
@@ -240,7 +279,7 @@ export default function UserManagement({ users, roles, can }: UserProps) {
                                                     {user.deleted_at ? (
                                                         <button
                                                             onClick={() => handleRestoreUser(user)}
-                                                            className="inline-flex items-center gap-1 rounded-lg bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 transition-colors hover:bg-green-100"
+                                                            className="inline-flex items-center gap-1 rounded-lg bg-[#E4EDE8]/50 px-3 py-1.5 text-sm font-medium text-[#2A5E44] transition-colors hover:bg-[#E4EDE8]"
                                                         >
                                                             Restore
                                                         </button>
@@ -284,6 +323,27 @@ export default function UserManagement({ users, roles, can }: UserProps) {
                         </div>
                     </div>
                 </div>
+
+                {/* Pagination */}
+                {users.last_page > 1 && (
+                    <div className="flex items-center justify-center gap-2">
+                        {Array.from({ length: users.last_page }, (_, i) => i + 1).map((page) => (
+                            <button
+                                key={page}
+                                onClick={() =>
+                                    router.get('/admin/users', { ...filters, page }, { preserveState: true })
+                                }
+                                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                                    page === users.current_page
+                                        ? 'bg-[#1B3D2F] text-white dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
+                                        : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                                }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
                 {/* Edit User Modal */}
                 {isEditModalOpen && selectedUser && (

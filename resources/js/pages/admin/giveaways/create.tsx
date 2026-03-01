@@ -399,8 +399,8 @@ export default function Create() {
                     leave="transition ease-in-out duration-300"
                     leaveTo="opacity-0"
                 >
-                    <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
-                        <p className="text-sm font-medium text-green-900 dark:text-green-100">Giveaway created successfully!</p>
+                    <div className="mt-4 rounded-lg border border-[#E4EDE8] bg-[#E4EDE8]/30 p-4 dark:border-[#2A4A3A] dark:bg-[#162820]">
+                        <p className="text-sm font-medium text-[#1B3D2F] dark:text-[#5AAF7E]">Giveaway created successfully!</p>
                     </div>
                 </Transition>
             </div>

@@ -175,10 +175,10 @@ export default function CreateProject({ developers }: CreateProjectProps) {
                 {showToast.show && (
                     <div
                         className={`mb-6 rounded-xl border p-4 shadow-sm ${
-                            showToast.type === 'success' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+                            showToast.type === 'success' ? 'border-[#E4EDE8] bg-[#E4EDE8]/30' : 'border-red-200 bg-red-50'
                         }`}
                     >
-                        <p className={`text-sm font-medium ${showToast.type === 'success' ? 'text-green-900' : 'text-red-900'}`}>
+                        <p className={`text-sm font-medium ${showToast.type === 'success' ? 'text-[#1B3D2F] dark:text-[#5AAF7E]' : 'text-red-900'}`}>
                             {showToast.message}
                         </p>
                     </div>
