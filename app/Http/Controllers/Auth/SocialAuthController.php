@@ -17,16 +17,14 @@ class SocialAuthController extends Controller
 
     public function __construct(
         protected GitHubService $githubService
-    )
-    {
-    }
+    ) {}
 
     /**
      * Redirect to OAuth provider.
      */
     public function redirect(string $provider): RedirectResponse
     {
-        if (!in_array($provider, $this->supportedProviders)) {
+        if (! in_array($provider, $this->supportedProviders)) {
             return redirect()->route('login')
                 ->withErrors(['provider' => 'Unsupported authentication provider.']);
         }
@@ -48,7 +46,7 @@ class SocialAuthController extends Controller
      */
     public function callback(string $provider): RedirectResponse
     {
-        if (!in_array($provider, $this->supportedProviders)) {
+        if (! in_array($provider, $this->supportedProviders)) {
             return redirect()->route('login')
                 ->withErrors(['provider' => 'Unsupported authentication provider.']);
         }
@@ -64,9 +62,18 @@ class SocialAuthController extends Controller
 
             Auth::login($user, remember: true);
 
+            Log::info("Social auth success for {$provider}", [
+                'user_id' => $user->id,
+                'session_id' => session()->getId(),
+                'session_driver' => config('session.driver'),
+                'auth_check' => Auth::check(),
+            ]);
+
             return redirect()->intended('/dashboard');
         } catch (\Exception $e) {
-            Log::error("Social auth error for {$provider}: " . $e->getMessage());
+            Log::error("Social auth error for {$provider}: ".$e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             return redirect()->route('login')
                 ->withErrors(['social' => 'Unable to authenticate. Please try again.']);
@@ -102,7 +109,7 @@ class SocialAuthController extends Controller
             ];
 
             // Update avatar if not set
-            if (!$user->avatar_url && $socialUser->getAvatar()) {
+            if (! $user->avatar_url && $socialUser->getAvatar()) {
                 $updateData['avatar_url'] = $socialUser->getAvatar();
             }
 
@@ -159,7 +166,7 @@ class SocialAuthController extends Controller
             return Str::slug(explode('@', $email)[0]);
         }
 
-        return 'user-' . Str::random(8);
+        return 'user-'.Str::random(8);
     }
 
     /**
@@ -171,7 +178,7 @@ class SocialAuthController extends Controller
         $counter = 1;
 
         while (User::where('username', $username)->exists()) {
-            $username = $originalUsername . '-' . $counter;
+            $username = $originalUsername.'-'.$counter;
             $counter++;
         }
 
@@ -206,7 +213,7 @@ class SocialAuthController extends Controller
                 ]);
             }
         } catch (\Exception $e) {
-            Log::warning("Failed to sync GitHub contributions for user {$user->id}: " . $e->getMessage());
+            Log::warning("Failed to sync GitHub contributions for user {$user->id}: ".$e->getMessage());
         }
     }
 
@@ -215,7 +222,7 @@ class SocialAuthController extends Controller
      */
     public function link(string $provider): RedirectResponse
     {
-        if (!in_array($provider, $this->supportedProviders)) {
+        if (! in_array($provider, $this->supportedProviders)) {
             return back()->withErrors(['provider' => 'Unsupported authentication provider.']);
         }
 
@@ -229,7 +236,7 @@ class SocialAuthController extends Controller
      */
     public function linkCallback(string $provider): RedirectResponse
     {
-        if (!in_array($provider, $this->supportedProviders)) {
+        if (! in_array($provider, $this->supportedProviders)) {
             return redirect()->route('profile.edit')
                 ->withErrors(['provider' => 'Unsupported authentication provider.']);
         }
@@ -259,16 +266,16 @@ class SocialAuthController extends Controller
                 $this->syncGitHubContributions($user);
             }
 
-            if (!$user->avatar_url && $socialUser->getAvatar()) {
+            if (! $user->avatar_url && $socialUser->getAvatar()) {
                 $updateData['avatar_url'] = $socialUser->getAvatar();
             }
 
             $user->update($updateData);
 
             return redirect()->route('profile.edit')
-                ->with('status', ucfirst($provider) . ' account linked successfully.');
+                ->with('status', ucfirst($provider).' account linked successfully.');
         } catch (\Exception $e) {
-            Log::error("Social link error for {$provider}: " . $e->getMessage());
+            Log::error("Social link error for {$provider}: ".$e->getMessage());
 
             return redirect()->route('profile.edit')
                 ->withErrors(['social' => 'Unable to link account. Please try again.']);
@@ -280,7 +287,7 @@ class SocialAuthController extends Controller
      */
     public function unlink(string $provider): RedirectResponse
     {
-        if (!in_array($provider, $this->supportedProviders)) {
+        if (! in_array($provider, $this->supportedProviders)) {
             return back()->withErrors(['provider' => 'Unsupported authentication provider.']);
         }
 
@@ -290,10 +297,10 @@ class SocialAuthController extends Controller
         // Ensure user has another way to login (password or another provider)
         $hasPassword = $user->password !== null;
         $linkedProviders = collect($this->supportedProviders)
-            ->filter(fn($p) => $user->{"{$p}_id"} !== null)
+            ->filter(fn ($p) => $user->{"{$p}_id"} !== null)
             ->count();
 
-        if (!$hasPassword && $linkedProviders <= 1) {
+        if (! $hasPassword && $linkedProviders <= 1) {
             return back()->withErrors([
                 'social' => 'You must set a password or link another account before unlinking this provider.',
             ]);
@@ -309,6 +316,6 @@ class SocialAuthController extends Controller
 
         $user->update($updateData);
 
-        return back()->with('status', ucfirst($provider) . ' account unlinked.');
+        return back()->with('status', ucfirst($provider).' account unlinked.');
     }
 }

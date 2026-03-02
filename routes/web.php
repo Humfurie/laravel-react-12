@@ -37,7 +37,7 @@ Route::get('/', function (HomepageCacheService $homepageService) {
             'headline' => $primaryUser->headline,
             'bio' => $primaryUser->bio,
             'about' => $primaryUser->about,
-            'profile_stats' => $primaryUser->profile_stats ?? [],
+            'profile_stats' => $homepageService->getProfileStats(),
             'about_image_path' => $primaryUser->about_image_path,
             'github_username' => $primaryUser->github_username,
         ],

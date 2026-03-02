@@ -147,11 +147,11 @@ export default function Settings({ allSettings }: Props) {
 
                         {/* Show selected file preview */}
                         {hasSelectedFile && (
-                            <div className="rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950">
+                            <div className="rounded-lg border border-[#E4EDE8] bg-[#E4EDE8]/30 p-3 dark:border-[#2A4A3A] dark:bg-[#162820]">
                                 <div className="flex items-center gap-3">
-                                    <FileText className="h-8 w-8 flex-shrink-0 text-green-600" />
+                                    <FileText className="h-8 w-8 flex-shrink-0 text-[#2A5E44] dark:text-[#5AAF7E]" />
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-green-900 dark:text-green-100">File selected</p>
+                                        <p className="text-sm font-medium text-[#1B3D2F] dark:text-[#5AAF7E]">File selected</p>
                                         <p className="text-muted-foreground truncate text-xs">{selectedFiles[setting.key].name}</p>
                                     </div>
                                     <Button
@@ -291,8 +291,8 @@ export default function Settings({ allSettings }: Props) {
 
                 {/* Success Message */}
                 {recentlySuccessful && (
-                    <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
-                        <p className="text-sm font-medium text-green-900 dark:text-green-100">Settings saved successfully!</p>
+                    <div className="rounded-lg border border-[#E4EDE8] bg-[#E4EDE8]/30 p-4 dark:border-[#2A4A3A] dark:bg-[#162820]">
+                        <p className="text-sm font-medium text-[#1B3D2F] dark:text-[#5AAF7E]">Settings saved successfully!</p>
                     </div>
                 )}
 

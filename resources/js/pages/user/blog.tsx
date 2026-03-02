@@ -1,12 +1,9 @@
-import FloatingNav from '@/components/floating-nav';
-import Footer from '@/components/global/Footer';
 import StructuredData, { schemas } from '@/components/seo/StructuredData';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MotionDiv, MotionItem, MotionStagger } from '@/components/ui/motion';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowRight, ArrowUpRight, BookOpen, Calendar, Eye, Sparkles } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BookOpen, Briefcase, Calendar, Eye, Pencil, Sparkles } from 'lucide-react';
 import { memo, useCallback, useEffect, useState } from 'react';
 
 interface Blog {
@@ -23,6 +20,7 @@ interface Blog {
         meta_description?: string;
         meta_keywords?: string;
     } | null;
+    tags: string[] | null;
     isPrimary: boolean;
     sort_order: number;
     view_count: number;
@@ -32,6 +30,8 @@ interface Blog {
     status_label: string;
 }
 
+type BlogCategory = 'portfolio' | 'personal';
+
 interface Props {
     blogs: {
         data: Blog[];
@@ -40,6 +40,7 @@ interface Props {
         per_page: number;
         total: number;
     };
+    category: BlogCategory;
 }
 
 const truncateText = (text: string, maxLength: number = 150) => {
@@ -61,7 +62,7 @@ const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog;
     if (isFeatured) {
         return (
             <article className="group cursor-pointer lg:col-span-2" onClick={handleCardClick}>
-                <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-[#E8E4DC] dark:bg-gray-800">
+                <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-[#F3F1EC] dark:bg-[#0F1A15]">
                     {blog.display_image ? (
                         <img
                             src={blog.display_image}
@@ -71,30 +72,27 @@ const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog;
                         />
                     ) : (
                         <div className="flex h-full items-center justify-center">
-                            <BookOpen className="h-24 w-24 text-gray-400" />
+                            <BookOpen className="h-24 w-24 text-[#E5E4E0] dark:text-[#2A4A3A]" />
                         </div>
                     )}
 
                     {/* Date Badge */}
                     {blog.published_at && (
-                        <div className="absolute top-6 left-6 rounded-full bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-sm dark:bg-gray-700 dark:text-gray-200">
+                        <div className="absolute top-6 left-6 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-[#1A1A1A] backdrop-blur-sm dark:bg-[#162820]/90 dark:text-[#E8E6E1]">
                             {new Date(blog.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </div>
                     )}
 
                     {/* Featured Badge */}
                     {blog.isPrimary && (
-                        <div className="absolute top-6 right-6">
-                            <Badge className="rounded-full border-0 bg-[#88C0A8] px-4 py-1.5 text-white">
-                                <Sparkles className="mr-1 h-3 w-3" />
-                                Featured
-                            </Badge>
+                        <div className="absolute top-6 right-6 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide text-[#1B3D2F] uppercase">
+                            Featured
                         </div>
                     )}
 
                     {/* Content Overlay */}
                     <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
-                        <h2 className="mb-2 line-clamp-2 text-2xl font-bold text-white md:text-3xl">{blog.title}</h2>
+                        <h2 className="font-display mb-2 line-clamp-2 text-2xl font-normal text-white md:text-3xl">{blog.title}</h2>
                         {blog.excerpt && (
                             <p className="line-clamp-2 max-w-xl text-sm text-white/80 md:text-base">{truncateText(blog.excerpt, 150)}</p>
                         )}
@@ -107,8 +105,8 @@ const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog;
                     </div>
 
                     {/* Arrow Link */}
-                    <div className="absolute right-6 bottom-6 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg transition-transform group-hover:scale-110">
-                        <ArrowUpRight className="h-5 w-5 text-gray-900" />
+                    <div className="absolute right-6 bottom-6 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg transition-transform group-hover:scale-110 dark:bg-[#162820]">
+                        <ArrowUpRight className="h-5 w-5 text-[#1B3D2F] dark:text-[#5AAF7E]" />
                     </div>
                 </div>
             </article>
@@ -118,7 +116,7 @@ const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog;
     return (
         <article className={`group cursor-pointer ${isLarge ? 'md:col-span-2' : ''}`} onClick={handleCardClick}>
             {/* Image Container */}
-            <div className={`relative overflow-hidden rounded-2xl bg-[#F5F5F3] dark:bg-gray-800 ${isLarge ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}>
+            <div className={`relative overflow-hidden rounded-xl bg-[#F3F1EC] dark:bg-[#0F1A15] ${isLarge ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}>
                 {blog.display_image ? (
                     <img
                         src={blog.display_image}
@@ -127,22 +125,21 @@ const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog;
                         loading="lazy"
                     />
                 ) : (
-                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50">
-                        <span className="font-serif text-6xl font-bold text-gray-300">{blog.title.charAt(0).toUpperCase()}</span>
+                    <div className="flex h-full items-center justify-center">
+                        <span className="font-display text-5xl text-[#E5E4E0] dark:text-[#2A4A3A]">{blog.title.charAt(0).toUpperCase()}</span>
                     </div>
                 )}
 
                 {/* Featured badge */}
                 {blog.isPrimary && (
-                    <Badge className="absolute top-4 left-4 rounded-full border-0 bg-[#88C0A8] px-3 py-1 text-white">
-                        <Sparkles className="mr-1 h-3 w-3" />
+                    <div className="absolute top-4 left-4 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide text-[#1B3D2F] uppercase">
                         Featured
-                    </Badge>
+                    </div>
                 )}
 
                 {/* Date badge */}
                 {blog.published_at && (
-                    <div className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-700 backdrop-blur-sm dark:bg-gray-700/90 dark:text-gray-200">
+                    <div className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-[#1A1A1A] backdrop-blur-sm dark:bg-[#162820]/90 dark:text-[#E8E6E1]">
                         {new Date(blog.published_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                     </div>
                 )}
@@ -154,8 +151,8 @@ const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog;
                 </div>
 
                 {/* Arrow Link - appears on hover */}
-                <div className="absolute top-4 right-4 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full bg-white opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                    <ArrowUpRight className="h-4 w-4 text-gray-900" />
+                <div className="absolute top-4 right-4 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full bg-white opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 dark:bg-[#162820]">
+                    <ArrowUpRight className="h-4 w-4 text-[#1B3D2F] dark:text-[#5AAF7E]" />
                 </div>
             </div>
 
@@ -163,20 +160,20 @@ const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog;
             <div className={`mt-4 ${isLarge ? 'md:mt-6' : ''}`}>
                 {/* Title */}
                 <h3
-                    className={`line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-gray-600 dark:text-white dark:group-hover:text-gray-300 ${isLarge ? 'text-2xl md:text-3xl' : 'text-lg'}`}
+                    className={`font-display line-clamp-2 font-normal text-[#1A1A1A] transition-colors group-hover:text-[#1B3D2F] dark:text-[#E8E6E1] dark:group-hover:text-[#5AAF7E] ${isLarge ? 'text-[2rem] md:text-[2.5rem]' : 'text-[1.5rem]'}`}
                 >
                     {blog.title}
                 </h3>
 
                 {/* Excerpt */}
                 {blog.excerpt && (
-                    <p className={`mt-2 line-clamp-2 text-gray-500 dark:text-gray-400 ${isLarge ? 'text-base' : 'text-sm'}`}>
+                    <p className={`mt-2 line-clamp-2 text-[#6B6B63] dark:text-[#9E9E95] ${isLarge ? 'text-[0.9rem]' : 'text-[0.85rem]'}`}>
                         {truncateText(blog.excerpt, isLarge ? 200 : 100)}
                     </p>
                 )}
 
                 {/* Meta */}
-                <div className="mt-3 flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
+                <div className="mt-3 flex items-center gap-4 text-xs text-[#9E9E95]">
                     {blog.published_at && (
                         <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
@@ -193,7 +190,49 @@ const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog;
     );
 });
 
-export default function BlogIndex({ blogs }: Props) {
+const categories: { key: BlogCategory; label: string; icon: typeof Briefcase }[] = [
+    { key: 'portfolio', label: 'Portfolio', icon: Briefcase },
+    { key: 'personal', label: 'Personal', icon: Pencil },
+];
+
+const CategoryTabs = memo(function CategoryTabs({ active }: { active: BlogCategory }) {
+    const handleTabClick = useCallback(
+        (category: BlogCategory) => {
+            if (category === active) return;
+            router.get(
+                `/blog`,
+                { category },
+                {
+                    preserveScroll: false,
+                    preserveState: true,
+                    only: ['blogs', 'category'],
+                },
+            );
+        },
+        [active],
+    );
+
+    return (
+        <div className="flex items-center gap-1 rounded-full bg-[#F3F1EC] p-1 dark:bg-[#162820]">
+            {categories.map(({ key, label, icon: Icon }) => (
+                <button
+                    key={key}
+                    onClick={() => handleTabClick(key)}
+                    className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
+                        active === key
+                            ? 'bg-[#1B3D2F] text-white shadow-sm dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
+                            : 'text-[#6B6B63] hover:text-[#1B3D2F] dark:text-[#9E9E95] dark:hover:text-[#5AAF7E]'
+                    }`}
+                >
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
+                </button>
+            ))}
+        </div>
+    );
+});
+
+export default function BlogIndex({ blogs, category }: Props) {
     const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
@@ -212,39 +251,39 @@ export default function BlogIndex({ blogs }: Props) {
         return () => window.removeEventListener('scroll', updateScrollDirection);
     }, [isVisible]);
 
+    const categoryLabel = category === 'portfolio' ? 'Portfolio' : 'Personal';
+
     // Get featured post and rest
     const featuredPost = blogs.data.find((blog) => blog.isPrimary) || blogs.data[0];
     const otherPosts = blogs.data.filter((blog) => blog.id !== featuredPost?.id);
 
     return (
         <>
-            <Head title="Blog">
+            <Head title={`${category === 'portfolio' ? 'Portfolio' : 'Personal'} Blog`}>
                 <meta
                     name="description"
-                    content="Read articles, tutorials, and insights by Humphrey Singculan on software development, Laravel, React, and full-stack engineering."
+                    content={
+                        category === 'portfolio'
+                            ? 'Portfolio articles by Humphrey Singculan on software development, Laravel, React, and full-stack engineering.'
+                            : 'Personal blog posts by Humphrey Singculan — thoughts, experiences, and stories beyond code.'
+                    }
                 />
                 <link rel="canonical" href="https://humfurie.org/blog" />
 
                 {/* Open Graph Meta Tags for Social Media */}
-                <meta property="og:title" content="Blog - All Posts" />
-                <meta
-                    property="og:description"
-                    content="Browse through all our articles, tutorials, and insights. Discover the latest trends and best practices in technology and development."
-                />
+                <meta property="og:title" content={`${categoryLabel} Blog`} />
+                <meta property="og:description" content={`Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`} />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
-                <meta property="og:image" content="/images/og-default.jpg" />
+                <meta property="og:image" content="https://humfurie.org/images/og-default.jpg" />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
                 <meta property="og:image:alt" content="Blog - Technology Articles and Insights" />
 
                 {/* Twitter Card Meta Tags */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Blog - All Posts" />
-                <meta
-                    name="twitter:description"
-                    content="Browse through all our articles, tutorials, and insights. Discover the latest trends and best practices in technology and development."
-                />
+                <meta name="twitter:title" content={`${categoryLabel} Blog`} />
+                <meta name="twitter:description" content={`Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`} />
                 <meta name="twitter:image" content="/images/og-default.jpg" />
 
                 {/* Schema.org JSON-LD Structured Data */}
@@ -252,9 +291,8 @@ export default function BlogIndex({ blogs }: Props) {
                     {JSON.stringify({
                         '@context': 'https://schema.org',
                         '@type': 'CollectionPage',
-                        name: 'Blog - All Posts',
-                        description:
-                            'Browse through all our articles, tutorials, and insights. Discover the latest trends and best practices in technology and development.',
+                        name: `${categoryLabel} Blog`,
+                        description: `Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`,
                         url: typeof window !== 'undefined' ? window.location.href : '',
                         mainEntity: {
                             '@type': 'ItemList',
@@ -302,16 +340,14 @@ export default function BlogIndex({ blogs }: Props) {
 
             <StructuredData data={[schemas.organization()]} />
 
-            <div className="min-h-screen bg-[#FAFAF8] dark:bg-gray-900">
-                <FloatingNav currentPage="blog" />
-
+            <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0A1210]">
                 <main className="pt-20">
                     {/* Magazine Hero Section */}
-                    <section className="container mx-auto px-4 py-8 md:py-12">
+                    <section className="primary-container py-8 md:py-12">
                         {/* Section Header */}
-                        <MotionDiv className="mb-8 flex items-end justify-between">
+                        <MotionDiv className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                             <div>
-                                <h1 className="font-serif text-5xl font-bold tracking-tight text-gray-900 md:text-6xl lg:text-7xl dark:text-white">
+                                <h1 className="font-display text-5xl font-light tracking-tight text-[#1A1A1A] md:text-6xl lg:text-7xl dark:text-[#E8E6E1]">
                                     Best of the
                                     <br />
                                     <span className="relative">
@@ -322,19 +358,22 @@ export default function BlogIndex({ blogs }: Props) {
                                                 stroke="currentColor"
                                                 strokeWidth="2"
                                                 strokeLinecap="round"
-                                                className="text-gray-300 dark:text-gray-600"
+                                                className="text-[#E5E4E0] dark:text-[#2A4A3A]"
                                             />
                                         </svg>
                                     </span>
                                 </h1>
                             </div>
-                            <Link
-                                href="#all-posts"
-                                className="hidden items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 md:flex dark:text-gray-400 dark:hover:text-white"
-                            >
-                                See all posts
-                                <ArrowRight className="h-4 w-4" />
-                            </Link>
+                            <div className="flex items-center gap-4">
+                                <CategoryTabs active={category} />
+                                <Link
+                                    href="#all-posts"
+                                    className="hidden items-center gap-2 text-sm font-medium text-[#9E9E95] transition-colors hover:text-[#1B3D2F] md:flex dark:hover:text-[#5AAF7E]"
+                                >
+                                    See all posts
+                                    <ArrowRight className="h-4 w-4" />
+                                </Link>
+                            </div>
                         </MotionDiv>
 
                         {/* Featured Grid - Magazine Layout */}
@@ -346,29 +385,31 @@ export default function BlogIndex({ blogs }: Props) {
                                 {/* Sidebar Cards */}
                                 <div className="flex flex-col gap-6">
                                     {/* Info Card */}
-                                    <div className="flex flex-col justify-between rounded-3xl bg-[#C5E8D5] p-6 dark:bg-green-900/30">
-                                        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
+                                    <div className="flex flex-col justify-between rounded-xl bg-[#E4EDE8] p-6 dark:bg-[#1B3D2F]/20">
+                                        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-[#6B6B63] dark:text-[#9E9E95]">
                                             <Sparkles className="h-4 w-4" />
                                             <span>ARTICLES</span>
                                         </div>
                                         <div>
-                                            <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">Become a</p>
-                                            <h3 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
+                                            <p className="mb-2 text-sm text-[#6B6B63] dark:text-[#9E9E95]">Become a</p>
+                                            <h3 className="font-display mb-4 text-2xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">
                                                 Regular
                                                 <br />
                                                 Reader
                                             </h3>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            <p className="text-sm text-[#6B6B63] dark:text-[#9E9E95]">
                                                 Stay updated with the latest insights and tutorials
                                             </p>
                                         </div>
-                                        <div className="mt-6 font-serif text-3xl font-bold text-gray-900 dark:text-white">{blogs.total} posts</div>
+                                        <div className="font-display mt-6 text-3xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">
+                                            {blogs.total} posts
+                                        </div>
                                     </div>
 
                                     {/* Second Featured Post */}
                                     {otherPosts[0] && (
                                         <div
-                                            className="group relative aspect-square cursor-pointer overflow-hidden rounded-3xl"
+                                            className="group relative aspect-square cursor-pointer overflow-hidden rounded-xl"
                                             onClick={() => router.visit(`/blog/${otherPosts[0].slug}`)}
                                         >
                                             {otherPosts[0].display_image ? (
@@ -379,8 +420,8 @@ export default function BlogIndex({ blogs }: Props) {
                                                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                                                 />
                                             ) : (
-                                                <div className="flex h-full items-center justify-center bg-[#F5E6D3] dark:bg-gray-700">
-                                                    <BookOpen className="h-16 w-16 text-gray-400 dark:text-gray-500" />
+                                                <div className="flex h-full items-center justify-center bg-[#FDF5EE] dark:bg-[#162820]">
+                                                    <BookOpen className="h-16 w-16 text-[#E8945A]/40" />
                                                 </div>
                                             )}
 
@@ -391,12 +432,14 @@ export default function BlogIndex({ blogs }: Props) {
                                             </div>
 
                                             <div className="absolute right-4 bottom-4 left-4">
-                                                <h3 className="line-clamp-2 text-lg font-bold text-white drop-shadow-lg">{otherPosts[0].title}</h3>
+                                                <h3 className="font-display line-clamp-2 text-lg font-normal text-white drop-shadow-lg">
+                                                    {otherPosts[0].title}
+                                                </h3>
                                             </div>
 
                                             {/* Arrow */}
-                                            <div className="absolute right-4 bottom-4 flex h-10 w-10 items-center justify-center rounded-full bg-white opacity-0 transition-opacity group-hover:opacity-100">
-                                                <ArrowUpRight className="h-4 w-4 text-gray-900" />
+                                            <div className="absolute right-4 bottom-4 flex h-10 w-10 items-center justify-center rounded-full bg-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-[#162820]">
+                                                <ArrowUpRight className="h-4 w-4 text-[#1B3D2F] dark:text-[#5AAF7E]" />
                                             </div>
                                         </div>
                                     )}
@@ -406,28 +449,33 @@ export default function BlogIndex({ blogs }: Props) {
                     </section>
 
                     {/* All Posts Section */}
-                    <section id="all-posts" className="bg-white py-16 dark:bg-gray-800">
-                        <div className="container mx-auto px-4">
+                    <section id="all-posts" className="bg-white py-16 dark:bg-[#0F1A15]">
+                        <div className="primary-container">
                             {/* Section Header */}
                             <div className="mb-8">
                                 <div className="mb-4 flex items-center gap-3">
-                                    <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-                                    <h2 className="font-serif text-3xl font-bold text-gray-900 dark:text-white">All Articles</h2>
-                                    <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                                    <div className="h-px flex-1 bg-[#E5E4E0] dark:bg-[#2A4A3A]" />
+                                    <h2 className="font-display text-3xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">
+                                        {category === 'portfolio' ? 'Portfolio' : 'Personal'} Articles
+                                    </h2>
+                                    <div className="h-px flex-1 bg-[#E5E4E0] dark:bg-[#2A4A3A]" />
                                 </div>
-                                <p className="text-center text-gray-500 dark:text-gray-400">
+                                <p className="text-center text-[#6B6B63] dark:text-[#9E9E95]">
                                     Browse through {blogs.total} article{blogs.total !== 1 ? 's' : ''}
                                 </p>
                             </div>
 
                             {blogs.data.length === 0 ? (
                                 <div className="py-16 text-center">
-                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
-                                        <BookOpen className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#F3F1EC] dark:bg-[#162820]">
+                                        <BookOpen className="h-8 w-8 text-[#9E9E95]" />
                                     </div>
-                                    <h3 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-white">No posts found</h3>
-                                    <p className="mb-6 text-gray-500 dark:text-gray-400">We're working on some great content. Check back soon!</p>
-                                    <Button onClick={() => router.visit('/')} className="rounded-full bg-gray-900 px-8 text-white hover:bg-gray-800">
+                                    <h3 className="mb-2 text-2xl font-semibold text-[#1A1A1A] dark:text-[#E8E6E1]">No posts found</h3>
+                                    <p className="mb-6 text-[#6B6B63] dark:text-[#9E9E95]">We're working on some great content. Check back soon!</p>
+                                    <Button
+                                        onClick={() => router.visit('/')}
+                                        className="rounded-full bg-[#1B3D2F] px-8 text-white hover:bg-[#2A5E44] dark:bg-[#5AAF7E] dark:text-[#0F1A15] dark:hover:bg-[#5AAF7E]/90"
+                                    >
                                         Back to Home
                                     </Button>
                                 </div>
@@ -449,11 +497,11 @@ export default function BlogIndex({ blogs }: Props) {
                                                 {Array.from({ length: blogs.last_page }, (_, i) => i + 1).map((page) => (
                                                     <button
                                                         key={page}
-                                                        onClick={() => router.visit(`/blog?page=${page}`)}
+                                                        onClick={() => router.visit(`/blog?category=${category}&page=${page}`)}
                                                         className={`h-10 w-10 rounded-full font-medium transition-all ${
                                                             page === blogs.current_page
-                                                                ? 'bg-gray-900 text-white'
-                                                                : 'border border-gray-200 bg-white text-gray-600 hover:border-gray-900 hover:text-gray-900'
+                                                                ? 'bg-[#1B3D2F] text-white dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
+                                                                : 'border border-[#E5E4E0] bg-white text-[#6B6B63] hover:border-[#1B3D2F] hover:text-[#1B3D2F] dark:border-[#2A4A3A] dark:bg-[#162820] dark:text-[#9E9E95] dark:hover:border-[#5AAF7E] dark:hover:text-[#5AAF7E]'
                                                         }`}
                                                     >
                                                         {page}
@@ -468,20 +516,18 @@ export default function BlogIndex({ blogs }: Props) {
                     </section>
 
                     {/* CTA Section */}
-                    <section className="border-t border-gray-100 bg-white py-16 dark:border-gray-800 dark:bg-gray-950">
-                        <MotionDiv className="container mx-auto px-4 text-center">
-                            <p className="mb-3 text-sm font-medium tracking-wide text-orange-600 uppercase dark:text-orange-400">
-                                Newsletter
-                            </p>
-                            <h2 className="mb-4 text-2xl font-semibold text-gray-900 md:text-3xl dark:text-white">
-                                Stay in the loop
+                    <section className="border-t border-[#E5E4E0] bg-white py-16 dark:border-[#2A4A3A] dark:bg-[#0A1210]">
+                        <MotionDiv className="primary-container text-center">
+                            <p className="mb-3 text-sm font-medium tracking-wide text-[#E8945A] uppercase">Blog</p>
+                            <h2 className="font-display mb-4 text-2xl font-normal text-[#1A1A1A] md:text-3xl dark:text-[#E8E6E1]">
+                                Thanks for reading
                             </h2>
-                            <p className="mx-auto mb-8 max-w-md text-gray-600 dark:text-gray-400">
-                                Get notified about new articles and insights. No spam, just quality content.
+                            <p className="mx-auto mb-8 max-w-md text-[#6B6B63] dark:text-[#9E9E95]">
+                                Thoughts on development, tech, and whatever else is on my mind.
                             </p>
                             <div className="flex flex-wrap justify-center gap-3">
                                 <Button
-                                    className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+                                    className="rounded-full bg-[#1B3D2F] px-6 py-3 text-sm font-medium text-white hover:bg-[#2A5E44] dark:bg-[#5AAF7E] dark:text-[#0F1A15] dark:hover:bg-[#5AAF7E]/90"
                                     onClick={() => router.visit('/')}
                                 >
                                     Back to Home
@@ -490,8 +536,6 @@ export default function BlogIndex({ blogs }: Props) {
                         </MotionDiv>
                     </section>
                 </main>
-
-                <Footer />
             </div>
         </>
     );

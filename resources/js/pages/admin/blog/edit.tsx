@@ -620,12 +620,12 @@ export default function EditBlog({ blog }: Props) {
                                             />
                                             <p className="mt-2 text-xs text-gray-500">Supports: JPG, PNG, GIF, SVG, WEBP (max 5MB)</p>
                                             {data.featured_image_file && (
-                                                <div className="mt-3 rounded-md border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/30">
-                                                    <div className="flex items-center text-green-700 dark:text-green-400">
+                                                <div className="mt-3 rounded-md border border-[#E4EDE8] bg-[#E4EDE8]/30 p-3 dark:border-[#2A4A3A] dark:bg-[#162820]">
+                                                    <div className="flex items-center text-[#1B3D2F] dark:text-[#5AAF7E]">
                                                         <Upload className="mr-2 h-4 w-4" />
                                                         <span className="text-sm font-medium">{data.featured_image_file.name}</span>
                                                     </div>
-                                                    <p className="mt-1 text-xs text-green-600 dark:text-green-500">
+                                                    <p className="mt-1 text-xs text-[#2A5E44] dark:text-[#5AAF7E]">
                                                         Image will be uploaded when you save the post
                                                     </p>
                                                 </div>

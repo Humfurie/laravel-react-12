@@ -17,14 +17,32 @@ class ExpertiseController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $this->authorize('viewAny', Expertise::class);
 
-        $expertises = Expertise::ordered()->get();
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'category' => ['nullable', 'in:all,be,fe,td'],
+        ]);
+
+        $query = Expertise::query();
+
+        if (! empty($validated['search'])) {
+            $query->where('name', 'ilike', '%'.$validated['search'].'%');
+        }
+
+        if (! empty($validated['category']) && $validated['category'] !== 'all') {
+            $query->where('category_slug', $validated['category']);
+        }
+
+        $expertises = $query->ordered()
+            ->paginate(15)
+            ->withQueryString();
 
         return Inertia::render('admin/expertise/index', [
             'expertises' => $expertises,
+            'filters' => $request->only(['search', 'category']),
         ]);
     }
 

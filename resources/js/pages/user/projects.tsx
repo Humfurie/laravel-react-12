@@ -1,11 +1,7 @@
-import FloatingNav from '@/components/floating-nav';
-import Footer from '@/components/global/Footer';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectFilters } from '@/components/projects/ProjectFilters';
 import { ProjectModal } from '@/components/projects/ProjectModal';
 import StructuredData, { schemas } from '@/components/seo/StructuredData';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { MotionDiv, MotionItem, MotionStagger } from '@/components/ui/motion';
 import type { Deployment } from '@/types/deployment';
 import type { Project, ProjectCategory } from '@/types/project';
@@ -95,6 +91,20 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                     content="Explore Humphrey Singculan's portfolio of projects - web applications built with Laravel, React, and modern full-stack technologies."
                 />
                 <link rel="canonical" href="https://humfurie.org/projects" />
+                <meta property="og:title" content="Projects - Humphrey Singculan" />
+                <meta
+                    property="og:description"
+                    content="Explore Humphrey Singculan's portfolio of projects - web applications built with Laravel, React, and modern full-stack technologies."
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://humfurie.org/projects" />
+                <meta property="og:image" content="https://humfurie.org/images/og-default.jpg" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Projects - Humphrey Singculan" />
+                <meta
+                    name="twitter:description"
+                    content="Explore Humphrey Singculan's portfolio of projects - web applications built with Laravel, React, and modern full-stack technologies."
+                />
             </Head>
 
             {/* Structured Data */}
@@ -114,16 +124,14 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                 ]}
             />
 
-            <div className="min-h-screen bg-[#FAFAF8] dark:bg-gray-900">
-                <FloatingNav currentPage="projects" />
-
+            <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0A1210]">
                 <main className="pt-20">
                     {/* Magazine Hero Section */}
-                    <section className="container mx-auto px-4 py-8 md:py-12">
+                    <section className="primary-container py-8 md:py-12">
                         {/* Section Header */}
                         <MotionDiv className="mb-8 flex items-end justify-between">
                             <div>
-                                <h1 className="font-serif text-5xl font-bold tracking-tight text-gray-900 md:text-6xl lg:text-7xl dark:text-white">
+                                <h1 className="font-display text-5xl font-light tracking-tight text-[#1A1A1A] md:text-6xl lg:text-7xl dark:text-[#E8E6E1]">
                                     Best of the
                                     <br />
                                     <span className="relative">
@@ -134,7 +142,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                                 stroke="currentColor"
                                                 strokeWidth="2"
                                                 strokeLinecap="round"
-                                                className="text-gray-300 dark:text-gray-600"
+                                                className="text-[#E5E4E0] dark:text-[#2A4A3A]"
                                             />
                                         </svg>
                                     </span>
@@ -142,7 +150,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                             </div>
                             <Link
                                 href="#all-projects"
-                                className="hidden items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 md:flex dark:text-gray-400 dark:hover:text-white"
+                                className="hidden items-center gap-2 text-sm font-medium text-[#9E9E95] transition-colors hover:text-[#1B3D2F] md:flex dark:hover:text-[#5AAF7E]"
                             >
                                 See all projects
                                 <ArrowRight className="h-4 w-4" />
@@ -154,7 +162,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                             <MotionDiv delay={0.1} className="grid gap-6 lg:grid-cols-3">
                                 {/* Main Featured Card */}
                                 <div className="group cursor-pointer lg:col-span-2" onClick={() => handleProjectClick(heroProject)}>
-                                    <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-[#E8E4DC] dark:bg-gray-800">
+                                    <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-[#F3F1EC] dark:bg-[#162820]">
                                         {heroProject.thumbnail_url ? (
                                             <img
                                                 src={heroProject.thumbnail_url}
@@ -164,13 +172,13 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                             />
                                         ) : (
                                             <div className="flex h-full items-center justify-center">
-                                                <Code2 className="h-24 w-24 text-gray-400" />
+                                                <Code2 className="h-24 w-24 text-[#E5E4E0] dark:text-[#2A4A3A]" />
                                             </div>
                                         )}
 
                                         {/* Date Badge */}
                                         {heroProject.started_at && (
-                                            <div className="absolute top-6 left-6 rounded-full bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-sm dark:bg-gray-700 dark:text-gray-200">
+                                            <div className="absolute top-6 left-6 rounded-full bg-white/90 px-4 py-2 text-xs font-medium text-[#1A1A1A] backdrop-blur-sm dark:bg-[#162820]/90 dark:text-[#E8E6E1]">
                                                 {new Date(heroProject.started_at).toLocaleDateString('en-US', {
                                                     month: 'short',
                                                     day: 'numeric',
@@ -181,22 +189,22 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
 
                                         {/* Category Badge */}
                                         <div className="absolute top-6 right-6">
-                                            <Badge className="rounded-full border-0 bg-[#88C0A8] px-4 py-1.5 text-white">
+                                            <span className="rounded-full bg-[#E4EDE8] px-4 py-1.5 text-[0.7rem] font-semibold tracking-wide text-[#1B3D2F] uppercase">
                                                 {heroProject.category_label}
-                                            </Badge>
+                                            </span>
                                         </div>
 
                                         {/* Content Overlay */}
                                         <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
-                                            <h2 className="mb-2 text-2xl font-bold text-white md:text-3xl">{heroProject.title}</h2>
+                                            <h2 className="font-display mb-2 text-2xl font-normal text-white md:text-3xl">{heroProject.title}</h2>
                                             <p className="line-clamp-2 max-w-xl text-sm text-white/80 md:text-base">
                                                 {heroProject.short_description}
                                             </p>
                                         </div>
 
                                         {/* Arrow Link */}
-                                        <div className="absolute right-6 bottom-6 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg transition-transform group-hover:scale-110">
-                                            <ArrowUpRight className="h-5 w-5 text-gray-900" />
+                                        <div className="absolute right-6 bottom-6 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg transition-transform group-hover:scale-110 dark:bg-[#162820]">
+                                            <ArrowUpRight className="h-5 w-5 text-[#1B3D2F] dark:text-[#5AAF7E]" />
                                         </div>
                                     </div>
                                 </div>
@@ -204,35 +212,34 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                 {/* Sidebar Cards */}
                                 <div className="flex flex-col gap-6">
                                     {/* Info Card */}
-                                    <div className="flex flex-col justify-between rounded-3xl bg-[#C5E8D5] p-6 dark:bg-green-900/30">
-                                        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
+                                    <div className="flex flex-col justify-between rounded-xl bg-[#E4EDE8] p-6 dark:bg-[#162820]">
+                                        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-[#1B3D2F] dark:text-[#5AAF7E]">
                                             <Sparkles className="h-4 w-4" />
-                                            <span>FEATURED</span>
+                                            <span className="tracking-[0.08em] uppercase">Featured</span>
                                         </div>
                                         <div>
-                                            <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">Explore my</p>
-                                            <h3 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
+                                            <p className="mb-2 text-sm text-[#6B6B63] dark:text-[#9E9E95]">Explore my</p>
+                                            <h3 className="font-display mb-4 text-2xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">
                                                 Web & Mobile
                                                 <br />
                                                 Projects
                                             </h3>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            <p className="text-sm text-[#6B6B63] dark:text-[#9E9E95]">
                                                 Building innovative solutions with modern technologies
                                             </p>
                                         </div>
-                                        <Button
-                                            variant="outline"
-                                            className="mt-6 rounded-full border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white dark:border-gray-200 dark:text-gray-200 dark:hover:bg-gray-200 dark:hover:text-gray-900"
+                                        <button
                                             onClick={() => document.getElementById('all-projects')?.scrollIntoView({ behavior: 'smooth' })}
+                                            className="mt-6 rounded-full border border-[#1B3D2F] px-5 py-2.5 text-sm font-medium text-[#1B3D2F] transition-colors hover:bg-[#1B3D2F] hover:text-white dark:border-[#5AAF7E] dark:text-[#5AAF7E] dark:hover:bg-[#5AAF7E] dark:hover:text-[#0F1A15]"
                                         >
                                             Learn more
-                                        </Button>
+                                        </button>
                                     </div>
 
                                     {/* Second Featured */}
                                     {sidebarProjects[0] && (
                                         <div
-                                            className="group relative aspect-square cursor-pointer overflow-hidden rounded-3xl"
+                                            className="group relative aspect-square cursor-pointer overflow-hidden rounded-xl"
                                             onClick={() => handleProjectClick(sidebarProjects[0])}
                                         >
                                             {sidebarProjects[0].thumbnail_url ? (
@@ -243,8 +250,8 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                                                 />
                                             ) : (
-                                                <div className="flex h-full items-center justify-center bg-[#F5E6D3] dark:bg-gray-700">
-                                                    <Code2 className="h-16 w-16 text-gray-400 dark:text-gray-500" />
+                                                <div className="flex h-full items-center justify-center bg-[#FDF5EE] dark:bg-[#162820]">
+                                                    <Code2 className="h-16 w-16 text-[#E5E4E0] dark:text-[#2A4A3A]" />
                                                 </div>
                                             )}
 
@@ -252,24 +259,26 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                             <div className="absolute top-4 right-4 flex items-center gap-2">
                                                 <span
                                                     className={`h-2 w-2 rounded-full ${
-                                                        sidebarProjects[0].status === 'live' ? 'bg-green-500' : 'bg-yellow-500'
+                                                        sidebarProjects[0].status === 'live' ? 'bg-[#5AAF7E]' : 'bg-[#E8945A]'
                                                     }`}
                                                 />
-                                                <span className="rounded-full bg-black/50 px-2 py-1 text-xs font-medium text-white">
+                                                <span className="rounded-full bg-black/50 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
                                                     {sidebarProjects[0].status_label}
                                                 </span>
                                             </div>
 
                                             <div className="absolute right-4 bottom-4 left-4">
-                                                <Badge className="mb-2 rounded-full border-0 bg-white/90 text-gray-900">
+                                                <span className="mb-2 inline-block rounded-full bg-white/90 px-3 py-1 text-[0.7rem] font-semibold text-[#1A1A1A] backdrop-blur-sm">
                                                     {sidebarProjects[0].category_label}
-                                                </Badge>
-                                                <h3 className="text-lg font-bold text-white drop-shadow-lg">{sidebarProjects[0].title}</h3>
+                                                </span>
+                                                <h3 className="font-display text-lg font-normal text-white drop-shadow-lg">
+                                                    {sidebarProjects[0].title}
+                                                </h3>
                                             </div>
 
                                             {/* Arrow */}
-                                            <div className="absolute right-4 bottom-4 flex h-10 w-10 items-center justify-center rounded-full bg-white opacity-0 transition-opacity group-hover:opacity-100">
-                                                <ArrowUpRight className="h-4 w-4 text-gray-900" />
+                                            <div className="absolute right-4 bottom-4 flex h-10 w-10 items-center justify-center rounded-full bg-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-[#162820]">
+                                                <ArrowUpRight className="h-4 w-4 text-[#1B3D2F] dark:text-[#5AAF7E]" />
                                             </div>
                                         </div>
                                     )}
@@ -279,8 +288,8 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                     </section>
 
                     {/* All Projects Section */}
-                    <section id="all-projects" className="bg-white py-16 dark:bg-gray-800">
-                        <div className="container mx-auto px-4">
+                    <section id="all-projects" className="bg-white py-16 dark:bg-[#0F1A15]">
+                        <div className="primary-container">
                             {/* Tab Navigation */}
                             <div className="mb-8">
                                 <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
@@ -288,18 +297,18 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                         <button
                                             key={key}
                                             onClick={() => handleTabChange(key)}
-                                            className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+                                            className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all ${
                                                 activeTab === key
-                                                    ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                                                    ? 'bg-[#1B3D2F] text-white dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
+                                                    : 'border border-[#E5E4E0] bg-white text-[#6B6B63] hover:border-[#2A5E44] hover:text-[#1B3D2F] dark:border-[#2A4A3A] dark:bg-[#162820] dark:text-[#9E9E95] dark:hover:border-[#5AAF7E] dark:hover:text-[#5AAF7E]'
                                             }`}
                                         >
                                             {label}
                                             <span
                                                 className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold ${
                                                     activeTab === key
-                                                        ? 'bg-white/20 text-white dark:bg-gray-900/20 dark:text-gray-900'
-                                                        : 'bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
+                                                        ? 'bg-white/20 text-white dark:bg-[#0F1A15]/20 dark:text-[#0F1A15]'
+                                                        : 'bg-[#F3F1EC] text-[#9E9E95] dark:bg-[#0F1A15] dark:text-[#9E9E95]'
                                                 }`}
                                             >
                                                 {key === 'deployments' ? deployments.length : (projects[key as keyof typeof projects]?.length ?? 0)}
@@ -307,7 +316,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                         </button>
                                     ))}
                                 </div>
-                                <p className="text-center text-gray-500 dark:text-gray-400">
+                                <p className="text-center text-[#9E9E95]">
                                     Browse through {activeProjects.length} project{activeProjects.length !== 1 ? 's' : ''}
                                 </p>
                             </div>
@@ -325,7 +334,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                             </div>
 
                             {/* Results Count */}
-                            <div className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+                            <div className="mb-6 text-sm text-[#9E9E95]">
                                 {filteredProjects.length} project{filteredProjects.length !== 1 ? 's' : ''} found
                             </div>
 
@@ -344,73 +353,69 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                 </MotionStagger>
                             ) : (
                                 <div className="py-16 text-center">
-                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
-                                        <Code2 className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#F3F1EC] dark:bg-[#162820]">
+                                        <Code2 className="h-8 w-8 text-[#9E9E95] dark:text-[#2A4A3A]" />
                                     </div>
-                                    <p className="mb-4 text-lg text-gray-600 dark:text-gray-300">No projects match your filters.</p>
-                                    <Button
-                                        variant="outline"
-                                        className="rounded-full"
+                                    <p className="mb-4 text-lg text-[#6B6B63] dark:text-[#9E9E95]">No projects match your filters.</p>
+                                    <button
+                                        className="rounded-full border border-[#E5E4E0] px-5 py-2.5 text-sm font-medium text-[#6B6B63] transition-colors hover:border-[#1B3D2F] hover:text-[#1B3D2F] dark:border-[#2A4A3A] dark:text-[#9E9E95] dark:hover:border-[#5AAF7E] dark:hover:text-[#5AAF7E]"
                                         onClick={() => {
                                             setSelectedCategory(null);
                                             setSelectedTech([]);
                                         }}
                                     >
                                         Clear Filters
-                                    </Button>
+                                    </button>
                                 </div>
                             )}
                         </div>
                     </section>
 
-                    {/* Stats Section - Magazine Style */}
-                    <section className="bg-[#FAFAF8] py-16 dark:bg-gray-900">
-                        <div className="container mx-auto px-4">
+                    {/* Stats Section */}
+                    <section className="bg-[#FAFAF8] py-16 dark:bg-[#0A1210]">
+                        <div className="primary-container">
                             <MotionStagger staggerDelay={0.1} className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-8">
-                                <MotionItem variant="scaleUp" className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:p-8 dark:border-gray-700 dark:bg-gray-800">
-                                    <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
+                                <MotionItem
+                                    variant="scaleUp"
+                                    className="rounded-xl border border-[#E5E4E0] bg-white p-6 shadow-sm md:p-8 dark:border-[#2A4A3A] dark:bg-[#162820]"
+                                >
+                                    <div className="font-display mb-2 text-4xl font-light text-[#1A1A1A] md:text-5xl dark:text-[#E8E6E1]">
                                         {allProjects.length}
                                     </div>
-                                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Projects</div>
+                                    <div className="text-sm font-medium text-[#9E9E95]">Total Projects</div>
                                 </MotionItem>
-                                <MotionItem variant="scaleUp" className="rounded-3xl bg-[#C5E8D5] p-6 md:p-8 dark:bg-green-900/30">
-                                    <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
+                                <MotionItem variant="scaleUp" className="rounded-xl bg-[#E4EDE8] p-6 md:p-8 dark:bg-[#162820]">
+                                    <div className="font-display mb-2 text-4xl font-light text-[#1A1A1A] md:text-5xl dark:text-[#E8E6E1]">
                                         {allProjects.filter((p) => p.status === 'live').length}
                                     </div>
-                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Live Projects</div>
+                                    <div className="text-sm font-medium text-[#1B3D2F] dark:text-[#5AAF7E]">Live Projects</div>
                                 </MotionItem>
-                                <MotionItem variant="scaleUp" className="rounded-3xl bg-[#F5E6D3] p-6 md:p-8 dark:bg-amber-900/30">
-                                    <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
+                                <MotionItem variant="scaleUp" className="rounded-xl bg-[#FDF5EE] p-6 md:p-8 dark:bg-[#162820]">
+                                    <div className="font-display mb-2 text-4xl font-light text-[#1A1A1A] md:text-5xl dark:text-[#E8E6E1]">
                                         {allProjects.filter((p) => p.is_featured).length}
                                     </div>
-                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Featured</div>
+                                    <div className="text-sm font-medium text-[#E8945A]">Featured</div>
                                 </MotionItem>
-                                <MotionItem variant="scaleUp" className="rounded-3xl bg-[#E8E4DC] p-6 md:p-8 dark:bg-gray-700">
-                                    <div className="mb-2 font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
+                                <MotionItem variant="scaleUp" className="rounded-xl bg-[#F3F1EC] p-6 md:p-8 dark:bg-[#162820]">
+                                    <div className="font-display mb-2 text-4xl font-light text-[#1A1A1A] md:text-5xl dark:text-[#E8E6E1]">
                                         {techStack.length}
                                     </div>
-                                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Technologies</div>
+                                    <div className="text-sm font-medium text-[#6B6B63] dark:text-[#9E9E95]">Technologies</div>
                                 </MotionItem>
                             </MotionStagger>
                         </div>
                     </section>
 
                     {/* CTA Section */}
-                    <section className="border-t border-gray-100 bg-white py-16 dark:border-gray-800 dark:bg-gray-950">
-                        <MotionDiv className="container mx-auto px-4 text-center">
-                            <p className="mb-3 text-sm font-medium tracking-wide text-orange-600 uppercase dark:text-orange-400">
-                                Let's collaborate
-                            </p>
-                            <h2 className="mb-4 text-2xl font-semibold text-gray-900 md:text-3xl dark:text-white">
-                                Have a project in mind?
-                            </h2>
-                            <p className="mx-auto mb-8 max-w-md text-gray-600 dark:text-gray-400">
-                                I'm always open to discussing new projects and opportunities.
-                            </p>
+                    <section className="border-t border-[#E5E4E0] bg-[#1B3D2F] py-16 dark:border-[#2A4A3A]">
+                        <MotionDiv className="primary-container text-center">
+                            <p className="mb-3 text-[0.75rem] font-semibold tracking-[0.15em] text-[#E8945A] uppercase">Let's collaborate</p>
+                            <h2 className="font-display mb-4 text-2xl font-normal text-white md:text-3xl">Have a project in mind?</h2>
+                            <p className="mx-auto mb-8 max-w-md text-[#B8D8C7]">I'm always open to discussing new projects and opportunities.</p>
                             <div className="flex flex-wrap justify-center gap-3">
                                 <a
                                     href="mailto:humfurie@gmail.com"
-                                    className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+                                    className="inline-flex items-center gap-2 rounded-full bg-[#E8945A] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#d4833e]"
                                 >
                                     Get in touch
                                 </a>
@@ -418,7 +423,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                     href="https://github.com/Humfurie"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+                                    className="inline-flex items-center gap-2 rounded-full border border-white/30 px-6 py-3 text-sm font-medium text-white transition-colors hover:border-white hover:bg-white/10"
                                 >
                                     <Github className="h-4 w-4" />
                                     GitHub
@@ -430,8 +435,6 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
 
                 {/* Project Detail Modal */}
                 <ProjectModal project={selectedProject} open={modalOpen} onClose={handleCloseModal} />
-
-                <Footer />
             </div>
         </>
     );

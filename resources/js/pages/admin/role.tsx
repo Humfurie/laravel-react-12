@@ -195,7 +195,7 @@ export default function Role({ roles, permissions }: RoleProps) {
                                                     {role.deleted_at ? (
                                                         <button
                                                             onClick={() => router.patch(route('roles.restore', { role: role.slug }))}
-                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-green-50 hover:text-green-600"
+                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-[#E4EDE8] hover:text-[#2A5E44]"
                                                         >
                                                             <RotateCw className="h-4 w-4" />
                                                         </button>

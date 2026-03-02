@@ -23,19 +23,43 @@ class DeploymentController extends Controller
         private ImageService $imageService
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Deployment::class);
 
-        $deployments = Deployment::query()
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'in:all,active,maintenance,archived,deleted'],
+        ]);
+
+        $query = Deployment::query()
             ->withTrashed()
-            ->with(['primaryImage', 'project:id,title'])
-            ->orderBy('sort_order')
+            ->with(['primaryImage', 'project:id,title']);
+
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'ilike', '%'.$search.'%')
+                    ->orWhereHas('project', fn ($pq) => $pq->where('title', 'ilike', '%'.$search.'%'));
+            });
+        }
+
+        if (! empty($validated['status']) && $validated['status'] !== 'all') {
+            if ($validated['status'] === 'deleted') {
+                $query->whereNotNull('deleted_at');
+            } else {
+                $query->whereNull('deleted_at')->where('status', $validated['status']);
+            }
+        }
+
+        $deployments = $query->orderBy('sort_order')
             ->orderBy('updated_at', 'desc')
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
 
         return Inertia::render('admin/deployments/index', [
             'deployments' => $deployments,
+            'filters' => $request->only(['search', 'status']),
             'statuses' => Deployment::getStatuses(),
             'clientTypes' => Deployment::getClientTypes(),
             'can' => [

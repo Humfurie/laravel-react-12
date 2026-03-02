@@ -1,19 +1,7 @@
-import FloatingNav from '@/components/floating-nav';
-import Footer from '@/components/global/Footer';
 import { MotionDiv } from '@/components/ui/motion';
 import type { SocialLinks } from '@/types';
 import { Head } from '@inertiajs/react';
-import {
-    Briefcase,
-    ChevronDown,
-    ChevronUp,
-    Code2,
-    Download,
-    GraduationCap,
-    Mail,
-    Printer,
-    User as UserIcon,
-} from 'lucide-react';
+import { Briefcase, ChevronDown, ChevronUp, Code2, Download, GraduationCap, Mail, Printer, User as UserIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface Experience {
@@ -97,30 +85,28 @@ const sections = [
 
 function ResumeExperienceItem({ experience, expanded, onToggle }: { experience: Experience; expanded: boolean; onToggle: () => void }) {
     return (
-        <div className="border-b border-gray-100 py-4 last:border-0 dark:border-gray-700/50">
+        <div className="border-b border-[#E5E4E0] py-4 last:border-0 dark:border-[#2A4A3A]">
             <button onClick={onToggle} className="flex w-full items-start justify-between text-left">
                 <div className="flex-1">
                     <div className="flex items-center gap-3">
                         <div>
-                            <div className="text-sm font-semibold text-gray-900 dark:text-white">{experience.position}</div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{experience.company}</p>
+                            <div className="text-sm font-semibold text-[#1A1A1A] dark:text-[#E8E6E1]">{experience.position}</div>
+                            <p className="text-sm text-[#6B6B63] dark:text-[#9E9E95]">{experience.company}</p>
                         </div>
                     </div>
-                    <div className="mt-1 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-500">
+                    <div className="mt-1 flex items-center gap-3 text-xs text-[#9E9E95]">
                         <span>{experience.location}</span>
                         <span>|</span>
                         <span>
                             {formatDate(experience.start_month, experience.start_year)} –{' '}
-                            {experience.is_current_position
-                                ? 'Present'
-                                : formatDate(experience.end_month!, experience.end_year!)}
+                            {experience.is_current_position ? 'Present' : formatDate(experience.end_month!, experience.end_year!)}
                         </span>
-                        <span className="text-orange-500">
+                        <span className="text-[#E8945A]">
                             {getDuration(experience.start_month, experience.start_year, experience.end_month, experience.end_year)}
                         </span>
                     </div>
                 </div>
-                <span className="mt-1 shrink-0 text-gray-400">
+                <span className="mt-1 shrink-0 text-[#9E9E95]">
                     {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </span>
             </button>
@@ -128,8 +114,8 @@ function ResumeExperienceItem({ experience, expanded, onToggle }: { experience: 
             {expanded && experience.description.length > 0 && (
                 <ul className="mt-3 space-y-1.5 pl-4">
                     {experience.description.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
-                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-400" />
+                        <li key={idx} className="flex items-start gap-2 text-sm text-[#6B6B63] dark:text-[#9E9E95]">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#E8945A]" />
                             {item}
                         </li>
                     ))}
@@ -140,8 +126,8 @@ function ResumeExperienceItem({ experience, expanded, onToggle }: { experience: 
             {!expanded && experience.description.length > 0 && (
                 <ul className="mt-3 hidden space-y-1.5 pl-4 print:block">
                     {experience.description.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
-                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-400" />
+                        <li key={idx} className="flex items-start gap-2 text-sm text-[#6B6B63]">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#E8945A]" />
                             {item}
                         </li>
                     ))}
@@ -153,7 +139,7 @@ function ResumeExperienceItem({ experience, expanded, onToggle }: { experience: 
 
 function SkillBadge({ skill }: { skill: Expertise }) {
     return (
-        <span className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E5E4E0] bg-[#F3F1EC] px-2.5 py-1 text-xs font-medium text-[#6B6B63] dark:border-[#2A4A3A] dark:bg-[#162820] dark:text-[#9E9E95]">
             {skill.image_url && <img src={skill.image_url} alt={skill.name} className="h-3.5 w-3.5 object-contain" />}
             {skill.name}
         </span>
@@ -214,18 +200,34 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
     return (
         <>
             <Head title={`Resume - ${profileUser.name}`}>
-                <meta name="description" content={`${profileUser.name} - ${profileUser.headline}. View my professional experience, skills, and education.`} />
+                <meta
+                    name="description"
+                    content={`${profileUser.name} - ${profileUser.headline}. View my professional experience, skills, and education.`}
+                />
+                <link rel="canonical" href="https://humfurie.org/resume" />
+                <meta property="og:title" content={`Resume - ${profileUser.name}`} />
+                <meta
+                    property="og:description"
+                    content={`${profileUser.name} - ${profileUser.headline}. View my professional experience, skills, and education.`}
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://humfurie.org/resume" />
+                <meta property="og:image" content="https://humfurie.org/images/og-default.jpg" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={`Resume - ${profileUser.name}`} />
+                <meta
+                    name="twitter:description"
+                    content={`${profileUser.name} - ${profileUser.headline}. View my professional experience, skills, and education.`}
+                />
             </Head>
 
-            <FloatingNav currentPage="resume" />
-
-            <main className="min-h-screen bg-gray-50 pt-20 print:bg-white print:pt-0 dark:bg-gray-900">
+            <main className="min-h-screen bg-[#FAFAF8] pt-20 dark:bg-[#0A1210] print:bg-white print:pt-0">
                 <div className="mx-auto max-w-5xl px-4 py-8 md:py-12">
                     {/* Action buttons */}
                     <MotionDiv className="mb-6 flex justify-end gap-3 print:hidden">
                         <button
                             onClick={() => window.print()}
-                            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                            className="inline-flex items-center gap-2 rounded-full border border-[#E5E4E0] bg-white px-4 py-2 text-sm font-medium text-[#6B6B63] transition-colors hover:border-[#2A5E44] hover:text-[#1B3D2F] dark:border-[#2A4A3A] dark:bg-[#162820] dark:text-[#9E9E95] dark:hover:border-[#5AAF7E] dark:hover:text-[#5AAF7E]"
                         >
                             <Printer className="h-4 w-4" />
                             Print
@@ -234,7 +236,7 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                             <a
                                 href={profileUser.resume_path}
                                 download
-                                className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-600"
+                                className="inline-flex items-center gap-2 rounded-full bg-[#E8945A] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#d4833e]"
                             >
                                 <Download className="h-4 w-4" />
                                 Download PDF
@@ -245,16 +247,14 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                     {/* Resume Document */}
                     <MotionDiv
                         delay={0.1}
-                        className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-10 print:rounded-none print:border-none print:p-0 print:shadow-none dark:border-gray-700 dark:bg-gray-800"
+                        className="rounded-xl border border-[#E5E4E0] bg-white p-6 shadow-sm md:p-10 dark:border-[#2A4A3A] dark:bg-[#162820] print:rounded-none print:border-none print:p-0 print:shadow-none"
                     >
                         {/* Header */}
-                        <header className="border-b border-gray-200 pb-6 dark:border-gray-700">
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{profileUser.name}</h1>
-                            {profileUser.headline && (
-                                <p className="mt-1 text-lg text-gray-600 dark:text-gray-400">{profileUser.headline}</p>
-                            )}
-                            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                                <a href={`mailto:${profileUser.email}`} className="transition-colors hover:text-orange-500">
+                        <header className="border-b border-[#E5E4E0] pb-6 dark:border-[#2A4A3A]">
+                            <h1 className="font-display text-3xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">{profileUser.name}</h1>
+                            {profileUser.headline && <p className="mt-1 text-lg text-[#6B6B63] dark:text-[#9E9E95]">{profileUser.headline}</p>}
+                            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-[#9E9E95]">
+                                <a href={`mailto:${profileUser.email}`} className="transition-colors hover:text-[#E8945A]">
                                     {profileUser.email}
                                 </a>
                                 {profileUser.social_links?.linkedin && (
@@ -262,7 +262,7 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                         href={profileUser.social_links.linkedin}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="transition-colors hover:text-orange-500"
+                                        className="transition-colors hover:text-[#E8945A]"
                                     >
                                         LinkedIn
                                     </a>
@@ -272,7 +272,7 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                         href={profileUser.social_links.github}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="transition-colors hover:text-orange-500"
+                                        className="transition-colors hover:text-[#E8945A]"
                                     >
                                         GitHub
                                     </a>
@@ -282,7 +282,7 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                         href={`https://github.com/${profileUser.github_username}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="transition-colors hover:text-orange-500"
+                                        className="transition-colors hover:text-[#E8945A]"
                                     >
                                         GitHub
                                     </a>
@@ -306,8 +306,8 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                                     }}
                                                     className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
                                                         activeSection === id
-                                                            ? 'bg-orange-50 font-medium text-orange-600 dark:bg-orange-500/10 dark:text-orange-400'
-                                                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300'
+                                                            ? 'bg-[#FDF5EE] font-medium text-[#E8945A] dark:bg-[#E8945A]/10 dark:text-[#E8945A]'
+                                                            : 'text-[#9E9E95] hover:bg-[#F3F1EC] hover:text-[#6B6B63] dark:hover:bg-[#0F1A15] dark:hover:text-[#9E9E95]'
                                                     }`}
                                                 >
                                                     <Icon className="h-4 w-4" />
@@ -322,20 +322,30 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                             {/* Content */}
                             <div className="min-w-0 flex-1 space-y-10">
                                 {/* Professional Summary */}
-                                <section id="summary" ref={(el) => { sectionRefs.current['summary'] = el; }}>
-                                    <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
-                                        <UserIcon className="h-5 w-5 text-orange-500" />
+                                <section
+                                    id="summary"
+                                    ref={(el) => {
+                                        sectionRefs.current['summary'] = el;
+                                    }}
+                                >
+                                    <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-[#1A1A1A] dark:text-[#E8E6E1]">
+                                        <UserIcon className="h-5 w-5 text-[#E8945A]" />
                                         Professional Summary
                                     </h2>
-                                    <p className="leading-relaxed text-gray-600 dark:text-gray-300">
+                                    <p className="leading-relaxed text-[#6B6B63] dark:text-[#9E9E95]">
                                         {profileUser.bio || profileUser.about || 'No summary available.'}
                                     </p>
                                 </section>
 
                                 {/* Experience */}
-                                <section id="experience" ref={(el) => { sectionRefs.current['experience'] = el; }}>
-                                    <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
-                                        <Briefcase className="h-5 w-5 text-orange-500" />
+                                <section
+                                    id="experience"
+                                    ref={(el) => {
+                                        sectionRefs.current['experience'] = el;
+                                    }}
+                                >
+                                    <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-[#1A1A1A] dark:text-[#E8E6E1]">
+                                        <Briefcase className="h-5 w-5 text-[#E8945A]" />
                                         Experience
                                     </h2>
                                     <div>
@@ -351,9 +361,14 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                 </section>
 
                                 {/* Technical Skills */}
-                                <section id="skills" ref={(el) => { sectionRefs.current['skills'] = el; }}>
-                                    <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
-                                        <Code2 className="h-5 w-5 text-orange-500" />
+                                <section
+                                    id="skills"
+                                    ref={(el) => {
+                                        sectionRefs.current['skills'] = el;
+                                    }}
+                                >
+                                    <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-[#1A1A1A] dark:text-[#E8E6E1]">
+                                        <Code2 className="h-5 w-5 text-[#E8945A]" />
                                         Technical Skills
                                     </h2>
                                     <div className="space-y-4">
@@ -361,7 +376,7 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                             (cat) =>
                                                 skillsByCategory[cat].length > 0 && (
                                                     <div key={cat}>
-                                                        <div className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                                        <div className="mb-2 text-sm font-semibold text-[#6B6B63] dark:text-[#9E9E95]">
                                                             {categoryLabels[cat]}
                                                         </div>
                                                         <div className="flex flex-wrap gap-2">
@@ -376,18 +391,23 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                 </section>
 
                                 {/* Education */}
-                                <section id="education" ref={(el) => { sectionRefs.current['education'] = el; }}>
-                                    <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
-                                        <GraduationCap className="h-5 w-5 text-orange-500" />
+                                <section
+                                    id="education"
+                                    ref={(el) => {
+                                        sectionRefs.current['education'] = el;
+                                    }}
+                                >
+                                    <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-[#1A1A1A] dark:text-[#E8E6E1]">
+                                        <GraduationCap className="h-5 w-5 text-[#E8945A]" />
                                         Education & Certifications
                                     </h2>
                                     {profileUser.education && profileUser.education.length > 0 ? (
                                         <div className="space-y-4">
                                             {profileUser.education.map((edu, idx) => (
-                                                <div key={idx} className="border-b border-gray-100 pb-4 last:border-0 dark:border-gray-700/50">
-                                                    <div className="text-sm font-semibold text-gray-900 dark:text-white">{edu.degree}</div>
-                                                    <p className="text-sm text-gray-600 dark:text-gray-400">{edu.institution}</p>
-                                                    <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+                                                <div key={idx} className="border-b border-[#E5E4E0] pb-4 last:border-0 dark:border-[#2A4A3A]">
+                                                    <div className="text-sm font-semibold text-[#1A1A1A] dark:text-[#E8E6E1]">{edu.degree}</div>
+                                                    <p className="text-sm text-[#6B6B63] dark:text-[#9E9E95]">{edu.institution}</p>
+                                                    <div className="mt-1 flex items-center gap-2 text-xs text-[#9E9E95]">
                                                         {edu.location && <span>{edu.location}</span>}
                                                         {edu.location && <span>|</span>}
                                                         <span>
@@ -397,31 +417,36 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                                         {edu.honors && (
                                                             <>
                                                                 <span>|</span>
-                                                                <span className="text-orange-500">{edu.honors}</span>
+                                                                <span className="text-[#E8945A]">{edu.honors}</span>
                                                             </>
                                                         )}
                                                     </div>
-                                                    {edu.description && <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{edu.description}</p>}
+                                                    {edu.description && (
+                                                        <p className="mt-2 text-sm text-[#6B6B63] dark:text-[#9E9E95]">{edu.description}</p>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                                            Education details will be added soon.
-                                        </p>
+                                        <p className="text-sm text-[#9E9E95]">Education details will be added soon.</p>
                                     )}
                                 </section>
 
                                 {/* Contact */}
-                                <section id="contact" ref={(el) => { sectionRefs.current['contact'] = el; }}>
-                                    <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
-                                        <Mail className="h-5 w-5 text-orange-500" />
+                                <section
+                                    id="contact"
+                                    ref={(el) => {
+                                        sectionRefs.current['contact'] = el;
+                                    }}
+                                >
+                                    <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-[#1A1A1A] dark:text-[#E8E6E1]">
+                                        <Mail className="h-5 w-5 text-[#E8945A]" />
                                         Contact
                                     </h2>
                                     <div className="flex flex-wrap gap-3">
                                         <a
                                             href={`mailto:${profileUser.email}`}
-                                            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 transition-colors hover:border-orange-300 hover:text-orange-600 dark:border-gray-700 dark:text-gray-300 dark:hover:border-orange-500/50 dark:hover:text-orange-400"
+                                            className="inline-flex items-center gap-2 rounded-full border border-[#E5E4E0] px-3 py-2 text-sm text-[#6B6B63] transition-colors hover:border-[#E8945A] hover:text-[#E8945A] dark:border-[#2A4A3A] dark:text-[#9E9E95] dark:hover:border-[#E8945A] dark:hover:text-[#E8945A]"
                                         >
                                             <Mail className="h-4 w-4" />
                                             {profileUser.email}
@@ -431,7 +456,7 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                                 href={profileUser.social_links.linkedin}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 transition-colors hover:border-blue-300 hover:text-blue-600 dark:border-gray-700 dark:text-gray-300 dark:hover:border-blue-500/50 dark:hover:text-blue-400"
+                                                className="inline-flex items-center gap-2 rounded-full border border-[#E5E4E0] px-3 py-2 text-sm text-[#6B6B63] transition-colors hover:border-[#2A5E44] hover:text-[#1B3D2F] dark:border-[#2A4A3A] dark:text-[#9E9E95] dark:hover:border-[#5AAF7E] dark:hover:text-[#5AAF7E]"
                                             >
                                                 LinkedIn
                                             </a>
@@ -441,7 +466,7 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                                 href={profileUser.social_links?.github || `https://github.com/${profileUser.github_username}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:text-white"
+                                                className="inline-flex items-center gap-2 rounded-full border border-[#E5E4E0] px-3 py-2 text-sm text-[#6B6B63] transition-colors hover:border-[#1B3D2F] hover:text-[#1B3D2F] dark:border-[#2A4A3A] dark:text-[#9E9E95] dark:hover:border-[#E8E6E1] dark:hover:text-[#E8E6E1]"
                                             >
                                                 GitHub
                                             </a>
@@ -453,8 +478,6 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                     </MotionDiv>
                 </div>
             </main>
-
-            <Footer />
         </>
     );
 }

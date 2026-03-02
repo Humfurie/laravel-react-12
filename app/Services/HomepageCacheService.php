@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Blog;
+use App\Models\Deployment;
 use App\Models\Experience;
 use App\Models\Expertise;
 use App\Models\Project;
@@ -267,6 +268,49 @@ class HomepageCacheService
     }
 
     /**
+     * Compute dynamic profile stats from the database.
+     *
+     * @return array<int, array{label: string, value: string}>
+     */
+    public function getProfileStats(): array
+    {
+        $adminId = (int) config('app.admin_user_id');
+
+        // Years of experience — from earliest experience start date to now
+        $earliest = Experience::where('user_id', $adminId)
+            ->orderBy('start_year')
+            ->orderBy('start_month')
+            ->first();
+
+        $years = 0;
+        if ($earliest) {
+            $start = $earliest->start_year + ($earliest->start_month / 12);
+            $now = (int) date('Y') + ((int) date('n') / 12);
+            $years = $now - $start;
+        }
+
+        // Projects count
+        $projectCount = Project::where('is_public', true)->count();
+
+        // Live deployments count
+        $liveCount = Deployment::active()->count();
+
+        // GitHub commits
+        $user = User::find($adminId);
+        $commits = 0;
+        if ($user?->github_contributions) {
+            $commits = $user->github_contributions['commits'] ?? 0;
+        }
+
+        return [
+            ['value' => (int) floor($years).'+', 'label' => 'Years'],
+            ['value' => $projectCount.'+', 'label' => 'Projects'],
+            ['value' => (string) $liveCount, 'label' => 'Live Sites'],
+            ['value' => $commits.'+', 'label' => 'Commits'],
+        ];
+    }
+
+    /**
      * Get GitHub stats without caching.
      *
      * @return array{total_contributions: int, commits: int, pull_requests: int, issues: int, reviews: int, calendar: array}|null
@@ -280,5 +324,4 @@ class HomepageCacheService
 
         return app(GitHubService::class)->getUserContributions($user->github_username);
     }
-
 }

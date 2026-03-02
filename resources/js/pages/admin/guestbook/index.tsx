@@ -79,8 +79,8 @@ export default function GuestbookIndex({ entries, stats, filters }: Props) {
                     </div>
                     <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
                         <div className="flex items-center gap-3">
-                            <div className="rounded-lg bg-green-100 p-2 dark:bg-green-500/20">
-                                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                            <div className="rounded-lg bg-[#E4EDE8] p-2 dark:bg-[#162820]">
+                                <CheckCircle className="h-5 w-5 text-[#2A5E44] dark:text-[#5AAF7E]" />
                             </div>
                             <div>
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.approved}</p>
@@ -187,7 +187,7 @@ export default function GuestbookIndex({ entries, stats, filters }: Props) {
                                                 Deleted
                                             </span>
                                         ) : entry.is_approved ? (
-                                            <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-500/20 dark:text-green-400">
+                                            <span className="inline-flex items-center rounded-full bg-[#E4EDE8] px-2 py-0.5 text-xs font-medium text-[#1B3D2F] dark:bg-[#162820] dark:text-[#5AAF7E]">
                                                 Approved
                                             </span>
                                         ) : (
@@ -234,7 +234,7 @@ export default function GuestbookIndex({ entries, stats, filters }: Props) {
                                                     onClick={() =>
                                                         router.patch(`/admin/guestbook/${entry.id}/restore`, {}, { preserveScroll: true })
                                                     }
-                                                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-green-50 hover:text-green-500 dark:hover:bg-green-500/10 dark:hover:text-green-400"
+                                                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-[#E4EDE8] hover:text-[#2A5E44] dark:hover:bg-[#162820] dark:hover:text-[#5AAF7E]"
                                                     title="Restore"
                                                 >
                                                     <RotateCcw className="h-4 w-4" />

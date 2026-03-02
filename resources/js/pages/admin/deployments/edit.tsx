@@ -551,7 +551,7 @@ export default function EditDeployment({ deployment, statuses, clientTypes, proj
                                 <p className="text-muted-foreground text-xs">Supports: JPG, PNG, GIF, WEBP (max 5MB)</p>
 
                                 {data.thumbnail && (
-                                    <div className="flex items-center text-green-600">
+                                    <div className="flex items-center text-[#2A5E44] dark:text-[#5AAF7E]">
                                         <Upload className="mr-2 h-4 w-4" />
                                         <span className="text-sm">Selected: {data.thumbnail.name}</span>
                                     </div>
