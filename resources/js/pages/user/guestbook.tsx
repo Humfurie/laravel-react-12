@@ -1,6 +1,3 @@
-import FloatingNav from '@/components/floating-nav';
-import Footer from '@/components/global/Footer';
-import ScrollProgress from '@/components/global/ScrollProgress';
 import type { User } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
@@ -31,16 +28,14 @@ interface Props {
 
 function SignInPrompt() {
     return (
-        <div className="rounded-xl border border-[#E5E4E0] bg-white p-6 text-center dark:border-[#2A4A3A] dark:bg-[#162820] md:p-8">
+        <div className="rounded-xl border border-[#E5E4E0] bg-white p-6 text-center md:p-8 dark:border-[#2A4A3A] dark:bg-[#162820]">
             <MessageSquareHeart className="mx-auto mb-4 h-10 w-10 text-[#E8945A]" />
             <h3 className="mb-2 text-lg font-semibold text-[#1A1A1A] dark:text-[#E8E6E1]">Sign in to leave a message</h3>
-            <p className="mb-6 text-sm text-[#9E9E95]">
-                Authenticate with your GitHub or Google account to sign the guestbook.
-            </p>
+            <p className="mb-6 text-sm text-[#9E9E95]">Authenticate with your GitHub or Google account to sign the guestbook.</p>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <a
                     href="/auth/github/redirect?intended=/guestbook"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#E5E4E0] bg-[#1B3D2F] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2A5E44] dark:border-[#2A4A3A] sm:w-auto"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#E5E4E0] bg-[#1B3D2F] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2A5E44] sm:w-auto dark:border-[#2A4A3A]"
                 >
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
@@ -49,7 +44,7 @@ function SignInPrompt() {
                 </a>
                 <a
                     href="/auth/google/redirect?intended=/guestbook"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#E5E4E0] bg-white px-5 py-2.5 text-sm font-medium text-[#6B6B63] transition-colors hover:bg-[#F3F1EC] dark:border-[#2A4A3A] dark:bg-[#162820] dark:text-[#9E9E95] dark:hover:bg-[#0F1A15] sm:w-auto"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#E5E4E0] bg-white px-5 py-2.5 text-sm font-medium text-[#6B6B63] transition-colors hover:bg-[#F3F1EC] sm:w-auto dark:border-[#2A4A3A] dark:bg-[#162820] dark:text-[#9E9E95] dark:hover:bg-[#0F1A15]"
                 >
                     <svg className="h-4 w-4" viewBox="0 0 24 24">
                         <path
@@ -161,15 +156,11 @@ function GuestbookEntryCard({
     const isOwn = currentUserId === entry.user.id;
 
     return (
-        <div className="flex gap-4 rounded-xl border border-[#E5E4E0] bg-white p-4 transition-colors hover:border-[#F5C89E] dark:border-[#2A4A3A] dark:bg-[#162820] dark:hover:border-[#5AAF7E] md:p-5">
+        <div className="flex gap-4 rounded-xl border border-[#E5E4E0] bg-white p-4 transition-colors hover:border-[#F5C89E] md:p-5 dark:border-[#2A4A3A] dark:bg-[#162820] dark:hover:border-[#5AAF7E]">
             {/* Avatar */}
             <div className="shrink-0">
                 {entry.user.avatar_url ? (
-                    <img
-                        src={entry.user.avatar_url}
-                        alt={entry.user.name}
-                        className="h-10 w-10 rounded-full object-cover"
-                    />
+                    <img src={entry.user.avatar_url} alt={entry.user.name} className="h-10 w-10 rounded-full object-cover" />
                 ) : (
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FDF5EE] text-sm font-semibold text-[#E8945A] dark:bg-[#E8945A]/20 dark:text-[#E8945A]">
                         {entry.user.name.charAt(0).toUpperCase()}
@@ -192,9 +183,7 @@ function GuestbookEntryCard({
                             {entry.user.github_username}
                         </a>
                     )}
-                    <span className="text-xs text-[#9E9E95]">
-                        {formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}
-                    </span>
+                    <span className="text-xs text-[#9E9E95]">{formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}</span>
                 </div>
                 <p className="mt-1 text-sm leading-relaxed text-[#6B6B63] dark:text-[#9E9E95]">{entry.message}</p>
             </div>
@@ -255,16 +244,22 @@ export default function Guestbook({ entries: initialEntries }: Props) {
         <>
             <Head title="Guestbook">
                 <meta name="description" content="Sign the guestbook and leave a message. Say hello or share your thoughts!" />
+                <link rel="canonical" href="https://humfurie.org/guestbook" />
+                <meta property="og:title" content="Guestbook - Humphrey Singculan" />
+                <meta property="og:description" content="Sign the guestbook and leave a message. Say hello or share your thoughts!" />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://humfurie.org/guestbook" />
+                <meta property="og:image" content="https://humfurie.org/images/og-default.jpg" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Guestbook - Humphrey Singculan" />
+                <meta name="twitter:description" content="Sign the guestbook and leave a message. Say hello or share your thoughts!" />
             </Head>
-
-            <ScrollProgress />
-            <FloatingNav currentPage="guestbook" />
 
             <main className="min-h-screen bg-[#FAFAF8] pt-20 dark:bg-[#0A1210]">
                 <div className="mx-auto max-w-2xl px-4 py-10 md:py-16">
                     {/* Header */}
                     <div className="mb-8 text-center">
-                        <h1 className="font-display text-3xl font-light text-[#1A1A1A] dark:text-[#E8E6E1] md:text-4xl">
+                        <h1 className="font-display text-3xl font-light text-[#1A1A1A] md:text-4xl dark:text-[#E8E6E1]">
                             <span className="text-[#E8945A]">G</span>uestbook
                         </h1>
                         <p className="mt-2 text-[#9E9E95]">Leave a message, say hello, or share your thoughts.</p>
@@ -325,8 +320,6 @@ export default function Guestbook({ entries: initialEntries }: Props) {
                     )}
                 </div>
             </main>
-
-            <Footer />
         </>
     );
 }

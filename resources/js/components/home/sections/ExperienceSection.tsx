@@ -1,5 +1,5 @@
 import SectionTitle from '@/components/global/SectionTitle';
-import { MotionDiv, MotionStagger, MotionItem } from '@/components/ui/motion';
+import { MotionItem, MotionStagger } from '@/components/ui/motion';
 import { Link } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
 import { memo } from 'react';
@@ -157,7 +157,7 @@ const ExperienceItem = memo(function ExperienceItem({ experience }: { experience
         >
             {/* Date column */}
             <div className="pt-0.5 text-[0.82rem] leading-snug text-[#9E9E95] md:pt-1">
-                <span className="font-display text-[1.3rem] font-normal text-[#1A1A1A] dark:text-[#E8E6E1] md:block">
+                <span className="font-display text-[1.3rem] font-normal text-[#1A1A1A] md:block dark:text-[#E8E6E1]">
                     {formatYearRange(experience)}
                 </span>
                 <span className="ml-2 md:ml-0">{formatMonthRange(experience)}</span>
@@ -165,13 +165,13 @@ const ExperienceItem = memo(function ExperienceItem({ experience }: { experience
 
             {/* Info column */}
             <div>
-                <p className="font-display text-[28px] font-light text-[#1B3D2F] sm:text-[32px] md:text-[38px] dark:text-[#E8E6E1]">{experience.position}</p>
+                <p className="font-display text-[28px] font-light text-[#1B3D2F] sm:text-[32px] md:text-[38px] dark:text-[#E8E6E1]">
+                    {experience.position}
+                </p>
                 <div className="mt-1 text-[0.92rem] font-medium text-[#E8945A]">{experience.company}</div>
                 <div className="mt-1.5 text-[0.82rem] text-[#9E9E95]">{experience.location}</div>
                 {experience.description.length > 0 && (
-                    <p className="mt-3 max-w-[560px] text-[0.9rem] leading-[1.7] text-[#6B6B63] dark:text-[#9E9E95]">
-                        {experience.description[0]}
-                    </p>
+                    <p className="mt-3 max-w-[560px] text-[0.9rem] leading-[1.7] text-[#6B6B63] dark:text-[#9E9E95]">{experience.description[0]}</p>
                 )}
             </div>
         </MotionItem>

@@ -1,6 +1,6 @@
-import SectionTitle from '@/components/global/SectionTitle';
 import ContributorStack from '@/components/github/ContributorStack';
-import { MotionDiv, MotionStagger, MotionItem } from '@/components/ui/motion';
+import SectionTitle from '@/components/global/SectionTitle';
+import { MotionDiv, MotionItem, MotionStagger } from '@/components/ui/motion';
 import type { Project } from '@/types/project';
 import { Link, router } from '@inertiajs/react';
 import { ArrowRight, Github, Globe } from 'lucide-react';
@@ -45,7 +45,9 @@ const ProjectCard = memo(function ProjectCard({ project, featured = false }: { p
             }`}
         >
             {/* Thumbnail */}
-            <div className={`relative overflow-hidden bg-[#F3F1EC] dark:bg-[#0F1A15] ${featured ? 'aspect-[16/10] md:aspect-auto md:min-h-[340px]' : 'aspect-[16/10]'}`}>
+            <div
+                className={`relative overflow-hidden bg-[#F3F1EC] dark:bg-[#0F1A15] ${featured ? 'aspect-[16/10] md:aspect-auto md:min-h-[340px]' : 'aspect-[16/10]'}`}
+            >
                 {project.thumbnail_url ? (
                     <img
                         src={project.thumbnail_url}
@@ -55,22 +57,20 @@ const ProjectCard = memo(function ProjectCard({ project, featured = false }: { p
                     />
                 ) : (
                     <div className="flex h-full items-center justify-center">
-                        <span className="font-display text-5xl text-[#E5E4E0] dark:text-[#2A4A3A]">
-                            {project.title.charAt(0).toUpperCase()}
-                        </span>
+                        <span className="font-display text-5xl text-[#E5E4E0] dark:text-[#2A4A3A]">{project.title.charAt(0).toUpperCase()}</span>
                     </div>
                 )}
 
                 {/* Status badges */}
                 {project.status === 'live' && (
-                    <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-[#FDF5EE] px-2.5 py-1 text-[0.7rem] font-semibold tracking-wide uppercase text-[#E8945A]">
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-[#FDF5EE] px-2.5 py-1 text-[0.7rem] font-semibold tracking-wide text-[#E8945A] uppercase">
                         <span className="h-1.5 w-1.5 rounded-full bg-[#E8945A]" />
                         Live
                     </div>
                 )}
 
                 {project.is_featured && (
-                    <div className="absolute top-3 left-3 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide uppercase text-[#1B3D2F]">
+                    <div className="absolute top-3 left-3 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide text-[#1B3D2F] uppercase">
                         Featured
                     </div>
                 )}
@@ -80,14 +80,14 @@ const ProjectCard = memo(function ProjectCard({ project, featured = false }: { p
             <div className={`p-7 ${featured ? 'flex flex-col justify-center md:p-10' : ''}`}>
                 {/* Category */}
                 {project.category_label && (
-                    <span className="text-[0.7rem] font-semibold tracking-[0.08em] uppercase text-[#1B3D2F] dark:text-[#5AAF7E]">
+                    <span className="text-[0.7rem] font-semibold tracking-[0.08em] text-[#1B3D2F] uppercase dark:text-[#5AAF7E]">
                         {project.category_label}
                     </span>
                 )}
 
                 {/* Title */}
                 <h3
-                    className={`mt-2 font-display font-normal leading-tight text-[#1A1A1A] transition-colors group-hover:text-[#1B3D2F] dark:text-[#E8E6E1] dark:group-hover:text-[#5AAF7E] ${
+                    className={`font-display mt-2 leading-tight font-normal text-[#1A1A1A] transition-colors group-hover:text-[#1B3D2F] dark:text-[#E8E6E1] dark:group-hover:text-[#5AAF7E] ${
                         featured ? 'text-[2rem]' : 'line-clamp-2 text-[1.5rem]'
                     }`}
                 >
@@ -159,12 +159,9 @@ const ProjectCard = memo(function ProjectCard({ project, featured = false }: { p
     );
 });
 
-const HomeProjects = ({ projects, authorUsername }: HomeProjectsProps) => {
+const HomeProjects = ({ projects }: HomeProjectsProps) => {
     const featuredProject = useMemo(() => projects.find((p) => p.is_featured), [projects]);
-    const regularProjects = useMemo(
-        () => projects.filter((p) => p.id !== featuredProject?.id).slice(0, 4),
-        [projects, featuredProject?.id],
-    );
+    const regularProjects = useMemo(() => projects.filter((p) => p.id !== featuredProject?.id).slice(0, 4), [projects, featuredProject?.id]);
 
     if (projects.length === 0) return null;
 

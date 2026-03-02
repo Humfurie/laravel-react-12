@@ -1,7 +1,4 @@
-import FloatingNav from '@/components/floating-nav';
 import FloatingResumeButton from '@/components/global/FloatingResumeButton';
-import Footer from '@/components/global/Footer';
-import ScrollProgress from '@/components/global/ScrollProgress';
 import SectionTitle from '@/components/global/SectionTitle';
 import HomeAboutMe from '@/components/home/sections/HomeAboutMe';
 import HomeBanner from '@/components/home/sections/HomeBanner';
@@ -9,7 +6,7 @@ import HomeCTA from '@/components/home/sections/HomeCTA';
 import HomeExpertise from '@/components/home/sections/HomeExpertise';
 import HomeProjects from '@/components/home/sections/HomeProjects';
 import StructuredData, { schemas } from '@/components/seo/StructuredData';
-import { MotionDiv, MotionStagger, MotionItem } from '@/components/ui/motion';
+import { MotionDiv, MotionItem, MotionStagger } from '@/components/ui/motion';
 import type { Project } from '@/types/project';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
@@ -146,7 +143,7 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
 
                 {/* Featured badge */}
                 {blog.isPrimary && (
-                    <div className="absolute top-3 left-3 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide uppercase text-[#1B3D2F]">
+                    <div className="absolute top-3 left-3 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide text-[#1B3D2F] uppercase">
                         Featured
                     </div>
                 )}
@@ -156,14 +153,12 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
             <div className={`p-7 ${featured ? 'flex flex-col justify-center md:p-10' : ''}`}>
                 {/* Date */}
                 {blog.published_at && (
-                    <span className="text-[0.78rem] text-[#9E9E95]">
-                        {formatDistanceToNow(new Date(blog.published_at), { addSuffix: true })}
-                    </span>
+                    <span className="text-[0.78rem] text-[#9E9E95]">{formatDistanceToNow(new Date(blog.published_at), { addSuffix: true })}</span>
                 )}
 
                 {/* Title */}
                 <h3
-                    className={`mt-2 font-display font-normal leading-tight text-[#1A1A1A] transition-colors group-hover:text-[#1B3D2F] dark:text-[#E8E6E1] dark:group-hover:text-[#5AAF7E] ${
+                    className={`font-display mt-2 leading-tight font-normal text-[#1A1A1A] transition-colors group-hover:text-[#1B3D2F] dark:text-[#E8E6E1] dark:group-hover:text-[#5AAF7E] ${
                         featured ? 'text-[2rem]' : 'line-clamp-2 text-[1.5rem]'
                     }`}
                 >
@@ -172,7 +167,9 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
 
                 {/* Excerpt */}
                 {blog.excerpt && (
-                    <p className={`mt-2.5 text-[0.9rem] leading-[1.7] text-[#6B6B63] dark:text-[#9E9E95] ${featured ? 'line-clamp-3' : 'line-clamp-2'}`}>
+                    <p
+                        className={`mt-2.5 text-[0.9rem] leading-[1.7] text-[#6B6B63] dark:text-[#9E9E95] ${featured ? 'line-clamp-3' : 'line-clamp-2'}`}
+                    >
                         {blog.excerpt}
                     </p>
                 )}
@@ -187,21 +184,9 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
     );
 }
 
-export default function Home({
-    primary = [],
-    latest = [],
-    experiences = [],
-    expertises = [],
-    projects = [],
-    projectStats,
-    githubStats,
-    profileUser,
-}: Props): JSX.Element {
+export default function Home({ primary = [], latest = [], experiences = [], expertises = [], projects = [], profileUser }: Props): JSX.Element {
     // Memoize blog deduplication to avoid O(n×m) on every render
-    const allBlogs = useMemo(
-        () => [...primary, ...latest.filter((b) => !primary.find((p) => p.id === b.id))],
-        [primary, latest],
-    );
+    const allBlogs = useMemo(() => [...primary, ...latest.filter((b) => !primary.find((p) => p.id === b.id))], [primary, latest]);
     const featuredBlog = primary[0];
     const otherBlogs = useMemo(() => allBlogs.filter((b) => b.id !== featuredBlog?.id).slice(0, 5), [allBlogs, featuredBlog?.id]);
 
@@ -261,17 +246,12 @@ export default function Home({
             {/* Structured Data for SEO */}
             <StructuredData data={[schemas.person(), schemas.website(), schemas.organization()]} />
 
-            <ScrollProgress />
-            <FloatingNav currentPage="home" />
-
             <HomeBanner stats={profileUser?.profile_stats} />
             <HomeAboutMe profileUser={profileUser} />
             <ExperienceSection experiences={transformedExperiences} />
 
             {/* Projects Section */}
-            {projects.length > 0 && (
-                <HomeProjects projects={projects} authorUsername={profileUser?.github_username ?? undefined} />
-            )}
+            {projects.length > 0 && <HomeProjects projects={projects} />}
 
             <HomeExpertise expertises={expertises} />
 
@@ -313,8 +293,6 @@ export default function Home({
 
             {/* CTA Section with Contact Links */}
             <HomeCTA email={profileUser?.email} socialLinks={profileUser?.social_links ?? undefined} />
-
-            <Footer />
 
             {/* Floating Resume Button */}
             <FloatingResumeButton resumeUrl={profileUser?.resume_path ?? null} />

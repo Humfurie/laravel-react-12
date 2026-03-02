@@ -1,20 +1,7 @@
-import FloatingNav from '@/components/floating-nav';
-import Footer from '@/components/global/Footer';
-import ScrollProgress from '@/components/global/ScrollProgress';
 import { MotionDiv } from '@/components/ui/motion';
 import type { SocialLinks } from '@/types';
 import { Head } from '@inertiajs/react';
-import {
-    Briefcase,
-    ChevronDown,
-    ChevronUp,
-    Code2,
-    Download,
-    GraduationCap,
-    Mail,
-    Printer,
-    User as UserIcon,
-} from 'lucide-react';
+import { Briefcase, ChevronDown, ChevronUp, Code2, Download, GraduationCap, Mail, Printer, User as UserIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface Experience {
@@ -112,9 +99,7 @@ function ResumeExperienceItem({ experience, expanded, onToggle }: { experience: 
                         <span>|</span>
                         <span>
                             {formatDate(experience.start_month, experience.start_year)} –{' '}
-                            {experience.is_current_position
-                                ? 'Present'
-                                : formatDate(experience.end_month!, experience.end_year!)}
+                            {experience.is_current_position ? 'Present' : formatDate(experience.end_month!, experience.end_year!)}
                         </span>
                         <span className="text-[#E8945A]">
                             {getDuration(experience.start_month, experience.start_year, experience.end_month, experience.end_year)}
@@ -215,13 +200,28 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
     return (
         <>
             <Head title={`Resume - ${profileUser.name}`}>
-                <meta name="description" content={`${profileUser.name} - ${profileUser.headline}. View my professional experience, skills, and education.`} />
+                <meta
+                    name="description"
+                    content={`${profileUser.name} - ${profileUser.headline}. View my professional experience, skills, and education.`}
+                />
+                <link rel="canonical" href="https://humfurie.org/resume" />
+                <meta property="og:title" content={`Resume - ${profileUser.name}`} />
+                <meta
+                    property="og:description"
+                    content={`${profileUser.name} - ${profileUser.headline}. View my professional experience, skills, and education.`}
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://humfurie.org/resume" />
+                <meta property="og:image" content="https://humfurie.org/images/og-default.jpg" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={`Resume - ${profileUser.name}`} />
+                <meta
+                    name="twitter:description"
+                    content={`${profileUser.name} - ${profileUser.headline}. View my professional experience, skills, and education.`}
+                />
             </Head>
 
-            <ScrollProgress />
-            <FloatingNav currentPage="resume" />
-
-            <main className="min-h-screen bg-[#FAFAF8] pt-20 print:bg-white print:pt-0 dark:bg-[#0A1210]">
+            <main className="min-h-screen bg-[#FAFAF8] pt-20 dark:bg-[#0A1210] print:bg-white print:pt-0">
                 <div className="mx-auto max-w-5xl px-4 py-8 md:py-12">
                     {/* Action buttons */}
                     <MotionDiv className="mb-6 flex justify-end gap-3 print:hidden">
@@ -247,14 +247,12 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                     {/* Resume Document */}
                     <MotionDiv
                         delay={0.1}
-                        className="rounded-xl border border-[#E5E4E0] bg-white p-6 shadow-sm md:p-10 print:rounded-none print:border-none print:p-0 print:shadow-none dark:border-[#2A4A3A] dark:bg-[#162820]"
+                        className="rounded-xl border border-[#E5E4E0] bg-white p-6 shadow-sm md:p-10 dark:border-[#2A4A3A] dark:bg-[#162820] print:rounded-none print:border-none print:p-0 print:shadow-none"
                     >
                         {/* Header */}
                         <header className="border-b border-[#E5E4E0] pb-6 dark:border-[#2A4A3A]">
                             <h1 className="font-display text-3xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">{profileUser.name}</h1>
-                            {profileUser.headline && (
-                                <p className="mt-1 text-lg text-[#6B6B63] dark:text-[#9E9E95]">{profileUser.headline}</p>
-                            )}
+                            {profileUser.headline && <p className="mt-1 text-lg text-[#6B6B63] dark:text-[#9E9E95]">{profileUser.headline}</p>}
                             <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-[#9E9E95]">
                                 <a href={`mailto:${profileUser.email}`} className="transition-colors hover:text-[#E8945A]">
                                     {profileUser.email}
@@ -324,7 +322,12 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                             {/* Content */}
                             <div className="min-w-0 flex-1 space-y-10">
                                 {/* Professional Summary */}
-                                <section id="summary" ref={(el) => { sectionRefs.current['summary'] = el; }}>
+                                <section
+                                    id="summary"
+                                    ref={(el) => {
+                                        sectionRefs.current['summary'] = el;
+                                    }}
+                                >
                                     <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-[#1A1A1A] dark:text-[#E8E6E1]">
                                         <UserIcon className="h-5 w-5 text-[#E8945A]" />
                                         Professional Summary
@@ -335,7 +338,12 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                 </section>
 
                                 {/* Experience */}
-                                <section id="experience" ref={(el) => { sectionRefs.current['experience'] = el; }}>
+                                <section
+                                    id="experience"
+                                    ref={(el) => {
+                                        sectionRefs.current['experience'] = el;
+                                    }}
+                                >
                                     <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-[#1A1A1A] dark:text-[#E8E6E1]">
                                         <Briefcase className="h-5 w-5 text-[#E8945A]" />
                                         Experience
@@ -353,7 +361,12 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                 </section>
 
                                 {/* Technical Skills */}
-                                <section id="skills" ref={(el) => { sectionRefs.current['skills'] = el; }}>
+                                <section
+                                    id="skills"
+                                    ref={(el) => {
+                                        sectionRefs.current['skills'] = el;
+                                    }}
+                                >
                                     <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-[#1A1A1A] dark:text-[#E8E6E1]">
                                         <Code2 className="h-5 w-5 text-[#E8945A]" />
                                         Technical Skills
@@ -378,7 +391,12 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                 </section>
 
                                 {/* Education */}
-                                <section id="education" ref={(el) => { sectionRefs.current['education'] = el; }}>
+                                <section
+                                    id="education"
+                                    ref={(el) => {
+                                        sectionRefs.current['education'] = el;
+                                    }}
+                                >
                                     <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-[#1A1A1A] dark:text-[#E8E6E1]">
                                         <GraduationCap className="h-5 w-5 text-[#E8945A]" />
                                         Education & Certifications
@@ -403,19 +421,24 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                                                             </>
                                                         )}
                                                     </div>
-                                                    {edu.description && <p className="mt-2 text-sm text-[#6B6B63] dark:text-[#9E9E95]">{edu.description}</p>}
+                                                    {edu.description && (
+                                                        <p className="mt-2 text-sm text-[#6B6B63] dark:text-[#9E9E95]">{edu.description}</p>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-[#9E9E95]">
-                                            Education details will be added soon.
-                                        </p>
+                                        <p className="text-sm text-[#9E9E95]">Education details will be added soon.</p>
                                     )}
                                 </section>
 
                                 {/* Contact */}
-                                <section id="contact" ref={(el) => { sectionRefs.current['contact'] = el; }}>
+                                <section
+                                    id="contact"
+                                    ref={(el) => {
+                                        sectionRefs.current['contact'] = el;
+                                    }}
+                                >
                                     <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-[#1A1A1A] dark:text-[#E8E6E1]">
                                         <Mail className="h-5 w-5 text-[#E8945A]" />
                                         Contact
@@ -455,8 +478,6 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                     </MotionDiv>
                 </div>
             </main>
-
-            <Footer />
         </>
     );
 }

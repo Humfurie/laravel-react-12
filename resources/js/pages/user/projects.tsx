@@ -1,6 +1,3 @@
-import FloatingNav from '@/components/floating-nav';
-import Footer from '@/components/global/Footer';
-import ScrollProgress from '@/components/global/ScrollProgress';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectFilters } from '@/components/projects/ProjectFilters';
 import { ProjectModal } from '@/components/projects/ProjectModal';
@@ -94,6 +91,20 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                     content="Explore Humphrey Singculan's portfolio of projects - web applications built with Laravel, React, and modern full-stack technologies."
                 />
                 <link rel="canonical" href="https://humfurie.org/projects" />
+                <meta property="og:title" content="Projects - Humphrey Singculan" />
+                <meta
+                    property="og:description"
+                    content="Explore Humphrey Singculan's portfolio of projects - web applications built with Laravel, React, and modern full-stack technologies."
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://humfurie.org/projects" />
+                <meta property="og:image" content="https://humfurie.org/images/og-default.jpg" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="Projects - Humphrey Singculan" />
+                <meta
+                    name="twitter:description"
+                    content="Explore Humphrey Singculan's portfolio of projects - web applications built with Laravel, React, and modern full-stack technologies."
+                />
             </Head>
 
             {/* Structured Data */}
@@ -114,9 +125,6 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
             />
 
             <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0A1210]">
-                <ScrollProgress />
-                <FloatingNav currentPage="projects" />
-
                 <main className="pt-20">
                     {/* Magazine Hero Section */}
                     <section className="primary-container py-8 md:py-12">
@@ -181,14 +189,14 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
 
                                         {/* Category Badge */}
                                         <div className="absolute top-6 right-6">
-                                            <span className="rounded-full bg-[#E4EDE8] px-4 py-1.5 text-[0.7rem] font-semibold tracking-wide uppercase text-[#1B3D2F]">
+                                            <span className="rounded-full bg-[#E4EDE8] px-4 py-1.5 text-[0.7rem] font-semibold tracking-wide text-[#1B3D2F] uppercase">
                                                 {heroProject.category_label}
                                             </span>
                                         </div>
 
                                         {/* Content Overlay */}
                                         <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
-                                            <h2 className="mb-2 font-display text-2xl font-normal text-white md:text-3xl">{heroProject.title}</h2>
+                                            <h2 className="font-display mb-2 text-2xl font-normal text-white md:text-3xl">{heroProject.title}</h2>
                                             <p className="line-clamp-2 max-w-xl text-sm text-white/80 md:text-base">
                                                 {heroProject.short_description}
                                             </p>
@@ -211,7 +219,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                         </div>
                                         <div>
                                             <p className="mb-2 text-sm text-[#6B6B63] dark:text-[#9E9E95]">Explore my</p>
-                                            <h3 className="mb-4 font-display text-2xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">
+                                            <h3 className="font-display mb-4 text-2xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">
                                                 Web & Mobile
                                                 <br />
                                                 Projects
@@ -263,7 +271,9 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                                 <span className="mb-2 inline-block rounded-full bg-white/90 px-3 py-1 text-[0.7rem] font-semibold text-[#1A1A1A] backdrop-blur-sm">
                                                     {sidebarProjects[0].category_label}
                                                 </span>
-                                                <h3 className="font-display text-lg font-normal text-white drop-shadow-lg">{sidebarProjects[0].title}</h3>
+                                                <h3 className="font-display text-lg font-normal text-white drop-shadow-lg">
+                                                    {sidebarProjects[0].title}
+                                                </h3>
                                             </div>
 
                                             {/* Arrow */}
@@ -365,26 +375,29 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                     <section className="bg-[#FAFAF8] py-16 dark:bg-[#0A1210]">
                         <div className="primary-container">
                             <MotionStagger staggerDelay={0.1} className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-8">
-                                <MotionItem variant="scaleUp" className="rounded-xl border border-[#E5E4E0] bg-white p-6 shadow-sm md:p-8 dark:border-[#2A4A3A] dark:bg-[#162820]">
-                                    <div className="mb-2 font-display text-4xl font-light text-[#1A1A1A] md:text-5xl dark:text-[#E8E6E1]">
+                                <MotionItem
+                                    variant="scaleUp"
+                                    className="rounded-xl border border-[#E5E4E0] bg-white p-6 shadow-sm md:p-8 dark:border-[#2A4A3A] dark:bg-[#162820]"
+                                >
+                                    <div className="font-display mb-2 text-4xl font-light text-[#1A1A1A] md:text-5xl dark:text-[#E8E6E1]">
                                         {allProjects.length}
                                     </div>
                                     <div className="text-sm font-medium text-[#9E9E95]">Total Projects</div>
                                 </MotionItem>
                                 <MotionItem variant="scaleUp" className="rounded-xl bg-[#E4EDE8] p-6 md:p-8 dark:bg-[#162820]">
-                                    <div className="mb-2 font-display text-4xl font-light text-[#1A1A1A] md:text-5xl dark:text-[#E8E6E1]">
+                                    <div className="font-display mb-2 text-4xl font-light text-[#1A1A1A] md:text-5xl dark:text-[#E8E6E1]">
                                         {allProjects.filter((p) => p.status === 'live').length}
                                     </div>
                                     <div className="text-sm font-medium text-[#1B3D2F] dark:text-[#5AAF7E]">Live Projects</div>
                                 </MotionItem>
                                 <MotionItem variant="scaleUp" className="rounded-xl bg-[#FDF5EE] p-6 md:p-8 dark:bg-[#162820]">
-                                    <div className="mb-2 font-display text-4xl font-light text-[#1A1A1A] md:text-5xl dark:text-[#E8E6E1]">
+                                    <div className="font-display mb-2 text-4xl font-light text-[#1A1A1A] md:text-5xl dark:text-[#E8E6E1]">
                                         {allProjects.filter((p) => p.is_featured).length}
                                     </div>
                                     <div className="text-sm font-medium text-[#E8945A]">Featured</div>
                                 </MotionItem>
                                 <MotionItem variant="scaleUp" className="rounded-xl bg-[#F3F1EC] p-6 md:p-8 dark:bg-[#162820]">
-                                    <div className="mb-2 font-display text-4xl font-light text-[#1A1A1A] md:text-5xl dark:text-[#E8E6E1]">
+                                    <div className="font-display mb-2 text-4xl font-light text-[#1A1A1A] md:text-5xl dark:text-[#E8E6E1]">
                                         {techStack.length}
                                     </div>
                                     <div className="text-sm font-medium text-[#6B6B63] dark:text-[#9E9E95]">Technologies</div>
@@ -396,15 +409,9 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                     {/* CTA Section */}
                     <section className="border-t border-[#E5E4E0] bg-[#1B3D2F] py-16 dark:border-[#2A4A3A]">
                         <MotionDiv className="primary-container text-center">
-                            <p className="mb-3 text-[0.75rem] font-semibold tracking-[0.15em] uppercase text-[#E8945A]">
-                                Let's collaborate
-                            </p>
-                            <h2 className="mb-4 font-display text-2xl font-normal text-white md:text-3xl">
-                                Have a project in mind?
-                            </h2>
-                            <p className="mx-auto mb-8 max-w-md text-[#B8D8C7]">
-                                I'm always open to discussing new projects and opportunities.
-                            </p>
+                            <p className="mb-3 text-[0.75rem] font-semibold tracking-[0.15em] text-[#E8945A] uppercase">Let's collaborate</p>
+                            <h2 className="font-display mb-4 text-2xl font-normal text-white md:text-3xl">Have a project in mind?</h2>
+                            <p className="mx-auto mb-8 max-w-md text-[#B8D8C7]">I'm always open to discussing new projects and opportunities.</p>
                             <div className="flex flex-wrap justify-center gap-3">
                                 <a
                                     href="mailto:humfurie@gmail.com"
@@ -428,8 +435,6 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
 
                 {/* Project Detail Modal */}
                 <ProjectModal project={selectedProject} open={modalOpen} onClose={handleCloseModal} />
-
-                <Footer />
             </div>
         </>
     );

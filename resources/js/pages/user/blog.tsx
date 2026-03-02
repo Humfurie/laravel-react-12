@@ -1,6 +1,3 @@
-import FloatingNav from '@/components/floating-nav';
-import Footer from '@/components/global/Footer';
-import ScrollProgress from '@/components/global/ScrollProgress';
 import StructuredData, { schemas } from '@/components/seo/StructuredData';
 import { Button } from '@/components/ui/button';
 import { MotionDiv, MotionItem, MotionStagger } from '@/components/ui/motion';
@@ -88,14 +85,14 @@ const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog;
 
                     {/* Featured Badge */}
                     {blog.isPrimary && (
-                        <div className="absolute top-6 right-6 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide uppercase text-[#1B3D2F]">
+                        <div className="absolute top-6 right-6 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide text-[#1B3D2F] uppercase">
                             Featured
                         </div>
                     )}
 
                     {/* Content Overlay */}
                     <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
-                        <h2 className="mb-2 line-clamp-2 font-display text-2xl font-normal text-white md:text-3xl">{blog.title}</h2>
+                        <h2 className="font-display mb-2 line-clamp-2 text-2xl font-normal text-white md:text-3xl">{blog.title}</h2>
                         {blog.excerpt && (
                             <p className="line-clamp-2 max-w-xl text-sm text-white/80 md:text-base">{truncateText(blog.excerpt, 150)}</p>
                         )}
@@ -135,7 +132,7 @@ const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog;
 
                 {/* Featured badge */}
                 {blog.isPrimary && (
-                    <div className="absolute top-4 left-4 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide uppercase text-[#1B3D2F]">
+                    <div className="absolute top-4 left-4 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide text-[#1B3D2F] uppercase">
                         Featured
                     </div>
                 )}
@@ -163,7 +160,7 @@ const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog;
             <div className={`mt-4 ${isLarge ? 'md:mt-6' : ''}`}>
                 {/* Title */}
                 <h3
-                    className={`line-clamp-2 font-display font-normal text-[#1A1A1A] transition-colors group-hover:text-[#1B3D2F] dark:text-[#E8E6E1] dark:group-hover:text-[#5AAF7E] ${isLarge ? 'text-[2rem] md:text-[2.5rem]' : 'text-[1.5rem]'}`}
+                    className={`font-display line-clamp-2 font-normal text-[#1A1A1A] transition-colors group-hover:text-[#1B3D2F] dark:text-[#E8E6E1] dark:group-hover:text-[#5AAF7E] ${isLarge ? 'text-[2rem] md:text-[2.5rem]' : 'text-[1.5rem]'}`}
                 >
                     {blog.title}
                 </h3>
@@ -202,11 +199,15 @@ const CategoryTabs = memo(function CategoryTabs({ active }: { active: BlogCatego
     const handleTabClick = useCallback(
         (category: BlogCategory) => {
             if (category === active) return;
-            router.get(`/blog`, { category }, {
-                preserveScroll: false,
-                preserveState: true,
-                only: ['blogs', 'category'],
-            });
+            router.get(
+                `/blog`,
+                { category },
+                {
+                    preserveScroll: false,
+                    preserveState: true,
+                    only: ['blogs', 'category'],
+                },
+            );
         },
         [active],
     );
@@ -271,13 +272,10 @@ export default function BlogIndex({ blogs, category }: Props) {
 
                 {/* Open Graph Meta Tags for Social Media */}
                 <meta property="og:title" content={`${categoryLabel} Blog`} />
-                <meta
-                    property="og:description"
-                    content={`Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`}
-                />
+                <meta property="og:description" content={`Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`} />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
-                <meta property="og:image" content="/images/og-default.jpg" />
+                <meta property="og:image" content="https://humfurie.org/images/og-default.jpg" />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
                 <meta property="og:image:alt" content="Blog - Technology Articles and Insights" />
@@ -285,10 +283,7 @@ export default function BlogIndex({ blogs, category }: Props) {
                 {/* Twitter Card Meta Tags */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={`${categoryLabel} Blog`} />
-                <meta
-                    name="twitter:description"
-                    content={`Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`}
-                />
+                <meta name="twitter:description" content={`Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`} />
                 <meta name="twitter:image" content="/images/og-default.jpg" />
 
                 {/* Schema.org JSON-LD Structured Data */}
@@ -346,9 +341,6 @@ export default function BlogIndex({ blogs, category }: Props) {
             <StructuredData data={[schemas.organization()]} />
 
             <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0A1210]">
-                <ScrollProgress />
-                <FloatingNav currentPage="blog" />
-
                 <main className="pt-20">
                     {/* Magazine Hero Section */}
                     <section className="primary-container py-8 md:py-12">
@@ -400,7 +392,7 @@ export default function BlogIndex({ blogs, category }: Props) {
                                         </div>
                                         <div>
                                             <p className="mb-2 text-sm text-[#6B6B63] dark:text-[#9E9E95]">Become a</p>
-                                            <h3 className="mb-4 font-display text-2xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">
+                                            <h3 className="font-display mb-4 text-2xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">
                                                 Regular
                                                 <br />
                                                 Reader
@@ -409,7 +401,9 @@ export default function BlogIndex({ blogs, category }: Props) {
                                                 Stay updated with the latest insights and tutorials
                                             </p>
                                         </div>
-                                        <div className="mt-6 font-display text-3xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">{blogs.total} posts</div>
+                                        <div className="font-display mt-6 text-3xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">
+                                            {blogs.total} posts
+                                        </div>
                                     </div>
 
                                     {/* Second Featured Post */}
@@ -438,7 +432,9 @@ export default function BlogIndex({ blogs, category }: Props) {
                                             </div>
 
                                             <div className="absolute right-4 bottom-4 left-4">
-                                                <h3 className="line-clamp-2 font-display text-lg font-normal text-white drop-shadow-lg">{otherPosts[0].title}</h3>
+                                                <h3 className="font-display line-clamp-2 text-lg font-normal text-white drop-shadow-lg">
+                                                    {otherPosts[0].title}
+                                                </h3>
                                             </div>
 
                                             {/* Arrow */}
@@ -476,7 +472,10 @@ export default function BlogIndex({ blogs, category }: Props) {
                                     </div>
                                     <h3 className="mb-2 text-2xl font-semibold text-[#1A1A1A] dark:text-[#E8E6E1]">No posts found</h3>
                                     <p className="mb-6 text-[#6B6B63] dark:text-[#9E9E95]">We're working on some great content. Check back soon!</p>
-                                    <Button onClick={() => router.visit('/')} className="rounded-full bg-[#1B3D2F] px-8 text-white hover:bg-[#2A5E44] dark:bg-[#5AAF7E] dark:text-[#0F1A15] dark:hover:bg-[#5AAF7E]/90">
+                                    <Button
+                                        onClick={() => router.visit('/')}
+                                        className="rounded-full bg-[#1B3D2F] px-8 text-white hover:bg-[#2A5E44] dark:bg-[#5AAF7E] dark:text-[#0F1A15] dark:hover:bg-[#5AAF7E]/90"
+                                    >
                                         Back to Home
                                     </Button>
                                 </div>
@@ -519,10 +518,8 @@ export default function BlogIndex({ blogs, category }: Props) {
                     {/* CTA Section */}
                     <section className="border-t border-[#E5E4E0] bg-white py-16 dark:border-[#2A4A3A] dark:bg-[#0A1210]">
                         <MotionDiv className="primary-container text-center">
-                            <p className="mb-3 text-sm font-medium tracking-wide text-[#E8945A] uppercase">
-                                Blog
-                            </p>
-                            <h2 className="mb-4 font-display text-2xl font-normal text-[#1A1A1A] md:text-3xl dark:text-[#E8E6E1]">
+                            <p className="mb-3 text-sm font-medium tracking-wide text-[#E8945A] uppercase">Blog</p>
+                            <h2 className="font-display mb-4 text-2xl font-normal text-[#1A1A1A] md:text-3xl dark:text-[#E8E6E1]">
                                 Thanks for reading
                             </h2>
                             <p className="mx-auto mb-8 max-w-md text-[#6B6B63] dark:text-[#9E9E95]">
@@ -539,8 +536,6 @@ export default function BlogIndex({ blogs, category }: Props) {
                         </MotionDiv>
                     </section>
                 </main>
-
-                <Footer />
             </div>
         </>
     );

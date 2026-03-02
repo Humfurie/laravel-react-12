@@ -1,16 +1,11 @@
 import { publicNavItems } from '@/config/navigation';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { LogIn, LayoutDashboard, Menu, X } from 'lucide-react';
+import { LayoutDashboard, LogIn, Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import ThemeToggle from './theme-toggle';
 
-interface FloatingNavProps {
-    currentPage?: string;
-}
-
-export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) {
-    const [activeItem, setActiveItem] = useState(currentPage);
+export default function FloatingNav() {
     const { url, props } = usePage<SharedData>();
     const isLoggedIn = !!props.auth.user;
     const [isVisible, setIsVisible] = useState(true);
@@ -76,9 +71,7 @@ export default function FloatingNav({ currentPage = 'home' }: FloatingNavProps) 
                                         if (isCurrentPage(item.route)) {
                                             e.preventDefault();
                                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                                            return;
                                         }
-                                        setActiveItem(item.id);
                                     }}
                                     className={`relative text-[0.85rem] font-normal tracking-wide transition-colors duration-300 ${
                                         isActive
