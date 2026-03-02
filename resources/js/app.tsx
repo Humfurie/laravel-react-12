@@ -2,6 +2,7 @@ import '../css/app.css';
 
 import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import type { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import ConsentBanner from './components/consent/ConsentBanner';
 import PageLoader from './components/page-loader';
@@ -69,7 +70,18 @@ createInertiaApp({
         }
         return `${title} | Humphrey Singculan`;
     },
-    resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
+    resolve: async (name) => {
+        const page = await resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx'));
+        const mod = page as { default: { layout?: (page: ReactNode) => ReactNode } };
+
+        // Apply persistent PublicLayout to public user pages (not admin, auth, or settings)
+        if (name.startsWith('user/') && !mod.default.layout) {
+            const { default: PublicLayout } = await import('./layouts/public-layout');
+            mod.default.layout = (page: ReactNode) => <PublicLayout>{page}</PublicLayout>;
+        }
+
+        return page;
+    },
     setup({ el, App, props }) {
         const root = createRoot(el);
 

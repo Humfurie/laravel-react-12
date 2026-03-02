@@ -221,8 +221,8 @@ test('unpublished blog post returns 404 for public access', function () {
 });
 
 test('published blog posts appear in public listing', function () {
-    $publishedBlog = Blog::factory()->published()->create();
-    $draftBlog = Blog::factory()->create(['status' => 'draft']);
+    $publishedBlog = Blog::factory()->published()->create(['tags' => ['portfolio']]);
+    $draftBlog = Blog::factory()->create(['status' => 'draft', 'tags' => ['portfolio']]);
 
     $response = $this->get(route('blog.index'))
         ->assertOk();
@@ -230,7 +230,61 @@ test('published blog posts appear in public listing', function () {
     $response->assertInertia(fn ($page) => $page->component('user/blog')
         ->has('blogs.data', 1)
         ->where('blogs.data.0.id', $publishedBlog->id)
+        ->where('category', 'portfolio')
     );
+});
+
+test('blog index defaults to portfolio category', function () {
+    Blog::factory()->published()->create(['tags' => ['portfolio']]);
+    Blog::factory()->published()->create(['tags' => ['personal']]);
+
+    $this->get(route('blog.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->component('user/blog')
+            ->has('blogs.data', 1)
+            ->where('category', 'portfolio')
+        );
+});
+
+test('blog index filters by personal category', function () {
+    Blog::factory()->published()->create(['tags' => ['portfolio']]);
+    $personalBlog = Blog::factory()->published()->create(['tags' => ['personal']]);
+
+    $this->get(route('blog.index', ['category' => 'personal']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->component('user/blog')
+            ->has('blogs.data', 1)
+            ->where('blogs.data.0.id', $personalBlog->id)
+            ->where('category', 'personal')
+        );
+});
+
+test('blog with both tags appears in both categories', function () {
+    $bothBlog = Blog::factory()->published()->create(['tags' => ['portfolio', 'personal']]);
+
+    $this->get(route('blog.index', ['category' => 'portfolio']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('blogs.data', 1)
+            ->where('blogs.data.0.id', $bothBlog->id)
+        );
+
+    $this->get(route('blog.index', ['category' => 'personal']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('blogs.data', 1)
+            ->where('blogs.data.0.id', $bothBlog->id)
+        );
+});
+
+test('blog without matching category tag does not appear', function () {
+    Blog::factory()->published()->create(['tags' => ['personal']]);
+
+    $this->get(route('blog.index', ['category' => 'portfolio']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('blogs.data', 0)
+        );
 });
 
 test('home page shows primary and latest blogs with stats', function () {
@@ -281,6 +335,107 @@ test('blog returns null display image when no images available', function () {
     ]);
 
     expect($blog->display_image)->toBeNull();
+});
+
+// --- Admin Search, Filter & Pagination ---
+
+test('admin blog index filters by published status', function () {
+    Blog::factory()->create(['status' => 'published', 'published_at' => now()]);
+    Blog::factory()->create(['status' => 'draft']);
+    Blog::factory()->create(['status' => 'private']);
+
+    $this->actingAs($this->user)
+        ->get(route('blogs.index', ['status' => 'published']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('admin/blog')
+            ->has('blogs.data', 1)
+            ->where('blogs.data.0.status', 'published')
+        );
+});
+
+test('admin blog index filters by draft status', function () {
+    Blog::factory()->create(['status' => 'published', 'published_at' => now()]);
+    Blog::factory()->create(['status' => 'draft']);
+
+    $this->actingAs($this->user)
+        ->get(route('blogs.index', ['status' => 'draft']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('blogs.data', 1)
+            ->where('blogs.data.0.status', 'draft')
+        );
+});
+
+test('admin blog index filters by deleted status', function () {
+    Blog::factory()->create(['status' => 'published', 'published_at' => now()]);
+    $deleted = Blog::factory()->create(['status' => 'published', 'published_at' => now()]);
+    $deleted->delete();
+
+    $this->actingAs($this->user)
+        ->get(route('blogs.index', ['status' => 'deleted']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('blogs.data', 1)
+            ->where('blogs.data.0.id', $deleted->id)
+        );
+});
+
+test('admin blog index searches by title', function () {
+    Blog::factory()->create(['title' => 'Laravel Best Practices']);
+    Blog::factory()->create(['title' => 'React Components Guide']);
+
+    $this->actingAs($this->user)
+        ->get(route('blogs.index', ['search' => 'Laravel']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('blogs.data', 1)
+            ->where('blogs.data.0.title', 'Laravel Best Practices')
+        );
+});
+
+test('admin blog index search is case insensitive', function () {
+    Blog::factory()->create(['title' => 'Laravel Best Practices']);
+
+    $this->actingAs($this->user)
+        ->get(route('blogs.index', ['search' => 'laravel']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->has('blogs.data', 1));
+});
+
+test('admin blog index paginates results', function () {
+    Blog::factory()->count(15)->create();
+
+    $this->actingAs($this->user)
+        ->get(route('blogs.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('blogs.data', 10)
+            ->where('blogs.last_page', 2)
+        );
+});
+
+test('admin blog index preserves filters in pagination', function () {
+    Blog::factory()->count(15)->create(['status' => 'draft']);
+    Blog::factory()->create(['status' => 'published', 'published_at' => now()]);
+
+    $this->actingAs($this->user)
+        ->get(route('blogs.index', ['status' => 'draft', 'page' => 2]))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('blogs.current_page', 2)
+            ->where('filters.status', 'draft')
+        );
+});
+
+test('admin blog index passes filters back to frontend', function () {
+    $this->actingAs($this->user)
+        ->get(route('blogs.index', ['search' => 'test', 'status' => 'published']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('filters.search', 'test')
+            ->where('filters.status', 'published')
+        );
 });
 
 test('unauthenticated user cannot access admin blog routes', function () {

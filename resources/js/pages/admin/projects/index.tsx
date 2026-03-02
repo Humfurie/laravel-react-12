@@ -7,7 +7,8 @@ import AdminLayout from '@/layouts/AdminLayout';
 import type { Project, ProjectCategory, ProjectStatus } from '@/types/project';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
-import { Github, Globe, MoreHorizontal, Plus, RotateCcw, Star, Trash2 } from 'lucide-react';
+import { Github, Globe, MoreHorizontal, Plus, RotateCcw, Search, Star, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Props {
     projects: {
@@ -17,6 +18,10 @@ interface Props {
         per_page: number;
         total: number;
     };
+    filters: {
+        search?: string;
+        status?: string;
+    };
     categories: Record<ProjectCategory, string>;
     statuses: Record<ProjectStatus, string>;
 }
@@ -24,7 +29,7 @@ interface Props {
 const getStatusColor = (status: ProjectStatus) => {
     switch (status) {
         case 'live':
-            return 'bg-green-100 text-green-800';
+            return 'bg-[#E4EDE8] text-[#1B3D2F] dark:bg-[#162820] dark:text-[#5AAF7E]';
         case 'development':
             return 'bg-yellow-100 text-yellow-800';
         case 'maintenance':
@@ -182,7 +187,7 @@ function ProjectCard({ project }: { project: Project }) {
                                 ) : (
                                     <>
                                         {can('project', 'restore') && (
-                                            <DropdownMenuItem onClick={handleRestore} className="text-green-600">
+                                            <DropdownMenuItem onClick={handleRestore} className="text-[#2A5E44] dark:text-[#5AAF7E]">
                                                 <RotateCcw className="mr-2 h-4 w-4" />
                                                 Restore
                                             </DropdownMenuItem>
@@ -204,8 +209,34 @@ function ProjectCard({ project }: { project: Project }) {
     );
 }
 
-export default function ProjectsIndex({ projects }: Props) {
+const statusFilters = [
+    { label: 'All', value: undefined },
+    { label: 'Live', value: 'live' },
+    { label: 'Development', value: 'development' },
+    { label: 'Maintenance', value: 'maintenance' },
+    { label: 'Archived', value: 'archived' },
+    { label: 'Deleted', value: 'deleted' },
+] as const;
+
+export default function ProjectsIndex({ projects, filters }: Props) {
     const { can } = usePermissions();
+    const [search, setSearch] = useState(filters.search || '');
+    const isInitialMount = useRef(true);
+
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        const timeout = setTimeout(() => {
+            router.get(route('admin.projects.index'), { search: search || undefined, status: filters.status }, { preserveState: true, replace: true });
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [search]);
+
+    const handleFilter = (status: string | undefined) => {
+        router.get(route('admin.projects.index'), { search: filters.search, status }, { preserveState: true, replace: true });
+    };
 
     return (
         <AdminLayout>
@@ -227,6 +258,35 @@ export default function ProjectsIndex({ projects }: Props) {
                     )}
                 </div>
 
+                {/* Filters */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-wrap gap-2">
+                        {statusFilters.map((filter) => (
+                            <button
+                                key={filter.label}
+                                onClick={() => handleFilter(filter.value)}
+                                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                                    filters.status === filter.value
+                                        ? 'bg-[#1B3D2F] text-white dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                                }`}
+                            >
+                                {filter.label}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="relative">
+                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search projects..."
+                            className="rounded-lg border border-gray-200 bg-white py-1.5 pr-4 pl-9 text-sm focus:border-[#5AAF7E] focus:ring-2 focus:ring-[#5AAF7E]/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        />
+                    </div>
+                </div>
+
                 <div className="space-y-4">
                     <div className="text-muted-foreground text-sm">
                         {projects.total} project{projects.total !== 1 ? 's' : ''} found
@@ -236,7 +296,7 @@ export default function ProjectsIndex({ projects }: Props) {
                         <Card>
                             <CardContent className="py-12 text-center">
                                 <p className="text-muted-foreground">No projects found.</p>
-                                {can('project', 'create') && (
+                                {!filters.search && !filters.status && can('project', 'create') && (
                                     <Link href={route('admin.projects.create')} className="mt-4 inline-block">
                                         <Button>Create your first project</Button>
                                     </Link>
@@ -247,6 +307,27 @@ export default function ProjectsIndex({ projects }: Props) {
                         projects.data.map((project) => <ProjectCard key={project.id} project={project} />)
                     )}
                 </div>
+
+                {/* Pagination */}
+                {projects.last_page > 1 && (
+                    <div className="flex items-center justify-center gap-2">
+                        {Array.from({ length: projects.last_page }, (_, i) => i + 1).map((page) => (
+                            <button
+                                key={page}
+                                onClick={() =>
+                                    router.get(route('admin.projects.index'), { ...filters, page }, { preserveState: true })
+                                }
+                                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                                    page === projects.current_page
+                                        ? 'bg-[#1B3D2F] text-white dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
+                                        : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                                }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
         </AdminLayout>
     );

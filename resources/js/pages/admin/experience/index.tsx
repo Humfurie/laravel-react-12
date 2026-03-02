@@ -6,7 +6,8 @@ import { usePermissions } from '@/hooks/usePermissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
-import { Edit, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import { Edit, MoreHorizontal, Plus, Search, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Experience {
     id: number;
@@ -26,7 +27,16 @@ interface Experience {
 }
 
 interface Props {
-    experiences: Experience[];
+    experiences: {
+        data: Experience[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    filters: {
+        search?: string;
+    };
 }
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -123,11 +133,24 @@ function ExperienceCard({ experience, canUpdate, canDelete }: { experience: Expe
     );
 }
 
-export default function ExperienceIndex({ experiences }: Props) {
+export default function ExperienceIndex({ experiences, filters }: Props) {
     const { can } = usePermissions();
     const canCreate = can('experience', 'create');
     const canUpdate = can('experience', 'update');
     const canDelete = can('experience', 'delete');
+    const [search, setSearch] = useState(filters.search || '');
+    const isInitialMount = useRef(true);
+
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        const timeout = setTimeout(() => {
+            router.get(route('admin.experiences.index'), { search: search || undefined }, { preserveState: true, replace: true });
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [search]);
 
     return (
         <AdminLayout>
@@ -149,16 +172,30 @@ export default function ExperienceIndex({ experiences }: Props) {
                     )}
                 </div>
 
+                {/* Search */}
+                <div className="flex justify-end">
+                    <div className="relative">
+                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search company or position..."
+                            className="rounded-lg border border-gray-200 bg-white py-1.5 pr-4 pl-9 text-sm focus:border-[#5AAF7E] focus:ring-2 focus:ring-[#5AAF7E]/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        />
+                    </div>
+                </div>
+
                 <div className="space-y-4">
                     <div className="text-muted-foreground text-sm">
-                        {experiences.length} experience{experiences.length !== 1 ? 's' : ''} found
+                        {experiences.total} experience{experiences.total !== 1 ? 's' : ''} found
                     </div>
 
-                    {experiences.length === 0 ? (
+                    {experiences.data.length === 0 ? (
                         <Card>
                             <CardContent className="py-12 text-center">
                                 <p className="text-muted-foreground">No experiences found.</p>
-                                {canCreate && (
+                                {!filters.search && canCreate && (
                                     <Link href={route('admin.experiences.create')} className="mt-4 inline-block">
                                         <Button>Add your first experience</Button>
                                     </Link>
@@ -166,11 +203,32 @@ export default function ExperienceIndex({ experiences }: Props) {
                             </CardContent>
                         </Card>
                     ) : (
-                        experiences.map((experience) => (
+                        experiences.data.map((experience) => (
                             <ExperienceCard key={experience.id} experience={experience} canUpdate={canUpdate} canDelete={canDelete} />
                         ))
                     )}
                 </div>
+
+                {/* Pagination */}
+                {experiences.last_page > 1 && (
+                    <div className="flex items-center justify-center gap-2">
+                        {Array.from({ length: experiences.last_page }, (_, i) => i + 1).map((page) => (
+                            <button
+                                key={page}
+                                onClick={() =>
+                                    router.get(route('admin.experiences.index'), { ...filters, page }, { preserveState: true })
+                                }
+                                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                                    page === experiences.current_page
+                                        ? 'bg-[#1B3D2F] text-white dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
+                                        : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                                }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
         </AdminLayout>
     );

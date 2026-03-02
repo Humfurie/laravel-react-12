@@ -57,6 +57,11 @@ export default defineConfig({
         // Disable source maps in production
         sourcemap: false,
     },
+    server: {
+        watch: {
+            usePolling: true,
+        },
+    },
     resolve: {
         alias: {
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),

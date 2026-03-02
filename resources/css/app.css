@@ -9,24 +9,32 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Cormorant Garamond', 'Georgia', serif;
 
-    --color-brand-orange: #fc6141;
-    --color-brand-green: #2ecc71;
-    --color-brand-offwhite: #f7f3f1;
-    --color-brand-white: #ffffff;
-    --color-brand-black: #1f1f1f;
-    --color-brand-gray: #4c4c4c;
+    /* ── New brand palette ── */
+    --color-brand-green: #1B3D2F;
+    --color-brand-green-mid: #2A5E44;
+    --color-brand-green-light: #E4EDE8;
+    --color-brand-orange: #E8945A;
+    --color-brand-orange-light: #F5C89E;
+    --color-brand-orange-bg: #FDF5EE;
+    --color-brand-offwhite: #FAFAF8;
+    --color-brand-white: #FFFFFF;
+    --color-brand-black: #1A1A1A;
+    --color-brand-gray: #6B6B63;
 
-    --color-muted-orange: #ff8c6b;
-    --color-muted-green: #5dd890;
-    --color-muted-offwhite: #faf8f5;
-    --color-muted-gray: #8e8e8e;
+    --color-muted-orange: #F5C89E;
+    --color-muted-green: #3D7A5A;
+    --color-muted-offwhite: #F3F1EC;
+    --color-muted-gray: #9E9E95;
 
+    /* ── Radius ── */
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
 
+    /* ── Semantic color tokens (shadcn/ui) ── */
     --color-background: var(--background);
     --color-foreground: var(--foreground);
 
@@ -75,9 +83,6 @@
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
   looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
 */
 @layer base {
     *,
@@ -89,100 +94,134 @@
     }
 }
 
+/* ======= FONT FACES ======= */
+
+/* Outfit — Body font */
 @font-face {
     font-display: swap;
-    font-family: 'Montserrat';
+    font-family: 'Outfit';
     font-style: normal;
     font-weight: 400;
-    src: url('/fonts/montserrat-v29-latin-regular.woff2') format('woff2');
+    src: url('/fonts/outfit-v15-latin-regular.woff2') format('woff2');
 }
 
 @font-face {
     font-display: swap;
-    font-family: 'Montserrat';
-    font-style: italic;
-    font-weight: 400;
-    src: url('/fonts/montserrat-v29-latin-italic.woff2') format('woff2');
+    font-family: 'Outfit';
+    font-style: normal;
+    font-weight: 500;
+    src: url('/fonts/outfit-v15-latin-500.woff2') format('woff2');
 }
 
 @font-face {
     font-display: swap;
-    font-family: 'Montserrat';
+    font-family: 'Outfit';
     font-style: normal;
-    font-weight: 700;
-    src: url('/fonts/montserrat-v29-latin-700.woff2') format('woff2');
+    font-weight: 600;
+    src: url('/fonts/outfit-v15-latin-600.woff2') format('woff2');
 }
+
+/* Cormorant Garamond — Display/heading font */
+@font-face {
+    font-display: swap;
+    font-family: 'Cormorant Garamond';
+    font-style: normal;
+    font-weight: 300;
+    src: url('/fonts/cormorant-garamond-v21-latin-300.woff2') format('woff2');
+}
+
+@font-face {
+    font-display: swap;
+    font-family: 'Cormorant Garamond';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/fonts/cormorant-garamond-v21-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+    font-display: swap;
+    font-family: 'Cormorant Garamond';
+    font-style: normal;
+    font-weight: 500;
+    src: url('/fonts/cormorant-garamond-v21-latin-500.woff2') format('woff2');
+}
+
+/* ======= LIGHT MODE (root) ======= */
 
 :root {
-    --background: oklch(0.97 0.005 60);
-    --foreground: oklch(0.2 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.2 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.2 0 0);
-    --primary: oklch(0.65 0.18 25);
-    --primary-foreground: oklch(0.99 0 0);
-    --secondary: oklch(0.62 0.18 155);
-    --secondary-foreground: oklch(0.99 0 0);
-    --muted: oklch(0.96 0.005 60);
-    --muted-foreground: oklch(0.5 0 0);
-    --accent: oklch(0.62 0.18 155);
-    --accent-foreground: oklch(0.99 0 0);
-    --destructive: oklch(0.55 0.22 27);
-    --destructive-foreground: oklch(0.99 0 0);
-    --border: oklch(0.9 0 0);
-    --input: oklch(0.92 0.005 60);
-    --ring: oklch(0.65 0.18 25);
-    --chart-1: oklch(0.65 0.18 25);
-    --chart-2: oklch(0.62 0.18 155);
-    --chart-3: oklch(0.55 0.15 280);
-    --chart-4: oklch(0.7 0.12 70);
-    --chart-5: oklch(0.58 0.15 350);
+    --background: #FAFAF8;
+    --foreground: #1A1A1A;
+    --card: #FFFFFF;
+    --card-foreground: #1A1A1A;
+    --popover: #FFFFFF;
+    --popover-foreground: #1A1A1A;
+    --primary: #1B3D2F;
+    --primary-foreground: #FFFFFF;
+    --secondary: #E4EDE8;
+    --secondary-foreground: #1B3D2F;
+    --muted: #F3F1EC;
+    --muted-foreground: #6B6B63;
+    --accent: #E8945A;
+    --accent-foreground: #FFFFFF;
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
+    --border: #E5E4E0;
+    --input: #E5E4E0;
+    --ring: #1B3D2F;
+    --chart-1: #1B3D2F;
+    --chart-2: #E8945A;
+    --chart-3: #2A5E44;
+    --chart-4: #F5C89E;
+    --chart-5: #E4EDE8;
     --radius: 0.625rem;
-    --sidebar: oklch(0.97 0.005 60);
-    --sidebar-foreground: oklch(0.2 0 0);
-    --sidebar-primary: oklch(0.65 0.18 25);
-    --sidebar-primary-foreground: oklch(0.99 0 0);
-    --sidebar-accent: oklch(0.94 0.005 60);
-    --sidebar-accent-foreground: oklch(0.2 0 0);
-    --sidebar-border: oklch(0.92 0.005 60);
-    --sidebar-ring: oklch(0.65 0.18 25);
+    --sidebar: #FAFAF8;
+    --sidebar-foreground: #1A1A1A;
+    --sidebar-primary: #1B3D2F;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #E4EDE8;
+    --sidebar-accent-foreground: #1B3D2F;
+    --sidebar-border: #E5E4E0;
+    --sidebar-ring: #1B3D2F;
 }
 
+/* ======= DARK MODE ======= */
+
 .dark {
-    --background: oklch(0.12 0 0);
-    --foreground: oklch(0.93 0 0);
-    --card: oklch(0.18 0 0);
-    --card-foreground: oklch(0.93 0 0);
-    --popover: oklch(0.21 0 0);
-    --popover-foreground: oklch(0.93 0 0);
-    --primary: oklch(0.7 0.18 25);
-    --primary-foreground: oklch(0.98 0 0);
-    --secondary: oklch(0.26 0 0);
-    --secondary-foreground: oklch(0.93 0 0);
-    --muted: oklch(0.26 0 0);
-    --muted-foreground: oklch(0.6 0 0);
-    --accent: oklch(0.26 0 0);
-    --accent-foreground: oklch(0.93 0 0);
-    --destructive: oklch(0.55 0.22 27);
-    --destructive-foreground: oklch(0.98 0 0);
-    --border: oklch(0.3 0 0);
-    --input: oklch(0.26 0 0);
-    --ring: oklch(0.7 0.18 25);
-    --chart-1: oklch(0.7 0.18 25);
-    --chart-2: oklch(0.65 0.15 155);
-    --chart-3: oklch(0.6 0.15 280);
-    --chart-4: oklch(0.75 0.12 70);
-    --chart-5: oklch(0.65 0.15 350);
-    --sidebar: oklch(0.16 0 0);
-    --sidebar-foreground: oklch(0.93 0 0);
-    --sidebar-primary: oklch(0.7 0.18 25);
-    --sidebar-primary-foreground: oklch(0.98 0 0);
-    --sidebar-accent: oklch(0.22 0 0);
-    --sidebar-accent-foreground: oklch(0.93 0 0);
-    --sidebar-border: oklch(0.26 0 0);
-    --sidebar-ring: oklch(0.7 0.18 25);
+    --background: #0F1A15;
+    --foreground: #E8E6E1;
+    --card: #162820;
+    --card-foreground: #E8E6E1;
+    --popover: #1A3028;
+    --popover-foreground: #E8E6E1;
+    --primary: #5AAF7E;
+    --primary-foreground: #0F1A15;
+    --secondary: #1E3A2D;
+    --secondary-foreground: #E8E6E1;
+    --muted: #1E3A2D;
+    --muted-foreground: #9E9E95;
+    --accent: #E8945A;
+    --accent-foreground: #0F1A15;
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
+    --border: #2A4A3A;
+    --input: #1E3A2D;
+    --ring: #5AAF7E;
+    --chart-1: #5AAF7E;
+    --chart-2: #E8945A;
+    --chart-3: #3D7A5A;
+    --chart-4: #F5C89E;
+    --chart-5: #2A5E44;
+    --sidebar: #0F1A15;
+    --sidebar-foreground: #E8E6E1;
+    --sidebar-primary: #5AAF7E;
+    --sidebar-primary-foreground: #0F1A15;
+    --sidebar-accent: #1E3A2D;
+    --sidebar-accent-foreground: #E8E6E1;
+    --sidebar-border: #2A4A3A;
+    --sidebar-ring: #5AAF7E;
 }
+
+/* ======= BASE LAYER ======= */
 
 @layer base {
     * {
@@ -190,7 +229,8 @@
     }
 
     body {
-        @apply bg-brand-offwhite text-foreground dark:bg-background;
+        @apply bg-background text-foreground;
+        line-height: 1.7;
     }
 }
 
@@ -250,40 +290,42 @@
 
 /* ======= GLOBALS ======= */
 
-h3 {
-    @apply text-brand-black text-[18px] font-bold dark:text-white;
-}
+@layer base {
+    h3 {
+        @apply text-brand-black text-[18px] font-semibold dark:text-white;
+    }
 
-h4 {
-    @apply text-brand-orange text-[28px] sm:text-[32px] md:text-[38px];
+    h4 {
+        @apply text-brand-green font-display text-[28px] font-light sm:text-[32px] md:text-[38px] dark:text-[#E8E6E1];
+    }
 }
 
 .primary-container {
-    @apply mx-auto w-full max-w-[1115px] max-2xl:px-[16px];
+    @apply mx-auto w-full max-w-[1200px] px-6;
 }
 
 .hs-shadow {
-    @apply shadow-[0_2px_8px_rgba(0,0,0,0.2)];
+    @apply shadow-[0_2px_12px_rgba(0,0,0,0.08)];
 }
 
 .hs-btn {
-    @apply w-full cursor-pointer rounded-full px-[15px] py-[5px] text-[16px] transition-colors transition-transform duration-200 group-hover:scale-105 hover:scale-105 md:text-[18px];
+    @apply w-full cursor-pointer rounded-full px-6 py-2.5 text-[15px] font-medium transition-all duration-200 hover:scale-[1.02];
 }
 
 .btn-orange {
-    @apply bg-brand-orange text-brand-white group-hover:bg-brand-orange/90 hover:bg-brand-orange/90;
+    @apply bg-brand-orange text-white hover:bg-brand-orange/90;
 }
 
 .btn-green {
-    @apply bg-brand-green text-brand-white group-hover:bg-brand-green/90 hover:bg-brand-green/90;
+    @apply bg-brand-green text-white hover:bg-brand-green-mid;
 }
 
 .btn-featured {
-    @apply bg-brand-green text-brand-white group-hover:bg-brand-green/90 hover:bg-brand-green/90;
+    @apply bg-brand-green text-white hover:bg-brand-green-mid;
 }
 
 .btn-white {
-    @apply bg-brand-white text-brand-black group-hover:bg-white/80 hover:bg-white/80;
+    @apply bg-white text-brand-black hover:bg-white/80;
 }
 
 .hs-bg-white {
@@ -293,8 +335,53 @@ h4 {
 h1 span {
     @apply text-brand-orange;
 }
+
 .input-field {
-    @apply focus:ring-brand-orange mt-1 w-full rounded-md border border-gray-400 px-4 py-2 focus:ring-2 focus:outline-none;
+    @apply focus:ring-brand-green mt-1 w-full rounded-lg border border-[#E5E4E0] px-4 py-2.5 focus:ring-2 focus:outline-none;
+}
+
+/* ======= SECTION LABEL PATTERN ======= */
+
+.section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #1B3D2F;
+    margin-bottom: 1rem;
+}
+
+.section-label::before {
+    content: '';
+    width: 2rem;
+    height: 2px;
+    background: #E8945A;
+    border-radius: 1px;
+}
+
+.dark .section-label {
+    color: #5AAF7E;
+}
+
+.dark .section-label::before {
+    background: #E8945A;
+}
+
+/* ======= DISPLAY HEADING UTILITY ======= */
+
+.heading-display {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    line-height: 1.1;
+    color: #1B3D2F;
+}
+
+.dark .heading-display {
+    color: #E8E6E1;
 }
 
 /* WebKit scrollbar styles */
@@ -303,29 +390,30 @@ h1 span {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #fc6141; /* Brand orange hex */
+    background-color: #1B3D2F;
     border-radius: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-    background-color: #f5f5f5; /* Optional: light background */
+    background-color: #F3F1EC;
 }
 
-/* Blog content styling */
+/* ======= BLOG CONTENT STYLING ======= */
+
 .blog-content {
     @apply max-w-none;
 }
 
 .blog-content h1 {
-    @apply text-brand-black mt-8 mb-4 text-3xl font-bold dark:text-white;
+    @apply font-display text-brand-black mt-8 mb-4 text-3xl font-light dark:text-white;
 }
 
 .blog-content h2 {
-    @apply text-brand-black mt-6 mb-3 text-2xl font-bold dark:text-white;
+    @apply font-display text-brand-black mt-6 mb-3 text-2xl font-light dark:text-white;
 }
 
 .blog-content h3 {
-    @apply text-brand-black mt-5 mb-2 text-xl font-bold dark:text-white;
+    @apply text-brand-black mt-5 mb-2 text-xl font-semibold dark:text-white;
 }
 
 .blog-content p {
@@ -342,7 +430,7 @@ h1 span {
 }
 
 .blog-content img {
-    @apply mx-auto my-6 h-auto max-w-full rounded-lg shadow-lg;
+    @apply mx-auto my-6 h-auto max-w-full rounded-2xl shadow-lg;
 }
 
 .blog-content blockquote {
@@ -354,7 +442,7 @@ h1 span {
 }
 
 .blog-content pre {
-    @apply bg-muted my-4 overflow-x-auto rounded-lg p-4;
+    @apply bg-muted my-4 overflow-x-auto rounded-xl p-4;
 }
 
 .blog-content a {

@@ -22,21 +22,40 @@ class BlogController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Blog::class);
 
-        $blogs = Blog::query()
-            ->withTrashed()
-            ->orderBy('updated_at', 'desc')
-            ->paginate(10);
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'in:all,published,draft,private,deleted'],
+        ]);
+
+        $query = Blog::query()->withTrashed();
+
+        if (! empty($validated['search'])) {
+            $query->where('title', 'ilike', '%'.$validated['search'].'%');
+        }
+
+        if (! empty($validated['status']) && $validated['status'] !== 'all') {
+            if ($validated['status'] === 'deleted') {
+                $query->whereNotNull('deleted_at');
+            } else {
+                $query->whereNull('deleted_at')->where('status', $validated['status']);
+            }
+        }
+
+        $blogs = $query->orderBy('updated_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('admin/blog', [
             'blogs' => $blogs,
+            'filters' => $request->only(['search', 'status']),
             'can' => [
                 'create' => auth()->user()->can('create', Blog::class),
-                'update' => true, // Will be checked per blog item
-                'delete' => true, // Will be checked per blog item
+                'update' => true,
+                'delete' => true,
             ],
         ]);
     }

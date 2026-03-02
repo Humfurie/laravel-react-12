@@ -436,7 +436,7 @@ export default function RealEstateManagement({ developers, projects, properties,
                                                                         : project.status === 'under-construction'
                                                                           ? 'bg-yellow-100 text-yellow-800'
                                                                           : project.status === 'ready-for-occupancy'
-                                                                            ? 'bg-green-100 text-green-800'
+                                                                            ? 'bg-[#E4EDE8] text-[#1B3D2F] dark:bg-[#162820] dark:text-[#5AAF7E]'
                                                                             : project.status === 'completed'
                                                                               ? 'bg-gray-100 text-gray-800'
                                                                               : 'bg-red-100 text-red-800'
@@ -569,7 +569,7 @@ export default function RealEstateManagement({ developers, projects, properties,
                                                             <span
                                                                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                                                     property.listing_status === 'available'
-                                                                        ? 'bg-green-100 text-green-800'
+                                                                        ? 'bg-[#E4EDE8] text-[#1B3D2F] dark:bg-[#162820] dark:text-[#5AAF7E]'
                                                                         : property.listing_status === 'reserved'
                                                                           ? 'bg-yellow-100 text-yellow-800'
                                                                           : property.listing_status === 'sold'

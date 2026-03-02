@@ -1,13 +1,11 @@
-import FloatingNav from '@/components/floating-nav';
-import Footer from '@/components/global/Footer';
+import AdBanner from '@/components/ads/AdBanner';
+import StickyAd from '@/components/ads/StickyAd';
 import StructuredData, { schemas } from '@/components/seo/StructuredData';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { ArrowLeft, Calendar, Clock, Eye, Share2, Sparkles } from 'lucide-react';
-import AdBanner from '@/components/ads/AdBanner';
-import StickyAd from '@/components/ads/StickyAd';
 
 // TipTap Node Styles for proper blog content formatting
 import '@/components/tiptap-node/blockquote-node/blockquote-node.scss';
@@ -73,9 +71,8 @@ export default function BlogPost({ blog }: Props) {
     // Check if ads are configured
     const hasAds = adsense?.client_id && (adsense?.slots?.blog_post_top || adsense?.slots?.blog_post_bottom || adsense?.slots?.blog_post_sidebar);
 
-    const safeImage = typeof blog.display_image === 'string' && blog.display_image
-        ? blog.display_image
-        : 'https://humfurie.org/images/og-default.jpg';
+    const safeImage =
+        typeof blog.display_image === 'string' && blog.display_image ? blog.display_image : 'https://humfurie.org/images/og-default.jpg';
 
     const handleShare = async () => {
         if (navigator.share) {
@@ -121,7 +118,6 @@ export default function BlogPost({ blog }: Props) {
                 <meta name="twitter:description" content={String(blog.meta_data?.meta_description || blog.excerpt || '')} />
                 {blog.display_image && <meta name="twitter:image" content={String(blog.display_image)} />}
 
-
                 {/* Canonical URL */}
                 <link rel="canonical" href={`https://humfurie.org/blog/${blog.slug}`} />
             </Head>
@@ -148,8 +144,6 @@ export default function BlogPost({ blog }: Props) {
             />
 
             <div className="min-h-screen bg-[#FAFAF8] dark:bg-neutral-950">
-                <FloatingNav currentPage="blog" />
-
                 <main className="pt-20">
                     {/* Article Header */}
                     <article>
@@ -189,12 +183,14 @@ export default function BlogPost({ blog }: Props) {
                             </div>
 
                             {/* Title */}
-                            <h1 className="mb-6 font-serif text-4xl leading-tight font-bold tracking-tight text-gray-900 dark:text-white md:text-5xl lg:text-6xl">
+                            <h1 className="mb-6 font-serif text-4xl leading-tight font-bold tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
                                 {blog.title}
                             </h1>
 
                             {/* Excerpt */}
-                            {blog.excerpt && <p className="mb-8 max-w-3xl text-xl leading-relaxed text-gray-600 dark:text-gray-300">{blog.excerpt}</p>}
+                            {blog.excerpt && (
+                                <p className="mb-8 max-w-3xl text-xl leading-relaxed text-gray-600 dark:text-gray-300">{blog.excerpt}</p>
+                            )}
 
                             {/* Share Button */}
                             <Button variant="outline" size="sm" onClick={handleShare} className="rounded-full">
@@ -227,7 +223,7 @@ export default function BlogPost({ blog }: Props) {
                                     />
 
                                     {/* Article Body */}
-                                    <div className="rounded-3xl bg-white p-8 shadow-sm dark:bg-neutral-900 dark:shadow-neutral-800/20 md:p-12">
+                                    <div className="rounded-3xl bg-white p-8 shadow-sm md:p-12 dark:bg-neutral-900 dark:shadow-neutral-800/20">
                                         <div
                                             className="tiptap ProseMirror prose prose-lg prose-gray dark:prose-invert prose-headings:font-serif prose-headings:font-bold prose-headings:tracking-tight prose-h2:text-3xl prose-h3:text-2xl prose-p:leading-relaxed prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-2xl max-w-none [&_p:empty]:hidden"
                                             dangerouslySetInnerHTML={{ __html: blog.content }}
@@ -287,8 +283,6 @@ export default function BlogPost({ blog }: Props) {
                     </section>
                 </main>
             </div>
-
-            <Footer />
         </>
     );
 }

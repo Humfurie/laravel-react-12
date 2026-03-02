@@ -213,6 +213,84 @@ test('public api show returns 404 for soft deleted deployment', function () {
         ->assertNotFound();
 });
 
+// --- Admin Search, Filter & Pagination ---
+
+test('admin deployment index filters by active status', function () {
+    Deployment::factory()->create(['status' => 'active']);
+    Deployment::factory()->create(['status' => 'archived']);
+
+    $this->actingAs($this->user)
+        ->get(route('admin.deployments.index', ['status' => 'active']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('deployments.data', 1)
+            ->where('deployments.data.0.status', 'active')
+        );
+});
+
+test('admin deployment index filters by deleted status', function () {
+    Deployment::factory()->create(['status' => 'active']);
+    $deleted = Deployment::factory()->create(['status' => 'active']);
+    $deleted->delete();
+
+    $this->actingAs($this->user)
+        ->get(route('admin.deployments.index', ['status' => 'deleted']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('deployments.data', 1)
+            ->where('deployments.data.0.id', $deleted->id)
+        );
+});
+
+test('admin deployment index searches by title', function () {
+    Deployment::factory()->create(['title' => 'Client Portfolio']);
+    Deployment::factory()->create(['title' => 'E-commerce Store']);
+
+    $this->actingAs($this->user)
+        ->get(route('admin.deployments.index', ['search' => 'Portfolio']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('deployments.data', 1)
+            ->where('deployments.data.0.title', 'Client Portfolio')
+        );
+});
+
+test('admin deployment index searches by related project name', function () {
+    $project = Project::factory()->create(['title' => 'Main Project']);
+    Deployment::factory()->create(['title' => 'Some Deployment', 'project_id' => $project->id]);
+    Deployment::factory()->create(['title' => 'Other Deployment', 'project_id' => null]);
+
+    $this->actingAs($this->user)
+        ->get(route('admin.deployments.index', ['search' => 'Main Project']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('deployments.data', 1)
+            ->where('deployments.data.0.title', 'Some Deployment')
+        );
+});
+
+test('admin deployment index paginates results', function () {
+    Deployment::factory()->count(15)->create();
+
+    $this->actingAs($this->user)
+        ->get(route('admin.deployments.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('deployments.data', 12)
+            ->where('deployments.last_page', 2)
+        );
+});
+
+test('admin deployment index passes filters back to frontend', function () {
+    $this->actingAs($this->user)
+        ->get(route('admin.deployments.index', ['search' => 'test', 'status' => 'active']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('filters.search', 'test')
+            ->where('filters.status', 'active')
+        );
+});
+
 // Image operation tests
 
 test('admin can upload images to deployment', function () {

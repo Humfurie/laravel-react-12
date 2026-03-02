@@ -1,5 +1,4 @@
-import { Badge } from '@/components/ui/badge';
-import type { ContributionWeek, Project, ProjectCategory, ProjectStatus } from '@/types/project';
+import type { ContributionWeek, Project, ProjectStatus } from '@/types/project';
 import { ArrowUpRight, Github, Globe } from 'lucide-react';
 import { memo } from 'react';
 
@@ -12,34 +11,15 @@ interface ProjectCardProps {
 const getStatusColor = (status: ProjectStatus) => {
     switch (status) {
         case 'live':
-            return 'bg-green-500';
+            return 'bg-[#5AAF7E]';
         case 'development':
-            return 'bg-yellow-500';
+            return 'bg-[#E8945A]';
         case 'maintenance':
-            return 'bg-orange-500';
+            return 'bg-[#F5C89E]';
         case 'archived':
-            return 'bg-gray-500';
+            return 'bg-[#9E9E95]';
         default:
-            return 'bg-gray-500';
-    }
-};
-
-const getCategoryColor = (category: ProjectCategory) => {
-    switch (category) {
-        case 'web_app':
-            return 'bg-blue-100 text-blue-700';
-        case 'mobile_app':
-            return 'bg-purple-100 text-purple-700';
-        case 'api':
-            return 'bg-indigo-100 text-indigo-700';
-        case 'library':
-            return 'bg-pink-100 text-pink-700';
-        case 'cli':
-            return 'bg-cyan-100 text-cyan-700';
-        case 'design':
-            return 'bg-rose-100 text-rose-700';
-        default:
-            return 'bg-gray-100 text-gray-700';
+            return 'bg-[#9E9E95]';
     }
 };
 
@@ -51,11 +31,11 @@ function MiniContributionGraph({ calendar }: { calendar: ContributionWeek[] }) {
     }
 
     const getColor = (count: number): string => {
-        if (count === 0) return '#ebedf0';
-        if (count <= 3) return '#9be9a8';
-        if (count <= 6) return '#40c463';
-        if (count <= 9) return '#30a14e';
-        return '#216e39';
+        if (count === 0) return '#E5E4E0';
+        if (count <= 3) return '#B8D8C7';
+        if (count <= 6) return '#5AAF7E';
+        if (count <= 9) return '#2A5E44';
+        return '#1B3D2F';
     };
 
     return (
@@ -83,7 +63,9 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
     return (
         <article className={`group cursor-pointer ${isLarge ? 'md:col-span-2 md:row-span-2' : ''}`} onClick={onClick}>
             {/* Image Container */}
-            <div className={`relative overflow-hidden rounded-2xl bg-[#F5F5F3] ${isLarge ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}>
+            <div
+                className={`relative overflow-hidden rounded-xl bg-[#F3F1EC] dark:bg-[#0F1A15] ${isLarge ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}
+            >
                 {project.thumbnail_url ? (
                     <img
                         src={project.thumbnail_url}
@@ -92,31 +74,37 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
                         loading="lazy"
                     />
                 ) : (
-                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50">
-                        <span className="font-serif text-6xl font-bold text-gray-300">{project.title.charAt(0).toUpperCase()}</span>
+                    <div className="flex h-full items-center justify-center">
+                        <span className="font-display text-5xl text-[#E5E4E0] dark:text-[#2A4A3A]">
+                            {project.title.charAt(0).toUpperCase()}
+                        </span>
                     </div>
                 )}
 
                 {/* Status indicator */}
                 <div className="absolute top-4 right-4 flex items-center gap-2">
-                    <span className={`h-2.5 w-2.5 rounded-full ${getStatusColor(project.status)} ring-2 ring-white`} />
+                    <span
+                        className={`h-2.5 w-2.5 rounded-full ${getStatusColor(project.status)} ring-2 ring-white dark:ring-[#162820]`}
+                    />
                 </div>
 
                 {/* Featured badge */}
                 {project.is_featured && (
-                    <Badge className="absolute top-4 left-4 rounded-full border-0 bg-[#88C0A8] px-3 py-1 text-white">Featured</Badge>
+                    <div className="absolute top-4 left-4 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide uppercase text-[#1B3D2F]">
+                        Featured
+                    </div>
                 )}
 
                 {/* Date badge */}
                 {project.started_at && (
-                    <div className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-700 backdrop-blur-sm">
+                    <div className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-[#1A1A1A] backdrop-blur-sm dark:bg-[#162820]/90 dark:text-[#E8E6E1]">
                         {new Date(project.started_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                     </div>
                 )}
 
                 {/* Arrow Link - appears on hover */}
-                <div className="absolute right-4 bottom-4 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full bg-white opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                    <ArrowUpRight className="h-4 w-4 text-gray-900" />
+                <div className="absolute right-4 bottom-4 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full bg-white opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 dark:bg-[#162820]">
+                    <ArrowUpRight className="h-4 w-4 text-[#1B3D2F] dark:text-[#5AAF7E]" />
                 </div>
 
                 {/* Quick links overlay */}
@@ -128,10 +116,10 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
+                                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white dark:bg-[#162820]/90 dark:hover:bg-[#162820]"
                                 title="View Demo"
                             >
-                                <Globe className="h-4 w-4 text-gray-700" />
+                                <Globe className="h-4 w-4 text-[#1B3D2F] dark:text-[#5AAF7E]" />
                             </a>
                         )}
                         {project.links?.repo_url && (
@@ -140,10 +128,10 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white"
+                                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white dark:bg-[#162820]/90 dark:hover:bg-[#162820]"
                                 title="View Repository"
                             >
-                                <Github className="h-4 w-4 text-gray-700" />
+                                <Github className="h-4 w-4 text-[#1B3D2F] dark:text-[#5AAF7E]" />
                             </a>
                         )}
                     </div>
@@ -153,32 +141,39 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
             {/* Content */}
             <div className={`mt-4 ${isLarge ? 'md:mt-6' : ''}`}>
                 {/* Category */}
-                <Badge variant="secondary" className={`rounded-full border-0 text-xs font-medium ${getCategoryColor(project.category)}`}>
-                    {project.category_label}
-                </Badge>
+                {project.category_label && (
+                    <span className="text-[0.7rem] font-semibold tracking-[0.08em] uppercase text-[#1B3D2F] dark:text-[#5AAF7E]">
+                        {project.category_label}
+                    </span>
+                )}
 
                 {/* Title */}
                 <h3
-                    className={`mt-2 line-clamp-2 font-bold text-gray-900 transition-colors group-hover:text-gray-600 ${isLarge ? 'text-2xl md:text-3xl' : 'text-lg'}`}
+                    className={`mt-2 line-clamp-2 font-display font-normal text-[#1A1A1A] transition-colors group-hover:text-[#1B3D2F] dark:text-[#E8E6E1] dark:group-hover:text-[#5AAF7E] ${isLarge ? 'text-[2rem] md:text-[2.5rem]' : 'text-[1.5rem]'}`}
                 >
                     {project.title}
                 </h3>
 
                 {/* Description */}
                 {project.short_description && (
-                    <p className={`mt-2 line-clamp-2 text-gray-500 ${isLarge ? 'text-base' : 'text-sm'}`}>{project.short_description}</p>
+                    <p className={`mt-2 line-clamp-2 text-[#6B6B63] dark:text-[#9E9E95] ${isLarge ? 'text-[0.9rem]' : 'text-[0.85rem]'}`}>
+                        {project.short_description}
+                    </p>
                 )}
 
                 {/* Tech Stack */}
                 {project.tech_stack && project.tech_stack.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-1.5">
                         {project.tech_stack.slice(0, isLarge ? 5 : 3).map((tech) => (
-                            <span key={tech} className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-400">
+                            <span
+                                key={tech}
+                                className="rounded-full border border-[#E5E4E0] bg-white px-2.5 py-0.5 text-[0.78rem] font-medium text-[#6B6B63] dark:border-[#2A4A3A] dark:bg-[#162820] dark:text-[#9E9E95]"
+                            >
                                 {tech}
                             </span>
                         ))}
                         {project.tech_stack.length > (isLarge ? 5 : 3) && (
-                            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-400">
+                            <span className="rounded-full border border-[#E5E4E0] bg-white px-2.5 py-0.5 text-[0.78rem] font-medium text-[#9E9E95] dark:border-[#2A4A3A] dark:bg-[#162820]">
                                 +{project.tech_stack.length - (isLarge ? 5 : 3)}
                             </span>
                         )}
@@ -187,10 +182,10 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
 
                 {/* Mini Contribution Graph */}
                 {project.metrics?.contribution_calendar?.calendar && (
-                    <div className="mt-3 border-t border-gray-100 pt-3 dark:border-gray-700">
+                    <div className="mt-3 border-t border-[#E5E4E0] pt-3 dark:border-[#2A4A3A]">
                         <div className="mb-1.5 flex items-center justify-between">
-                            <span className="text-xs text-gray-500 dark:text-gray-400">GitHub Activity</span>
-                            <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                            <span className="text-xs text-[#9E9E95]">GitHub Activity</span>
+                            <span className="text-xs font-medium text-[#6B6B63] dark:text-[#9E9E95]">
                                 {project.metrics.contribution_calendar.total_contributions}
                             </span>
                         </div>
@@ -208,9 +203,7 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
                                 className="h-5 w-5 rounded-full"
                             />
                         )}
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                            By {project.author.login || 'Unknown'}
-                        </span>
+                        <span className="text-xs text-[#9E9E95]">By {project.author.login || 'Unknown'}</span>
                     </div>
                 )}
             </div>

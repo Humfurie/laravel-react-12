@@ -201,14 +201,14 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
                                         href={route('verification.send')}
                                         method="post"
                                         as="button"
-                                        className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                                        className="text-[#1B3D2F] underline decoration-[#E5E4E0] underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:text-[#5AAF7E] dark:decoration-[#2A4A3A]"
                                     >
                                         Click here to resend the verification email.
                                     </Link>
                                 </p>
 
                                 {status === 'verification-link-sent' && (
-                                    <div className="mt-2 text-sm font-medium text-green-600">
+                                    <div className="mt-2 text-sm font-medium text-[#2A5E44] dark:text-[#5AAF7E]">
                                         A new verification link has been sent to your email address.
                                     </div>
                                 )}
@@ -336,8 +336,8 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
                             )}
 
                             {data.about_image && (
-                                <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950">
-                                    <Image className="h-8 w-8 text-green-600" />
+                                <div className="flex items-center gap-3 rounded-lg border border-[#E4EDE8] bg-[#E4EDE8]/30 p-3 dark:border-[#2A4A3A] dark:bg-[#162820]">
+                                    <Image className="h-8 w-8 text-[#2A5E44] dark:text-[#5AAF7E]" />
                                     <div className="flex-1">
                                         <p className="text-sm font-medium">New image selected</p>
                                         <p className="text-muted-foreground text-xs">{data.about_image.name}</p>
@@ -477,8 +477,8 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
                             )}
 
                             {data.resume && (
-                                <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950">
-                                    <FileText className="h-8 w-8 text-green-600" />
+                                <div className="flex items-center gap-3 rounded-lg border border-[#E4EDE8] bg-[#E4EDE8]/30 p-3 dark:border-[#2A4A3A] dark:bg-[#162820]">
+                                    <FileText className="h-8 w-8 text-[#2A5E44] dark:text-[#5AAF7E]" />
                                     <div className="flex-1">
                                         <p className="text-sm font-medium">New file selected</p>
                                         <p className="text-muted-foreground text-xs">{data.resume.name}</p>
@@ -525,7 +525,7 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
                             leave="transition ease-in-out"
                             leaveTo="opacity-0"
                         >
-                            <p className="text-sm text-green-600">Saved successfully!</p>
+                            <p className="text-sm text-[#2A5E44] dark:text-[#5AAF7E]">Saved successfully!</p>
                         </Transition>
                     </div>
                 </form>

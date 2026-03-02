@@ -172,7 +172,7 @@ export default function Edit({ raffle }: Props) {
                         <Badge
                             className={
                                 raffle.status === 'active'
-                                    ? 'bg-green-100 text-green-800'
+                                    ? 'bg-[#E4EDE8] text-[#1B3D2F] dark:bg-[#162820] dark:text-[#5AAF7E]'
                                     : raffle.status === 'draft'
                                       ? 'bg-yellow-100 text-yellow-800'
                                       : 'bg-gray-100 text-gray-800'
@@ -392,7 +392,7 @@ export default function Edit({ raffle }: Props) {
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-muted-foreground text-sm">Status</span>
-                                    <Badge className={raffle.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                                    <Badge className={raffle.is_active ? 'bg-[#E4EDE8] text-[#1B3D2F] dark:bg-[#162820] dark:text-[#5AAF7E]' : 'bg-gray-100 text-gray-800'}>
                                         {raffle.is_active ? 'Active' : 'Inactive'}
                                     </Badge>
                                 </div>
@@ -434,7 +434,7 @@ export default function Edit({ raffle }: Props) {
                             <div className="bg-card rounded-lg border p-6">
                                 <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
                                     {raffle.prize_claimed ? (
-                                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                                        <CheckCircle2 className="h-5 w-5 text-[#2A5E44] dark:text-[#5AAF7E]" />
                                     ) : (
                                         <AlertCircle className="h-5 w-5 text-orange-600" />
                                     )}
@@ -443,9 +443,9 @@ export default function Edit({ raffle }: Props) {
 
                                 {raffle.prize_claimed ? (
                                     <div className="space-y-3">
-                                        <div className="rounded-md border border-green-200 bg-green-50 p-3">
-                                            <p className="text-sm font-medium text-green-800">Prize Claimed Successfully</p>
-                                            <p className="mt-1 text-xs text-green-600">
+                                        <div className="rounded-md border border-[#E4EDE8] bg-[#E4EDE8]/30 p-3">
+                                            <p className="text-sm font-medium text-[#1B3D2F] dark:text-[#5AAF7E]">Prize Claimed Successfully</p>
+                                            <p className="mt-1 text-xs text-[#2A5E44] dark:text-[#5AAF7E]">
                                                 Claimed on {formatDatetimeForDisplay(raffle.prize_claimed_at!)}
                                             </p>
                                         </div>
@@ -470,7 +470,7 @@ export default function Edit({ raffle }: Props) {
                                             <Button
                                                 onClick={handleClaimPrize}
                                                 disabled={submittingClaim}
-                                                className="w-full bg-green-600 hover:bg-green-700 sm:flex-1"
+                                                className="w-full bg-[#2A5E44] hover:bg-[#1B3D2F] sm:flex-1"
                                             >
                                                 {submittingClaim ? (
                                                     <>

@@ -203,7 +203,7 @@ export default function CreateDeveloper() {
                                             Supports: JPG, PNG, GIF, SVG (max 5MB). File will be uploaded when you save the developer.
                                         </p>
                                         {form.data.logo_file && (
-                                            <div className="mt-3 flex items-center text-green-600">
+                                            <div className="mt-3 flex items-center text-[#2A5E44] dark:text-[#5AAF7E]">
                                                 <Upload className="mr-2 h-4 w-4" />
                                                 <span className="text-sm">Selected: {form.data.logo_file.name}</span>
                                             </div>

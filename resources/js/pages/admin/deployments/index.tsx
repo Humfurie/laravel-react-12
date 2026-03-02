@@ -7,7 +7,8 @@ import AdminLayout from '@/layouts/AdminLayout';
 import type { Deployment, DeploymentClientType, DeploymentStatus } from '@/types/deployment';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
-import { Globe, MoreHorizontal, Plus, RotateCcw, Star, Trash2 } from 'lucide-react';
+import { Globe, MoreHorizontal, Plus, RotateCcw, Search, Star, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Props {
     deployments: {
@@ -16,6 +17,10 @@ interface Props {
         last_page: number;
         per_page: number;
         total: number;
+    };
+    filters: {
+        search?: string;
+        status?: string;
     };
     statuses: Record<DeploymentStatus, string>;
     clientTypes: Record<DeploymentClientType, string>;
@@ -27,7 +32,7 @@ interface Props {
 const getStatusColor = (status: DeploymentStatus) => {
     switch (status) {
         case 'active':
-            return 'bg-green-100 text-green-800';
+            return 'bg-[#E4EDE8] text-[#1B3D2F] dark:bg-[#162820] dark:text-[#5AAF7E]';
         case 'maintenance':
             return 'bg-orange-100 text-orange-800';
         case 'archived':
@@ -156,7 +161,7 @@ function DeploymentCard({ deployment }: { deployment: Deployment }) {
                                 ) : (
                                     <>
                                         {can('deployment', 'restore') && (
-                                            <DropdownMenuItem onClick={handleRestore} className="text-green-600">
+                                            <DropdownMenuItem onClick={handleRestore} className="text-[#2A5E44] dark:text-[#5AAF7E]">
                                                 <RotateCcw className="mr-2 h-4 w-4" />
                                                 Restore
                                             </DropdownMenuItem>
@@ -178,8 +183,33 @@ function DeploymentCard({ deployment }: { deployment: Deployment }) {
     );
 }
 
-export default function DeploymentsIndex({ deployments, can: pageCan }: Props) {
+const statusFilters = [
+    { label: 'All', value: undefined },
+    { label: 'Active', value: 'active' },
+    { label: 'Maintenance', value: 'maintenance' },
+    { label: 'Archived', value: 'archived' },
+    { label: 'Deleted', value: 'deleted' },
+] as const;
+
+export default function DeploymentsIndex({ deployments, filters, can: pageCan }: Props) {
     const { can } = usePermissions();
+    const [search, setSearch] = useState(filters.search || '');
+    const isInitialMount = useRef(true);
+
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        const timeout = setTimeout(() => {
+            router.get(route('admin.deployments.index'), { search: search || undefined, status: filters.status }, { preserveState: true, replace: true });
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [search]);
+
+    const handleFilter = (status: string | undefined) => {
+        router.get(route('admin.deployments.index'), { search: filters.search, status }, { preserveState: true, replace: true });
+    };
 
     return (
         <AdminLayout>
@@ -201,6 +231,35 @@ export default function DeploymentsIndex({ deployments, can: pageCan }: Props) {
                     )}
                 </div>
 
+                {/* Filters */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-wrap gap-2">
+                        {statusFilters.map((filter) => (
+                            <button
+                                key={filter.label}
+                                onClick={() => handleFilter(filter.value)}
+                                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                                    filters.status === filter.value
+                                        ? 'bg-[#1B3D2F] text-white dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                                }`}
+                            >
+                                {filter.label}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="relative">
+                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search deployments..."
+                            className="rounded-lg border border-gray-200 bg-white py-1.5 pr-4 pl-9 text-sm focus:border-[#5AAF7E] focus:ring-2 focus:ring-[#5AAF7E]/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        />
+                    </div>
+                </div>
+
                 <div className="space-y-4">
                     <div className="text-muted-foreground text-sm">
                         {deployments.total} deployment{deployments.total !== 1 ? 's' : ''} found
@@ -210,7 +269,7 @@ export default function DeploymentsIndex({ deployments, can: pageCan }: Props) {
                         <Card>
                             <CardContent className="py-12 text-center">
                                 <p className="text-muted-foreground">No deployments found.</p>
-                                {pageCan.create && (
+                                {!filters.search && !filters.status && pageCan.create && (
                                     <Link href={route('admin.deployments.create')} className="mt-4 inline-block">
                                         <Button>Create your first deployment</Button>
                                     </Link>
@@ -221,6 +280,27 @@ export default function DeploymentsIndex({ deployments, can: pageCan }: Props) {
                         deployments.data.map((deployment) => <DeploymentCard key={deployment.id} deployment={deployment} />)
                     )}
                 </div>
+
+                {/* Pagination */}
+                {deployments.last_page > 1 && (
+                    <div className="flex items-center justify-center gap-2">
+                        {Array.from({ length: deployments.last_page }, (_, i) => i + 1).map((page) => (
+                            <button
+                                key={page}
+                                onClick={() =>
+                                    router.get(route('admin.deployments.index'), { ...filters, page }, { preserveState: true })
+                                }
+                                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                                    page === deployments.current_page
+                                        ? 'bg-[#1B3D2F] text-white dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
+                                        : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                                }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
         </AdminLayout>
     );

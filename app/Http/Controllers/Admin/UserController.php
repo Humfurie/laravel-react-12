@@ -19,19 +19,39 @@ class UserController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $this->authorize('viewAny', User::class);
-        $users = User::with('roles')
-            ->withTrashed()
-            ->get()
-            ->map(function ($user) {
+
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'role' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $query = User::with('roles')->withTrashed();
+
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', '%'.$search.'%')
+                    ->orWhere('email', 'ilike', '%'.$search.'%');
+            });
+        }
+
+        if (! empty($validated['role']) && $validated['role'] !== 'all') {
+            $query->whereHas('roles', fn ($q) => $q->where('slug', $validated['role']));
+        }
+
+        $users = $query->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->withQueryString()
+            ->through(function ($user) {
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'email_verified_at' => $user->email_verified_at?->toDateString(),
-                    'roles' => $user->roles->map(fn($role) => [
+                    'roles' => $user->roles->map(fn ($role) => [
                         'id' => $role->id,
                         'name' => $role->name,
                         'slug' => $role->slug,
@@ -50,6 +70,7 @@ class UserController extends Controller
 
         return Inertia::render('admin/user', [
             'users' => $users,
+            'filters' => $request->only(['search', 'role']),
             'roles' => $roles,
             'can' => [
                 'create' => auth()->user()->can('create', User::class),
@@ -85,7 +106,7 @@ class UserController extends Controller
 
             return redirect()->back()->with('success', 'User created successfully.');
         } catch (Throwable $e) {
-            return redirect()->back()->with('error', 'Failed to create user: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to create user: '.$e->getMessage());
         }
     }
 
@@ -95,7 +116,7 @@ class UserController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
             'role_ids' => 'nullable|array',
             'role_ids.*' => 'exists:roles,id',
@@ -131,7 +152,7 @@ class UserController extends Controller
 
             return redirect()->back()->with('success', 'User updated successfully.');
         } catch (Throwable $e) {
-            return redirect()->back()->with('error', 'Failed to update user: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update user: '.$e->getMessage());
         }
     }
 
@@ -153,7 +174,7 @@ class UserController extends Controller
 
             return redirect()->back()->with('success', 'User roles updated successfully.');
         } catch (Throwable $e) {
-            return redirect()->back()->with('error', 'Failed to update user roles: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update user roles: '.$e->getMessage());
         }
     }
 
@@ -166,7 +187,7 @@ class UserController extends Controller
 
             return redirect()->back()->with('success', 'User deleted successfully.');
         } catch (Throwable $e) {
-            return redirect()->back()->with('error', 'Failed to delete user: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to delete user: '.$e->getMessage());
         }
     }
 
@@ -179,7 +200,7 @@ class UserController extends Controller
 
             return redirect()->back()->with('success', 'User restored successfully.');
         } catch (Throwable $e) {
-            return redirect()->back()->with('error', 'Failed to restore user: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to restore user: '.$e->getMessage());
         }
     }
 
@@ -193,7 +214,7 @@ class UserController extends Controller
 
             return redirect()->back()->with('success', 'User permanently deleted.');
         } catch (Throwable $e) {
-            return redirect()->back()->with('error', 'Failed to permanently delete user: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to permanently delete user: '.$e->getMessage());
         }
     }
 }

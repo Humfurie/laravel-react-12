@@ -164,7 +164,7 @@ export default function Index({ categories }: Props) {
                                         <td className="px-4 py-3 text-sm">{category.projects_count}</td>
                                         <td className="px-4 py-3">
                                             {category.is_active ? (
-                                                <Badge variant="default" className="bg-green-600">
+                                                <Badge variant="default" className="bg-[#2A5E44]">
                                                     Active
                                                 </Badge>
                                             ) : (

@@ -1,6 +1,6 @@
 import { MotionDiv } from '@/components/ui/motion';
 import { Link } from '@inertiajs/react';
-import { ArrowRight, Calendar, Linkedin, Mail, MessageSquareHeart } from 'lucide-react';
+import { ArrowRight, Mail } from 'lucide-react';
 
 interface HomeCTAProps {
     email?: string;
@@ -10,67 +10,48 @@ interface HomeCTAProps {
     };
 }
 
-const HomeCTA = ({ email, socialLinks }: HomeCTAProps) => {
-    const hasContactLinks = email || socialLinks?.linkedin || socialLinks?.calendar;
-
+const HomeCTA = ({ email }: HomeCTAProps) => {
     return (
-        <section id="cta-section" className="home-blog call-to-action py-[40px] md:py-[80px]">
-            <div className="primary-container flex min-h-[400px] flex-col items-center gap-[32px] lg:flex-row">
-                {/* Contact Links */}
-                {hasContactLinks && (
-                    <MotionDiv className="w-full lg:w-[40%]">
-                        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Get in Touch</h3>
-                        <div className="flex flex-wrap gap-3">
-                            {email && (
-                                <a
-                                    href={`mailto:${email}`}
-                                    className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-orange-300 hover:bg-orange-50 hover:text-orange-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-orange-500/50 dark:hover:bg-orange-500/10 dark:hover:text-orange-400"
-                                >
-                                    <Mail className="h-4 w-4" />
-                                    Email Me
-                                </a>
-                            )}
-                            {socialLinks?.linkedin && (
-                                <a
-                                    href={socialLinks.linkedin}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-blue-500/50 dark:hover:bg-blue-500/10 dark:hover:text-blue-400"
-                                >
-                                    <Linkedin className="h-4 w-4" />
-                                    LinkedIn
-                                </a>
-                            )}
-                            {socialLinks?.calendar && (
-                                <a
-                                    href={socialLinks.calendar}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-green-300 hover:bg-green-50 hover:text-green-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-green-500/50 dark:hover:bg-green-500/10 dark:hover:text-green-400"
-                                >
-                                    <Calendar className="h-4 w-4" />
-                                    Schedule a Call
-                                </a>
-                            )}
-                        </div>
-                    </MotionDiv>
-                )}
+        <section className="relative overflow-hidden bg-[#1B3D2F] py-[clamp(80px,12vw,160px)] text-center dark:bg-[#0A1210]">
+            {/* Decorative radial gradients */}
+            <div className="pointer-events-none absolute inset-0">
+                <div className="absolute -top-[30%] -right-[20%] h-[500px] w-[500px] rounded-full bg-[#2A5E44] opacity-30 blur-[120px]" />
+                <div className="absolute -bottom-[30%] -left-[20%] h-[400px] w-[400px] rounded-full bg-[#E8945A] opacity-10 blur-[100px]" />
+            </div>
 
-                {/* Guestbook CTA */}
-                <MotionDiv delay={0.2} className={`form w-full ${hasContactLinks ? 'lg:w-[60%]' : ''}`}>
-                    <div className="flex h-full flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50 p-8 text-center dark:from-gray-800 dark:to-gray-900">
-                        <MessageSquareHeart className="mx-auto mb-4 h-12 w-12 text-orange-500" />
-                        <h3 className="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Leave a Message</h3>
-                        <p className="mx-auto mb-6 max-w-md text-gray-600 dark:text-gray-400">
-                            Sign the guestbook and say hello! I'd love to hear from fellow developers and visitors.
-                        </p>
+            <div className="primary-container relative z-10">
+                <MotionDiv>
+                    {/* Section label (centered) */}
+                    <div className="section-label justify-center !text-[#5AAF7E] !mb-4">Let's Connect</div>
+
+                    <h2 className="mx-auto font-display text-[clamp(2.2rem,4vw,3.5rem)] leading-[1.2] font-light text-white">
+                        Have a project in mind?
+                        <br />
+                        Let's build it together.
+                    </h2>
+
+                    <p className="mx-auto mt-5 max-w-[500px] text-[1.05rem] leading-relaxed text-white/65">
+                        I'm always open to discussing new projects, creative ideas, or opportunities to be part of
+                        something amazing.
+                    </p>
+
+                    <div className="mt-10 flex flex-wrap justify-center gap-4">
                         <Link
                             href="/guestbook"
-                            className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-600 hover:shadow-lg"
+                            className="inline-flex items-center gap-2 rounded-full bg-[#E8945A] px-7 py-3 text-[0.88rem] font-medium text-white transition-all duration-200 hover:-translate-y-px hover:bg-[#d4834e]"
                         >
-                            Visit Guestbook
+                            Get in Touch
                             <ArrowRight className="h-4 w-4" />
                         </Link>
+                        {email && (
+                            <a
+                                href={`mailto:${email}`}
+                                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-transparent px-7 py-3 text-[0.88rem] font-medium text-white transition-all duration-200 hover:-translate-y-px hover:border-white/30"
+                            >
+                                <Mail className="h-4 w-4" />
+                                Send an Email
+                            </a>
+                        )}
                     </div>
                 </MotionDiv>
             </div>

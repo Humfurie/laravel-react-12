@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->user = createAdminUser('blog');
+    $this->user = createAdminUser(['blog', 'project']);
 });
 
 test('project auto generates slug from title', function () {
@@ -98,4 +98,68 @@ test('project demo_url is nullable', function () {
     ]);
 
     expect($project->demo_url)->toBeNull();
+});
+
+// --- Admin Search, Filter & Pagination ---
+
+test('admin project index filters by live status', function () {
+    Project::factory()->create(['status' => 'live']);
+    Project::factory()->create(['status' => 'archived']);
+
+    $this->actingAs($this->user)
+        ->get(route('admin.projects.index', ['status' => 'live']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('projects.data', 1)
+            ->where('projects.data.0.status', 'live')
+        );
+});
+
+test('admin project index filters by deleted status', function () {
+    Project::factory()->create(['status' => 'live']);
+    $deleted = Project::factory()->create(['status' => 'live']);
+    $deleted->delete();
+
+    $this->actingAs($this->user)
+        ->get(route('admin.projects.index', ['status' => 'deleted']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('projects.data', 1)
+            ->where('projects.data.0.id', $deleted->id)
+        );
+});
+
+test('admin project index searches by title', function () {
+    Project::factory()->create(['title' => 'Portfolio Website']);
+    Project::factory()->create(['title' => 'E-commerce Platform']);
+
+    $this->actingAs($this->user)
+        ->get(route('admin.projects.index', ['search' => 'Portfolio']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('projects.data', 1)
+            ->where('projects.data.0.title', 'Portfolio Website')
+        );
+});
+
+test('admin project index paginates results', function () {
+    Project::factory()->count(15)->create();
+
+    $this->actingAs($this->user)
+        ->get(route('admin.projects.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('projects.data', 12)
+            ->where('projects.last_page', 2)
+        );
+});
+
+test('admin project index passes filters back to frontend', function () {
+    $this->actingAs($this->user)
+        ->get(route('admin.projects.index', ['search' => 'test', 'status' => 'live']))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('filters.search', 'test')
+            ->where('filters.status', 'live')
+        );
 });

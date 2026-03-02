@@ -1,33 +1,48 @@
 import React from 'react';
-import { RiArrowRightDoubleLine } from 'react-icons/ri';
 
 interface SectionTitleProps {
+    /** Uppercase section label text (e.g. "EXPERIENCE") */
     title: string;
+    /** Optional larger display heading below the label */
+    heading?: string;
+    /** Optional description text below the heading */
+    description?: string;
+    /** Horizontal alignment */
+    align?: 'left' | 'center';
+    /** Optional link wrapping the heading */
     link?: string;
 }
 
-const SectionTitle: React.FC<SectionTitleProps> = ({ title, link }) => {
-    const firstLetter = title.charAt(0);
-    const restOfTitle = title.slice(1);
+/**
+ * Section title pattern from design system:
+ * ── LABEL          (0.75rem, uppercase, green, orange line prefix)
+ * Display Heading   (Cormorant Garamond, clamp 2-3.2rem, weight 300)
+ * Description       (1rem, secondary text)
+ */
+const SectionTitle: React.FC<SectionTitleProps> = ({ title, heading, description, align = 'left', link }) => {
+    const isCenter = align === 'center';
 
-    const content = (
-        <span className="flex items-center gap-2 text-[24px] sm:text-[28px] md:text-[34px] lg:text-[44px]">
-            <span>
-                <span className="text-brand-orange">{firstLetter}</span>
-                {restOfTitle}
-            </span>
-            {link && <RiArrowRightDoubleLine />}
-        </span>
-    );
+    return (
+        <div className={`mb-10 ${isCenter ? 'text-center' : ''}`}>
+            {/* Section label */}
+            <div className={`section-label ${isCenter ? 'justify-center' : ''}`}>{title}</div>
 
-    return link ? (
-        <h2 className="text-brand-gray hover:text-brand-gray/80 w-fit cursor-pointer pb-[38px] font-bold transition-all duration-200 hover:scale-[1.02]">
-            <a href={link}>{content}</a>
-        </h2>
-    ) : (
-        <h2 className="text-brand-gray flex w-full items-center justify-center pb-[38px] text-[24px] font-bold sm:text-[28px] md:text-[34px] lg:text-[44px]">
-            {content}
-        </h2>
+            {/* Display heading */}
+            {heading && (
+                <h2 className="heading-display text-[clamp(2rem,4vw,3.2rem)]">
+                    {link ? (
+                        <a href={link} className="transition-colors hover:text-[#2A5E44] dark:hover:text-[#5AAF7E]">
+                            {heading}
+                        </a>
+                    ) : (
+                        heading
+                    )}
+                </h2>
+            )}
+
+            {/* Optional description */}
+            {description && <p className="mt-2 max-w-[540px] text-base leading-relaxed text-[#6B6B63] dark:text-[#9E9E95]">{description}</p>}
+        </div>
     );
 };
 

@@ -6,6 +6,7 @@ use App\Http\Requests\StoreExperienceRequest;
 use App\Http\Requests\UpdateExperienceRequest;
 use App\Models\Experience;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ExperienceController extends Controller
@@ -29,15 +30,30 @@ class ExperienceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $experiences = Experience::with('image')
-            ->where('user_id', auth()->id())
-            ->ordered()
-            ->get();
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $query = Experience::with('image')
+            ->where('user_id', auth()->id());
+
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('company', 'ilike', '%'.$search.'%')
+                    ->orWhere('position', 'ilike', '%'.$search.'%');
+            });
+        }
+
+        $experiences = $query->ordered()
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('admin/experience/index', [
             'experiences' => $experiences,
+            'filters' => $request->only(['search']),
         ]);
     }
 

@@ -6,19 +6,26 @@ export default {
         extend: {
             colors: {
                 brand: {
-                    orange: '#FC6141', // Your original vibrant orange
-                    green: '#2ECC71', // Fresh green for featured/accents
-                    offwhite: '#F7F3F1', // Off-white for backgrounds
-                    white: '#FFFFFF', // Pure white for cards
-                    black: '#1F1F1F', // Dark text
-                    gray: '#4C4C4C', // Secondary text
+                    orange: '#E8945A',
+                    green: '#1B3D2F',
+                    'green-mid': '#2A5E44',
+                    'green-light': '#E4EDE8',
+                    'orange-light': '#F5C89E',
+                    'orange-bg': '#FDF5EE',
+                    offwhite: '#FAFAF8',
+                    white: '#FFFFFF',
+                    black: '#1A1A1A',
+                    gray: '#6B6B63',
                 },
                 muted: {
-                    orange: '#FF8C6B', // Lighter orange for hover states
-                    green: '#5DD890', // Lighter green for hover states
-                    offwhite: '#FAF8F5', // Very light off-white
-                    gray: '#8E8E8E', // Light gray for subtle text
+                    orange: '#F5C89E',
+                    green: '#3D7A5A',
+                    offwhite: '#F3F1EC',
+                    gray: '#9E9E95',
                 },
+            },
+            fontFamily: {
+                display: ['Cormorant Garamond', 'Georgia', 'serif'],
             },
         },
     },

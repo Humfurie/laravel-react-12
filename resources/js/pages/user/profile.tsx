@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Head, Link } from '@inertiajs/react';
 import { Calendar, Code, ExternalLink, GitFork, GitPullRequest, MessageSquare, Star } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 interface ContributionDay {
     contributionCount: number;
@@ -58,7 +59,7 @@ interface ProfileProps {
     contributedProjects: Project[];
 }
 
-export default function Profile({ user, contributedProjects }: ProfileProps) {
+function Profile({ user, contributedProjects }: ProfileProps) {
     const contributions = user.github_contributions;
 
     return (
@@ -66,13 +67,19 @@ export default function Profile({ user, contributedProjects }: ProfileProps) {
             <Head title={`${user.name} (@${user.username})`}>
                 <meta name="description" content={`${user.name}'s developer profile — GitHub contributions, projects, and open source activity.`} />
                 <meta property="og:title" content={`${user.name} (@${user.username})`} />
-                <meta property="og:description" content={`${user.name}'s developer profile — GitHub contributions, projects, and open source activity.`} />
+                <meta
+                    property="og:description"
+                    content={`${user.name}'s developer profile — GitHub contributions, projects, and open source activity.`}
+                />
                 <meta property="og:type" content="profile" />
                 <meta property="og:url" content={`https://humfurie.org/u/${user.username}`} />
                 <meta property="og:image" content={user.avatar_url || 'https://humfurie.org/images/og-default.jpg'} />
                 <meta name="twitter:card" content="summary" />
                 <meta name="twitter:title" content={`${user.name} (@${user.username})`} />
-                <meta name="twitter:description" content={`${user.name}'s developer profile — GitHub contributions, projects, and open source activity.`} />
+                <meta
+                    name="twitter:description"
+                    content={`${user.name}'s developer profile — GitHub contributions, projects, and open source activity.`}
+                />
                 <link rel="canonical" href={`https://humfurie.org/u/${user.username}`} />
             </Head>
 
@@ -270,3 +277,8 @@ export default function Profile({ user, contributedProjects }: ProfileProps) {
         </>
     );
 }
+
+// Opt out of PublicLayout — profile is a standalone page
+Profile.layout = (page: ReactNode) => page;
+
+export default Profile;
