@@ -38,6 +38,7 @@ class SocialAuthController extends Controller
 
         return Socialite::driver($provider)
             ->scopes($scopes)
+            ->stateless()
             ->redirect();
     }
 
@@ -52,7 +53,7 @@ class SocialAuthController extends Controller
         }
 
         try {
-            $socialUser = Socialite::driver($provider)->user();
+            $socialUser = Socialite::driver($provider)->stateless()->user();
             $user = $this->findOrCreateUser($socialUser, $provider);
 
             // Fetch GitHub contributions if logging in with GitHub
@@ -61,13 +62,9 @@ class SocialAuthController extends Controller
             }
 
             Auth::login($user, remember: true);
+            session()->regenerate();
 
-            Log::info("Social auth success for {$provider}", [
-                'user_id' => $user->id,
-                'session_id' => session()->getId(),
-                'session_driver' => config('session.driver'),
-                'auth_check' => Auth::check(),
-            ]);
+            Log::info("Social auth success for {$provider}", ['user_id' => $user->id]);
 
             return redirect()->intended('/dashboard');
         } catch (\Exception $e) {
@@ -228,6 +225,7 @@ class SocialAuthController extends Controller
 
         return Socialite::driver($provider)
             ->scopes($this->getScopes($provider))
+            ->stateless()
             ->redirect();
     }
 
@@ -242,7 +240,7 @@ class SocialAuthController extends Controller
         }
 
         try {
-            $socialUser = Socialite::driver($provider)->user();
+            $socialUser = Socialite::driver($provider)->stateless()->user();
             $user = Auth::user();
             $providerIdColumn = "{$provider}_id";
 
