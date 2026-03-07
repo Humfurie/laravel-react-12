@@ -15,7 +15,7 @@ test('contact form submits successfully and sends email', function () {
     $response->assertRedirect();
     $response->assertSessionHas('success');
 
-    Mail::assertSent(ContactSubmission::class, function ($mail) {
+    Mail::assertQueued(ContactSubmission::class, function ($mail) {
         return $mail->senderName === 'John Doe'
             && $mail->senderEmail === 'john@example.com'
             && $mail->hasTo(config('mail.contact_recipient'));
@@ -93,7 +93,7 @@ test('contact form strips html tags from message', function () {
 
     $response->assertRedirect();
 
-    Mail::assertSent(ContactSubmission::class, function ($mail) {
+    Mail::assertQueued(ContactSubmission::class, function ($mail) {
         return $mail->senderMessage === 'alert("xss")Hello, I want to discuss a project.';
     });
 });
