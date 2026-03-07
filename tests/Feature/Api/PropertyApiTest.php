@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    Storage::fake('minio');
+    Storage::fake();
 
     // Create admin user with property permissions
     $this->user = createAdminUser('property');

@@ -41,7 +41,7 @@ test('it cannot show draft giveaway', function () {
 });
 
 test('it can submit entry to active giveaway', function () {
-    Storage::fake('minio');
+    Storage::fake();
     $giveaway = Giveaway::factory()->active()->create();
 
     $entryData = [
@@ -69,7 +69,7 @@ test('it can submit entry to active giveaway', function () {
 });
 
 test('it normalizes phone number starting with 09', function () {
-    Storage::fake('minio');
+    Storage::fake();
     $giveaway = Giveaway::factory()->active()->create();
 
     $response = $this->postJson("/api/v1/giveaways/{$giveaway->slug}/enter", [
@@ -88,7 +88,7 @@ test('it normalizes phone number starting with 09', function () {
 });
 
 test('it accepts phone number already in normalized format', function () {
-    Storage::fake('minio');
+    Storage::fake();
     $giveaway = Giveaway::factory()->active()->create();
 
     $response = $this->postJson("/api/v1/giveaways/{$giveaway->slug}/enter", [
@@ -126,7 +126,7 @@ test('it prevents duplicate phone number for same giveaway', function () {
 });
 
 test('it allows same phone number for different giveaways', function () {
-    Storage::fake('minio');
+    Storage::fake();
     $giveaway1 = Giveaway::factory()->active()->create();
     $giveaway2 = Giveaway::factory()->active()->create();
 
@@ -150,7 +150,7 @@ test('it allows same phone number for different giveaways', function () {
 });
 
 test('it validates required fields', function () {
-    Storage::fake('minio');
+    Storage::fake();
     $giveaway = Giveaway::factory()->active()->create();
 
     $response = $this->postJson("/api/v1/giveaways/{$giveaway->slug}/enter", []);
@@ -269,7 +269,7 @@ test('it includes entries count in giveaway list', function () {
 });
 
 test('it sets entry status to pending by default', function () {
-    Storage::fake('minio');
+    Storage::fake();
     $giveaway = Giveaway::factory()->active()->create();
 
     $this->postJson("/api/v1/giveaways/{$giveaway->slug}/enter", [
