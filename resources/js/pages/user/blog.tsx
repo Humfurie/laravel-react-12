@@ -196,21 +196,18 @@ const categories: { key: BlogCategory; label: string; icon: typeof Briefcase }[]
 ];
 
 const CategoryTabs = memo(function CategoryTabs({ active }: { active: BlogCategory }) {
-    const handleTabClick = useCallback(
-        (category: BlogCategory) => {
-            if (category === active) return;
-            router.get(
-                `/blog`,
-                { category },
-                {
-                    preserveScroll: false,
-                    preserveState: true,
-                    only: ['blogs', 'category'],
-                },
-            );
-        },
-        [active],
-    );
+    const [optimistic, setOptimistic] = useState<BlogCategory>(active);
+
+    // Sync when server confirms the new category
+    useEffect(() => {
+        setOptimistic(active);
+    }, [active]);
+
+    const handleTabClick = (category: BlogCategory) => {
+        if (category === optimistic) return;
+        setOptimistic(category); // Instant visual switch
+        router.get(`/blog`, { category }, { preserveState: true, only: ['blogs', 'category'] });
+    };
 
     return (
         <div className="flex items-center gap-1 rounded-full bg-[#F3F1EC] p-1 dark:bg-[#162820]">
@@ -219,7 +216,7 @@ const CategoryTabs = memo(function CategoryTabs({ active }: { active: BlogCatego
                     key={key}
                     onClick={() => handleTabClick(key)}
                     className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
-                        active === key
+                        optimistic === key
                             ? 'bg-[#1B3D2F] text-white shadow-sm dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
                             : 'text-[#6B6B63] hover:text-[#1B3D2F] dark:text-[#9E9E95] dark:hover:text-[#5AAF7E]'
                     }`}
