@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\GuestbookController;
 use App\Http\Controllers\McpOAuthController;
@@ -91,6 +92,11 @@ Route::get('/guestbook', [GuestbookController::class, 'index'])->name('guestbook
 
 // Resume
 Route::get('/resume', [ResumeController::class, 'index'])->name('resume.index');
+
+// Contact form
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware('throttle:3,1')
+    ->name('contact.store');
 
 Route::middleware(['auth'])->group(function () {
     // Debug route to check experience data

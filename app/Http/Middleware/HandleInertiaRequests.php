@@ -47,6 +47,9 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
+            'flash' => [
+                'success' => $request->session()->get('success'),
+            ],
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
@@ -59,7 +62,7 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'adsense' => [
                 'client_id' => config('services.adsense.client_id'),
-                'enabled' => !empty(config('services.adsense.client_id')),
+                'enabled' => ! empty(config('services.adsense.client_id')),
                 'slots' => config('services.adsense.slots'),
             ],
         ];
