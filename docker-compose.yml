@@ -24,9 +24,8 @@ services:
         networks:
             - sail
             - proxy
+        depends_on:
             - shared-postgres
-        external_links:
-            - minio-standalone:minio-standalone
 
 networks:
     sail:

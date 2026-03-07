@@ -113,15 +113,15 @@ class ExperienceSeeder extends Seeder
             $localImagePath = storage_path('app/public/experiences/' . $imageName);
 
             // Handle file upload based on disk type
-            if ($disk === 'minio') {
-                // Production: Upload to MinIO
+            if ($disk !== 'public' && $disk !== 'local') {
+                // Remote disk: Upload to configured storage
                 if (\Illuminate\Support\Facades\File::exists($localImagePath)) {
-                    if (!\Illuminate\Support\Facades\Storage::disk('minio')->exists($storagePath)) {
+                    if (!\Illuminate\Support\Facades\Storage::disk($disk)->exists($storagePath)) {
                         $imageContent = \Illuminate\Support\Facades\File::get($localImagePath);
-                        \Illuminate\Support\Facades\Storage::disk('minio')->put($storagePath, $imageContent);
-                        $this->command->info("Uploaded {$imageName} to MinIO");
+                        \Illuminate\Support\Facades\Storage::disk($disk)->put($storagePath, $imageContent);
+                        $this->command->info("Uploaded {$imageName} to {$disk}");
                     } else {
-                        $this->command->info("Image already exists in MinIO: {$imageName}");
+                        $this->command->info("Image already exists in {$disk}: {$imageName}");
                     }
                 } else {
                     $this->command->warn("Local image not found: {$localImagePath}");

@@ -107,12 +107,10 @@ class SettingsController extends Controller
      */
     private function generateFileUrl(string $disk, string $path): string
     {
-        if ($disk === 'minio') {
-            // In production with MinIO, use the Storage URL method
-            return Storage::disk('minio')->url($path);
+        if (in_array($disk, ['local', 'public'])) {
+            return Storage::disk('public')->url($path);
         }
 
-        // In local with public disk, use the standard /storage URL
-        return Storage::disk('public')->url($path);
+        return Storage::disk($disk)->url($path);
     }
 }

@@ -58,9 +58,9 @@ class ExpertiseController extends Controller
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
 
-            // Store in MinIO images/techstack directory
-            $path = $file->storeAs('images/techstack', $filename, 'minio');
-            $validated['image'] = Storage::disk('minio')->url($path);
+            // Store in configured disk images/techstack directory
+            $path = $file->storeAs('images/techstack', $filename, config('filesystems.default'));
+            $validated['image'] = Storage::disk(config('filesystems.default'))->url($path);
         } elseif ($request->filled('image_path')) {
             // Use manually provided path
             $validated['image'] = $request->image_path;
@@ -94,8 +94,8 @@ class ExpertiseController extends Controller
         // Delete image file if it exists and is stored locally
         if ($expertise->image && !str_starts_with($expertise->image, 'http')) {
             $imagePath = str_replace('storage/', '', $expertise->image);
-            if (Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
+            if (Storage::disk(config('filesystems.default'))->exists($imagePath)) {
+                Storage::disk(config('filesystems.default'))->delete($imagePath);
             }
         }
 
@@ -147,17 +147,17 @@ class ExpertiseController extends Controller
             // Delete old image if it exists and is stored locally
             if ($expertise->image && !str_starts_with($expertise->image, 'http')) {
                 $oldPath = str_replace('storage/', '', $expertise->image);
-                if (Storage::disk('public')->exists($oldPath)) {
-                    Storage::disk('public')->delete($oldPath);
+                if (Storage::disk(config('filesystems.default'))->exists($oldPath)) {
+                    Storage::disk(config('filesystems.default'))->delete($oldPath);
                 }
             }
 
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
 
-            // Store in MinIO images/techstack directory
-            $path = $file->storeAs('images/techstack', $filename, 'minio');
-            $validated['image'] = Storage::disk('minio')->url($path);
+            // Store in configured disk images/techstack directory
+            $path = $file->storeAs('images/techstack', $filename, config('filesystems.default'));
+            $validated['image'] = Storage::disk(config('filesystems.default'))->url($path);
         } elseif ($request->filled('image_path')) {
             $validated['image'] = $request->image_path;
         }
