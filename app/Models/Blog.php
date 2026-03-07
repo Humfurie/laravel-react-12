@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -212,6 +213,11 @@ class Blog extends Model
 
         // Second priority: featured_image field (legacy)
         if ($this->featured_image) {
+            // Convert legacy /storage/ paths to current disk URL
+            if (str_starts_with($this->featured_image, '/storage/')) {
+                $path = substr($this->featured_image, strlen('/storage/'));
+                return Storage::url($path);
+            }
             return $this->featured_image;
         }
 
