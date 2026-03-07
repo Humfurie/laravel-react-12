@@ -49,7 +49,7 @@ test('can display create experience form', function () {
 });
 
 test('can store a new experience', function () {
-    Storage::fake('minio');
+    Storage::fake();
     $image = UploadedFile::fake()->image('company-logo.png');
 
     $data = [
@@ -85,7 +85,7 @@ test('can store a new experience', function () {
 
     $experience = Experience::where('position', 'Senior Software Engineer')->first();
     expect($experience->image)->not->toBeNull();
-    Storage::disk('minio')->assertExists($experience->image->path);
+    Storage::assertExists($experience->image->path);
 });
 
 test('validates required fields when storing experience', function () {
@@ -169,7 +169,7 @@ test('can update an experience', function () {
 });
 
 test('can update experience with new image', function () {
-    Storage::fake('minio');
+    Storage::fake();
     $experience = Experience::factory()->create(['user_id' => $this->user->id]);
 
     $oldImage = UploadedFile::fake()->image('old-logo.png');

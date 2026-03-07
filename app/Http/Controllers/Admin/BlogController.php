@@ -80,7 +80,7 @@ class BlogController extends Controller
         if ($request->hasFile('featured_image_file')) {
             $image = $request->file('featured_image_file');
             $filename = $this->generateUniqueFilename($image);
-            $path = $image->storeAs('blog-images', $filename, 'minio');
+            $path = $image->storeAs('blog-images', $filename, config('filesystems.default'));
 
             if ($path === false) {
                 return back()->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
@@ -143,7 +143,7 @@ class BlogController extends Controller
     }
 
     /**
-     * Delete old image from MinIO storage (handles both URL formats).
+     * Delete old image from storage (handles both URL formats).
      */
     private function deleteOldImage(string $imageUrl): void
     {
@@ -158,7 +158,7 @@ class BlogController extends Controller
                 return;
             }
 
-            Storage::disk('minio')->delete($path);
+            Storage::disk(config('filesystems.default'))->delete($path);
 
             return;
         }
@@ -174,7 +174,7 @@ class BlogController extends Controller
                 return;
             }
 
-            Storage::disk('minio')->delete($extractedPath);
+            Storage::disk(config('filesystems.default'))->delete($extractedPath);
 
             return;
         }
@@ -208,7 +208,7 @@ class BlogController extends Controller
         if ($request->hasFile('featured_image_file')) {
             $image = $request->file('featured_image_file');
             $filename = $this->generateUniqueFilename($image);
-            $path = $image->storeAs('blog-images', $filename, 'minio');
+            $path = $image->storeAs('blog-images', $filename, config('filesystems.default'));
 
             if ($path === false) {
                 return back()->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
@@ -292,7 +292,7 @@ class BlogController extends Controller
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $filename = $this->generateUniqueFilename($image);
-            $path = $image->storeAs('blog-images', $filename, 'minio');
+            $path = $image->storeAs('blog-images', $filename, config('filesystems.default'));
 
             if ($path === false) {
                 return response()->json([

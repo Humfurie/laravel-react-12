@@ -99,7 +99,7 @@ class BlogSeeder extends Seeder
                     $filename = 'blog-' . $blog->id . '-' . uniqid() . '.jpg';
                     $storagePath = 'images/blogs/' . $filename;
 
-                    // Upload to the configured disk (minio in production, public in local)
+                    // Upload to the configured disk
                     Storage::disk($disk)->put($storagePath, $imageContent);
 
                     // Create polymorphic image relationship

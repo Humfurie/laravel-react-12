@@ -38,6 +38,6 @@ if (!function_exists('setting_file_url')) {
         }
 
         // Otherwise, generate storage URL
-        return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+        return \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->url($path);
     }
 }

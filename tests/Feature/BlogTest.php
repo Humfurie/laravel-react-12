@@ -11,7 +11,7 @@ beforeEach(function () {
     $this->user = createAdminUser('blog');
     // Set admin user ID in config for homepage tests
     config(['app.admin_user_id' => $this->user->id]);
-    Storage::fake('minio');
+    Storage::fake();
 });
 
 test('authenticated user can view blog index', function () {
@@ -198,7 +198,7 @@ test('authenticated user can upload blog image', function () {
         ]);
 
     $responseData = $response->json();
-    Storage::disk('minio')->assertExists($responseData['path']);
+    Storage::assertExists($responseData['path']);
 });
 
 test('blog post view count increments when viewed', function () {

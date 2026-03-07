@@ -124,10 +124,10 @@ class UploadImageFromUrl extends Tool
         $directory = $expertise ? 'images/techstack' : 'blog-images';
         $storagePath = $directory.'/'.$filename;
 
-        $stored = Storage::disk('minio')->put($storagePath, $body);
+        $stored = Storage::disk(config('filesystems.default'))->put($storagePath, $body);
 
         if (! $stored) {
-            return Response::error('Failed to store image in MinIO.');
+            return Response::error('Failed to store image.');
         }
 
         $publicPath = '/storage/'.$storagePath;

@@ -41,7 +41,7 @@ it('rejects invalid content types', function () {
         ]),
     ]);
 
-    Storage::fake('minio');
+    Storage::fake();
 
     $result = callUploadTool(['url' => 'https://example.com/file.pdf']);
 
@@ -80,7 +80,7 @@ it('rejects oversized images', function () {
         ]),
     ]);
 
-    Storage::fake('minio');
+    Storage::fake();
 
     $result = callUploadTool(['url' => 'https://example.com/huge.jpg']);
 
@@ -95,7 +95,7 @@ it('handles download failure gracefully', function () {
         'https://example.com/missing.jpg' => Http::response('Not Found', 404),
     ]);
 
-    Storage::fake('minio');
+    Storage::fake();
 
     $result = callUploadTool(['url' => 'https://example.com/missing.jpg']);
 
@@ -114,7 +114,7 @@ it('downloads and stores an image successfully', function () {
         ]),
     ]);
 
-    Storage::fake('minio');
+    Storage::fake();
 
     $result = callUploadTool(['url' => 'https://example.com/photo.png']);
     $data = uploadToolData($result);
@@ -128,7 +128,7 @@ it('downloads and stores an image successfully', function () {
 
     // Verify file was stored
     $storagePath = str_replace('/storage/', '', $data['path']);
-    Storage::disk('minio')->assertExists($storagePath);
+    Storage::assertExists($storagePath);
 });
 
 it('handles Content-Type with charset parameter', function () {
@@ -138,7 +138,7 @@ it('handles Content-Type with charset parameter', function () {
         ]),
     ]);
 
-    Storage::fake('minio');
+    Storage::fake();
 
     $result = callUploadTool(['url' => 'https://example.com/photo.jpg']);
     $data = uploadToolData($result);
@@ -158,7 +158,7 @@ it('associates uploaded image with a blog by ID', function () {
         ]),
     ]);
 
-    Storage::fake('minio');
+    Storage::fake();
 
     $result = callUploadTool([
         'url' => 'https://example.com/featured.webp',
@@ -180,7 +180,7 @@ it('associates uploaded image with a blog by slug', function () {
         ]),
     ]);
 
-    Storage::fake('minio');
+    Storage::fake();
 
     $result = callUploadTool([
         'url' => 'https://example.com/featured.gif',
@@ -197,7 +197,7 @@ it('skips blog that already has a featured image without downloading', function 
     $blog = Blog::factory()->published()->create(['featured_image' => '/storage/existing.jpg']);
 
     Http::fake();
-    Storage::fake('minio');
+    Storage::fake();
 
     $result = callUploadTool([
         'url' => 'https://example.com/new.webp',
@@ -243,7 +243,7 @@ it('associates uploaded image with an expertise by ID', function () {
         ]),
     ]);
 
-    Storage::fake('minio');
+    Storage::fake();
 
     $result = callUploadTool([
         'url' => 'https://example.com/icon.png',
@@ -261,7 +261,7 @@ it('skips expertise that already has an image without downloading', function () 
     $expertise = Expertise::factory()->create(['image' => '/storage/existing-icon.png']);
 
     Http::fake();
-    Storage::fake('minio');
+    Storage::fake();
 
     $result = callUploadTool([
         'url' => 'https://example.com/new-icon.png',

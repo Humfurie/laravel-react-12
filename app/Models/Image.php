@@ -51,7 +51,7 @@ class Image extends Model
         $disk = Storage::disk(config('filesystems.default'));
 
         // For local/public disks, return relative path
-        if (in_array(config('filesystems.default'), ['local', 'public', 'minio'])) {
+        if (in_array(config('filesystems.default'), ['local', 'public'])) {
             return '/storage/' . $this->path;
         }
 
@@ -74,7 +74,7 @@ class Image extends Model
         $urls = [];
         foreach ($this->sizes as $size => $path) {
             // For local/public disks, return relative path
-            if (in_array($defaultDisk, ['local', 'public', 'minio'])) {
+            if (in_array($defaultDisk, ['local', 'public'])) {
                 $urls[$size] = '/storage/' . $path;
             } else {
                 // For other disks (S3, etc.), return full URL
@@ -99,7 +99,7 @@ class Image extends Model
         $path = $this->sizes[$size];
 
         // For local/public disks, return relative path
-        if (in_array($defaultDisk, ['local', 'public', 'minio'])) {
+        if (in_array($defaultDisk, ['local', 'public'])) {
             return '/storage/' . $path;
         }
 

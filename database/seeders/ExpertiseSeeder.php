@@ -145,17 +145,17 @@ class ExpertiseSeeder extends Seeder
                 $filename = basename($expertiseData['image']);
                 $storagePath = 'images/techstack/' . $filename;
 
-                if ($disk === 'minio') {
-                    // Production: Upload to MinIO
-                    if (!Storage::disk('minio')->exists($storagePath)) {
+                if ($disk !== 'public' && $disk !== 'local') {
+                    // Remote disk: Upload to configured storage
+                    if (!Storage::disk($disk)->exists($storagePath)) {
                         $imageContent = File::get($localImagePath);
-                        Storage::disk('minio')->put($storagePath, $imageContent);
-                        $this->command->info("Uploaded {$filename} to MinIO");
+                        Storage::disk($disk)->put($storagePath, $imageContent);
+                        $this->command->info("Uploaded {$filename} to {$disk}");
                     } else {
-                        $this->command->info("Image already exists in MinIO: {$filename}");
+                        $this->command->info("Image already exists in {$disk}: {$filename}");
                     }
-                    // Store MinIO URL
-                    $expertiseData['image'] = Storage::disk('minio')->url($storagePath);
+                    // Store remote URL
+                    $expertiseData['image'] = Storage::disk($disk)->url($storagePath);
                 } else {
                     // Local: Use public disk - keep original path
                     $this->command->info("Using local public path for {$filename}");

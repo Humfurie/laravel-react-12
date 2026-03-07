@@ -88,7 +88,7 @@ class ExperienceController extends Controller
                 $experience->image->delete();
             }
 
-            $path = $request->file('image')->store('experiences', 'minio');
+            $path = $request->file('image')->store('experiences', config('filesystems.default'));
             $experience->image()->create([
                 'name' => $request->file('image')->getClientOriginalName(),
                 'path' => $path,
@@ -116,7 +116,7 @@ class ExperienceController extends Controller
 
         // Handle image upload if provided
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('experiences', 'minio');
+            $path = $request->file('image')->store('experiences', config('filesystems.default'));
             $experience->image()->create([
                 'name' => $request->file('image')->getClientOriginalName(),
                 'path' => $path,

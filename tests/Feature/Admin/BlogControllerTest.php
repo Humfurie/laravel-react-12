@@ -14,7 +14,7 @@ beforeEach(function () {
     // Set admin user ID in config for homepage tests
     config(['app.admin_user_id' => $this->user->id]);
 
-    Storage::fake('minio');
+    Storage::fake();
 });
 
 test('get primary and latest returns correct structure', function () {
@@ -177,8 +177,8 @@ test('featured image upload uses storage prefix', function () {
         ->not->toContain('minio.humfurie.org')
         ->toContain('blog-images/');
 
-    // Verify file was stored in MinIO
-    Storage::disk('minio')->assertExists(str_replace('/storage/', '', $blog->featured_image));
+    // Verify file was stored
+    Storage::assertExists(str_replace('/storage/', '', $blog->featured_image));
 });
 
 test('featured image update replaces old image', function () {
@@ -188,7 +188,7 @@ test('featured image update replaces old image', function () {
     ]);
 
     // Create a fake old image file
-    Storage::disk('minio')->put('blog-images/old-image.jpg', 'old content');
+    Storage::put('blog-images/old-image.jpg', 'old content');
 
     $updateData = [
         'title' => $blog->title,
@@ -208,7 +208,7 @@ test('featured image update replaces old image', function () {
         ->not->toBe('/storage/blog-images/old-image.jpg');
 
     // Old image should be deleted
-    Storage::disk('minio')->assertMissing('blog-images/old-image.jpg');
+    Storage::assertMissing('blog-images/old-image.jpg');
 });
 
 test('inline image upload returns storage prefix url', function () {
