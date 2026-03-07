@@ -40,8 +40,7 @@ class ProfileController extends Controller
                 $this->deleteFile($user->resume_path);
             }
 
-            // Use public disk for local, minio for production
-            $disk = app()->environment('local') ? 'public' : 'minio';
+            $disk = config('filesystems.default');
             $path = $request->file('resume')->store('resumes/'.$user->id, $disk);
             $validated['resume_path'] = $path;
         }
@@ -53,8 +52,7 @@ class ProfileController extends Controller
                 $this->deleteFile($user->about_image_path);
             }
 
-            // Use public disk for local, minio for production
-            $disk = app()->environment('local') ? 'public' : 'minio';
+            $disk = config('filesystems.default');
             $path = $request->file('about_image')->store('about-images/'.$user->id, $disk);
             $validated['about_image_path'] = $path;
         }
@@ -89,7 +87,7 @@ class ProfileController extends Controller
             return;
         }
 
-        $disk = app()->environment('local') ? 'public' : 'minio';
+        $disk = config('filesystems.default');
         if (Storage::disk($disk)->exists($path)) {
             Storage::disk($disk)->delete($path);
         }

@@ -134,7 +134,7 @@ class BlogLocationController extends Controller
 
         $file = $request->file('image');
         $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('blog-location-images', $filename, 'minio');
+        $path = $file->storeAs('blog-location-images', $filename, config('filesystems.default'));
 
         // Get the next order for images
         $maxOrder = $location->images()->max('order') ?? -1;

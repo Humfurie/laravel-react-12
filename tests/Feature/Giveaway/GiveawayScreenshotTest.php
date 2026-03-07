@@ -6,8 +6,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
-    config(['filesystems.default' => 'minio']);
-    Storage::fake('minio');
+    Storage::fake();
 });
 
 test('it requires screenshot when submitting entry', function () {
@@ -38,11 +37,11 @@ test('it accepts valid screenshot image', function () {
 
     $response->assertStatus(201);
 
-    // Screenshot should be stored in MinIO
+    // Screenshot should be stored
     $entry = GiveawayEntry::first();
     expect($entry->screenshot_path)->not->toBeNull();
 
-    Storage::disk('minio')->assertExists($entry->screenshot_path);
+    Storage::assertExists($entry->screenshot_path);
 });
 
 test('it stores screenshot in correct path format', function () {
@@ -169,8 +168,8 @@ test('different users can upload screenshots with same filename', function () {
     // Both screenshots should be stored with different paths
     expect($entries[0]->screenshot_path)->not->toBe($entries[1]->screenshot_path);
 
-    Storage::disk('minio')->assertExists($entries[0]->screenshot_path);
-    Storage::disk('minio')->assertExists($entries[1]->screenshot_path);
+    Storage::assertExists($entries[0]->screenshot_path);
+    Storage::assertExists($entries[1]->screenshot_path);
 });
 
 test('screenshot uses phone hash in filename for privacy', function () {

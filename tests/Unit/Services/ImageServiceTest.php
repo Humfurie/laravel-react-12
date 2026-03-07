@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\Storage;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    // Set minio as the default disk for tests
-    config(['filesystems.default' => 'minio']);
-    Storage::fake('minio');
+    Storage::fake();
     $this->imageService = app(ImageService::class);
 });
 
@@ -33,7 +31,7 @@ describe('WebP Conversion', function () {
         expect($image->path)->toEndWith('.webp');
 
         // Verify file exists in storage
-        Storage::disk('minio')->assertExists($image->path);
+        Storage::assertExists($image->path);
     });
 
     test('converts uploaded PNG images to WebP format', function () {
@@ -44,7 +42,7 @@ describe('WebP Conversion', function () {
 
         expect($image->filename)->toEndWith('.webp');
         expect($image->mime_type)->toBe('image/webp');
-        Storage::disk('minio')->assertExists($image->path);
+        Storage::assertExists($image->path);
     });
 
     test('generates WebP thumbnails at different sizes', function () {
@@ -60,7 +58,7 @@ describe('WebP Conversion', function () {
         // Assert all thumbnails are WebP
         foreach ($image->sizes as $size => $path) {
             expect($path)->toEndWith('.webp');
-            Storage::disk('minio')->assertExists($path);
+            Storage::assertExists($path);
         }
     });
 
@@ -104,7 +102,7 @@ describe('Multiple Image Upload', function () {
         foreach ($images as $image) {
             expect($image->filename)->toEndWith('.webp');
             expect($image->mime_type)->toBe('image/webp');
-            Storage::disk('minio')->assertExists($image->path);
+            Storage::assertExists($image->path);
         }
     });
 
