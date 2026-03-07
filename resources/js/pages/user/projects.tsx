@@ -37,6 +37,8 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
 
     const handleTabChange = useCallback((tab: TabKey) => {
         setActiveTab(tab);
+        setSelectedCategory(null);
+        setSelectedTech([]);
         const url = new URL(window.location.href);
         url.searchParams.set('tab', tab);
         window.history.replaceState({}, '', url.toString());
@@ -340,7 +342,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
 
                             {/* Projects Grid - Magazine Style */}
                             {filteredProjects.length > 0 ? (
-                                <MotionStagger staggerDelay={0.05} className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                                <MotionStagger key={activeTab} staggerDelay={0.05} className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                                     {filteredProjects.map((project, index) => (
                                         <MotionItem key={project.id} variant="fadeUp">
                                             <ProjectCard
