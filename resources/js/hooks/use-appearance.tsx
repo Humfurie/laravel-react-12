@@ -19,14 +19,25 @@ const setCookie = (name: string, value: string, days = 365) => {
     document.cookie = `${name}=${value};path=/;max-age=${maxAge};SameSite=Lax`;
 };
 
-const applyTheme = (appearance: Appearance) => {
+const applyTheme = (appearance: Appearance, withTransition = false) => {
     if (typeof document === 'undefined') {
         return;
     }
 
     const isDark = appearance === 'dark' || (appearance === 'system' && prefersDark());
 
+    if (withTransition) {
+        document.documentElement.classList.add('theme-transitioning');
+    }
+
     document.documentElement.classList.toggle('dark', isDark);
+
+    if (withTransition) {
+        // Remove after transition completes
+        setTimeout(() => {
+            document.documentElement.classList.remove('theme-transitioning');
+        }, 300);
+    }
 };
 
 const mediaQuery = () => {
@@ -40,7 +51,7 @@ const mediaQuery = () => {
 const handleSystemThemeChange = () => {
     if (typeof localStorage === 'undefined') return;
     const currentAppearance = localStorage.getItem('appearance') as Appearance;
-    applyTheme(currentAppearance || 'system');
+    applyTheme(currentAppearance || 'system', true);
 };
 
 export function initializeTheme() {
@@ -72,7 +83,7 @@ export function useAppearance() {
         // Store in cookie for SSR...
         setCookie('appearance', mode);
 
-        applyTheme(mode);
+        applyTheme(mode, true);
     }, []);
 
     useEffect(() => {
