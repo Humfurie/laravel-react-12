@@ -66,9 +66,9 @@ class ExpertiseController extends Controller
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
 
-            // Store in MinIO images/techstack directory
-            $path = $file->storeAs('images/techstack', $filename, 'minio');
-            $validated['image'] = Storage::disk('minio')->url($path);
+            // Store in configured disk images/techstack directory
+            $path = $file->storeAs('images/techstack', $filename, config('filesystems.default'));
+            $validated['image'] = Storage::disk(config('filesystems.default'))->url($path);
         }
 
         Expertise::create($validated);
@@ -169,9 +169,9 @@ class ExpertiseController extends Controller
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
 
-            // Store in MinIO images/techstack directory
-            $path = $file->storeAs('images/techstack', $filename, 'minio');
-            $validated['image'] = Storage::disk('minio')->url($path);
+            // Store in configured disk images/techstack directory
+            $path = $file->storeAs('images/techstack', $filename, config('filesystems.default'));
+            $validated['image'] = Storage::disk(config('filesystems.default'))->url($path);
         }
 
         $expertise->update($validated);
