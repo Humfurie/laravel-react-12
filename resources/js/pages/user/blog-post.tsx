@@ -225,7 +225,7 @@ export default function BlogPost({ blog }: Props) {
                                     {/* Article Body */}
                                     <div className="rounded-3xl bg-white p-8 shadow-sm md:p-12 dark:bg-neutral-900 dark:shadow-neutral-800/20">
                                         <div
-                                            className="tiptap ProseMirror prose prose-lg prose-gray dark:prose-invert prose-headings:font-serif prose-headings:font-bold prose-headings:tracking-tight prose-h2:text-3xl prose-h3:text-2xl prose-p:leading-relaxed prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-2xl max-w-none [&_p:empty]:hidden"
+                                            className="tiptap ProseMirror prose prose-lg prose-gray dark:prose-invert prose-headings:font-serif prose-headings:font-bold prose-headings:tracking-tight prose-h2:text-3xl prose-h3:text-2xl prose-p:leading-relaxed prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-2xl max-w-none [&_p:empty]:hidden !whitespace-normal"
                                             dangerouslySetInnerHTML={{ __html: blog.content }}
                                         />
                                     </div>
