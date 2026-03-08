@@ -4,6 +4,7 @@ use App\Models\Blog;
 use App\Models\BlogView;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -138,13 +139,27 @@ test('status label attribute returns correct labels', function () {
         ->and($privateBlog->status_label)->toBe('Private');
 });
 
+test('display image converts legacy /storage/ path via Storage::url()', function () {
+    $blog = Blog::factory()->make(['featured_image' => '/storage/blog-images/hero.jpg']);
+    $expected = Storage::disk(config('filesystems.default'))->url('blog-images/hero.jpg');
+
+    expect($blog->display_image)->toBe($expected);
+});
+
+test('display image returns absolute URL in featured_image unchanged', function () {
+    $blog = Blog::factory()->make(['featured_image' => 'https://r2.humfurie.org/blog-images/foo.jpg']);
+
+    expect($blog->display_image)->toBe('https://r2.humfurie.org/blog-images/foo.jpg');
+});
+
 test('display image returns featured image when available', function () {
     $blog = Blog::factory()->create([
         'featured_image' => '/storage/featured.jpg',
         'content' => '<p>Some content with <img src="/storage/content.jpg"></p>'
     ]);
+    $expected = Storage::disk(config('filesystems.default'))->url('featured.jpg');
 
-    expect($blog->display_image)->toBe('/storage/featured.jpg');
+    expect($blog->display_image)->toBe($expected);
 });
 
 test('display image extracts first image from content', function () {
