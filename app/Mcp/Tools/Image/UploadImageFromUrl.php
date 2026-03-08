@@ -4,6 +4,7 @@ namespace App\Mcp\Tools\Image;
 
 use App\Models\Blog;
 use App\Models\Expertise;
+use App\Models\Project;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -25,16 +26,17 @@ class UploadImageFromUrl extends Tool
 
     public function description(): string
     {
-        return 'Upload an image from a URL to storage. Use this to set blog featured images or expertise icons from real URLs instead of fabricating paths. Provide blog_id/blog_slug OR expertise_id, not both. Returns error if the specified target does not exist. Will not overwrite existing images — returns "skipped" if one already exists. Status fields return: "updated", "skipped", or "none".';
+        return 'Upload an image from a URL to storage. Use this to set blog featured images, expertise icons, or project thumbnails from real URLs. Provide blog_id/blog_slug, expertise_id, OR project_id — not more than one. Returns error if the specified target does not exist. Will not overwrite existing images — returns "skipped" if one already exists. Status fields return: "updated", "skipped", or "none".';
     }
 
     public function schema(JsonSchema $schema): array
     {
         return [
             'url' => $schema->string()->description('HTTPS image URL to download')->required(),
-            'blog_id' => $schema->integer()->description('Blog ID to attach image to (mutually exclusive with expertise_id)'),
-            'blog_slug' => $schema->string()->description('Blog slug to attach image to (mutually exclusive with expertise_id)'),
-            'expertise_id' => $schema->integer()->description('Expertise ID to attach image to (mutually exclusive with blog_id/blog_slug, stores in images/techstack/)'),
+            'blog_id' => $schema->integer()->description('Blog ID to attach image to (mutually exclusive with expertise_id and project_id)'),
+            'blog_slug' => $schema->string()->description('Blog slug to attach image to (mutually exclusive with expertise_id and project_id)'),
+            'expertise_id' => $schema->integer()->description('Expertise ID to attach image to (mutually exclusive with blog_id/blog_slug and project_id, stores in images/techstack/)'),
+            'project_id' => $schema->integer()->description('Project ID to attach image to as primary thumbnail (mutually exclusive with blog_id/blog_slug and expertise_id)'),
         ];
     }
 
@@ -50,10 +52,12 @@ class UploadImageFromUrl extends Tool
         $blogId = $request->get('blog_id');
         $blogSlug = $request->get('blog_slug');
         $expertiseId = $request->get('expertise_id');
+        $projectId = $request->get('project_id');
         $hasBlogTarget = $blogId || $blogSlug;
 
-        if ($hasBlogTarget && $expertiseId) {
-            return Response::error('Provide blog_id/blog_slug or expertise_id, not both.');
+        $exclusiveCount = (int) $hasBlogTarget + (int) (bool) $expertiseId + (int) (bool) $projectId;
+        if ($exclusiveCount > 1) {
+            return Response::error('Provide only one of: blog_id/blog_slug, expertise_id, or project_id.');
         }
 
         $blog = null;
@@ -68,11 +72,8 @@ class UploadImageFromUrl extends Tool
 
             if ($blog->featured_image) {
                 return Response::json([
-                    'path' => null,
-                    'size' => null,
-                    'mime_type' => null,
-                    'blog_updated' => 'skipped',
-                    'expertise_updated' => 'none',
+                    'path' => null, 'size' => null, 'mime_type' => null,
+                    'blog_updated' => 'skipped', 'expertise_updated' => 'none', 'project_updated' => 'none',
                 ]);
             }
         }
@@ -87,11 +88,24 @@ class UploadImageFromUrl extends Tool
 
             if ($expertise->image) {
                 return Response::json([
-                    'path' => null,
-                    'size' => null,
-                    'mime_type' => null,
-                    'blog_updated' => 'none',
-                    'expertise_updated' => 'skipped',
+                    'path' => null, 'size' => null, 'mime_type' => null,
+                    'blog_updated' => 'none', 'expertise_updated' => 'skipped', 'project_updated' => 'none',
+                ]);
+            }
+        }
+
+        $project = null;
+        if ($projectId) {
+            $project = Project::find($projectId);
+
+            if (! $project) {
+                return Response::error('Project not found.');
+            }
+
+            if ($project->primaryImage()->exists()) {
+                return Response::json([
+                    'path' => null, 'size' => null, 'mime_type' => null,
+                    'blog_updated' => 'none', 'expertise_updated' => 'none', 'project_updated' => 'skipped',
                 ]);
             }
         }
@@ -121,16 +135,17 @@ class UploadImageFromUrl extends Tool
 
         $extension = self::ALLOWED_MIME_TYPES[$mimeType];
         $filename = time().'_'.Str::random(10).'.'.$extension;
-        $directory = $expertise ? 'images/techstack' : 'blog-images';
+        $directory = $expertise ? 'images/techstack' : ($project ? 'project-images' : 'blog-images');
         $storagePath = $directory.'/'.$filename;
 
-        $stored = Storage::disk(config('filesystems.default'))->put($storagePath, $body);
+        $disk = Storage::disk(config('filesystems.default'));
+        $stored = $disk->put($storagePath, $body);
 
         if (! $stored) {
             return Response::error('Failed to store image.');
         }
 
-        $publicPath = '/storage/'.$storagePath;
+        $publicPath = $disk->url($storagePath);
 
         $blogUpdated = 'none';
         if ($blog) {
@@ -144,12 +159,28 @@ class UploadImageFromUrl extends Tool
             $expertiseUpdated = 'updated';
         }
 
+        $projectUpdated = 'none';
+        if ($project) {
+            $project->images()->create([
+                'name' => $filename,
+                'path' => $storagePath,
+                'filename' => $filename,
+                'mime_type' => $mimeType,
+                'size' => strlen($body),
+                'order' => 0,
+                'is_primary' => true,
+                'sizes' => [],
+            ]);
+            $projectUpdated = 'updated';
+        }
+
         return Response::json([
             'path' => $publicPath,
             'size' => strlen($body),
             'mime_type' => $mimeType,
             'blog_updated' => $blogUpdated,
             'expertise_updated' => $expertiseUpdated,
+            'project_updated' => $projectUpdated,
         ]);
     }
 }
