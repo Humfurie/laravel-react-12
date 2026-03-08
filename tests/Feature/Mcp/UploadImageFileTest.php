@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Storage;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 
+// Minimal valid 1x1 PNG — must be real image bytes to pass finfo MIME detection,
+// which runs before target validation in UploadImageFile.
+const PNG_1X1 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+
 function callFileUploadTool(array $arguments): Response
 {
     return (new UploadImageFile)->handle(new Request($arguments));
@@ -28,35 +32,31 @@ it('rejects missing base64', function () {
 });
 
 it('rejects invalid base64 data', function () {
-    $result = callFileUploadTool(['base64' => 'not-valid-base64!!!']);
+    // All '!' chars: strict=true → false; strict=false discards them → empty string → fails $data === '' check
+    $result = callFileUploadTool(['base64' => '!!!!']);
 
     expect($result->isError())->toBeTrue();
     expect((string) $result->content())->toContain('Invalid base64');
 });
 
 it('rejects oversized images', function () {
-    $oversizedData = str_repeat('A', 6 * 1024 * 1024);
-    $b64 = base64_encode($oversizedData);
-
-    $result = callFileUploadTool(['base64' => $b64]);
+    $result = callFileUploadTool(['base64' => base64_encode(str_repeat('A', 6 * 1024 * 1024))]);
 
     expect($result->isError())->toBeTrue();
     expect((string) $result->content())->toContain('5MB');
 });
 
 it('rejects invalid mime types', function () {
-    $pdfHeader = "%PDF-1.4 fake pdf content";
-    $b64 = base64_encode($pdfHeader);
-
-    $result = callFileUploadTool(['base64' => $b64]);
+    $result = callFileUploadTool(['base64' => base64_encode('%PDF-1.4 fake pdf content')]);
 
     expect($result->isError())->toBeTrue();
     expect((string) $result->content())->toContain('Invalid content type');
 });
 
 it('rejects providing both blog_id and expertise_id', function () {
+    // Must pass valid image bytes — MIME check runs before exclusivity check
     $result = callFileUploadTool([
-        'base64' => base64_encode('fake'),
+        'base64' => PNG_1X1,
         'blog_id' => 1,
         'expertise_id' => 1,
     ]);
@@ -67,7 +67,7 @@ it('rejects providing both blog_id and expertise_id', function () {
 
 it('rejects providing both project_id and expertise_id', function () {
     $result = callFileUploadTool([
-        'base64' => base64_encode('fake'),
+        'base64' => PNG_1X1,
         'project_id' => 1,
         'expertise_id' => 1,
     ]);
@@ -79,12 +79,9 @@ it('rejects providing both project_id and expertise_id', function () {
 // ─── Successful upload ──────────────────────────────────────────
 
 it('stores a PNG image successfully', function () {
-    // Minimal valid 1x1 PNG
-    $pngData = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
-
     Storage::fake();
 
-    $result = callFileUploadTool(['base64' => base64_encode($pngData)]);
+    $result = callFileUploadTool(['base64' => PNG_1X1]);
     $data = fileUploadToolData($result);
 
     expect($result->isError())->toBeFalse();
@@ -99,13 +96,12 @@ it('stores a PNG image successfully', function () {
 // ─── Blog association ───────────────────────────────────────────
 
 it('associates uploaded image with a blog by ID', function () {
-    $pngData = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
     $blog = Blog::factory()->published()->create(['featured_image' => null]);
 
     Storage::fake();
 
     $result = callFileUploadTool([
-        'base64' => base64_encode($pngData),
+        'base64' => PNG_1X1,
         'blog_id' => $blog->id,
     ]);
     $data = fileUploadToolData($result);
@@ -120,8 +116,9 @@ it('skips blog that already has a featured image', function () {
 
     Storage::fake();
 
+    // Must pass valid image bytes — skip check runs after MIME validation
     $result = callFileUploadTool([
-        'base64' => base64_encode('fake'),
+        'base64' => PNG_1X1,
         'blog_id' => $blog->id,
     ]);
     $data = fileUploadToolData($result);
@@ -134,7 +131,7 @@ it('skips blog that already has a featured image', function () {
 
 it('returns error when blog_id does not exist', function () {
     $result = callFileUploadTool([
-        'base64' => base64_encode('fake'),
+        'base64' => PNG_1X1,
         'blog_id' => 99999,
     ]);
 
@@ -145,13 +142,12 @@ it('returns error when blog_id does not exist', function () {
 // ─── Expertise association ──────────────────────────────────────
 
 it('associates uploaded image with an expertise', function () {
-    $pngData = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
     $expertise = Expertise::factory()->create(['image' => null]);
 
     Storage::fake();
 
     $result = callFileUploadTool([
-        'base64' => base64_encode($pngData),
+        'base64' => PNG_1X1,
         'expertise_id' => $expertise->id,
     ]);
     $data = fileUploadToolData($result);
@@ -164,7 +160,7 @@ it('associates uploaded image with an expertise', function () {
 
 it('returns error when expertise_id does not exist', function () {
     $result = callFileUploadTool([
-        'base64' => base64_encode('fake'),
+        'base64' => PNG_1X1,
         'expertise_id' => 99999,
     ]);
 
@@ -175,13 +171,12 @@ it('returns error when expertise_id does not exist', function () {
 // ─── Project association ─────────────────────────────────────────
 
 it('associates uploaded image with a project', function () {
-    $pngData = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
     $project = Project::factory()->create();
 
     Storage::fake();
 
     $result = callFileUploadTool([
-        'base64' => base64_encode($pngData),
+        'base64' => PNG_1X1,
         'project_id' => $project->id,
     ]);
     $data = fileUploadToolData($result);
@@ -208,7 +203,7 @@ it('skips project that already has a primary image', function () {
     Storage::fake();
 
     $result = callFileUploadTool([
-        'base64' => base64_encode('fake'),
+        'base64' => PNG_1X1,
         'project_id' => $project->id,
     ]);
     $data = fileUploadToolData($result);
@@ -220,7 +215,7 @@ it('skips project that already has a primary image', function () {
 
 it('returns error when project_id does not exist', function () {
     $result = callFileUploadTool([
-        'base64' => base64_encode('fake'),
+        'base64' => PNG_1X1,
         'project_id' => 99999,
     ]);
 
