@@ -3,6 +3,7 @@
 use App\Mcp\Tools\Image\UploadImageFromUrl;
 use App\Models\Blog;
 use App\Models\Expertise;
+use App\Models\Project;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Mcp\Request;
@@ -57,7 +58,7 @@ it('rejects providing both blog_id and expertise_id', function () {
     ]);
 
     expect($result->isError())->toBeTrue();
-    expect((string) $result->content())->toContain('not both');
+    expect((string) $result->content())->toContain('only one of');
 });
 
 it('rejects providing both blog_slug and expertise_id', function () {
@@ -68,7 +69,7 @@ it('rejects providing both blog_slug and expertise_id', function () {
     ]);
 
     expect($result->isError())->toBeTrue();
-    expect((string) $result->content())->toContain('not both');
+    expect((string) $result->content())->toContain('only one of');
 });
 
 it('rejects oversized images', function () {
@@ -284,4 +285,78 @@ it('returns error when expertise_id does not exist', function () {
 
     expect($result->isError())->toBeTrue();
     expect((string) $result->content())->toContain('Expertise not found');
+});
+
+// ─── Project association ─────────────────────────────────────────
+
+it('associates uploaded image with a project by ID', function () {
+    $project = Project::factory()->create();
+
+    Http::fake([
+        'https://example.com/thumb.png' => Http::response('png-data', 200, [
+            'Content-Type' => 'image/png',
+        ]),
+    ]);
+
+    Storage::fake();
+
+    $result = callUploadTool([
+        'url' => 'https://example.com/thumb.png',
+        'project_id' => $project->id,
+    ]);
+    $data = uploadToolData($result);
+
+    expect($result->isError())->toBeFalse();
+    expect($data['project_updated'])->toBe('updated');
+    expect($data['path'])->toContain('/project-images/');
+    expect($project->fresh()->primaryImage)->not->toBeNull();
+});
+
+it('skips project that already has a primary image without downloading', function () {
+    $project = Project::factory()->create();
+    $project->images()->create([
+        'name' => 'existing.jpg',
+        'path' => 'project-images/existing.jpg',
+        'filename' => 'existing.jpg',
+        'mime_type' => 'image/jpeg',
+        'size' => 1024,
+        'order' => 0,
+        'is_primary' => true,
+        'sizes' => [],
+    ]);
+
+    Http::fake();
+    Storage::fake();
+
+    $result = callUploadTool([
+        'url' => 'https://example.com/new.png',
+        'project_id' => $project->id,
+    ]);
+    $data = uploadToolData($result);
+
+    expect($result->isError())->toBeFalse();
+    expect($data['project_updated'])->toBe('skipped');
+    expect($data['path'])->toBeNull();
+    Http::assertNothingSent();
+});
+
+it('returns error when project_id does not exist', function () {
+    $result = callUploadTool([
+        'url' => 'https://example.com/thumb.png',
+        'project_id' => 99999,
+    ]);
+
+    expect($result->isError())->toBeTrue();
+    expect((string) $result->content())->toContain('Project not found');
+});
+
+it('rejects providing both project_id and blog_id', function () {
+    $result = callUploadTool([
+        'url' => 'https://example.com/photo.jpg',
+        'project_id' => 1,
+        'blog_id' => 1,
+    ]);
+
+    expect($result->isError())->toBeTrue();
+    expect((string) $result->content())->toContain('only one of');
 });
