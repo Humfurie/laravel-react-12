@@ -135,7 +135,11 @@ class UploadImageFromUrl extends Tool
 
         $extension = self::ALLOWED_MIME_TYPES[$mimeType];
         $filename = time().'_'.Str::random(10).'.'.$extension;
-        $directory = $expertise ? 'images/techstack' : ($project ? 'project-images' : 'blog-images');
+        $directory = match (true) {
+            $expertise !== null => 'images/techstack',
+            $project !== null   => 'project-images',
+            default             => 'blog-images',
+        };
         $storagePath = $directory.'/'.$filename;
 
         $disk = Storage::disk(config('filesystems.default'));
