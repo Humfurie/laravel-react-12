@@ -89,3 +89,83 @@ test('wildcard pattern matches nested blog routes', function () {
     $cacheControl = $response->headers->get('Cache-Control');
     expect($cacheControl)->toContain('s-maxage=3600');
 });
+
+test('resume page gets cache headers', function () {
+    $middleware = new CacheHeaders;
+    $request = Request::create('/resume', 'GET');
+
+    $response = $middleware->handle($request, function () {
+        return new Response('test');
+    });
+
+    $cacheControl = $response->headers->get('Cache-Control');
+    expect($cacheControl)->toContain('public');
+    expect($cacheControl)->toContain('max-age=300');
+    expect($cacheControl)->toContain('s-maxage=3600');
+});
+
+test('guestbook page gets cache headers', function () {
+    $middleware = new CacheHeaders;
+    $request = Request::create('/guestbook', 'GET');
+
+    $response = $middleware->handle($request, function () {
+        return new Response('test');
+    });
+
+    $cacheControl = $response->headers->get('Cache-Control');
+    expect($cacheControl)->toContain('public');
+    expect($cacheControl)->toContain('max-age=60');
+    expect($cacheControl)->toContain('s-maxage=300');
+});
+
+test('api deployments gets cache headers', function () {
+    $middleware = new CacheHeaders;
+    $request = Request::create('/api/deployments', 'GET');
+
+    $response = $middleware->handle($request, function () {
+        return new Response('test');
+    });
+
+    $cacheControl = $response->headers->get('Cache-Control');
+    expect($cacheControl)->toContain('public');
+    expect($cacheControl)->toContain('s-maxage=1800');
+});
+
+test('api deployments show gets cache headers', function () {
+    $middleware = new CacheHeaders;
+    $request = Request::create('/api/deployments/my-deploy', 'GET');
+
+    $response = $middleware->handle($request, function () {
+        return new Response('test');
+    });
+
+    $cacheControl = $response->headers->get('Cache-Control');
+    expect($cacheControl)->toContain('public');
+    expect($cacheControl)->toContain('s-maxage=1800');
+});
+
+test('api experiences gets cache headers', function () {
+    $middleware = new CacheHeaders;
+    $request = Request::create('/api/experiences', 'GET');
+
+    $response = $middleware->handle($request, function () {
+        return new Response('test');
+    });
+
+    $cacheControl = $response->headers->get('Cache-Control');
+    expect($cacheControl)->toContain('public');
+    expect($cacheControl)->toContain('s-maxage=3600');
+});
+
+test('api projects show gets cache headers', function () {
+    $middleware = new CacheHeaders;
+    $request = Request::create('/api/projects/my-project', 'GET');
+
+    $response = $middleware->handle($request, function () {
+        return new Response('test');
+    });
+
+    $cacheControl = $response->headers->get('Cache-Control');
+    expect($cacheControl)->toContain('public');
+    expect($cacheControl)->toContain('s-maxage=3600');
+});
