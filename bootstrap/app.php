@@ -7,8 +7,6 @@ use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\McpApiKeyAuth;
 use App\Http\Middleware\RedirectIfAuthenticated;
-use App\Jobs\RefreshCryptoCache;
-use App\Jobs\RefreshStockCache;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
@@ -54,18 +52,6 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withSchedule(function (Schedule $schedule) {
-        // Update giveaway statuses based on dates every 5 minutes
-        $schedule->command('giveaways:update-statuses')->everyFiveMinutes();
-
-        // Automatically select winners for ended giveaways every hour
-        $schedule->command('giveaways:select-winners')->hourly();
-
-        // Refresh crypto data cache every 15 minutes
-        $schedule->job(new RefreshCryptoCache)->everyFifteenMinutes();
-
-        // Refresh stock data cache every 15 minutes
-        $schedule->job(new RefreshStockCache)->everyFifteenMinutes();
-
         // Sync GitHub data for all projects daily at 3:00 AM
         $schedule->command('projects:sync-github-data')->dailyAt('03:00');
     })
@@ -90,19 +76,26 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($exception instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
                 $status = $exception->getStatusCode();
 
-                // For Inertia requests, render the Error page
-                return inertia('errors/Error', [
-                    'status' => $status,
-                    'message' => $exception->getMessage() ?: null,
-                ])->toResponse($request)->setStatusCode($status);
+                try {
+                    return inertia('errors/Error', [
+                        'status' => $status,
+                        'message' => $exception->getMessage() ?: null,
+                    ])->toResponse($request)->setStatusCode($status);
+                } catch (\Throwable) {
+                    return response($status.' | '.($exception->getMessage() ?: 'Error'), $status);
+                }
             }
 
             // For other exceptions in production, show generic 500 error
             if (! app()->environment('local')) {
-                return inertia('errors/Error', [
-                    'status' => 500,
-                    'message' => null,
-                ])->toResponse($request)->setStatusCode(500);
+                try {
+                    return inertia('errors/Error', [
+                        'status' => 500,
+                        'message' => null,
+                    ])->toResponse($request)->setStatusCode(500);
+                } catch (\Throwable) {
+                    return response('500 | Server Error', 500);
+                }
             }
 
             return $response;

@@ -11,9 +11,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ResumeController;
 use App\Http\Controllers\RssFeedController;
 use App\Http\Controllers\SitemapController;
-use App\Models\Experience;
 use App\Services\HomepageCacheService;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -99,16 +97,6 @@ Route::post('/contact', [ContactController::class, 'store'])
     ->name('contact.store');
 
 Route::middleware(['auth'])->group(function () {
-    // Debug route to check experience data
-    Route::get('/debug-experiences', function () {
-        Gate::authorize('viewAny', Experience::class);
-
-        $experiences = Experience::with('image')->ordered()->get();
-
-        return Inertia::render('debug-experiences', [
-            'experiences' => $experiences,
-        ]);
-    });
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('admin')->group(function () {
