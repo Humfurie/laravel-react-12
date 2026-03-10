@@ -18,6 +18,12 @@ class CacheHeaders
         '/blog' => 'blog_listing',
         '/blog/*' => 'blog_post',
         '/projects' => 'projects',
+        '/resume' => 'resume',
+        '/guestbook' => 'guestbook',
+        '/api/projects/*' => 'api_projects',
+        '/api/deployments' => 'api_deployments',
+        '/api/deployments/*' => 'api_deployments',
+        '/api/experiences' => 'api_experiences',
     ];
 
     /**

@@ -93,5 +93,25 @@ return [
             'max_age' => env('CACHE_HTTP_PROJECTS_MAX_AGE', 300),      // 5 min browser
             's_maxage' => env('CACHE_HTTP_PROJECTS_S_MAXAGE', 3600),   // 1 hr CDN
         ],
+        'resume' => [
+            'max_age' => env('CACHE_HTTP_RESUME_MAX_AGE', 300),        // 5 min browser
+            's_maxage' => env('CACHE_HTTP_RESUME_S_MAXAGE', 3600),     // 1 hr CDN
+        ],
+        'guestbook' => [
+            'max_age' => env('CACHE_HTTP_GUESTBOOK_MAX_AGE', 60),      // 1 min browser
+            's_maxage' => env('CACHE_HTTP_GUESTBOOK_S_MAXAGE', 300),   // 5 min CDN
+        ],
+        'api_projects' => [
+            'max_age' => env('CACHE_HTTP_API_PROJECTS_MAX_AGE', 300),  // 5 min browser
+            's_maxage' => env('CACHE_HTTP_API_PROJECTS_S_MAXAGE', 3600), // 1 hr CDN
+        ],
+        'api_deployments' => [
+            'max_age' => env('CACHE_HTTP_API_DEPLOYMENTS_MAX_AGE', 300), // 5 min browser
+            's_maxage' => env('CACHE_HTTP_API_DEPLOYMENTS_S_MAXAGE', 1800), // 30 min CDN
+        ],
+        'api_experiences' => [
+            'max_age' => env('CACHE_HTTP_API_EXPERIENCES_MAX_AGE', 300), // 5 min browser
+            's_maxage' => env('CACHE_HTTP_API_EXPERIENCES_S_MAXAGE', 3600), // 1 hr CDN
+        ],
     ],
 ];

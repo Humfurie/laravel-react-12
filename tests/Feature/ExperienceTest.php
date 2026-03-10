@@ -315,27 +315,3 @@ test('guests cannot access admin experience routes', function () {
     $this->delete(route('admin.experiences.destroy', $experience))->assertRedirect(route('login'));
 });
 
-test('guests cannot access debug experiences page', function () {
-    $this->get('/debug-experiences')->assertRedirect(route('login'));
-});
-
-test('authenticated users without experience permissions cannot access debug experiences page', function () {
-    $userWithoutPermissions = createUserWithRole('Viewer', 'viewer', 'blog', ['viewAny']);
-
-    $this->actingAs($userWithoutPermissions)
-        ->get('/debug-experiences')
-        ->assertForbidden();
-});
-
-test('authenticated users with experience permissions can access debug experiences page', function () {
-    $userWithPermissions = createAdminUser('experience', ['viewAny']);
-    Experience::factory()->count(3)->create();
-
-    $this->actingAs($userWithPermissions)
-        ->get('/debug-experiences')
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('debug-experiences')
-            ->has('experiences', 3)
-        );
-});
