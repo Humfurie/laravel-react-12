@@ -1,5 +1,6 @@
 import ContributorStack from '@/components/github/ContributorStack';
 import SectionTitle from '@/components/global/SectionTitle';
+import { ImageCarousel } from '@/components/projects/ImageCarousel';
 import { MotionDiv, MotionItem, MotionStagger } from '@/components/ui/motion';
 import type { Project } from '@/types/project';
 import { Link, router } from '@inertiajs/react';
@@ -48,7 +49,9 @@ const ProjectCard = memo(function ProjectCard({ project, featured = false }: { p
             <div
                 className={`relative overflow-hidden bg-[#F3F1EC] dark:bg-[#0F1A15] ${featured ? 'aspect-[16/10] md:aspect-auto md:min-h-[340px]' : 'aspect-[16/10]'}`}
             >
-                {project.thumbnail_url ? (
+                {project.images && project.images.length > 0 ? (
+                    <ImageCarousel images={project.images} title={project.title} className="h-full w-full" />
+                ) : project.thumbnail_url ? (
                     <img
                         src={project.thumbnail_url}
                         alt={project.title}
@@ -63,14 +66,14 @@ const ProjectCard = memo(function ProjectCard({ project, featured = false }: { p
 
                 {/* Status badges */}
                 {project.status === 'live' && (
-                    <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-[#FDF5EE] px-2.5 py-1 text-[0.7rem] font-semibold tracking-wide text-[#E8945A] uppercase">
+                    <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-full bg-[#FDF5EE] px-2.5 py-1 text-[0.7rem] font-semibold tracking-wide text-[#E8945A] uppercase">
                         <span className="h-1.5 w-1.5 rounded-full bg-[#E8945A]" />
                         Live
                     </div>
                 )}
 
                 {project.is_featured && (
-                    <div className="absolute top-3 left-3 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide text-[#1B3D2F] uppercase">
+                    <div className="absolute top-3 left-3 z-10 rounded-full bg-[#E4EDE8] px-3 py-1 text-[0.7rem] font-semibold tracking-wide text-[#1B3D2F] uppercase">
                         Featured
                     </div>
                 )}
