@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import GitHubContributionGraph from '@/components/github-contribution-graph';
 import type { Project } from '@/types/project';
+import { format } from 'date-fns';
 import { Download, ExternalLink, Github, Globe, Star, Users } from 'lucide-react';
 
 interface ProjectModalProps {
@@ -28,7 +29,9 @@ export function ProjectModal({ project, open, onClose }: ProjectModalProps) {
                                 {project.status_label}
                                 {project.started_at && (
                                     <span className="ml-2">
-                                        {project.completed_at ? `${project.started_at} - ${project.completed_at}` : `Started ${project.started_at}`}
+                                        {project.completed_at
+                                    ? `${format(new Date(project.started_at), 'MMM yyyy')} - ${format(new Date(project.completed_at), 'MMM yyyy')}`
+                                    : `Started ${format(new Date(project.started_at), 'MMM yyyy')}`}
                                     </span>
                                 )}
                             </DialogDescription>
