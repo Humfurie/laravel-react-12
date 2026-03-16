@@ -130,11 +130,19 @@ export function ProjectModal({ project, open, onClose }: ProjectModalProps) {
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3 pt-4">
-                    {project.links?.demo_url && (
+                    {project.links?.live_url && (
                         <Button asChild>
+                            <a href={project.links.live_url} target="_blank" rel="noopener noreferrer">
+                                <Globe className="mr-2 h-4 w-4" />
+                                Live Site
+                            </a>
+                        </Button>
+                    )}
+                    {project.links?.demo_url && (
+                        <Button variant="outline" asChild>
                             <a href={project.links.demo_url} target="_blank" rel="noopener noreferrer">
                                 <Globe className="mr-2 h-4 w-4" />
-                                View Live
+                                Demo
                             </a>
                         </Button>
                     )}

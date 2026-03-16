@@ -131,8 +131,20 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
                     </div>
 
                     {/* Quick links overlay */}
-                    {(project.links?.demo_url || project.links?.repo_url) && (
+                    {(project.links?.live_url || project.links?.demo_url || project.links?.repo_url) && (
                         <div className="absolute top-4 left-4 z-10 flex -translate-y-2 gap-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                            {project.links?.live_url && !project.is_featured && (
+                                <a
+                                    href={project.links.live_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white dark:bg-[#162820]/90 dark:hover:bg-[#162820]"
+                                    title="View Live Site"
+                                >
+                                    <Globe className="h-4 w-4 text-[#1B3D2F] dark:text-[#5AAF7E]" />
+                                </a>
+                            )}
                             {project.links?.demo_url && !project.is_featured && (
                                 <a
                                     href={project.links.demo_url}
@@ -140,7 +152,7 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
                                     className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white dark:bg-[#162820]/90 dark:hover:bg-[#162820]"
-                                    title="View Live Site"
+                                    title="View Demo"
                                 >
                                     <Globe className="h-4 w-4 text-[#1B3D2F] dark:text-[#5AAF7E]" />
                                 </a>

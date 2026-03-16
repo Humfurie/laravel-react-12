@@ -13,6 +13,7 @@ export interface ProjectImage {
 }
 
 export interface ProjectLinks {
+    live_url?: string;
     demo_url?: string;
     repo_url?: string;
     docs_url?: string;
