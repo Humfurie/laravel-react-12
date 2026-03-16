@@ -1,6 +1,7 @@
-import type { Project, ProjectImage, ProjectStatus } from '@/types/project';
+import { ImageCarousel } from '@/components/projects/ImageCarousel';
+import type { Project, ProjectStatus } from '@/types/project';
 import { ArrowUpRight, Github, Globe } from 'lucide-react';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo } from 'react';
 
 interface ProjectCardProps {
     project: Project;
@@ -23,73 +24,6 @@ const getStatusColor = (status: ProjectStatus) => {
     }
 };
 
-function getImageUrl(image: ProjectImage): string {
-    return image.thumbnail_urls?.medium || image.url;
-}
-
-function ImageCarousel({ images, title, isLarge }: { images: ProjectImage[]; title: string; isLarge: boolean }) {
-    const [activeIndex, setActiveIndex] = useState(0);
-    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-    const startRotation = useCallback(() => {
-        if (images.length <= 1) return;
-        intervalRef.current = setInterval(() => {
-            setActiveIndex((prev) => (prev + 1) % images.length);
-        }, 3000);
-    }, [images.length]);
-
-    const stopRotation = useCallback(() => {
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-    }, []);
-
-    useEffect(() => {
-        startRotation();
-        return stopRotation;
-    }, [startRotation, stopRotation]);
-
-    const handleMouseEnter = useCallback(() => stopRotation(), [stopRotation]);
-    const handleMouseLeave = useCallback(() => startRotation(), [startRotation]);
-
-    return (
-        <div
-            className={`relative overflow-hidden rounded-xl bg-[#F3F1EC] dark:bg-[#0F1A15] ${isLarge ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-        >
-            {images.map((image, index) => (
-                <img
-                    key={image.id}
-                    src={getImageUrl(image)}
-                    alt={`${title} - ${index + 1}`}
-                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
-                        index === activeIndex ? 'opacity-100' : 'opacity-0'
-                    }`}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                />
-            ))}
-
-            {/* Dot indicators */}
-            {images.length > 1 && (
-                <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
-                    {images.map((_, index) => (
-                        <span
-                            key={index}
-                            className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
-                                index === activeIndex
-                                    ? 'w-4 bg-white'
-                                    : 'bg-white/50'
-                            }`}
-                        />
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
-
 export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 'normal' }: ProjectCardProps) {
     const isLarge = size === 'large';
     const hasImages = project.images && project.images.length > 0;
@@ -99,7 +33,7 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
             {/* Image Container */}
             {hasImages ? (
                 <div className="relative">
-                    <ImageCarousel images={project.images!} title={project.title} isLarge={isLarge} />
+                    <ImageCarousel images={project.images!} title={project.title} className={`rounded-xl ${isLarge ? 'aspect-[16/10]' : 'aspect-[4/3]'}`} />
 
                     {/* Status indicator */}
                     <div className="absolute top-4 right-4 z-10 flex items-center gap-2">

@@ -195,7 +195,7 @@ class HomepageCacheService
     {
         $featured = Project::query()
             ->public()
-            ->with(['primaryImage', 'projectCategory'])
+            ->with(['images' => fn ($q) => $q->ordered(), 'projectCategory'])
             ->orderByDesc('is_featured')
             ->orderBy('featured_at', 'desc')
             ->orderBy('sort_order')
