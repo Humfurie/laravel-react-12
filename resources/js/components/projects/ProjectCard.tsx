@@ -29,14 +29,13 @@ function getImageUrl(image: ProjectImage): string {
 
 function ImageCarousel({ images, title, isLarge }: { images: ProjectImage[]; title: string; isLarge: boolean }) {
     const [activeIndex, setActiveIndex] = useState(0);
-    const [isHovering, setIsHovering] = useState(false);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const startRotation = useCallback(() => {
         if (images.length <= 1) return;
         intervalRef.current = setInterval(() => {
             setActiveIndex((prev) => (prev + 1) % images.length);
-        }, 2000);
+        }, 3000);
     }, [images.length]);
 
     const stopRotation = useCallback(() => {
@@ -47,20 +46,18 @@ function ImageCarousel({ images, title, isLarge }: { images: ProjectImage[]; tit
     }, []);
 
     useEffect(() => {
-        if (isHovering) {
-            startRotation();
-        } else {
-            stopRotation();
-            setActiveIndex(0);
-        }
+        startRotation();
         return stopRotation;
-    }, [isHovering, startRotation, stopRotation]);
+    }, [startRotation, stopRotation]);
+
+    const handleMouseEnter = useCallback(() => stopRotation(), [stopRotation]);
+    const handleMouseLeave = useCallback(() => startRotation(), [startRotation]);
 
     return (
         <div
             className={`relative overflow-hidden rounded-xl bg-[#F3F1EC] dark:bg-[#0F1A15] ${isLarge ? 'aspect-[16/10]' : 'aspect-[4/3]'}`}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
             {images.map((image, index) => (
                 <img
