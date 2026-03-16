@@ -64,6 +64,7 @@ export default function EditProject({ project, categories, statuses, ownershipTy
         category: project.category,
         tech_stack: project.tech_stack || [],
         links: project.links || {
+            live_url: '',
             demo_url: '',
             repo_url: '',
             docs_url: '',
@@ -397,13 +398,24 @@ export default function EditProject({ project, categories, statuses, ownershipTy
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
+                                    <Label htmlFor="live_url">Live Site URL</Label>
+                                    <Input
+                                        id="live_url"
+                                        type="url"
+                                        value={data.links.live_url || ''}
+                                        onChange={(e) => setData('links', { ...data.links, live_url: e.target.value })}
+                                        placeholder="https://myproject.com"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
                                     <Label htmlFor="demo_url">Demo URL</Label>
                                     <Input
                                         id="demo_url"
                                         type="url"
                                         value={data.links.demo_url || ''}
                                         onChange={(e) => setData('links', { ...data.links, demo_url: e.target.value })}
-                                        placeholder="https://myproject.com"
+                                        placeholder="https://demo.myproject.com"
                                     />
                                 </div>
 

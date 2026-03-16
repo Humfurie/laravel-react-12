@@ -1,3 +1,4 @@
+import GitHubContributionGraph from '@/components/github-contribution-graph';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectFilters } from '@/components/projects/ProjectFilters';
 import { ProjectModal } from '@/components/projects/ProjectModal';
@@ -6,10 +7,24 @@ import { MotionDiv, MotionItem, MotionStagger } from '@/components/ui/motion';
 import type { Deployment } from '@/types/deployment';
 import type { Project, ProjectCategory } from '@/types/project';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowRight, ArrowUpRight, Code2, Github, Sparkles } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Code2, Github, GitCommit, GitPullRequest, MessageSquare, Sparkles } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
 type TabKey = 'owned' | 'deployments' | 'contributed';
+
+interface GitHubStats {
+    total_contributions: number;
+    commits: number;
+    pull_requests: number;
+    issues: number;
+    calendar: Array<{
+        contributionDays: Array<{
+            contributionCount: number;
+            date: string;
+            color: string;
+        }>;
+    }>;
+}
 
 interface Props {
     featured: Project[];
@@ -18,6 +33,7 @@ interface Props {
     categories: Record<ProjectCategory, string>;
     techStack: string[];
     ownershipTypes: Record<string, string>;
+    githubStats: GitHubStats | null;
 }
 
 function getInitialTab(ownershipTypes: Record<string, string>): TabKey {
@@ -28,7 +44,7 @@ function getInitialTab(ownershipTypes: Record<string, string>): TabKey {
     return 'owned';
 }
 
-export default function ProjectsShowcase({ featured, projects, deployments, categories, techStack, ownershipTypes }: Props) {
+export default function ProjectsShowcase({ featured, projects, deployments, categories, techStack, ownershipTypes, githubStats }: Props) {
     const [activeTab, setActiveTab] = useState<TabKey>(() => getInitialTab(ownershipTypes));
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
@@ -288,6 +304,46 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                             </MotionDiv>
                         )}
                     </section>
+
+                    {/* GitHub Activity Section */}
+                    {githubStats?.calendar && (
+                        <section className="border-t border-[#E5E4E0] bg-white py-12 dark:border-[#2A4A3A] dark:bg-[#0F1A15]">
+                            <div className="primary-container">
+                                <MotionDiv className="mb-6 flex items-center gap-3">
+                                    <Github className="h-5 w-5 text-[#1B3D2F] dark:text-[#5AAF7E]" />
+                                    <h2 className="font-display text-xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">GitHub Activity</h2>
+                                    <span className="text-sm text-[#9E9E95]">{githubStats.total_contributions} contributions this year</span>
+                                </MotionDiv>
+
+                                <MotionDiv delay={0.1} className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
+                                    <div className="flex-1">
+                                        <GitHubContributionGraph calendar={githubStats.calendar} />
+                                    </div>
+
+                                    <div className="flex shrink-0 gap-6 lg:flex-col lg:gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <GitCommit className="h-4 w-4 text-[#5AAF7E]" />
+                                            <span className="text-sm text-[#6B6B63] dark:text-[#9E9E95]">
+                                                <span className="font-semibold text-[#1A1A1A] dark:text-[#E8E6E1]">{githubStats.commits}</span> commits
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <GitPullRequest className="h-4 w-4 text-[#E8945A]" />
+                                            <span className="text-sm text-[#6B6B63] dark:text-[#9E9E95]">
+                                                <span className="font-semibold text-[#1A1A1A] dark:text-[#E8E6E1]">{githubStats.pull_requests}</span> PRs
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <MessageSquare className="h-4 w-4 text-[#9E9E95]" />
+                                            <span className="text-sm text-[#6B6B63] dark:text-[#9E9E95]">
+                                                <span className="font-semibold text-[#1A1A1A] dark:text-[#E8E6E1]">{githubStats.issues}</span> issues
+                                            </span>
+                                        </div>
+                                    </div>
+                                </MotionDiv>
+                            </div>
+                        </section>
+                    )}
 
                     {/* All Projects Section */}
                     <section id="all-projects" className="bg-white py-16 dark:bg-[#0F1A15]">

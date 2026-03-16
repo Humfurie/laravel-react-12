@@ -32,7 +32,7 @@ class ProjectController extends Controller
         // Get all public projects grouped by ownership type
         $allProjects = Project::query()
             ->public()
-            ->with(['primaryImage'])
+            ->with(['images' => fn ($q) => $q->ordered()])
             ->ordered()
             ->get();
 
@@ -64,6 +64,8 @@ class ProjectController extends Controller
             }
         );
 
+        $githubStats = app(HomepageCacheService::class)->getCachedGitHubStats();
+
         return Inertia::render('user/projects', [
             'featured' => $featured,
             'projects' => $grouped,
@@ -75,6 +77,7 @@ class ProjectController extends Controller
                 'deployments' => 'Deployments',
                 'contributed' => 'Contributed To',
             ],
+            'githubStats' => $githubStats,
         ]);
     }
 

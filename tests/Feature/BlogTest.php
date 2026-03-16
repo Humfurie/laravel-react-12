@@ -438,6 +438,37 @@ test('admin blog index passes filters back to frontend', function () {
         );
 });
 
+test('admin blog index returns display_image for each blog', function () {
+    Blog::factory()->create([
+        'featured_image' => '/storage/blog-images/test.jpg',
+    ]);
+
+    $this->actingAs($this->user)
+        ->get(route('blogs.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('blogs.data', 1)
+            ->has('blogs.data.0.display_image')
+        );
+});
+
+test('admin blog index uses offset pagination', function () {
+    Blog::factory()->count(15)->create();
+
+    $this->actingAs($this->user)
+        ->get(route('blogs.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('blogs.data', 10)
+            ->has('blogs.total')
+            ->has('blogs.current_page')
+            ->has('blogs.last_page')
+            ->where('blogs.current_page', 1)
+            ->where('blogs.last_page', 2)
+            ->where('blogs.total', 15)
+        );
+});
+
 test('unauthenticated user cannot access admin blog routes', function () {
     $this->get(route('blogs.index'))
         ->assertRedirect(route('login'));
