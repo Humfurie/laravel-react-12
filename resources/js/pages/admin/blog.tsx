@@ -6,7 +6,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
-import { MoreHorizontal, Plus, RotateCcw, Search, Trash2 } from 'lucide-react';
+import { ImageOff, MoreHorizontal, Plus, RotateCcw, Search, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface Blog {
@@ -29,6 +29,7 @@ interface Blog {
     updated_at: string;
     deleted_at: string | null;
     status_label: string;
+    display_image: string | null;
 }
 
 interface Props {
@@ -96,38 +97,47 @@ function BlogCard({ blog }: { blog: Blog }) {
             className={`hover:bg-muted/50 ${can('blog', 'update') ? 'cursor-pointer' : 'cursor-default'} rounded-lg border bg-card p-4 transition-colors dark:shadow-lg dark:shadow-white/10 ${blog.deleted_at ? 'opacity-50' : ''}`}
             onClick={handleCardClick}
         >
-            <div className="flex items-start justify-between">
-                <div className="flex-1 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-lg font-semibold">{blog.title}</h3>
-                        <Badge className={getStatusColor(blog.status)}>{blog.status_label}</Badge>
-                        {blog.isPrimary && (
-                            <Badge variant="secondary" className="text-xs">
-                                Primary
-                            </Badge>
-                        )}
-                        {blog.deleted_at && (
-                            <Badge variant="destructive" className="text-xs">
-                                Deleted
-                            </Badge>
-                        )}
-                    </div>
-
-                    <p className="text-muted-foreground text-sm">/{blog.slug}</p>
-
-                    {blog.excerpt && <p className="text-muted-foreground text-sm">{truncateText(blog.excerpt, 120)}</p>}
-
-                    <div className="text-muted-foreground flex items-center gap-4 text-xs">
-                        <span>Last modified: {formatDistanceToNow(new Date(blog.updated_at), { addSuffix: true })}</span>
-                        {blog.published_at ? (
-                            <span>Published: {formatDistanceToNow(new Date(blog.published_at), { addSuffix: true })}</span>
-                        ) : (
-                            <span>Not published</span>
-                        )}
-                    </div>
+            <div className="flex items-start gap-4">
+                <div className="bg-muted flex h-20 w-28 shrink-0 items-center justify-center overflow-hidden rounded-md">
+                    {blog.display_image ? (
+                        <img src={blog.display_image} alt={blog.title} className="h-full w-full object-cover" />
+                    ) : (
+                        <ImageOff className="text-muted-foreground h-6 w-6" />
+                    )}
                 </div>
 
-                {hasActions && (
+                <div className="flex flex-1 items-start justify-between">
+                    <div className="flex-1 space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-lg font-semibold">{blog.title}</h3>
+                            <Badge className={getStatusColor(blog.status)}>{blog.status_label}</Badge>
+                            {blog.isPrimary && (
+                                <Badge variant="secondary" className="text-xs">
+                                    Primary
+                                </Badge>
+                            )}
+                            {blog.deleted_at && (
+                                <Badge variant="destructive" className="text-xs">
+                                    Deleted
+                                </Badge>
+                            )}
+                        </div>
+
+                        <p className="text-muted-foreground text-sm">/{blog.slug}</p>
+
+                        {blog.excerpt && <p className="text-muted-foreground text-sm">{truncateText(blog.excerpt, 120)}</p>}
+
+                        <div className="text-muted-foreground flex items-center gap-4 text-xs">
+                            <span>Last modified: {formatDistanceToNow(new Date(blog.updated_at), { addSuffix: true })}</span>
+                            {blog.published_at ? (
+                                <span>Published: {formatDistanceToNow(new Date(blog.published_at), { addSuffix: true })}</span>
+                            ) : (
+                                <span>Not published</span>
+                            )}
+                        </div>
+                    </div>
+
+                    {hasActions && (
                     <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -165,6 +175,7 @@ function BlogCard({ blog }: { blog: Blog }) {
                         </DropdownMenu>
                     </div>
                 )}
+                </div>
             </div>
         </div>
     );

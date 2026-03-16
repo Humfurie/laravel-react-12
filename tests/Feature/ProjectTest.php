@@ -163,3 +163,51 @@ test('admin project index passes filters back to frontend', function () {
             ->where('filters.status', 'live')
         );
 });
+
+// --- Public Projects Page ---
+
+test('public projects page returns github stats', function () {
+    $admin = createAdminUser(['blog', 'project']);
+    config(['app.admin_user_id' => $admin->id]);
+    $admin->update(['github_username' => 'testuser']);
+
+    Project::factory()->public()->create();
+
+    $this->get(route('projects.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('user/projects')
+            ->has('githubStats')
+        );
+});
+
+test('public projects page loads images for projects', function () {
+    $project = Project::factory()->public()->create();
+
+    // Create images for the project
+    $project->images()->createMany([
+        ['name' => 'Screenshot 1', 'path' => 'project-images/img1.jpg', 'is_primary' => true, 'order' => 1],
+        ['name' => 'Screenshot 2', 'path' => 'project-images/img2.jpg', 'is_primary' => false, 'order' => 2],
+        ['name' => 'Screenshot 3', 'path' => 'project-images/img3.jpg', 'is_primary' => false, 'order' => 3],
+    ]);
+
+    $this->get(route('projects.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('user/projects')
+            ->has('projects.owned', 1)
+            ->has('projects.owned.0.images', 3)
+        );
+});
+
+test('public projects page groups projects by ownership type', function () {
+    Project::factory()->public()->count(2)->create(['ownership_type' => 'owner']);
+    Project::factory()->public()->contributed()->create();
+
+    $this->get(route('projects.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('projects.owned', 2)
+            ->has('projects.contributed', 1)
+        );
+});

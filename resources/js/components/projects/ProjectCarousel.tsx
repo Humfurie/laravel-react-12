@@ -63,11 +63,19 @@ export function ProjectCarousel({ projects, onProjectClick }: ProjectCarouselPro
                     </div>
                     <div className="flex flex-wrap gap-3 pt-4">
                         <Button onClick={() => onProjectClick(currentProject)}>View Details</Button>
+                        {currentProject.links?.live_url && (
+                            <Button variant="outline" asChild>
+                                <a href={currentProject.links.live_url} target="_blank" rel="noopener noreferrer">
+                                    <Globe className="mr-2 h-4 w-4" />
+                                    Live Site
+                                </a>
+                            </Button>
+                        )}
                         {currentProject.links?.demo_url && (
                             <Button variant="outline" asChild>
                                 <a href={currentProject.links.demo_url} target="_blank" rel="noopener noreferrer">
                                     <Globe className="mr-2 h-4 w-4" />
-                                    Live Demo
+                                    Demo
                                 </a>
                             </Button>
                         )}
