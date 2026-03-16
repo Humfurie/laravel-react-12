@@ -130,7 +130,7 @@ const ProjectCard = memo(function ProjectCard({ project, featured = false }: { p
                                 className="inline-flex items-center gap-1.5 text-[0.85rem] font-medium text-[#1B3D2F] transition-all hover:gap-3 hover:text-[#E8945A] dark:text-[#5AAF7E] dark:hover:text-[#E8945A]"
                             >
                                 <Globe className="h-3.5 w-3.5" />
-                                Demo
+                                Live Site
                             </a>
                         )}
                         {project.links?.repo_url && (
@@ -160,8 +160,9 @@ const ProjectCard = memo(function ProjectCard({ project, featured = false }: { p
 });
 
 const HomeProjects = ({ projects }: HomeProjectsProps) => {
-    const featuredProject = useMemo(() => projects.find((p) => p.is_featured), [projects]);
-    const regularProjects = useMemo(() => projects.filter((p) => p.id !== featuredProject?.id).slice(0, 4), [projects, featuredProject?.id]);
+    const featuredProjects = useMemo(() => projects.filter((p) => p.is_featured), [projects]);
+    const featuredProject = featuredProjects[0];
+    const regularProjects = useMemo(() => featuredProjects.slice(1), [featuredProjects]);
 
     if (projects.length === 0) return null;
 

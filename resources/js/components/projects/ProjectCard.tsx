@@ -140,7 +140,7 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
                                     className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white dark:bg-[#162820]/90 dark:hover:bg-[#162820]"
-                                    title="View Demo"
+                                    title="View Live Site"
                                 >
                                     <Globe className="h-4 w-4 text-[#1B3D2F] dark:text-[#5AAF7E]" />
                                 </a>
@@ -215,7 +215,7 @@ export const ProjectCard = memo(function ProjectCard({ project, onClick, size = 
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
                                     className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-colors hover:bg-white dark:bg-[#162820]/90 dark:hover:bg-[#162820]"
-                                    title="View Demo"
+                                    title="View Live Site"
                                 >
                                     <Globe className="h-4 w-4 text-[#1B3D2F] dark:text-[#5AAF7E]" />
                                 </a>

@@ -67,7 +67,7 @@ export function ProjectCarousel({ projects, onProjectClick }: ProjectCarouselPro
                             <Button variant="outline" asChild>
                                 <a href={currentProject.links.demo_url} target="_blank" rel="noopener noreferrer">
                                     <Globe className="mr-2 h-4 w-4" />
-                                    Live Demo
+                                    Live Site
                                 </a>
                             </Button>
                         )}
