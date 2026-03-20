@@ -1,4 +1,6 @@
 import GitHubContributionGraph from '@/components/github-contribution-graph';
+import { DeploymentCard } from '@/components/projects/DeploymentCard';
+import { DeploymentModal } from '@/components/projects/DeploymentModal';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectFilters } from '@/components/projects/ProjectFilters';
 import { ProjectModal } from '@/components/projects/ProjectModal';
@@ -47,6 +49,7 @@ function getInitialTab(ownershipTypes: Record<string, string>): TabKey {
 export default function ProjectsShowcase({ featured, projects, deployments, categories, techStack, ownershipTypes, githubStats }: Props) {
     const [activeTab, setActiveTab] = useState<TabKey>(() => getInitialTab(ownershipTypes));
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+    const [selectedDeployment, setSelectedDeployment] = useState<Deployment | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedTech, setSelectedTech] = useState<string[]>([]);
@@ -65,16 +68,12 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
     }, [projects]);
 
     const activeProjects = useMemo(() => {
-        if (activeTab === 'deployments') {
-            return deployments as unknown as Project[];
-        }
-        return projects[activeTab] ?? [];
-    }, [projects, deployments, activeTab]);
+        return projects[activeTab as keyof typeof projects] ?? [];
+    }, [projects, activeTab]);
 
     const filteredProjects = useMemo(() => {
         return activeProjects.filter((project) => {
-            // Skip category filtering for deployments (they don't have categories)
-            if (activeTab !== 'deployments' && selectedCategory && project.category !== selectedCategory) {
+            if (selectedCategory && project.category !== selectedCategory) {
                 return false;
             }
             if (selectedTech.length > 0) {
@@ -85,16 +84,37 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
             }
             return true;
         });
-    }, [activeProjects, selectedCategory, selectedTech, activeTab]);
+    }, [activeProjects, selectedCategory, selectedTech]);
+
+    const filteredDeployments = useMemo(() => {
+        if (activeTab !== 'deployments') return [];
+        return deployments.filter((deployment) => {
+            if (selectedTech.length > 0) {
+                const deploymentTech = deployment.tech_stack || [];
+                if (!selectedTech.every((tech) => deploymentTech.includes(tech))) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    }, [deployments, selectedTech, activeTab]);
 
     const handleProjectClick = useCallback((project: Project) => {
         setSelectedProject(project);
+        setSelectedDeployment(null);
+        setModalOpen(true);
+    }, []);
+
+    const handleDeploymentClick = useCallback((deployment: Deployment) => {
+        setSelectedDeployment(deployment);
+        setSelectedProject(null);
         setModalOpen(true);
     }, []);
 
     const handleCloseModal = useCallback(() => {
         setModalOpen(false);
         setSelectedProject(null);
+        setSelectedDeployment(null);
     }, []);
 
     // Get first featured project for hero
@@ -375,7 +395,9 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                                     ))}
                                 </div>
                                 <p className="text-center text-[#9E9E95]">
-                                    Browse through {activeProjects.length} project{activeProjects.length !== 1 ? 's' : ''}
+                                    Browse through {activeTab === 'deployments' ? deployments.length : activeProjects.length}{' '}
+                                    {activeTab === 'deployments' ? 'deployment' : 'project'}
+                                    {(activeTab === 'deployments' ? deployments.length : activeProjects.length) !== 1 ? 's' : ''}
                                 </p>
                             </div>
 
@@ -393,11 +415,40 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
 
                             {/* Results Count */}
                             <div className="mb-6 text-sm text-[#9E9E95]">
-                                {filteredProjects.length} project{filteredProjects.length !== 1 ? 's' : ''} found
+                                {activeTab === 'deployments'
+                                    ? `${filteredDeployments.length} deployment${filteredDeployments.length !== 1 ? 's' : ''} found`
+                                    : `${filteredProjects.length} project${filteredProjects.length !== 1 ? 's' : ''} found`}
                             </div>
 
-                            {/* Projects Grid - Magazine Style */}
-                            {filteredProjects.length > 0 ? (
+                            {/* Projects/Deployments Grid - Magazine Style */}
+                            {activeTab === 'deployments' ? (
+                                filteredDeployments.length > 0 ? (
+                                    <MotionStagger key="deployments" staggerDelay={0.05} className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                                        {filteredDeployments.map((deployment, index) => (
+                                            <MotionItem key={deployment.id} variant="fadeUp">
+                                                <DeploymentCard
+                                                    deployment={deployment}
+                                                    onClick={() => handleDeploymentClick(deployment)}
+                                                    size={index === 0 && selectedTech.length === 0 ? 'large' : 'normal'}
+                                                />
+                                            </MotionItem>
+                                        ))}
+                                    </MotionStagger>
+                                ) : (
+                                    <div className="py-16 text-center">
+                                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#F3F1EC] dark:bg-[#162820]">
+                                            <Code2 className="h-8 w-8 text-[#9E9E95] dark:text-[#2A4A3A]" />
+                                        </div>
+                                        <p className="mb-4 text-lg text-[#6B6B63] dark:text-[#9E9E95]">No deployments match your filters.</p>
+                                        <button
+                                            className="rounded-full border border-[#E5E4E0] px-5 py-2.5 text-sm font-medium text-[#6B6B63] transition-colors hover:border-[#1B3D2F] hover:text-[#1B3D2F] dark:border-[#2A4A3A] dark:text-[#9E9E95] dark:hover:border-[#5AAF7E] dark:hover:text-[#5AAF7E]"
+                                            onClick={() => setSelectedTech([])}
+                                        >
+                                            Clear Filters
+                                        </button>
+                                    </div>
+                                )
+                            ) : filteredProjects.length > 0 ? (
                                 <MotionStagger key={activeTab} staggerDelay={0.05} className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                                     {filteredProjects.map((project, index) => (
                                         <MotionItem key={project.id} variant="fadeUp">
@@ -491,8 +542,9 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                     </section>
                 </main>
 
-                {/* Project Detail Modal */}
-                <ProjectModal project={selectedProject} open={modalOpen} onClose={handleCloseModal} />
+                {/* Detail Modals */}
+                <ProjectModal project={selectedProject} open={modalOpen && selectedProject !== null} onClose={handleCloseModal} />
+                <DeploymentModal deployment={selectedDeployment} open={modalOpen && selectedDeployment !== null} onClose={handleCloseModal} />
             </div>
         </>
     );

@@ -34,7 +34,7 @@ const fallbackExperiences: Experience[] = [
             'Collaborating with team to ensure smooth transition and accurate system behavior replication.',
         ],
         position: 'Software Engineer',
-        start_month: 6,
+        start_month: 7,
         start_year: 2024,
         end_month: null,
         end_year: null,
@@ -52,9 +52,9 @@ const fallbackExperiences: Experience[] = [
             'Collaborated with various teams to troubleshoot and resolve issues.',
         ],
         position: 'Junior Laravel Developer | Junior Software Developer',
-        start_month: 6,
+        start_month: 7,
         start_year: 2023,
-        end_month: 0,
+        end_month: 1,
         end_year: 2024,
         is_current_position: false,
     },
@@ -70,9 +70,9 @@ const fallbackExperiences: Experience[] = [
             'Skills gained from training include PHP, Laravel, Filament, and JQuery.',
         ],
         position: 'Junior Laravel Trainee',
-        start_month: 3,
+        start_month: 4,
         start_year: 2023,
-        end_month: 6,
+        end_month: 7,
         end_year: 2023,
         is_current_position: false,
     },
@@ -87,9 +87,9 @@ const fallbackExperiences: Experience[] = [
             "I've developed APIs and successfully completed our capstone project, which is an Automated Attendance System utilizing RFID Technology.",
         ],
         position: 'Intern',
-        start_month: 8,
+        start_month: 9,
         start_year: 2022,
-        end_month: 1,
+        end_month: 2,
         end_year: 2023,
         is_current_position: false,
     },
@@ -99,7 +99,7 @@ const fallbackExperiences: Experience[] = [
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 export function formatMonthYear(month: number, year: number): string {
-    return `${MONTH_NAMES[month]} ${year}`;
+    return `${MONTH_NAMES[month - 1]} ${year}`;
 }
 
 export function calculateDuration(
@@ -114,7 +114,7 @@ export function calculateDuration(
 
     if (isCurrentPosition || (endMonth === null && endYear === null)) {
         const now = new Date();
-        eMonth = now.getMonth();
+        eMonth = now.getMonth() + 1;
         eYear = now.getFullYear();
     } else if (endMonth === null || endYear === null) {
         return 'Invalid date range';
@@ -143,8 +143,8 @@ function formatYearRange(exp: Experience): string {
 /** Format the month range like "Jun 2024 — Present" */
 function formatMonthRange(exp: Experience): string {
     const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const start = `${SHORT_MONTHS[exp.start_month]} ${exp.start_year}`;
-    const end = exp.is_current_position ? 'Present' : `${SHORT_MONTHS[exp.end_month!]} ${exp.end_year}`;
+    const start = `${SHORT_MONTHS[exp.start_month - 1]} ${exp.start_year}`;
+    const end = exp.is_current_position ? 'Present' : `${SHORT_MONTHS[exp.end_month! - 1]} ${exp.end_year}`;
     return `${start} — ${end}`;
 }
 

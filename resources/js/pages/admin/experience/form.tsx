@@ -98,7 +98,7 @@ export default function ExperienceForm({ experience }: Props) {
         company: experience?.company || '',
         location: experience?.location || '',
         description: experience?.description || [],
-        start_month: experience?.start_month ?? 0,
+        start_month: experience?.start_month ?? 1,
         start_year: experience?.start_year || currentYear,
         end_month: experience?.end_month ?? null,
         end_year: experience?.end_year ?? null,
@@ -323,7 +323,7 @@ export default function ExperienceForm({ experience }: Props) {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {months.map((month, index) => (
-                                                    <SelectItem key={index} value={String(index)}>
+                                                    <SelectItem key={index + 1} value={String(index + 1)}>
                                                         {month}
                                                     </SelectItem>
                                                 ))}
@@ -369,7 +369,7 @@ export default function ExperienceForm({ experience }: Props) {
                                         <div className="space-y-2">
                                             <Label>End Month</Label>
                                             <Select
-                                                value={data.end_month !== null ? String(data.end_month) : '0'}
+                                                value={data.end_month !== null ? String(data.end_month) : '1'}
                                                 onValueChange={(value) => setData('end_month', parseInt(value))}
                                             >
                                                 <SelectTrigger>
@@ -377,7 +377,7 @@ export default function ExperienceForm({ experience }: Props) {
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {months.map((month, index) => (
-                                                        <SelectItem key={index} value={String(index)}>
+                                                        <SelectItem key={index + 1} value={String(index + 1)}>
                                                             {month}
                                                         </SelectItem>
                                                     ))}
