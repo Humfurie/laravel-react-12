@@ -54,6 +54,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule) {
         // Sync GitHub data for all projects daily at 3:00 AM
         $schedule->command('projects:sync-github-data')->dailyAt('03:00');
+
+        // Sync GitHub user contributions daily at 3:30 AM
+        $schedule->command('github:sync-contributions')->dailyAt('03:30');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, Throwable $exception, Request $request) {

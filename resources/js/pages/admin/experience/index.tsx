@@ -42,7 +42,7 @@ interface Props {
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function formatDate(month: number, year: number): string {
-    return `${months[month]} ${year}`;
+    return `${months[month - 1]} ${year}`;
 }
 
 // Individual Experience Card Component
