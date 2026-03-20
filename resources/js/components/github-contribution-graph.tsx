@@ -19,7 +19,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function GitHubContributionGraph({ calendar, className = '' }: GitHubContributionGraphProps) {
-    // Get month labels based on the calendar data
+    // Get month labels based on the calendar data, filtering out overlapping ones
     const monthLabels = useMemo(() => {
         if (!calendar || calendar.length === 0) return [];
 
@@ -39,7 +39,16 @@ export default function GitHubContributionGraph({ calendar, className = '' }: Gi
             }
         });
 
-        return labels;
+        // Filter out labels that would overlap (need at least ~3 weeks / 39px apart)
+        const minWeekGap = 3;
+        const filtered: typeof labels = [];
+        for (const label of labels) {
+            if (filtered.length === 0 || label.weekIndex - filtered[filtered.length - 1].weekIndex >= minWeekGap) {
+                filtered.push(label);
+            }
+        }
+
+        return filtered;
     }, [calendar]);
 
     if (!calendar || calendar.length === 0) {
@@ -48,13 +57,13 @@ export default function GitHubContributionGraph({ calendar, className = '' }: Gi
 
     return (
         <div className={`overflow-x-auto ${className}`}>
-            <div className="inline-block min-w-max">
+            <div className="inline-block">
                 {/* Month labels */}
                 <div className="text-muted-foreground mb-1 flex text-xs">
-                    <div className="w-8" /> {/* Spacer for day labels */}
-                    <div className="relative flex" style={{ width: calendar.length * 13 }}>
+                    <div className="w-8 shrink-0" /> {/* Spacer for day labels */}
+                    <div className="relative h-4" style={{ width: calendar.length * 13 }}>
                         {monthLabels.map(({ month, weekIndex }, idx) => (
-                            <span key={idx} className="absolute" style={{ left: weekIndex * 13 }}>
+                            <span key={idx} className="absolute text-[10px]" style={{ left: weekIndex * 13 }}>
                                 {month}
                             </span>
                         ))}
@@ -64,10 +73,10 @@ export default function GitHubContributionGraph({ calendar, className = '' }: Gi
                 {/* Graph grid */}
                 <div className="flex">
                     {/* Day labels */}
-                    <div className="text-muted-foreground mr-1 flex flex-col justify-around text-xs" style={{ height: 91 }}>
-                        <span className="h-3">{DAYS[1]}</span>
-                        <span className="h-3">{DAYS[3]}</span>
-                        <span className="h-3">{DAYS[5]}</span>
+                    <div className="text-muted-foreground mr-1 flex shrink-0 flex-col justify-around text-[10px]" style={{ height: 7 * 10 + 6 * 3 }}>
+                        <span>{DAYS[1]}</span>
+                        <span>{DAYS[3]}</span>
+                        <span>{DAYS[5]}</span>
                     </div>
 
                     {/* Contribution cells */}
