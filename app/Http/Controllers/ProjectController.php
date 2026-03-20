@@ -45,7 +45,7 @@ class ProjectController extends Controller
         $deployments = Deployment::query()
             ->public()
             ->active()
-            ->with(['images' => fn ($q) => $q->ordered()])
+            ->with(['images' => fn ($q) => $q->ordered(), 'primaryImage'])
             ->ordered()
             ->get();
 

@@ -81,26 +81,26 @@ test('can scope to ordered experiences', function () {
     $exp1 = Experience::factory()->create([
         'display_order' => 3,
         'start_year' => 2020,
-        'start_month' => 5,
+        'start_month' => 6,
     ]);
 
     $exp2 = Experience::factory()->create([
         'display_order' => 1,
         'start_year' => 2023,
-        'start_month' => 2,
+        'start_month' => 3,
     ]);
 
     $exp3 = Experience::factory()->create([
         'display_order' => 1,
         'start_year' => 2024,
-        'start_month' => 0,
+        'start_month' => 1,
     ]);
 
     $orderedExperiences = Experience::ordered()->get();
 
     // Should order by display_order ASC, then by start_year DESC (most recent first within same display_order)
     expect($orderedExperiences->first()->id)->toBe($exp3->id) // Most recent with display_order=1
-    ->and($orderedExperiences->last()->id)->toBe($exp1->id); // display_order=3
+        ->and($orderedExperiences->last()->id)->toBe($exp1->id); // display_order=3
 });
 
 test('soft deletes', function () {
@@ -127,7 +127,7 @@ test('has fillable attributes', function () {
         'display_order',
     ];
 
-    $experience = new Experience();
+    $experience = new Experience;
 
     expect($experience->getFillable())->toBe($fillable);
 });

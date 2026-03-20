@@ -17,8 +17,9 @@ class ExperienceSeeder extends Seeder
         $user = User::where('email', 'humfurie@gmail.com')->first()
             ?? User::first();
 
-        if (!$user) {
+        if (! $user) {
             $this->command->error('No users found. Please create a user first.');
+
             return;
         }
 
@@ -35,7 +36,7 @@ class ExperienceSeeder extends Seeder
                     'Refactoring outdated logic into modern Laravel features such as route model binding, invokable controllers, and service-based architecture.',
                     'Collaborating with team to ensure smooth transition and accurate system behavior replication.',
                 ],
-                'start_month' => 6, // July (0-indexed)
+                'start_month' => 7, // July
                 'start_year' => 2024,
                 'end_month' => null,
                 'end_year' => null,
@@ -53,9 +54,9 @@ class ExperienceSeeder extends Seeder
                     'Participated in debugging and feature improvements for legacy and active projects.',
                     'Collaborated with various teams to troubleshoot and resolve issues.',
                 ],
-                'start_month' => 6, // July
+                'start_month' => 7, // July
                 'start_year' => 2023,
-                'end_month' => 0, // January
+                'end_month' => 1, // January
                 'end_year' => 2024,
                 'is_current_position' => false,
                 'display_order' => 2,
@@ -71,9 +72,9 @@ class ExperienceSeeder extends Seeder
                     'Introduced to Domain-Driven Design principles.',
                     'Skills gained from training include PHP, Laravel, Filament, and JQuery.',
                 ],
-                'start_month' => 3, // April
+                'start_month' => 4, // April
                 'start_year' => 2023,
-                'end_month' => 6, // July
+                'end_month' => 7, // July
                 'end_year' => 2023,
                 'is_current_position' => false,
                 'display_order' => 3,
@@ -88,9 +89,9 @@ class ExperienceSeeder extends Seeder
                     "I have experience working with the AdonisJS Framework and Next.js, and I've completed several minor projects using them.",
                     "I've developed APIs and successfully completed our capstone project, which is an Automated Attendance System utilizing RFID Technology.",
                 ],
-                'start_month' => 8, // September
+                'start_month' => 9, // September
                 'start_year' => 2022,
-                'end_month' => 1, // February
+                'end_month' => 2, // February
                 'end_year' => 2023,
                 'is_current_position' => false,
                 'display_order' => 4,
@@ -109,14 +110,14 @@ class ExperienceSeeder extends Seeder
 
             // Determine which disk to use based on configuration
             $disk = config('filesystems.default');
-            $storagePath = 'experiences/' . $imageName;
-            $localImagePath = storage_path('app/public/experiences/' . $imageName);
+            $storagePath = 'experiences/'.$imageName;
+            $localImagePath = storage_path('app/public/experiences/'.$imageName);
 
             // Handle file upload based on disk type
             if ($disk !== 'public' && $disk !== 'local') {
                 // Remote disk: Upload to configured storage
                 if (\Illuminate\Support\Facades\File::exists($localImagePath)) {
-                    if (!\Illuminate\Support\Facades\Storage::disk($disk)->exists($storagePath)) {
+                    if (! \Illuminate\Support\Facades\Storage::disk($disk)->exists($storagePath)) {
                         $imageContent = \Illuminate\Support\Facades\File::get($localImagePath);
                         \Illuminate\Support\Facades\Storage::disk($disk)->put($storagePath, $imageContent);
                         $this->command->info("Uploaded {$imageName} to {$disk}");

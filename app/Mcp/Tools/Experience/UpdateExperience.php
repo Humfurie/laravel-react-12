@@ -27,7 +27,7 @@ class UpdateExperience extends Tool
             'company' => $schema->string()->description('Company name'),
             'location' => $schema->string()->description('Work location'),
             'description' => $schema->array()->description('Array of description bullet points'),
-            'start_month' => $schema->integer()->description('Start month (0=Jan, 11=Dec)'),
+            'start_month' => $schema->integer()->description('Start month (1=Jan, 12=Dec)'),
             'start_year' => $schema->integer()->description('Start year'),
             'end_month' => $schema->integer()->description('End month'),
             'end_year' => $schema->integer()->description('End year'),

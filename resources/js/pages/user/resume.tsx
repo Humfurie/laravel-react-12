@@ -60,12 +60,12 @@ interface Props {
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function formatDate(month: number, year: number): string {
-    return `${months[month]} ${year}`;
+    return `${months[month - 1]} ${year}`;
 }
 
 function getDuration(startMonth: number, startYear: number, endMonth: number | null, endYear: number | null): string {
-    const end = endMonth !== null && endYear !== null ? new Date(endYear, endMonth) : new Date();
-    const start = new Date(startYear, startMonth);
+    const end = endMonth !== null && endYear !== null ? new Date(endYear, endMonth - 1) : new Date();
+    const start = new Date(startYear, startMonth - 1);
     const totalMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
     const years = Math.floor(totalMonths / 12);
     const remainingMonths = totalMonths % 12;

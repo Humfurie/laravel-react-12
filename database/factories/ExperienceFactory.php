@@ -19,14 +19,14 @@ class ExperienceFactory extends Factory
     public function definition(): array
     {
         $startYear = fake()->numberBetween(2015, date('Y'));
-        $startMonth = fake()->numberBetween(0, 11);
+        $startMonth = fake()->numberBetween(1, 12);
         $isCurrent = fake()->boolean(30); // 30% chance of being current
 
         return [
             'user_id' => User::factory(),
             'position' => fake()->jobTitle(),
             'company' => fake()->company(),
-            'location' => fake()->city() . ', ' . fake()->country(),
+            'location' => fake()->city().', '.fake()->country(),
             'description' => [
                 fake()->sentence(12),
                 fake()->sentence(15),
@@ -34,7 +34,7 @@ class ExperienceFactory extends Factory
             ],
             'start_month' => $startMonth,
             'start_year' => $startYear,
-            'end_month' => $isCurrent ? null : fake()->numberBetween(0, 11),
+            'end_month' => $isCurrent ? null : fake()->numberBetween(1, 12),
             'end_year' => $isCurrent ? null : fake()->numberBetween($startYear, date('Y')),
             'is_current_position' => $isCurrent,
             'display_order' => fake()->numberBetween(0, 10),
@@ -46,7 +46,7 @@ class ExperienceFactory extends Factory
      */
     public function current(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_current_position' => true,
             'end_month' => null,
             'end_year' => null,
@@ -58,9 +58,9 @@ class ExperienceFactory extends Factory
      */
     public function ended(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_current_position' => false,
-            'end_month' => fake()->numberBetween(0, 11),
+            'end_month' => fake()->numberBetween(1, 12),
             'end_year' => fake()->numberBetween($attributes['start_year'], date('Y')),
         ]);
     }
