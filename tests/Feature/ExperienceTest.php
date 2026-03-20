@@ -61,7 +61,7 @@ test('can store a new experience', function () {
             'Mentored junior developers',
             'Improved system performance by 40%',
         ],
-        'start_month' => 0,
+        'start_month' => 1,
         'start_year' => 2023,
         'end_month' => null,
         'end_year' => null,
@@ -108,7 +108,7 @@ test('validates description is an array', function () {
             'company' => 'Company',
             'location' => 'Location',
             'description' => 'Not an array',
-            'start_month' => 0,
+            'start_month' => 1,
             'start_year' => 2023,
         ])
         ->assertSessionHasErrors(['description']);
@@ -239,14 +239,14 @@ test('orders experiences by display order and date', function () {
         'user_id' => $this->user->id,
         'display_order' => 2,
         'start_year' => 2023,
-        'start_month' => 0,
+        'start_month' => 1,
     ]);
 
     $exp2 = Experience::factory()->create([
         'user_id' => $this->user->id,
         'display_order' => 1,
         'start_year' => 2022,
-        'start_month' => 6,
+        'start_month' => 7,
     ]);
 
     $experiences = Experience::ordered()->get();
@@ -314,4 +314,3 @@ test('guests cannot access admin experience routes', function () {
     $this->put(route('admin.experiences.update', $experience))->assertRedirect(route('login'));
     $this->delete(route('admin.experiences.destroy', $experience))->assertRedirect(route('login'));
 });
-
