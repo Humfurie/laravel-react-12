@@ -136,7 +136,7 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                 />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://humfurie.org/projects" />
-                <meta property="og:image" content="https://humfurie.org/images/og-default.jpg" />
+                <meta property="og:image" content="https://humfurie.org/images/humphrey-banner.webp?v=1" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="Projects - Humphrey Singculan" />
                 <meta

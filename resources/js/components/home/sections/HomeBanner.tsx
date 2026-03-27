@@ -73,9 +73,8 @@ const HomeBanner = ({ stats }: HomeBannerProps) => {
 
                         <div className="relative z-[1] aspect-[4/5] overflow-hidden rounded-xl">
                             <picture>
-                                <source srcSet="/images/humphrey-banner.webp" media="(min-width: 768px)" />
                                 <img
-                                    src="/images/humphrey-banner-mb.webp"
+                                    src="/images/humphrey-banner.webp?v=1"
                                     alt="Humphrey - Software Developer"
                                     width="600"
                                     height="750"

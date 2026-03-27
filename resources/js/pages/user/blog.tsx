@@ -272,16 +272,11 @@ export default function BlogIndex({ blogs, category }: Props) {
                 <meta property="og:description" content={`Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`} />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
-                <meta property="og:image" content="https://humfurie.org/images/og-default.jpg" />
-                <meta property="og:image:width" content="1200" />
-                <meta property="og:image:height" content="630" />
-                <meta property="og:image:alt" content="Blog - Technology Articles and Insights" />
-
+                <meta property="og:image" content="https://humfurie.org/images/humphrey-banner.webp?v=1" />
                 {/* Twitter Card Meta Tags */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={`${categoryLabel} Blog`} />
                 <meta name="twitter:description" content={`Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`} />
-                <meta name="twitter:image" content="/images/og-default.jpg" />
 
                 {/* Schema.org JSON-LD Structured Data */}
                 <script type="application/ld+json">
