@@ -228,11 +228,7 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
                 />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://humfurie.org" />
-                <meta property="og:image" content="https://humfurie.org/images/og-default.jpg" />
-                <meta property="og:image:width" content="1200" />
-                <meta property="og:image:height" content="630" />
-                <meta property="og:image:alt" content="Humphrey Singculan - Software Engineer Portfolio" />
-
+                <meta property="og:image" content="https://humfurie.org/images/humphrey-banner.webp?v=1" />
                 {/* Twitter Card Meta Tags */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="Humphrey Singculan - Software Engineer | Blog & Portfolio" />
@@ -240,7 +236,6 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
                     name="twitter:description"
                     content="Humphrey Singculan is a Software Engineer specializing in Laravel, React, and full-stack development. Explore projects, blog posts, and professional portfolio."
                 />
-                <meta name="twitter:image" content="https://humfurie.org/images/og-default.jpg" />
             </Head>
 
             {/* Structured Data for SEO */}
