@@ -73,7 +73,7 @@ function Profile({ user, contributedProjects }: ProfileProps) {
                 />
                 <meta property="og:type" content="profile" />
                 <meta property="og:url" content={`https://humfurie.org/u/${user.username}`} />
-                <meta property="og:image" content={user.avatar_url || 'https://humfurie.org/images/og-default.jpg'} />
+                <meta property="og:image" content={user.avatar_url || 'https://humfurie.org/images/humphrey-banner.webp?v=1'} />
                 <meta name="twitter:card" content="summary" />
                 <meta name="twitter:title" content={`${user.name} (@${user.username})`} />
                 <meta

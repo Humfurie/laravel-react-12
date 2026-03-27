@@ -1,7 +1,7 @@
 import { MotionDiv } from '@/components/ui/motion';
 import { useForm, usePage } from '@inertiajs/react';
 import { ArrowRight, CheckCircle, Loader2, Mail } from 'lucide-react';
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 
 interface HomeCTAProps {
     email?: string;
@@ -22,19 +22,16 @@ const HomeCTA = ({ email }: HomeCTAProps) => {
         website: '', // honeypot
     });
 
-    useEffect(() => {
-        if (flash?.success) {
-            setShowSuccess(true);
-            reset();
-            const timer = setTimeout(() => setShowSuccess(false), 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [flash?.success]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         post(route('contact.store'), {
             preserveScroll: true,
+            onSuccess: () => {
+                reset();
+                setShowSuccess(true);
+                setTimeout(() => setShowSuccess(false), 5000);
+            },
         });
     };
 

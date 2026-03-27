@@ -71,8 +71,7 @@ export default function BlogPost({ blog }: Props) {
     // Check if ads are configured
     const hasAds = adsense?.client_id && (adsense?.slots?.blog_post_top || adsense?.slots?.blog_post_bottom || adsense?.slots?.blog_post_sidebar);
 
-    const safeImage =
-        typeof blog.display_image === 'string' && blog.display_image ? blog.display_image : 'https://humfurie.org/images/og-default.jpg';
+    const safeImage = typeof blog.display_image === 'string' && blog.display_image ? blog.display_image : 'https://humfurie.org/images/humphrey-banner.webp?v=1';
 
     const handleShare = async () => {
         if (navigator.share) {
