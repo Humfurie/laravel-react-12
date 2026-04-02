@@ -33,12 +33,15 @@ return Application::configure(basePath: dirname(__DIR__))
             Request::HEADER_X_FORWARDED_AWS_ELB
         );
 
+        $middleware->web(prepend: [
+            CacheHeaders::class,
+        ]);
+
         $middleware->web(append: [
             AddRequestContext::class,
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-            CacheHeaders::class,
         ]);
 
         $middleware->api(append: [
