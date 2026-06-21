@@ -33,8 +33,8 @@ class UserController extends Controller
         if (! empty($validated['search'])) {
             $search = $validated['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'ilike', '%'.$search.'%')
-                    ->orWhere('email', 'ilike', '%'.$search.'%');
+                $q->whereLike('name', '%'.$search.'%')
+                    ->orWhereLike('email', '%'.$search.'%');
             });
         }
 

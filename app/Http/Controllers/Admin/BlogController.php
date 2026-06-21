@@ -35,7 +35,7 @@ class BlogController extends Controller
         $query = Blog::query()->withTrashed();
 
         if (! empty($validated['search'])) {
-            $query->where('title', 'ilike', '%'.$validated['search'].'%');
+            $query->whereLike('title', '%'.$validated['search'].'%');
         }
 
         if (! empty($validated['status']) && $validated['status'] !== 'all') {

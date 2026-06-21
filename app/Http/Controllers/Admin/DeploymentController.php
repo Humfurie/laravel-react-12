@@ -39,8 +39,8 @@ class DeploymentController extends Controller
         if (! empty($validated['search'])) {
             $search = $validated['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'ilike', '%'.$search.'%')
-                    ->orWhereHas('project', fn ($pq) => $pq->where('title', 'ilike', '%'.$search.'%'));
+                $q->whereLike('title', '%'.$search.'%')
+                    ->orWhereHas('project', fn ($pq) => $pq->whereLike('title', '%'.$search.'%'));
             });
         }
 

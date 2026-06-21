@@ -114,13 +114,13 @@ class RealEstateProject extends Model
     public function scopeInLocation($query, $city = null, $province = null, $region = null)
     {
         if ($city) {
-            $query->where('city', 'like', "%{$city}%");
+            $query->whereLike('city', "%{$city}%");
         }
         if ($province) {
-            $query->where('province', 'like', "%{$province}%");
+            $query->whereLike('province', "%{$province}%");
         }
         if ($region) {
-            $query->where('region', 'like', "%{$region}%");
+            $query->whereLike('region', "%{$region}%");
         }
 
         return $query;
@@ -141,6 +141,10 @@ class RealEstateProject extends Model
 
     public function getAvailableUnitsCountAttribute(): int
     {
+        if ($this->relationLoaded('properties')) {
+            return $this->properties->where('listing_status', 'available')->count();
+        }
+
         return $this->properties()->where('listing_status', 'available')->count();
     }
 }

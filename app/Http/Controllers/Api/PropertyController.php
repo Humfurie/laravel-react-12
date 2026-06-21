@@ -319,7 +319,7 @@ class PropertyController extends Controller
         // Location-based search through project relationships (fallback)
         if ($request->has('city')) {
             $query->whereHas('project', function ($projectQuery) use ($request) {
-                $projectQuery->where('city', 'like', '%'.$request->get('city').'%');
+                $projectQuery->whereLike('city', '%'.$request->get('city').'%');
             });
         }
 

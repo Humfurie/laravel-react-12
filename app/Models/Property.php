@@ -108,7 +108,7 @@ class Property extends Model
             }
 
             // Set listed_at if status is available
-            if (($property->status === 'available' || $property->listing_status === 'available') && !$property->listed_at) {
+            if (($property->status === 'available' || $property->listing_status === 'available') && ! $property->listed_at) {
                 $property->listed_at = now();
             }
         });
@@ -236,7 +236,7 @@ class Property extends Model
 
     public function scopeInLocation($query, $location)
     {
-        return $query->where('city', 'like', '%' . $location . '%');
+        return $query->whereLike('city', '%'.$location.'%');
     }
 
     public function scopePriceRange($query, $minPrice = null, $maxPrice = null)
@@ -270,7 +270,7 @@ class Property extends Model
 
     public function getFormattedFloorAreaAttribute()
     {
-        return $this->floor_area ? number_format($this->floor_area, 2) . ' ' . $this->floor_area_unit : null;
+        return $this->floor_area ? number_format($this->floor_area, 2).' '.$this->floor_area_unit : null;
     }
 
     public function getPrimaryContactAttribute()
@@ -281,13 +281,13 @@ class Property extends Model
     // Compatibility accessors for tests
     public function getFormattedPriceAttribute()
     {
-        if (!$this->price) {
+        if (! $this->price) {
             return null;
         }
 
         $currency = $this->currency ?? 'PHP';
 
-        return number_format($this->price, 2) . ' ' . $currency;
+        return number_format($this->price, 2).' '.$currency;
     }
 
     public function getFullAddressAttribute()

@@ -30,7 +30,7 @@ class ExpertiseController extends Controller
         $query = Expertise::query();
 
         if (! empty($validated['search'])) {
-            $query->where('name', 'ilike', '%'.$validated['search'].'%');
+            $query->whereLike('name', '%'.$validated['search'].'%');
         }
 
         if (! empty($validated['category']) && $validated['category'] !== 'all') {

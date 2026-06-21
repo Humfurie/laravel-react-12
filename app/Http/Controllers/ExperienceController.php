@@ -43,8 +43,8 @@ class ExperienceController extends Controller
         if (! empty($validated['search'])) {
             $search = $validated['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('company', 'ilike', '%'.$search.'%')
-                    ->orWhere('position', 'ilike', '%'.$search.'%');
+                $q->whereLike('company', '%'.$search.'%')
+                    ->orWhereLike('position', '%'.$search.'%');
             });
         }
 

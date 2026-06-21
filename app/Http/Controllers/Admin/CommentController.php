@@ -43,7 +43,7 @@ class CommentController extends Controller
 
         // Search content
         if ($request->filled('search')) {
-            $query->where('content', 'like', '%'.$request->search.'%');
+            $query->whereLike('content', '%'.$request->search.'%');
         }
 
         // Filter comments with reports

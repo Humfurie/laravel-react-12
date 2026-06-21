@@ -40,7 +40,7 @@ class ProjectController extends Controller
             ->with(['primaryImage']);
 
         if (! empty($validated['search'])) {
-            $query->where('title', 'ilike', '%'.$validated['search'].'%');
+            $query->whereLike('title', '%'.$validated['search'].'%');
         }
 
         if (! empty($validated['status']) && $validated['status'] !== 'all') {
