@@ -7,6 +7,7 @@ use App\Models\Comment;
 use App\Models\CommentReport;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
@@ -18,10 +19,9 @@ class CommentController extends Controller
     /**
      * Display a listing of all comments.
      */
+    #[Authorize('viewAny', Comment::class)]
     public function index(Request $request): InertiaResponse
     {
-        $this->authorize('viewAny', Comment::class);
-
         $query = Comment::query()
             ->with(['user', 'commentable', 'reports'])
             ->withTrashed();
@@ -33,7 +33,7 @@ class CommentController extends Controller
 
         // Filter by commentable type
         if ($request->filled('commentable_type')) {
-            $query->where('commentable_type', 'App\\Models\\' . ucfirst($request->commentable_type));
+            $query->where('commentable_type', 'App\\Models\\'.ucfirst($request->commentable_type));
         }
 
         // Filter by user
@@ -43,7 +43,7 @@ class CommentController extends Controller
 
         // Search content
         if ($request->filled('search')) {
-            $query->where('content', 'like', '%' . $request->search . '%');
+            $query->where('content', 'like', '%'.$request->search.'%');
         }
 
         // Filter comments with reports
@@ -72,10 +72,9 @@ class CommentController extends Controller
     /**
      * Display reported comments.
      */
+    #[Authorize('moderate', Comment::class)]
     public function reportedIndex(): InertiaResponse
     {
-        $this->authorize('moderate', Comment::class);
-
         $reports = CommentReport::query()
             ->with(['comment.user', 'comment.commentable', 'reporter', 'reviewer'])
             ->latest()
@@ -94,10 +93,10 @@ class CommentController extends Controller
                 })
                 ->average(),
             'top_reason' => CommentReport::select('reason', DB::raw('count(*) as total'))
-                    ->whereDate('created_at', '>=', now()->subDays(7))
-                    ->groupBy('reason')
-                    ->orderByDesc('total')
-                    ->first()?->reason ?? 'N/A',
+                ->whereDate('created_at', '>=', now()->subDays(7))
+                ->groupBy('reason')
+                ->orderByDesc('total')
+                ->first()?->reason ?? 'N/A',
         ];
 
         return Inertia::render('admin/comments/reported', [
@@ -109,10 +108,9 @@ class CommentController extends Controller
     /**
      * Update a comment (admin edit).
      */
+    #[Authorize('update', 'comment')]
     public function update(Request $request, Comment $comment)
     {
-        $this->authorize('update', $comment);
-
         $validated = $request->validate([
             'content' => ['required', 'string', 'min:3', 'max:1000'],
         ]);
@@ -130,10 +128,9 @@ class CommentController extends Controller
     /**
      * Delete a comment (admin).
      */
+    #[Authorize('delete', 'comment')]
     public function destroy(Comment $comment)
     {
-        $this->authorize('delete', $comment);
-
         $comment->delete();
 
         return back()->with('success', 'Comment deleted successfully.');
@@ -142,10 +139,9 @@ class CommentController extends Controller
     /**
      * Update comment status.
      */
+    #[Authorize('moderate', Comment::class)]
     public function updateStatus(Request $request, Comment $comment)
     {
-        $this->authorize('moderate', Comment::class);
-
         $validated = $request->validate([
             'status' => ['required', 'in:approved,pending,hidden'],
         ]);
@@ -158,10 +154,9 @@ class CommentController extends Controller
     /**
      * Review and action a comment report.
      */
+    #[Authorize('moderate', Comment::class)]
     public function reviewReport(Request $request, CommentReport $report)
     {
-        $this->authorize('moderate', Comment::class);
-
         $validated = $request->validate([
             'action' => ['required', 'in:dismiss,hide,delete'],
             'admin_notes' => ['nullable', 'string', 'max:500'],
@@ -189,10 +184,9 @@ class CommentController extends Controller
     /**
      * Bulk delete comments.
      */
+    #[Authorize('moderate', Comment::class)]
     public function bulkDelete(Request $request)
     {
-        $this->authorize('moderate', Comment::class);
-
         $validated = $request->validate([
             'comment_ids' => ['required', 'array'],
             'comment_ids.*' => ['exists:comments,id'],
@@ -206,10 +200,9 @@ class CommentController extends Controller
     /**
      * Bulk approve comments.
      */
+    #[Authorize('moderate', Comment::class)]
     public function bulkApprove(Request $request)
     {
-        $this->authorize('moderate', Comment::class);
-
         $validated = $request->validate([
             'comment_ids' => ['required', 'array'],
             'comment_ids.*' => ['exists:comments,id'],
@@ -224,10 +217,9 @@ class CommentController extends Controller
     /**
      * Bulk hide comments.
      */
+    #[Authorize('moderate', Comment::class)]
     public function bulkHide(Request $request)
     {
-        $this->authorize('moderate', Comment::class);
-
         $validated = $request->validate([
             'comment_ids' => ['required', 'array'],
             'comment_ids.*' => ['exists:comments,id'],

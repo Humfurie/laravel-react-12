@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateExperienceRequest;
 use App\Models\Experience;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 use Inertia\Inertia;
 
 class ExperienceController extends Controller
@@ -60,10 +61,9 @@ class ExperienceController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    #[Authorize('update', 'experience')]
     public function edit(Experience $experience)
     {
-        $this->authorize('update', $experience);
-
         $experience->load('image');
 
         return Inertia::render('admin/experience/edit', [
@@ -74,10 +74,9 @@ class ExperienceController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    #[Authorize('update', 'experience')]
     public function update(UpdateExperienceRequest $request, Experience $experience)
     {
-        $this->authorize('update', $experience);
-
         $validated = $request->validated();
         $experience->update($validated);
 
@@ -103,10 +102,9 @@ class ExperienceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    #[Authorize('create', Experience::class)]
     public function store(StoreExperienceRequest $request)
     {
-        $this->authorize('create', Experience::class);
-
         $validated = $request->validated();
 
         $experience = Experience::create([
@@ -131,20 +129,18 @@ class ExperienceController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+    #[Authorize('create', Experience::class)]
     public function create()
     {
-        $this->authorize('create', Experience::class);
-
         return Inertia::render('admin/experience/create');
     }
 
     /**
      * Remove the specified resource from storage.
      */
+    #[Authorize('delete', 'experience')]
     public function destroy(Experience $experience)
     {
-        $this->authorize('delete', $experience);
-
         $experience->delete();
 
         return redirect()
