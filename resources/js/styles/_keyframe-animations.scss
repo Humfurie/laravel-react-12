@@ -104,3 +104,23 @@
 .animate-fade-in-down {
     animation: fadeInDown 0.3s ease-out;
 }
+
+/* ── Theme toggle: circular reveal via View Transition API ── */
+@keyframes theme-reveal {
+    from {
+        clip-path: circle(0% at var(--theme-toggle-x, 50%) var(--theme-toggle-y, 50%));
+    }
+    to {
+        clip-path: circle(150% at var(--theme-toggle-x, 50%) var(--theme-toggle-y, 50%));
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    ::view-transition-old(root) {
+        animation: none;
+    }
+
+    ::view-transition-new(root) {
+        animation: theme-reveal 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}

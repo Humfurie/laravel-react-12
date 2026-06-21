@@ -61,7 +61,7 @@ export function useAppearance() {
         return (localStorage.getItem('appearance') as Appearance) || 'system';
     });
 
-    const updateAppearance = useCallback((mode: Appearance) => {
+    const updateAppearance = useCallback((mode: Appearance, originX?: number, originY?: number) => {
         setAppearance(mode);
 
         // Store in localStorage for client-side persistence...
@@ -72,7 +72,18 @@ export function useAppearance() {
         // Store in cookie for SSR...
         setCookie('appearance', mode);
 
-        applyTheme(mode);
+        // Set CSS custom properties for the circular reveal origin point
+        if (originX !== undefined && originY !== undefined) {
+            document.documentElement.style.setProperty('--theme-toggle-x', `${originX}px`);
+            document.documentElement.style.setProperty('--theme-toggle-y', `${originY}px`);
+        }
+
+        if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+            (document as Document & { startViewTransition: (cb: () => void) => void })
+                .startViewTransition(() => applyTheme(mode));
+        } else {
+            applyTheme(mode);
+        }
     }, []);
 
     useEffect(() => {

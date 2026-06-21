@@ -15,8 +15,11 @@ export default function ThemeToggle({ variant = 'icon-only', className = '' }: T
         return appearance === 'dark' || (appearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     }, [appearance]);
 
-    const toggleTheme = () => {
-        updateAppearance(isDark ? 'light' : 'dark');
+    const toggleTheme = (e: React.MouseEvent<HTMLButtonElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        updateAppearance(isDark ? 'light' : 'dark', x, y);
     };
 
     // Show current mode, not the mode we're switching to
