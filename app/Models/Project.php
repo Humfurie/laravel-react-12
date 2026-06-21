@@ -230,6 +230,8 @@ class Project extends Model
 
     public function getThumbnailUrlAttribute(): ?string
     {
+        // Uses the eager-loaded primaryImage when present (no extra query);
+        // lazy-loads only for single-model fetches where there is no N+1.
         $primaryImage = $this->primaryImage;
         if ($primaryImage) {
             return $primaryImage->getThumbnailUrl('medium') ?? $primaryImage->url;

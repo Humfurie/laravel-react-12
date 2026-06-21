@@ -15,6 +15,7 @@ class BlogController extends Controller
         $category = request()->query('category', 'portfolio');
 
         $query = Blog::published()
+            ->with('image')
             ->orderBy('published_at', 'desc')
             ->orderBy('sort_order', 'asc');
 
