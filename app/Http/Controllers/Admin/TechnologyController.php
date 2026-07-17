@@ -7,22 +7,21 @@ use App\Http\Requests\TechnologyRequest;
 use App\Http\Resources\TechnologyResource;
 use App\Models\Technology;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 
 class TechnologyController extends Controller
 {
     use AuthorizesRequests;
 
+    #[Authorize('viewAny', Technology::class)]
     public function index()
     {
-        $this->authorize('viewAny', Technology::class);
-
         return TechnologyResource::collection(Technology::all());
     }
 
+    #[Authorize('create', Technology::class)]
     public function store(TechnologyRequest $request)
     {
-        $this->authorize('create', Technology::class);
-
         return new TechnologyResource(Technology::create($request->validated()));
     }
 

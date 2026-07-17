@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreGuestbookEntryRequest;
 use App\Models\GuestbookEntry;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
@@ -81,10 +82,9 @@ class GuestbookController extends Controller
     /**
      * Delete a guestbook entry (own entries only).
      */
+    #[Authorize('delete', 'guestbookEntry')]
     public function destroy(GuestbookEntry $guestbookEntry)
     {
-        $this->authorize('delete', $guestbookEntry);
-
         $guestbookEntry->delete();
 
         return response()->json(['success' => true]);

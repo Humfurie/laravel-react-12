@@ -26,7 +26,7 @@ class PropertyService
             $property = Property::create($data);
 
             // Create pricing if provided
-            if (!empty($pricingData)) {
+            if (! empty($pricingData)) {
                 $property->pricing()->create(array_merge(
                     $pricingData,
                     ['currency' => $pricingData['currency'] ?? 'PHP']
@@ -34,7 +34,7 @@ class PropertyService
             }
 
             // Create contacts if provided
-            if (!empty($contactsData)) {
+            if (! empty($contactsData)) {
                 foreach ($contactsData as $contactData) {
                     $property->contacts()->create($contactData);
                 }
@@ -110,13 +110,13 @@ class PropertyService
         if (isset($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhere('unit_number', 'like', "%{$search}%")
+                $q->whereLike('title', "%{$search}%")
+                    ->orWhereLike('description', "%{$search}%")
+                    ->orWhereLike('unit_number', "%{$search}%")
                     ->orWhereHas('project', function ($projectQuery) use ($search) {
-                        $projectQuery->where('name', 'like', "%{$search}%")
-                            ->orWhere('city', 'like', "%{$search}%")
-                            ->orWhere('address', 'like', "%{$search}%");
+                        $projectQuery->whereLike('name', "%{$search}%")
+                            ->orWhereLike('city', "%{$search}%")
+                            ->orWhereLike('address', "%{$search}%");
                     });
             });
         }
@@ -131,7 +131,7 @@ class PropertyService
             $query->where('listing_status', $filters['listing_status']);
         } else {
             // Default to available
-            if (!isset($filters['show_all'])) {
+            if (! isset($filters['show_all'])) {
                 $query->available();
             }
         }
@@ -191,7 +191,7 @@ class PropertyService
         // City
         if (isset($filters['city'])) {
             $query->whereHas('project', function ($projectQuery) use ($filters) {
-                $projectQuery->where('city', 'like', '%' . $filters['city'] . '%');
+                $projectQuery->whereLike('city', '%'.$filters['city'].'%');
             });
         }
     }
@@ -210,9 +210,9 @@ class PropertyService
             'total_views' => Property::sum('view_count'),
             // Use database aggregation instead of loading all properties into memory
             'average_price' => DB::table('property_pricing')
-                    ->join('properties', 'property_pricing.property_id', '=', 'properties.id')
-                    ->whereNull('properties.deleted_at')
-                    ->avg('property_pricing.total_contract_price') ?? 0,
+                ->join('properties', 'property_pricing.property_id', '=', 'properties.id')
+                ->whereNull('properties.deleted_at')
+                ->avg('property_pricing.total_contract_price') ?? 0,
             'properties_by_type' => Property::select('property_type', DB::raw('count(*) as count'))
                 ->groupBy('property_type')
                 ->pluck('count', 'property_type'),

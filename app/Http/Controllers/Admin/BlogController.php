@@ -8,6 +8,8 @@ use App\Http\Requests\UpdateBlogRequest;
 use App\Models\Blog;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -22,10 +24,9 @@ class BlogController extends Controller
     /**
      * Display a listing of the resource.
      */
+    #[Authorize('viewAny', Blog::class)]
     public function index(Request $request)
     {
-        $this->authorize('viewAny', Blog::class);
-
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', 'in:all,published,draft,private,deleted'],
@@ -34,7 +35,7 @@ class BlogController extends Controller
         $query = Blog::query()->withTrashed();
 
         if (! empty($validated['search'])) {
-            $query->where('title', 'ilike', '%'.$validated['search'].'%');
+            $query->whereLike('title', '%'.$validated['search'].'%');
         }
 
         if (! empty($validated['status']) && $validated['status'] !== 'all') {
@@ -60,20 +61,18 @@ class BlogController extends Controller
         ]);
     }
 
+    #[Authorize('create', Blog::class)]
     public function create()
     {
-        $this->authorize('create', Blog::class);
-
         return Inertia::render('admin/blog/create');
     }
 
     /**
      * @throws Throwable
      */
+    #[Authorize('create', Blog::class)]
     public function store(StoreBlogRequest $request)
     {
-        $this->authorize('create', Blog::class);
-
         $validated = $request->validated();
 
         // Handle file upload if present
@@ -137,7 +136,7 @@ class BlogController extends Controller
     /**
      * Generate a unique filename for uploaded images.
      */
-    private function generateUniqueFilename(\Illuminate\Http\UploadedFile $file): string
+    private function generateUniqueFilename(UploadedFile $file): string
     {
         return time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
     }
@@ -183,10 +182,9 @@ class BlogController extends Controller
         Log::warning('Unrecognized blog image URL format, could not delete', ['url' => $imageUrl]);
     }
 
+    #[Authorize('update', 'blog')]
     public function edit(Blog $blog)
     {
-        $this->authorize('update', $blog);
-
         return Inertia::render('admin/blog/edit', [
             'blog' => $blog,
         ]);
@@ -195,10 +193,9 @@ class BlogController extends Controller
     /**
      * @throws Throwable
      */
+    #[Authorize('update', 'blog')]
     public function update(UpdateBlogRequest $request, Blog $blog)
     {
-        $this->authorize('update', $blog);
-
         $validated = $request->validated();
         $oldImage = null;
 
@@ -251,10 +248,9 @@ class BlogController extends Controller
             ->with('success', 'Blog updated successfully.');
     }
 
+    #[Authorize('delete', 'blog')]
     public function destroy(Blog $blog)
     {
-        $this->authorize('delete', $blog);
-
         $blog->delete();
 
         return redirect()->route('blogs.index')
