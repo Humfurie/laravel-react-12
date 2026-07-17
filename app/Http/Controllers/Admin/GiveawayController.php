@@ -31,8 +31,8 @@ class GiveawayController extends Controller
         // Search
         if ($request->has('search') && $request->search) {
             $query->where(function ($q) use ($request) {
-                $q->where('title', 'like', "%{$request->search}%")
-                    ->orWhere('description', 'like', "%{$request->search}%");
+                $q->whereLike('title', "%{$request->search}%")
+                    ->orWhereLike('description', "%{$request->search}%");
             });
         }
 
@@ -86,7 +86,7 @@ class GiveawayController extends Controller
         ]);
 
         // Set default number of winners if not provided
-        if (!isset($validated['number_of_winners'])) {
+        if (! isset($validated['number_of_winners'])) {
             $validated['number_of_winners'] = 1;
         }
 
@@ -94,7 +94,7 @@ class GiveawayController extends Controller
             // Handle background image upload
             if ($request->hasFile('background_image')) {
                 $backgroundImage = $request->file('background_image');
-                $filename = 'bg_' . time() . '_' . Str::random(10) . '.' . $backgroundImage->getClientOriginalExtension();
+                $filename = 'bg_'.time().'_'.Str::random(10).'.'.$backgroundImage->getClientOriginalExtension();
                 $path = $backgroundImage->storeAs('giveaways/backgrounds', $filename, config('filesystems.default'));
                 $validated['background_image'] = $path;
             }
@@ -104,7 +104,7 @@ class GiveawayController extends Controller
             // Handle prize images upload
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $index => $image) {
-                    $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+                    $filename = time().'_'.Str::random(10).'.'.$image->getClientOriginalExtension();
                     $path = $image->storeAs('giveaways', $filename, config('filesystems.default'));
 
                     $giveaway->images()->create([
@@ -128,7 +128,7 @@ class GiveawayController extends Controller
         } catch (Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Failed to create giveaway: ' . $e->getMessage());
+                ->with('error', 'Failed to create giveaway: '.$e->getMessage());
         }
     }
 
@@ -266,7 +266,7 @@ class GiveawayController extends Controller
         DB::beginTransaction();
         try {
             $file = $request->file('image');
-            $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
             $disk = config('filesystems.default');
             $path = $file->storeAs('giveaways', $filename, $disk);
 
@@ -290,7 +290,7 @@ class GiveawayController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
 
-            return back()->with('error', 'Failed to upload image: ' . $e->getMessage());
+            return back()->with('error', 'Failed to upload image: '.$e->getMessage());
         }
     }
 
@@ -349,7 +349,7 @@ class GiveawayController extends Controller
         } catch (Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Failed to update giveaway: ' . $e->getMessage());
+                ->with('error', 'Failed to update giveaway: '.$e->getMessage());
         }
     }
 
@@ -399,14 +399,14 @@ class GiveawayController extends Controller
             }
 
             $file = $request->file('background');
-            $filename = 'bg_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $filename = 'bg_'.time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
             $path = $file->storeAs('giveaways/backgrounds', $filename, $disk);
 
             $giveaway->update(['background_image' => $path]);
 
             return back()->with('success', 'Background image uploaded successfully.');
         } catch (Exception $e) {
-            return back()->with('error', 'Failed to upload background image: ' . $e->getMessage());
+            return back()->with('error', 'Failed to upload background image: '.$e->getMessage());
         }
     }
 
@@ -426,7 +426,7 @@ class GiveawayController extends Controller
 
             return back()->with('success', 'Background image removed successfully.');
         } catch (Exception $e) {
-            return back()->with('error', 'Failed to delete background image: ' . $e->getMessage());
+            return back()->with('error', 'Failed to delete background image: '.$e->getMessage());
         }
     }
 
@@ -524,7 +524,7 @@ class GiveawayController extends Controller
 
         $winner = $giveaway->selectWinner();
 
-        if (!$winner) {
+        if (! $winner) {
             return back()->with('error', 'Failed to select winner(s). No eligible entries found.');
         }
 
@@ -573,7 +573,7 @@ class GiveawayController extends Controller
      */
     public function claimPrize(Giveaway $giveaway)
     {
-        if (!$giveaway->winner_id) {
+        if (! $giveaway->winner_id) {
             return back()->with('error', 'No winner selected for this giveaway.');
         }
 
@@ -599,7 +599,7 @@ class GiveawayController extends Controller
         // Find the specific winner to reject
         $winnerToReject = $giveaway->entries()->where('id', $request->winner_id)->where('status', 'winner')->first();
 
-        if (!$winnerToReject) {
+        if (! $winnerToReject) {
             return back()->with('error', 'Winner not found or already rejected.');
         }
 
@@ -620,7 +620,7 @@ class GiveawayController extends Controller
         // Select a replacement winner
         $newWinner = $giveaway->selectWinner();
 
-        if (!$newWinner) {
+        if (! $newWinner) {
             return back()->with('error', 'Failed to select a new winner. No eligible entries remaining.');
         }
 

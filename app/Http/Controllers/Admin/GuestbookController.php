@@ -36,8 +36,8 @@ class GuestbookController extends Controller
         if (! empty($validated['search'])) {
             $search = $validated['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('message', 'like', '%'.$search.'%')
-                    ->orWhereHas('user', fn ($userQuery) => $userQuery->where('name', 'like', '%'.$search.'%')
+                $q->whereLike('message', '%'.$search.'%')
+                    ->orWhereHas('user', fn ($userQuery) => $userQuery->whereLike('name', '%'.$search.'%')
                     );
             });
         }

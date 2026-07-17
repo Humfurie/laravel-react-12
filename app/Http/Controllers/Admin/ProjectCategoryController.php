@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateProjectCategoryRequest;
 use App\Models\ProjectCategory;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,10 +18,9 @@ class ProjectCategoryController extends Controller
 {
     use AuthorizesRequests;
 
+    #[Authorize('viewAny', ProjectCategory::class)]
     public function index(): Response
     {
-        $this->authorize('viewAny', ProjectCategory::class);
-
         $categories = ProjectCategory::ordered()
             ->withCount('projects')
             ->get();
@@ -30,10 +30,9 @@ class ProjectCategoryController extends Controller
         ]);
     }
 
+    #[Authorize('create', ProjectCategory::class)]
     public function store(StoreProjectCategoryRequest $request): RedirectResponse
     {
-        $this->authorize('create', ProjectCategory::class);
-
         ProjectCategory::create($request->validated());
 
         return redirect()
@@ -41,10 +40,9 @@ class ProjectCategoryController extends Controller
             ->with('success', 'Category created successfully.');
     }
 
+    #[Authorize('update', 'projectCategory')]
     public function update(UpdateProjectCategoryRequest $request, ProjectCategory $projectCategory): RedirectResponse
     {
-        $this->authorize('update', $projectCategory);
-
         $projectCategory->update($request->validated());
 
         return redirect()
@@ -52,10 +50,9 @@ class ProjectCategoryController extends Controller
             ->with('success', 'Category updated successfully.');
     }
 
+    #[Authorize('delete', 'projectCategory')]
     public function destroy(ProjectCategory $projectCategory): RedirectResponse
     {
-        $this->authorize('delete', $projectCategory);
-
         if ($projectCategory->projects()->exists()) {
             return redirect()
                 ->route('admin.project-categories.index')
@@ -69,12 +66,11 @@ class ProjectCategoryController extends Controller
             ->with('success', 'Category deleted successfully.');
     }
 
+    #[Authorize('viewAny', ProjectCategory::class)]
     public function reorder(ReorderProjectCategoriesRequest $request): RedirectResponse
     {
         // Authorization handled by route middleware (permission:project,update)
         // Additional check for viewAny since this is a bulk operation
-        $this->authorize('viewAny', ProjectCategory::class);
-
         $items = $request->validated()['items'];
 
         // Use Eloquent within transaction for safe batch updates

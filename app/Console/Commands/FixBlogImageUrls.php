@@ -39,7 +39,7 @@ class FixBlogImageUrls extends Command
 
         // For dry run, just read without locking
         $blogs = Blog::whereNotNull('featured_image')
-            ->where('featured_image', 'like', 'http%')
+            ->whereLike('featured_image', 'http%')
             ->get();
 
         $this->info("Found {$blogs->count()} blogs with HTTP URLs");

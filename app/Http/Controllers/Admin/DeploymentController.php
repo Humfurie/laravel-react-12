@@ -11,6 +11,7 @@ use App\Models\Project;
 use App\Services\ImageService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Throwable;
@@ -23,10 +24,9 @@ class DeploymentController extends Controller
         private ImageService $imageService
     ) {}
 
+    #[Authorize('viewAny', Deployment::class)]
     public function index(Request $request)
     {
-        $this->authorize('viewAny', Deployment::class);
-
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', 'in:all,active,maintenance,archived,deleted'],
@@ -39,8 +39,8 @@ class DeploymentController extends Controller
         if (! empty($validated['search'])) {
             $search = $validated['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'ilike', '%'.$search.'%')
-                    ->orWhereHas('project', fn ($pq) => $pq->where('title', 'ilike', '%'.$search.'%'));
+                $q->whereLike('title', '%'.$search.'%')
+                    ->orWhereHas('project', fn ($pq) => $pq->whereLike('title', '%'.$search.'%'));
             });
         }
 
@@ -68,10 +68,9 @@ class DeploymentController extends Controller
         ]);
     }
 
+    #[Authorize('create', Deployment::class)]
     public function create()
     {
-        $this->authorize('create', Deployment::class);
-
         $projects = Project::query()
             ->select('id', 'title')
             ->orderBy('title')
@@ -87,10 +86,9 @@ class DeploymentController extends Controller
     /**
      * @throws Throwable
      */
+    #[Authorize('create', Deployment::class)]
     public function store(StoreDeploymentRequest $request)
     {
-        $this->authorize('create', Deployment::class);
-
         $validated = $request->validated();
 
         $deployment = DB::transaction(function () use ($validated, $request) {
@@ -112,10 +110,9 @@ class DeploymentController extends Controller
             ->with('success', 'Deployment created successfully.');
     }
 
+    #[Authorize('update', 'deployment')]
     public function edit(Deployment $deployment)
     {
-        $this->authorize('update', $deployment);
-
         $deployment->load(['images' => fn ($q) => $q->ordered()]);
 
         $projects = Project::query()
@@ -134,10 +131,9 @@ class DeploymentController extends Controller
     /**
      * @throws Throwable
      */
+    #[Authorize('update', 'deployment')]
     public function update(UpdateDeploymentRequest $request, Deployment $deployment)
     {
-        $this->authorize('update', $deployment);
-
         $validated = $request->validated();
 
         DB::transaction(function () use ($deployment, $validated, $request) {
@@ -157,10 +153,9 @@ class DeploymentController extends Controller
             ->with('success', 'Deployment updated successfully.');
     }
 
+    #[Authorize('delete', 'deployment')]
     public function destroy(Deployment $deployment)
     {
-        $this->authorize('delete', $deployment);
-
         $deployment->delete();
 
         return redirect()->route('admin.deployments.index')
@@ -197,10 +192,9 @@ class DeploymentController extends Controller
             ->with('success', 'Deployment permanently deleted successfully.');
     }
 
+    #[Authorize('update', 'deployment')]
     public function uploadImage(Request $request, Deployment $deployment)
     {
-        $this->authorize('update', $deployment);
-
         $request->validate([
             'images' => 'required|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
@@ -215,10 +209,9 @@ class DeploymentController extends Controller
         return back()->with('success', count($images).' image(s) uploaded successfully.');
     }
 
+    #[Authorize('update', 'deployment')]
     public function deleteImage(Deployment $deployment, Image $image)
     {
-        $this->authorize('update', $deployment);
-
         if ($image->imageable_type !== Deployment::class || $image->imageable_id !== $deployment->id) {
             abort(403, 'Image does not belong to this deployment.');
         }
@@ -228,10 +221,9 @@ class DeploymentController extends Controller
         return back()->with('success', 'Image deleted successfully.');
     }
 
+    #[Authorize('update', 'deployment')]
     public function setPrimaryImage(Deployment $deployment, Image $image)
     {
-        $this->authorize('update', $deployment);
-
         if ($image->imageable_type !== Deployment::class || $image->imageable_id !== $deployment->id) {
             abort(403, 'Image does not belong to this deployment.');
         }

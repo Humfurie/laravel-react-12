@@ -12,6 +12,7 @@ use App\Models\Giveaway;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 
 class CommentController extends Controller
 {
@@ -63,11 +64,9 @@ class CommentController extends Controller
     /**
      * Update an existing comment.
      */
+    #[Authorize('update', 'comment')]
     public function update(UpdateCommentRequest $request, Comment $comment): JsonResponse|RedirectResponse
     {
-        // Authorize (policy checks ownership or admin)
-        $this->authorize('update', $comment);
-
         $validated = $request->validated();
 
         // Sanitize content - strip ALL HTML tags for security
@@ -91,11 +90,9 @@ class CommentController extends Controller
     /**
      * Delete a comment (soft delete).
      */
+    #[Authorize('delete', 'comment')]
     public function destroy(Comment $comment): JsonResponse|RedirectResponse
     {
-        // Authorize (policy checks ownership or admin)
-        $this->authorize('delete', $comment);
-
         $comment->delete();
 
         return response()->json([

@@ -40,8 +40,8 @@ class ListBlogs extends Tool
 
         if ($request->has('search')) {
             $search = $request->get('search');
-            $query->where(fn ($q) => $q->where('title', 'ilike', "%{$search}%")
-                ->orWhere('content', 'ilike', "%{$search}%"));
+            $query->where(fn ($q) => $q->whereLike('title', "%{$search}%")
+                ->orWhereLike('content', "%{$search}%"));
         }
 
         $perPage = min($request->get('per_page', 15), 50);

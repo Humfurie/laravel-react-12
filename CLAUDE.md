@@ -6,7 +6,7 @@
 - **Commands**: Use `./vendor/bin/sail artisan` (not `php artisan`)
 
 ## Stack
-PHP 8.4, Laravel 12, Inertia v2, React 19, Tailwind v4, Pest v3
+PHP 8.4 (min 8.3), Laravel 13, Inertia v2, React 19, Tailwind v4, Pest v4
 
 ## Core Rules
 - Follow existing code conventions; check sibling files
@@ -21,7 +21,9 @@ PHP 8.4, Laravel 12, Inertia v2, React 19, Tailwind v4, Pest v3
 - Use Form Request classes for validation
 - Use queued jobs (`ShouldQueue`) for slow operations
 - Use `config()` not `env()` outside config files
-- Laravel 12: streamlined structure, no Kernel files, commands auto-register
+- Laravel 13: streamlined structure, no Kernel files, commands auto-register
+- Laravel 13 requires PHP 8.3+; new APIs: `Cache::touch()`, `Queue::route()`, `#[Middleware]`/`#[Authorize]`/`#[Tries]` attributes, AI SDK, JSON:API resources
+- `laravel/boost` temporarily removed (no Laravel 13 support yet — its `roster` dep caps at L12; re-add when updated)
 
 ## Frontend
 - Inertia pages in `resources/js/Pages`

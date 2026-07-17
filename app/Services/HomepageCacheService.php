@@ -8,6 +8,7 @@ use App\Models\Experience;
 use App\Models\Expertise;
 use App\Models\Project;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -27,7 +28,7 @@ class HomepageCacheService
     /**
      * Get cached homepage blogs data with stampede protection.
      *
-     * @return array{primary: \Illuminate\Support\Collection, latest: \Illuminate\Database\Eloquent\Collection, stats: array{total_posts: int, total_views: int, featured_count: int}}
+     * @return array{primary: Collection, latest: \Illuminate\Database\Eloquent\Collection, stats: array{total_posts: int, total_views: int, featured_count: int}}
      */
     public function getCachedBlogsData(): array
     {
@@ -151,7 +152,7 @@ class HomepageCacheService
     /**
      * Get homepage blog data without caching.
      *
-     * @return array{primary: \Illuminate\Support\Collection, latest: \Illuminate\Database\Eloquent\Collection, stats: array{total_posts: int, total_views: int, featured_count: int}}
+     * @return array{primary: Collection, latest: \Illuminate\Database\Eloquent\Collection, stats: array{total_posts: int, total_views: int, featured_count: int}}
      */
     public function getBlogsData(): array
     {
@@ -159,7 +160,8 @@ class HomepageCacheService
         $featuredBlogs = Blog::getFeaturedBlogs(3);
 
         // Get latest blogs
-        $latestBlogs = Blog::published()
+        $latestBlogs = Blog::with(['image'])
+            ->published()
             ->orderBy('published_at', 'desc')
             ->limit(6)
             ->get();
@@ -195,7 +197,7 @@ class HomepageCacheService
     {
         $featured = Project::query()
             ->public()
-            ->with(['images' => fn ($q) => $q->ordered(), 'projectCategory'])
+            ->with(['images' => fn ($q) => $q->ordered(), 'projectCategory', 'primaryImage'])
             ->orderByDesc('is_featured')
             ->orderBy('featured_at', 'desc')
             ->orderBy('sort_order')

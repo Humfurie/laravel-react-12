@@ -9,6 +9,7 @@ use DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
@@ -19,10 +20,9 @@ class UserController extends Controller
 {
     use AuthorizesRequests;
 
+    #[Authorize('viewAny', User::class)]
     public function index(Request $request): Response
     {
-        $this->authorize('viewAny', User::class);
-
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
             'role' => ['nullable', 'string', 'max:50'],
@@ -33,8 +33,8 @@ class UserController extends Controller
         if (! empty($validated['search'])) {
             $search = $validated['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'ilike', '%'.$search.'%')
-                    ->orWhere('email', 'ilike', '%'.$search.'%');
+                $q->whereLike('name', '%'.$search.'%')
+                    ->orWhereLike('email', '%'.$search.'%');
             });
         }
 
@@ -78,10 +78,9 @@ class UserController extends Controller
         ]);
     }
 
+    #[Authorize('create', User::class)]
     public function store(Request $request): RedirectResponse
     {
-        $this->authorize('create', User::class);
-
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -110,10 +109,9 @@ class UserController extends Controller
         }
     }
 
+    #[Authorize('update', 'user')]
     public function update(Request $request, User $user): RedirectResponse
     {
-        $this->authorize('update', $user);
-
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
@@ -160,10 +158,9 @@ class UserController extends Controller
      * Assign roles to a user.
      * User ID 1 cannot have their roles changed.
      */
+    #[Authorize('assignRole', 'user')]
     public function assignRole(Request $request, User $user): RedirectResponse
     {
-        $this->authorize('assignRole', $user);
-
         $request->validate([
             'role_ids' => 'required|array',
             'role_ids.*' => 'exists:roles,id',
@@ -178,10 +175,9 @@ class UserController extends Controller
         }
     }
 
+    #[Authorize('delete', 'user')]
     public function destroy(User $user): RedirectResponse
     {
-        $this->authorize('delete', $user);
-
         try {
             $user->delete();
 
@@ -191,10 +187,9 @@ class UserController extends Controller
         }
     }
 
+    #[Authorize('restore', 'user')]
     public function restore(User $user): RedirectResponse
     {
-        $this->authorize('restore', $user);
-
         try {
             $user->restore();
 
@@ -204,10 +199,9 @@ class UserController extends Controller
         }
     }
 
+    #[Authorize('forceDelete', 'user')]
     public function forceDestroy(User $user): RedirectResponse
     {
-        $this->authorize('forceDelete', $user);
-
         try {
             $user->roles()->detach();
             $user->forceDelete();

@@ -37,9 +37,9 @@ class InquiryController extends Controller
         if ($request->filled('search')) {
             $search = $request->get('search');
             $query->where(function ($q) use ($search) {
-                $q->where('customer_name', 'like', "%{$search}%")
-                    ->orWhere('customer_email', 'like', "%{$search}%")
-                    ->orWhere('customer_phone', 'like', "%{$search}%");
+                $q->whereLike('customer_name', "%{$search}%")
+                    ->orWhereLike('customer_email', "%{$search}%")
+                    ->orWhereLike('customer_phone', "%{$search}%");
             });
         }
 

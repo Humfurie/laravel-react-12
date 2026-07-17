@@ -10,6 +10,7 @@ use App\Models\Project;
 use App\Services\ImageService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -26,10 +27,9 @@ class ProjectController extends Controller
     /**
      * Display a listing of the resource.
      */
+    #[Authorize('viewAny', Project::class)]
     public function index(Request $request)
     {
-        $this->authorize('viewAny', Project::class);
-
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', 'in:all,live,development,maintenance,archived,deleted'],
@@ -40,7 +40,7 @@ class ProjectController extends Controller
             ->with(['primaryImage']);
 
         if (! empty($validated['search'])) {
-            $query->where('title', 'ilike', '%'.$validated['search'].'%');
+            $query->whereLike('title', '%'.$validated['search'].'%');
         }
 
         if (! empty($validated['status']) && $validated['status'] !== 'all') {
@@ -72,10 +72,9 @@ class ProjectController extends Controller
      *
      * @throws Throwable
      */
+    #[Authorize('create', Project::class)]
     public function store(StoreProjectRequest $request)
     {
-        $this->authorize('create', Project::class);
-
         $validated = $request->validated();
 
         // Generate slug if not provided
@@ -111,10 +110,9 @@ class ProjectController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+    #[Authorize('create', Project::class)]
     public function create()
     {
-        $this->authorize('create', Project::class);
-
         return Inertia::render('admin/projects/create', [
             'categories' => Project::getCategories(),
             'statuses' => Project::getStatuses(),
@@ -125,10 +123,9 @@ class ProjectController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    #[Authorize('update', 'project')]
     public function edit(Project $project)
     {
-        $this->authorize('update', $project);
-
         $project->load(['images' => fn ($q) => $q->ordered()]);
 
         return Inertia::render('admin/projects/edit', [
@@ -144,10 +141,9 @@ class ProjectController extends Controller
      *
      * @throws Throwable
      */
+    #[Authorize('update', 'project')]
     public function update(UpdateProjectRequest $request, Project $project)
     {
-        $this->authorize('update', $project);
-
         $validated = $request->validated();
 
         // Generate slug if not provided
@@ -181,10 +177,9 @@ class ProjectController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    #[Authorize('delete', 'project')]
     public function destroy(Project $project)
     {
-        $this->authorize('delete', $project);
-
         $project->delete();
 
         return redirect()->route('admin.projects.index')
@@ -227,10 +222,9 @@ class ProjectController extends Controller
     /**
      * Upload images to the project gallery.
      */
+    #[Authorize('update', 'project')]
     public function uploadImage(Request $request, Project $project)
     {
-        $this->authorize('update', $project);
-
         $request->validate([
             'images' => 'required|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
@@ -248,10 +242,9 @@ class ProjectController extends Controller
     /**
      * Delete an image from the project gallery.
      */
+    #[Authorize('update', 'project')]
     public function deleteImage(Project $project, Image $image)
     {
-        $this->authorize('update', $project);
-
         // Verify the image belongs to this project
         if ($image->imageable_type !== Project::class || $image->imageable_id !== $project->id) {
             abort(403, 'Image does not belong to this project.');
@@ -265,10 +258,9 @@ class ProjectController extends Controller
     /**
      * Set an image as the primary thumbnail.
      */
+    #[Authorize('update', 'project')]
     public function setPrimaryImage(Project $project, Image $image)
     {
-        $this->authorize('update', $project);
-
         // Verify the image belongs to this project
         if ($image->imageable_type !== Project::class || $image->imageable_id !== $project->id) {
             abort(403, 'Image does not belong to this project.');

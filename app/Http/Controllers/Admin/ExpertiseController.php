@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Expertise;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -18,10 +19,9 @@ class ExpertiseController extends Controller
     /**
      * Display a listing of the resource.
      */
+    #[Authorize('viewAny', Expertise::class)]
     public function index(Request $request): Response
     {
-        $this->authorize('viewAny', Expertise::class);
-
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
             'category' => ['nullable', 'in:all,be,fe,td'],
@@ -30,7 +30,7 @@ class ExpertiseController extends Controller
         $query = Expertise::query();
 
         if (! empty($validated['search'])) {
-            $query->where('name', 'ilike', '%'.$validated['search'].'%');
+            $query->whereLike('name', '%'.$validated['search'].'%');
         }
 
         if (! empty($validated['category']) && $validated['category'] !== 'all') {
@@ -50,10 +50,9 @@ class ExpertiseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    #[Authorize('create', Expertise::class)]
     public function store(Request $request)
     {
-        $this->authorize('create', Expertise::class);
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
@@ -82,10 +81,9 @@ class ExpertiseController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+    #[Authorize('create', Expertise::class)]
     public function create(): Response
     {
-        $this->authorize('create', Expertise::class);
-
         $categories = [
             ['name' => 'Backend', 'slug' => 'be'],
             ['name' => 'Frontend', 'slug' => 'fe'],
@@ -100,10 +98,9 @@ class ExpertiseController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    #[Authorize('update', 'expertise')]
     public function edit(Expertise $expertise): Response
     {
-        $this->authorize('update', $expertise);
-
         $categories = [
             ['name' => 'Backend', 'slug' => 'be'],
             ['name' => 'Frontend', 'slug' => 'fe'],
@@ -119,10 +116,9 @@ class ExpertiseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    #[Authorize('delete', 'expertise')]
     public function destroy(Expertise $expertise)
     {
-        $this->authorize('delete', $expertise);
-
         $expertise->delete();
 
         return redirect()
@@ -133,10 +129,9 @@ class ExpertiseController extends Controller
     /**
      * Update the order of expertises.
      */
+    #[Authorize('update', Expertise::class)]
     public function reorder(Request $request)
     {
-        $this->authorize('update', Expertise::class);
-
         $validated = $request->validate([
             'items' => 'required|array',
             'items.*.id' => 'required|exists:expertises,id',
@@ -153,10 +148,9 @@ class ExpertiseController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    #[Authorize('update', 'expertise')]
     public function update(Request $request, Expertise $expertise)
     {
-        $this->authorize('update', $expertise);
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',

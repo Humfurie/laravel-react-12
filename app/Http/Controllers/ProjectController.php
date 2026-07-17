@@ -21,7 +21,7 @@ class ProjectController extends Controller
                 return Project::query()
                     ->public()
                     ->featured()
-                    ->with(['images' => fn ($q) => $q->ordered()])
+                    ->with(['images' => fn ($q) => $q->ordered(), 'primaryImage'])
                     ->orderBy('featured_at', 'desc')
                     ->orderBy('sort_order')
                     ->take(6)
@@ -32,7 +32,7 @@ class ProjectController extends Controller
         // Get all public projects grouped by ownership type
         $allProjects = Project::query()
             ->public()
-            ->with(['images' => fn ($q) => $q->ordered()])
+            ->with(['images' => fn ($q) => $q->ordered(), 'primaryImage'])
             ->ordered()
             ->get();
 

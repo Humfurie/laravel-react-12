@@ -13,9 +13,7 @@ class UserProfileController extends Controller
 {
     public function __construct(
         protected GitHubService $githubService
-    )
-    {
-    }
+    ) {}
 
     /**
      * Display a user's public profile.
@@ -50,7 +48,7 @@ class UserProfileController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->github_username) {
+        if (! $user->github_username) {
             return back()->withErrors(['github' => 'No GitHub account linked.']);
         }
 
@@ -74,16 +72,18 @@ class UserProfileController extends Controller
      */
     protected function getContributedProjects(User $user): array
     {
-        if (!$user->github_username) {
+        if (! $user->github_username) {
             return [];
         }
 
         // Find all public projects with metrics that include this user as a contributor
         $projects = Project::public()
             ->whereNotNull('metrics')
+            ->with('primaryImage')
             ->get()
             ->filter(function ($project) use ($user) {
                 $contributors = $project->metrics['contributors'] ?? [];
+
                 return collect($contributors)->contains('login', $user->github_username);
             })
             ->map(function ($project) use ($user) {

@@ -25,7 +25,7 @@ class PropertyListingController extends Controller
 
         if ($request->filled('city')) {
             $query->whereHas('project', function ($q) use ($request) {
-                $q->where('city', 'like', '%'.$request->city.'%');
+                $q->whereLike('city', '%'.$request->city.'%');
             });
         }
 
@@ -52,10 +52,10 @@ class PropertyListingController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
+                $q->whereLike('title', "%{$search}%")
+                    ->orWhereLike('description', "%{$search}%")
                     ->orWhereHas('project', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
+                        $q->whereLike('name', "%{$search}%");
                     });
             });
         }

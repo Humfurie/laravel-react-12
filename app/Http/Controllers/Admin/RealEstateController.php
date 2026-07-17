@@ -13,6 +13,7 @@ use App\Models\RealEstateProject;
 use App\Services\ImageService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -31,18 +32,18 @@ class RealEstateController extends Controller
     public function index()
     {
         // Check if user can view any of the resources
-        if (!auth()->user()->can('viewAny', Developer::class) &&
-            !auth()->user()->can('viewAny', RealEstateProject::class) &&
-            !auth()->user()->can('viewAny', Property::class)) {
+        if (! auth()->user()->can('viewAny', Developer::class) &&
+            ! auth()->user()->can('viewAny', RealEstateProject::class) &&
+            ! auth()->user()->can('viewAny', Property::class)) {
             abort(403, 'You do not have permission to access this page.');
         }
 
         // Fetch all data in parallel
         [$developers, $projects, $properties, $inquiries] = Concurrency::run([
-            fn() => Developer::with(['realEstateProjects.properties'])->get(),
-            fn() => RealEstateProject::with(['developer', 'properties'])->get(),
-            fn() => Property::with(['project.developer', 'pricing', 'contacts'])->get(),
-            fn() => Inquiry::with(['property.project'])->latest()->get(),
+            fn () => Developer::with(['realEstateProjects.properties'])->get(),
+            fn () => RealEstateProject::with(['developer', 'properties'])->get(),
+            fn () => Property::with(['project.developer', 'pricing', 'contacts'])->get(),
+            fn () => Inquiry::with(['property.project'])->latest()->get(),
         ]);
 
         return Inertia::render('admin/real-estate', [
@@ -59,26 +60,23 @@ class RealEstateController extends Controller
     }
 
     // Developer CRUD
+    #[Authorize('create', Developer::class)]
     public function createDeveloper()
     {
-        $this->authorize('create', Developer::class);
-
         return Inertia::render('admin/real-estate/developers/create');
     }
 
+    #[Authorize('update', 'developer')]
     public function editDeveloper(Developer $developer)
     {
-        $this->authorize('update', $developer);
-
         return Inertia::render('admin/real-estate/developers/edit', [
             'developer' => $developer,
         ]);
     }
 
+    #[Authorize('create', Developer::class)]
     public function storeDeveloper(Request $request)
     {
-        $this->authorize('create', Developer::class);
-
         $validated = $request->validate([
             'company_name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -103,10 +101,9 @@ class RealEstateController extends Controller
         return redirect()->route('real-estate.developers.edit', $developer->id)->with('success', 'Developer created successfully');
     }
 
+    #[Authorize('update', 'developer')]
     public function updateDeveloper(Request $request, Developer $developer)
     {
-        $this->authorize('update', $developer);
-
         $validated = $request->validate([
             'company_name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -135,20 +132,18 @@ class RealEstateController extends Controller
         return redirect()->route('real-estate.developers.edit', $developer->id)->with('success', 'Developer updated successfully');
     }
 
+    #[Authorize('delete', 'developer')]
     public function destroyDeveloper(Developer $developer)
     {
-        $this->authorize('delete', $developer);
-
         $developer->delete();
 
         return redirect()->route('real-estate.index')->with('success', 'Developer deleted successfully');
     }
 
     // Project CRUD
+    #[Authorize('create', RealEstateProject::class)]
     public function createProject()
     {
-        $this->authorize('create', RealEstateProject::class);
-
         $developers = Developer::all();
 
         return Inertia::render('admin/real-estate/projects/create', [
@@ -178,10 +173,9 @@ class RealEstateController extends Controller
         ]);
     }
 
+    #[Authorize('create', RealEstateProject::class)]
     public function storeProject(Request $request)
     {
-        $this->authorize('create', RealEstateProject::class);
-
         try {
             Log::info('Store project request:', $request->except(['featured_image', 'additional_images']));
 
@@ -243,14 +237,13 @@ class RealEstateController extends Controller
         } catch (Exception $e) {
             Log::error('Error creating project:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 
-            return redirect()->back()->withErrors(['error' => 'Failed to create project: ' . $e->getMessage()])->withInput();
+            return redirect()->back()->withErrors(['error' => 'Failed to create project: '.$e->getMessage()])->withInput();
         }
     }
 
+    #[Authorize('update', 'project')]
     public function updateProject(Request $request, RealEstateProject $project)
     {
-        $this->authorize('update', $project);
-
         try {
             Log::info('Update project request:', $request->except(['featured_image', 'additional_images']));
 
@@ -329,14 +322,13 @@ class RealEstateController extends Controller
         } catch (Exception $e) {
             Log::error('Error updating project:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 
-            return redirect()->back()->withErrors(['error' => 'Failed to update project: ' . $e->getMessage()])->withInput();
+            return redirect()->back()->withErrors(['error' => 'Failed to update project: '.$e->getMessage()])->withInput();
         }
     }
 
+    #[Authorize('delete', RealEstateProject::class)]
     public function destroyProject($project)
     {
-        $this->authorize('delete', RealEstateProject::class);
-
         $project = RealEstateProject::findOrFail($project);
         $project->delete();
 
@@ -344,10 +336,9 @@ class RealEstateController extends Controller
     }
 
     // Property CRUD
+    #[Authorize('viewAny', Property::class)]
     public function indexProperty()
     {
-        $this->authorize('viewAny', Property::class);
-
         $properties = Property::with(['project.developer', 'pricing', 'contacts', 'images'])
             ->latest()
             ->paginate(15);
@@ -360,10 +351,9 @@ class RealEstateController extends Controller
         ]);
     }
 
+    #[Authorize('create', Property::class)]
     public function createProperty()
     {
-        $this->authorize('create', Property::class);
-
         $projects = RealEstateProject::with('developer')->get();
 
         return Inertia::render('admin/real-estate/property/form', [
@@ -372,9 +362,9 @@ class RealEstateController extends Controller
         ]);
     }
 
+    #[Authorize('update', 'property')]
     public function editProperty(Property $property)
     {
-        $this->authorize('update', $property);
         $property->load(['project.developer', 'pricing', 'contacts', 'images']);
         $projects = RealEstateProject::with('developer')->get();
 
@@ -384,10 +374,9 @@ class RealEstateController extends Controller
         ]);
     }
 
+    #[Authorize('create', Property::class)]
     public function storeProperty(Request $request)
     {
-        $this->authorize('create', Property::class);
-
         $validated = $request->validate([
             'project_id' => 'nullable|exists:real_estate_projects,id',
             'title' => 'required|string|max:255',
@@ -427,10 +416,9 @@ class RealEstateController extends Controller
         return redirect()->route('real-estate.index')->with('success', 'Property created successfully');
     }
 
+    #[Authorize('update', 'property')]
     public function updateProperty(Request $request, Property $property)
     {
-        $this->authorize('update', $property);
-
         $validated = $request->validate([
             'project_id' => 'nullable|exists:real_estate_projects,id',
             'title' => 'required|string|max:255',
@@ -464,10 +452,9 @@ class RealEstateController extends Controller
         return redirect()->route('real-estate.index')->with('success', 'Property updated successfully');
     }
 
+    #[Authorize('delete', 'property')]
     public function destroyProperty(Property $property)
     {
-        $this->authorize('delete', $property);
-
         $property->delete();
 
         return response()->json([
@@ -686,8 +673,8 @@ class RealEstateController extends Controller
 
             // Otherwise, upload temporarily (for forms before model is created)
             // Store to temp directory - will be properly processed with ImageService later
-            $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs($directory . '/temp', $filename, config('filesystems.default'));
+            $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+            $path = $file->storeAs($directory.'/temp', $filename, config('filesystems.default'));
             $url = Storage::disk(config('filesystems.default'))->url($path);
 
             return response()->json([
@@ -704,7 +691,7 @@ class RealEstateController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error uploading image: ' . $e->getMessage(),
+                'message' => 'Error uploading image: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -740,7 +727,7 @@ class RealEstateController extends Controller
                 $path = str_replace('/storage/', '', parse_url($url, PHP_URL_PATH));
 
                 if (Storage::disk('public')->exists($path)) {
-                    $fullPath = storage_path('app/public/' . $path);
+                    $fullPath = storage_path('app/public/'.$path);
                     $fileInfo = pathinfo($path);
 
                     $image = $model->images()->create([
@@ -760,13 +747,13 @@ class RealEstateController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => count($attachedImages) . ' images attached successfully',
+                'message' => count($attachedImages).' images attached successfully',
                 'images' => $attachedImages,
             ]);
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error attaching images: ' . $e->getMessage(),
+                'message' => 'Error attaching images: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -797,7 +784,7 @@ class RealEstateController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error reordering images: ' . $e->getMessage(),
+                'message' => 'Error reordering images: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -815,7 +802,7 @@ class RealEstateController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error deleting image: ' . $e->getMessage(),
+                'message' => 'Error deleting image: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -834,7 +821,7 @@ class RealEstateController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error setting primary image: ' . $e->getMessage(),
+                'message' => 'Error setting primary image: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -853,13 +840,13 @@ class RealEstateController extends Controller
             Log::info('Extracted temp path:', ['path' => $tempPath]);
 
             // Check if file exists
-            if (!Storage::disk('public')->exists($tempPath)) {
+            if (! Storage::disk('public')->exists($tempPath)) {
                 Log::warning('File not found', ['path' => $tempPath]);
 
                 return null;
             }
 
-            $fullTempPath = storage_path('app/public/' . $tempPath);
+            $fullTempPath = storage_path('app/public/'.$tempPath);
             $fileInfo = pathinfo($tempPath);
 
             // Determine final directory based on model type
@@ -870,8 +857,8 @@ class RealEstateController extends Controller
             };
 
             // Generate new filename for final location
-            $finalFilename = time() . '_' . Str::random(10) . '.' . $fileInfo['extension'];
-            $finalPath = $directory . '/' . $finalFilename;
+            $finalFilename = time().'_'.Str::random(10).'.'.$fileInfo['extension'];
+            $finalPath = $directory.'/'.$finalFilename;
 
             // Move file from temp to final location
             Storage::disk('public')->move($tempPath, $finalPath);
@@ -919,9 +906,9 @@ class RealEstateController extends Controller
     {
         try {
             $thumbnailPaths = [];
-            $fullPath = storage_path('app/public/' . $imagePath);
+            $fullPath = storage_path('app/public/'.$imagePath);
 
-            if (!file_exists($fullPath)) {
+            if (! file_exists($fullPath)) {
                 Log::warning('Image file not found for thumbnail generation', ['path' => $fullPath]);
 
                 return [];
@@ -933,19 +920,19 @@ class RealEstateController extends Controller
 
             foreach (ImageService::SIZES as $sizeName => $maxWidth) {
                 // Create thumbnail directory
-                $thumbnailDir = $directory . '/thumbs/' . $sizeName;
-                $thumbnailFilename = pathinfo($filename, PATHINFO_FILENAME) . '_' . $sizeName . '.' . pathinfo($filename, PATHINFO_EXTENSION);
+                $thumbnailDir = $directory.'/thumbs/'.$sizeName;
+                $thumbnailFilename = pathinfo($filename, PATHINFO_FILENAME).'_'.$sizeName.'.'.pathinfo($filename, PATHINFO_EXTENSION);
 
                 // Resize image maintaining aspect ratio
                 $thumbnail = clone $image;
                 $thumbnail->scale(width: $maxWidth);
 
                 // Generate the path
-                $thumbnailPath = $thumbnailDir . '/' . $thumbnailFilename;
-                $fullThumbnailPath = storage_path('app/public/' . $thumbnailPath);
+                $thumbnailPath = $thumbnailDir.'/'.$thumbnailFilename;
+                $fullThumbnailPath = storage_path('app/public/'.$thumbnailPath);
 
                 // Ensure directory exists
-                if (!file_exists(dirname($fullThumbnailPath))) {
+                if (! file_exists(dirname($fullThumbnailPath))) {
                     mkdir(dirname($fullThumbnailPath), 0755, true);
                 }
 
