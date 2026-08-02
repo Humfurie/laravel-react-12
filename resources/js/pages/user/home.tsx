@@ -243,14 +243,8 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
 
             <HomeBanner stats={profileUser?.profile_stats} />
             <HomeAboutMe profileUser={profileUser} />
-            <ExperienceSection experiences={transformedExperiences} />
 
-            {/* Projects Section */}
-            {projects.length > 0 && <HomeProjects projects={projects} />}
-
-            <HomeExpertise expertises={expertises} />
-
-            {/* Blog Section */}
+            {/* Blog Section — leads the page */}
             <section className="bg-[#F3F1EC] py-[clamp(80px,12vw,160px)] dark:bg-[#0F1A15]">
                 <div className="primary-container">
                     {/* Header row: title left, view all right */}
@@ -285,6 +279,13 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
                     )}
                 </div>
             </section>
+
+            <ExperienceSection experiences={transformedExperiences} />
+
+            {/* Projects Section */}
+            {projects.length > 0 && <HomeProjects projects={projects} />}
+
+            <HomeExpertise expertises={expertises} />
 
             {/* CTA Section with Contact Links */}
             <HomeCTA email={profileUser?.email} socialLinks={profileUser?.social_links ?? undefined} />

@@ -40,6 +40,10 @@ return [
         'base_url' => 'https://financialmodelingprep.com/stable',
     ],
 
+    'humfurie' => [
+        'projects_url' => env('HUMFURIE_PROJECTS_API_URL', 'https://api.humfurie.org/api/projects'),
+    ],
+
     'google_analytics' => [
         'measurement_id' => env('GOOGLE_ANALYTICS_ID'),
     ],

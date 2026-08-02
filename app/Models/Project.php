@@ -42,6 +42,8 @@ class Project extends Model
     const OWNERSHIP_CONTRIBUTOR = 'contributor';
 
     protected $fillable = [
+        'external_id',
+        'external_synced_at',
         'title',
         'slug',
         'description',
@@ -68,6 +70,7 @@ class Project extends Model
     ];
 
     protected $casts = [
+        'external_synced_at' => 'datetime',
         'tech_stack' => 'array',
         'links' => 'array',
         'metrics' => 'array',
