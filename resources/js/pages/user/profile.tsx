@@ -72,15 +72,15 @@ function Profile({ user, contributedProjects }: ProfileProps) {
                     content={`${user.name}'s developer profile — GitHub contributions, projects, and open source activity.`}
                 />
                 <meta property="og:type" content="profile" />
-                <meta property="og:url" content={`https://humfurie.org/u/${user.username}`} />
-                <meta property="og:image" content={user.avatar_url || 'https://humfurie.org/images/humphrey-banner.webp?v=1'} />
+                <meta property="og:url" content={`https://humphrey.humfurie.org/u/${user.username}`} />
+                <meta property="og:image" content={user.avatar_url || 'https://humphrey.humfurie.org/images/humphrey-banner.webp?v=1'} />
                 <meta name="twitter:card" content="summary" />
                 <meta name="twitter:title" content={`${user.name} (@${user.username})`} />
                 <meta
                     name="twitter:description"
                     content={`${user.name}'s developer profile — GitHub contributions, projects, and open source activity.`}
                 />
-                <link rel="canonical" href={`https://humfurie.org/u/${user.username}`} />
+                <link rel="canonical" href={`https://humphrey.humfurie.org/u/${user.username}`} />
             </Head>
 
             <div className="bg-background min-h-screen">

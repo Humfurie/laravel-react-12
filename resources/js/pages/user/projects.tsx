@@ -128,15 +128,15 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                     name="description"
                     content="Explore Humphrey Singculan's portfolio of projects - web applications built with Laravel, React, and modern full-stack technologies."
                 />
-                <link rel="canonical" href="https://humfurie.org/projects" />
+                <link rel="canonical" href="https://humphrey.humfurie.org/projects" />
                 <meta property="og:title" content="Projects - Humphrey Singculan" />
                 <meta
                     property="og:description"
                     content="Explore Humphrey Singculan's portfolio of projects - web applications built with Laravel, React, and modern full-stack technologies."
                 />
                 <meta property="og:type" content="website" />
-                <meta property="og:url" content="https://humfurie.org/projects" />
-                <meta property="og:image" content="https://humfurie.org/images/humphrey-banner.webp?v=1" />
+                <meta property="og:url" content="https://humphrey.humfurie.org/projects" />
+                <meta property="og:image" content="https://humphrey.humfurie.org/images/humphrey-banner.webp?v=1" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="Projects - Humphrey Singculan" />
                 <meta
@@ -152,11 +152,11 @@ export default function ProjectsShowcase({ featured, projects, deployments, cate
                         name: 'Projects',
                         description:
                             "Explore Humphrey Singculan's portfolio of projects - web applications built with Laravel, React, and modern full-stack technologies.",
-                        url: 'https://humfurie.org/projects',
+                        url: 'https://humphrey.humfurie.org/projects',
                     }),
                     schemas.breadcrumbList([
-                        { name: 'Home', url: 'https://humfurie.org' },
-                        { name: 'Projects', url: 'https://humfurie.org/projects' },
+                        { name: 'Home', url: 'https://humphrey.humfurie.org' },
+                        { name: 'Projects', url: 'https://humphrey.humfurie.org/projects' },
                     ]),
                     schemas.organization(),
                 ]}

@@ -211,30 +211,30 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
 
     return (
         <>
-            <Head title="Humphrey Singculan - Software Engineer | Blog & Portfolio">
+            <Head title="Humphrey (Ping) — Personal Blog">
                 <meta
                     name="description"
-                    content="Humphrey Singculan is a Software Engineer specializing in Laravel, React, and full-stack development. Explore projects, blog posts, and professional portfolio."
+                    content="Humphrey's personal blog — thoughts, travel, motorcycles, and life, alongside a running record of software projects and experience."
                 />
 
                 {/* Canonical URL */}
-                <link rel="canonical" href="https://humfurie.org" />
+                <link rel="canonical" href="https://humphrey.humfurie.org" />
 
                 {/* Open Graph Meta Tags for Social Media */}
-                <meta property="og:title" content="Humphrey Singculan - Software Engineer | Blog & Portfolio" />
+                <meta property="og:title" content="Humphrey (Ping) — Personal Blog" />
                 <meta
                     property="og:description"
-                    content="Humphrey Singculan is a Software Engineer specializing in Laravel, React, and full-stack development. Explore projects, blog posts, and professional portfolio."
+                    content="Humphrey's personal blog — thoughts, travel, motorcycles, and life, alongside a running record of software projects and experience."
                 />
                 <meta property="og:type" content="website" />
-                <meta property="og:url" content="https://humfurie.org" />
-                <meta property="og:image" content="https://humfurie.org/images/humphrey-banner.webp?v=1" />
+                <meta property="og:url" content="https://humphrey.humfurie.org" />
+                <meta property="og:image" content="https://humphrey.humfurie.org/images/humphrey-banner.webp?v=1" />
                 {/* Twitter Card Meta Tags */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="Humphrey Singculan - Software Engineer | Blog & Portfolio" />
+                <meta name="twitter:title" content="Humphrey (Ping) — Personal Blog" />
                 <meta
                     name="twitter:description"
-                    content="Humphrey Singculan is a Software Engineer specializing in Laravel, React, and full-stack development. Explore projects, blog posts, and professional portfolio."
+                    content="Humphrey's personal blog — thoughts, travel, motorcycles, and life, alongside a running record of software projects and experience."
                 />
             </Head>
 

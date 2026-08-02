@@ -204,15 +204,15 @@ export default function Resume({ experiences, expertises, profileUser }: Props) 
                     name="description"
                     content={`${profileUser.name} - ${profileUser.headline}. View my professional experience, skills, and education.`}
                 />
-                <link rel="canonical" href="https://humfurie.org/resume" />
+                <link rel="canonical" href="https://humphrey.humfurie.org/resume" />
                 <meta property="og:title" content={`Resume - ${profileUser.name}`} />
                 <meta
                     property="og:description"
                     content={`${profileUser.name} - ${profileUser.headline}. View my professional experience, skills, and education.`}
                 />
                 <meta property="og:type" content="website" />
-                <meta property="og:url" content="https://humfurie.org/resume" />
-                <meta property="og:image" content="https://humfurie.org/images/humphrey-banner.webp?v=1" />
+                <meta property="og:url" content="https://humphrey.humfurie.org/resume" />
+                <meta property="og:image" content="https://humphrey.humfurie.org/images/humphrey-banner.webp?v=1" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={`Resume - ${profileUser.name}`} />
                 <meta

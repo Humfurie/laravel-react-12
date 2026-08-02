@@ -141,8 +141,8 @@ export const schemas = {
         '@type': 'Person',
         name: 'Humphrey Singculan',
         jobTitle: 'Software Engineer',
-        url: 'https://humfurie.org',
-        image: 'https://humfurie.org/images/profile.jpg',
+        url: 'https://humphrey.humfurie.org',
+        image: 'https://humphrey.humfurie.org/images/profile.jpg',
         description: 'Software Engineer specializing in Laravel, React, and full-stack development.',
         sameAs: [
             'https://github.com/Humfurie',
@@ -157,11 +157,11 @@ export const schemas = {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
         name: 'Humphrey Singculan',
-        url: 'https://humfurie.org',
+        url: 'https://humphrey.humfurie.org',
         description: 'Portfolio and blog of Humphrey Singculan, Software Engineer',
         potentialAction: {
             '@type': 'SearchAction',
-            target: 'https://humfurie.org/blog?search={search_term_string}',
+            target: 'https://humphrey.humfurie.org/blog?search={search_term_string}',
             'query-input': 'required name=search_term_string',
         },
     }),
@@ -186,14 +186,14 @@ export const schemas = {
         author: {
             '@type': 'Person',
             name: 'Humphrey Singculan',
-            url: 'https://humfurie.org',
+            url: 'https://humphrey.humfurie.org',
         },
         publisher: {
             '@type': 'Organization',
             name: 'Humphrey Singculan',
             logo: {
                 '@type': 'ImageObject',
-                url: 'https://humfurie.org/images/logo.png',
+                url: 'https://humphrey.humfurie.org/images/logo.png',
             },
         },
         mainEntityOfPage: {
@@ -234,7 +234,7 @@ export const schemas = {
         author: {
             '@type': 'Person',
             name: 'Humphrey Singculan',
-            url: 'https://humfurie.org',
+            url: 'https://humphrey.humfurie.org',
         },
     }),
 
@@ -250,10 +250,10 @@ export const schemas = {
         '@context': 'https://schema.org',
         '@type': 'Organization',
         name: 'Humphrey Singculan',
-        url: 'https://humfurie.org',
+        url: 'https://humphrey.humfurie.org',
         logo: {
             '@type': 'ImageObject',
-            url: 'https://humfurie.org/images/logo.png',
+            url: 'https://humphrey.humfurie.org/images/logo.png',
         },
         sameAs: [
             'https://github.com/Humfurie',

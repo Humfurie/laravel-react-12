@@ -265,14 +265,14 @@ export default function BlogIndex({ blogs, category }: Props) {
                             : 'Personal blog posts by Humphrey Singculan — thoughts, experiences, and stories beyond code.'
                     }
                 />
-                <link rel="canonical" href="https://humfurie.org/blog" />
+                <link rel="canonical" href="https://humphrey.humfurie.org/blog" />
 
                 {/* Open Graph Meta Tags for Social Media */}
                 <meta property="og:title" content={`${categoryLabel} Blog`} />
                 <meta property="og:description" content={`Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`} />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
-                <meta property="og:image" content="https://humfurie.org/images/humphrey-banner.webp?v=1" />
+                <meta property="og:image" content="https://humphrey.humfurie.org/images/humphrey-banner.webp?v=1" />
                 {/* Twitter Card Meta Tags */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={`${categoryLabel} Blog`} />
@@ -327,7 +327,7 @@ export default function BlogIndex({ blogs, category }: Props) {
                 </script>
 
                 {/* Canonical URL */}
-                <link rel="canonical" href="https://humfurie.org/blog" />
+                <link rel="canonical" href="https://humphrey.humfurie.org/blog" />
             </Head>
 
             <StructuredData data={[schemas.organization()]} />

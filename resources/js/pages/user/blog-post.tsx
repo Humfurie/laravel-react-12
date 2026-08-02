@@ -71,7 +71,7 @@ export default function BlogPost({ blog }: Props) {
     // Check if ads are configured
     const hasAds = adsense?.client_id && (adsense?.slots?.blog_post_top || adsense?.slots?.blog_post_bottom || adsense?.slots?.blog_post_sidebar);
 
-    const safeImage = typeof blog.display_image === 'string' && blog.display_image ? blog.display_image : 'https://humfurie.org/images/humphrey-banner.webp?v=1';
+    const safeImage = typeof blog.display_image === 'string' && blog.display_image ? blog.display_image : 'https://humphrey.humfurie.org/images/humphrey-banner.webp?v=1';
 
     const handleShare = async () => {
         if (navigator.share) {
@@ -100,7 +100,7 @@ export default function BlogPost({ blog }: Props) {
                 <meta property="og:title" content={String(blog.meta_data?.meta_title || blog.title || '')} />
                 <meta property="og:description" content={String(blog.meta_data?.meta_description || blog.excerpt || '')} />
                 <meta property="og:type" content="article" />
-                <meta property="og:url" content={`https://humfurie.org/blog/${blog.slug}`} />
+                <meta property="og:url" content={`https://humphrey.humfurie.org/blog/${blog.slug}`} />
                 <meta property="og:image" content={safeImage} />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
@@ -108,7 +108,7 @@ export default function BlogPost({ blog }: Props) {
 
                 {blog.published_at && <meta property="article:published_time" content={String(blog.published_at)} />}
                 <meta property="article:modified_time" content={String(blog.updated_at)} />
-                <meta property="article:author" content="https://humfurie.org" />
+                <meta property="article:author" content="https://humphrey.humfurie.org" />
                 <meta property="article:section" content="Technology" />
 
                 {/* Twitter Card Meta Tags */}
@@ -118,7 +118,7 @@ export default function BlogPost({ blog }: Props) {
                 {blog.display_image && <meta name="twitter:image" content={String(blog.display_image)} />}
 
                 {/* Canonical URL */}
-                <link rel="canonical" href={`https://humfurie.org/blog/${blog.slug}`} />
+                <link rel="canonical" href={`https://humphrey.humfurie.org/blog/${blog.slug}`} />
             </Head>
 
             {/* Structured Data */}
@@ -130,14 +130,14 @@ export default function BlogPost({ blog }: Props) {
                         image: blog.display_image || undefined,
                         datePublished: blog.published_at || blog.created_at,
                         dateModified: blog.updated_at,
-                        url: `https://humfurie.org/blog/${blog.slug}`,
+                        url: `https://humphrey.humfurie.org/blog/${blog.slug}`,
                         keywords: blog.meta_data?.meta_keywords || undefined,
                         articleBody: blog.content.replace(/<[^>]*>/g, '').substring(0, 500),
                     }),
                     schemas.breadcrumbList([
-                        { name: 'Home', url: 'https://humfurie.org' },
-                        { name: 'Blog', url: 'https://humfurie.org/blog' },
-                        { name: blog.title, url: `https://humfurie.org/blog/${blog.slug}` },
+                        { name: 'Home', url: 'https://humphrey.humfurie.org' },
+                        { name: 'Blog', url: 'https://humphrey.humfurie.org/blog' },
+                        { name: blog.title, url: `https://humphrey.humfurie.org/blog/${blog.slug}` },
                     ]),
                 ]}
             />

@@ -244,12 +244,12 @@ export default function Guestbook({ entries: initialEntries }: Props) {
         <>
             <Head title="Guestbook">
                 <meta name="description" content="Sign the guestbook and leave a message. Say hello or share your thoughts!" />
-                <link rel="canonical" href="https://humfurie.org/guestbook" />
+                <link rel="canonical" href="https://humphrey.humfurie.org/guestbook" />
                 <meta property="og:title" content="Guestbook - Humphrey Singculan" />
                 <meta property="og:description" content="Sign the guestbook and leave a message. Say hello or share your thoughts!" />
                 <meta property="og:type" content="website" />
-                <meta property="og:url" content="https://humfurie.org/guestbook" />
-                <meta property="og:image" content="https://humfurie.org/images/humphrey-banner.webp?v=1" />
+                <meta property="og:url" content="https://humphrey.humfurie.org/guestbook" />
+                <meta property="og:image" content="https://humphrey.humfurie.org/images/humphrey-banner.webp?v=1" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="Guestbook - Humphrey Singculan" />
                 <meta name="twitter:description" content="Sign the guestbook and leave a message. Say hello or share your thoughts!" />
