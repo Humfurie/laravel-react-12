@@ -12,22 +12,15 @@ class BlogController extends Controller
 {
     public function index()
     {
-        $category = request()->query('category', 'portfolio');
-
-        $query = Blog::published()
+        $blogs = Blog::published()
             ->with('image')
             ->orderBy('published_at', 'desc')
-            ->orderBy('sort_order', 'asc');
-
-        if (in_array($category, ['portfolio', 'personal'])) {
-            $query->whereJsonContains('tags', $category);
-        }
-
-        $blogs = $query->paginate(12)->withQueryString();
+            ->orderBy('sort_order', 'asc')
+            ->paginate(12)
+            ->withQueryString();
 
         return Inertia::render('user/blog', [
             'blogs' => $blogs,
-            'category' => $category,
         ]);
     }
 

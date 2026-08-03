@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { MotionDiv, MotionItem, MotionStagger } from '@/components/ui/motion';
 import { Head, Link, router } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowRight, ArrowUpRight, BookOpen, Briefcase, Calendar, Eye, Pencil, Sparkles } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BookOpen, Calendar, Eye, Sparkles } from 'lucide-react';
 import { memo, useCallback, useEffect, useState } from 'react';
 
 interface Blog {
@@ -30,8 +30,6 @@ interface Blog {
     status_label: string;
 }
 
-type BlogCategory = 'portfolio' | 'personal';
-
 interface Props {
     blogs: {
         data: Blog[];
@@ -40,7 +38,6 @@ interface Props {
         per_page: number;
         total: number;
     };
-    category: BlogCategory;
 }
 
 const truncateText = (text: string, maxLength: number = 150) => {
@@ -190,46 +187,7 @@ const BlogCard = memo(function BlogCard({ blog, size = 'normal' }: { blog: Blog;
     );
 });
 
-const categories: { key: BlogCategory; label: string; icon: typeof Briefcase }[] = [
-    { key: 'portfolio', label: 'Portfolio', icon: Briefcase },
-    { key: 'personal', label: 'Personal', icon: Pencil },
-];
-
-const CategoryTabs = memo(function CategoryTabs({ active }: { active: BlogCategory }) {
-    const [optimistic, setOptimistic] = useState<BlogCategory>(active);
-
-    // Sync when server confirms the new category
-    useEffect(() => {
-        setOptimistic(active);
-    }, [active]);
-
-    const handleTabClick = (category: BlogCategory) => {
-        if (category === optimistic) return;
-        setOptimistic(category); // Instant visual switch
-        router.get(`/blog`, { category }, { preserveState: true, only: ['blogs', 'category'] });
-    };
-
-    return (
-        <div className="flex items-center gap-1 rounded-full bg-[#F3F1EC] p-1 dark:bg-[#162820]">
-            {categories.map(({ key, label, icon: Icon }) => (
-                <button
-                    key={key}
-                    onClick={() => handleTabClick(key)}
-                    className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
-                        optimistic === key
-                            ? 'bg-[#1B3D2F] text-white shadow-sm dark:bg-[#5AAF7E] dark:text-[#0F1A15]'
-                            : 'text-[#6B6B63] hover:text-[#1B3D2F] dark:text-[#9E9E95] dark:hover:text-[#5AAF7E]'
-                    }`}
-                >
-                    <Icon className="h-3.5 w-3.5" />
-                    {label}
-                </button>
-            ))}
-        </div>
-    );
-});
-
-export default function BlogIndex({ blogs, category }: Props) {
+export default function BlogIndex({ blogs }: Props) {
     const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
@@ -248,43 +206,40 @@ export default function BlogIndex({ blogs, category }: Props) {
         return () => window.removeEventListener('scroll', updateScrollDirection);
     }, [isVisible]);
 
-    const categoryLabel = category === 'portfolio' ? 'Portfolio' : 'Personal';
-
     // Get featured post and rest
     const featuredPost = blogs.data.find((blog) => blog.isPrimary) || blogs.data[0];
     const otherPosts = blogs.data.filter((blog) => blog.id !== featuredPost?.id);
 
     return (
         <>
-            <Head title={`${category === 'portfolio' ? 'Portfolio' : 'Personal'} Blog`}>
+            <Head title="Blog">
                 <meta
                     name="description"
-                    content={
-                        category === 'portfolio'
-                            ? 'Portfolio articles by Humphrey Singculan on software development, Laravel, React, and full-stack engineering.'
-                            : 'Personal blog posts by Humphrey Singculan — thoughts, experiences, and stories beyond code.'
-                    }
+                    content="Humphrey's personal blog — thoughts, travel, motorcycles, and life, alongside the occasional post on what he's been building."
                 />
                 <link rel="canonical" href="https://humphrey.humfurie.org/blog" />
 
                 {/* Open Graph Meta Tags for Social Media */}
-                <meta property="og:title" content={`${categoryLabel} Blog`} />
-                <meta property="og:description" content={`Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`} />
+                <meta property="og:title" content="Blog" />
+                <meta
+                    property="og:description"
+                    content="Humphrey's personal blog — thoughts, travel, motorcycles, and life."
+                />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
                 <meta property="og:image" content="https://humphrey.humfurie.org/images/humphrey-banner.webp?v=1" />
                 {/* Twitter Card Meta Tags */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={`${categoryLabel} Blog`} />
-                <meta name="twitter:description" content={`Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`} />
+                <meta name="twitter:title" content="Blog" />
+                <meta name="twitter:description" content="Humphrey's personal blog — thoughts, travel, motorcycles, and life." />
 
                 {/* Schema.org JSON-LD Structured Data */}
                 <script type="application/ld+json">
                     {JSON.stringify({
                         '@context': 'https://schema.org',
                         '@type': 'CollectionPage',
-                        name: `${categoryLabel} Blog`,
-                        description: `Browse ${categoryLabel.toLowerCase()} articles by Humphrey Singculan.`,
+                        name: 'Blog',
+                        description: "Humphrey's personal blog — thoughts, travel, motorcycles, and life.",
                         url: typeof window !== 'undefined' ? window.location.href : '',
                         mainEntity: {
                             '@type': 'ItemList',
@@ -357,7 +312,6 @@ export default function BlogIndex({ blogs, category }: Props) {
                                 </h1>
                             </div>
                             <div className="flex items-center gap-4">
-                                <CategoryTabs active={category} />
                                 <Link
                                     href="#all-posts"
                                     className="hidden items-center gap-2 text-sm font-medium text-[#9E9E95] transition-colors hover:text-[#1B3D2F] md:flex dark:hover:text-[#5AAF7E]"
@@ -447,9 +401,7 @@ export default function BlogIndex({ blogs, category }: Props) {
                             <div className="mb-8">
                                 <div className="mb-4 flex items-center gap-3">
                                     <div className="h-px flex-1 bg-[#E5E4E0] dark:bg-[#2A4A3A]" />
-                                    <h2 className="font-display text-3xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">
-                                        {category === 'portfolio' ? 'Portfolio' : 'Personal'} Articles
-                                    </h2>
+                                    <h2 className="font-display text-3xl font-normal text-[#1A1A1A] dark:text-[#E8E6E1]">All Articles</h2>
                                     <div className="h-px flex-1 bg-[#E5E4E0] dark:bg-[#2A4A3A]" />
                                 </div>
                                 <p className="text-center text-[#6B6B63] dark:text-[#9E9E95]">
@@ -489,7 +441,7 @@ export default function BlogIndex({ blogs, category }: Props) {
                                                 {Array.from({ length: blogs.last_page }, (_, i) => i + 1).map((page) => (
                                                     <button
                                                         key={page}
-                                                        onClick={() => router.visit(`/blog?category=${category}&page=${page}`)}
+                                                        onClick={() => router.visit(`/blog?page=${page}`)}
                                                         className={`h-10 w-10 rounded-full font-medium transition-all ${
                                                             page === blogs.current_page
                                                                 ? 'bg-[#1B3D2F] text-white dark:bg-[#5AAF7E] dark:text-[#0F1A15]'

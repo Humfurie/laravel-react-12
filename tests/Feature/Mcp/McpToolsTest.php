@@ -144,6 +144,43 @@ it('returns error when updating a non-existent blog', function () {
     expect((string) $result->content())->toContain('Blog not found');
 });
 
+it('auto-sets published_at when updating status to published without one', function () {
+    $blog = Blog::factory()->draft()->create(['published_at' => null]);
+
+    $result = (new UpdateBlog)->handle(new Request([
+        'id' => $blog->id,
+        'status' => 'published',
+    ]));
+
+    expect($result->isError())->toBeFalse();
+    expect($blog->fresh()->published_at)->not->toBeNull();
+});
+
+it('does not overwrite an explicitly provided published_at when updating', function () {
+    $blog = Blog::factory()->draft()->create(['published_at' => null]);
+    $explicitDate = now()->addDays(3)->startOfSecond();
+
+    (new UpdateBlog)->handle(new Request([
+        'id' => $blog->id,
+        'status' => 'published',
+        'published_at' => $explicitDate->toIso8601String(),
+    ]));
+
+    expect($blog->fresh()->published_at->equalTo($explicitDate))->toBeTrue();
+});
+
+it('does not touch an already-set published_at when updating unrelated fields', function () {
+    $originalDate = now()->subDays(5)->startOfSecond();
+    $blog = Blog::factory()->create(['status' => 'published', 'published_at' => $originalDate]);
+
+    (new UpdateBlog)->handle(new Request([
+        'id' => $blog->id,
+        'title' => 'Refreshed Title',
+    ]));
+
+    expect($blog->fresh()->published_at->equalTo($originalDate))->toBeTrue();
+});
+
 // ─── Blog: DeleteBlog ─────────────────────────────────────────────
 
 it('soft-deletes a blog', function () {

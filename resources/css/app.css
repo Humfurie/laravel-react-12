@@ -2,6 +2,7 @@
 @import '@/styles/_variables.scss';
 @import '@/styles/_keyframe-animations.scss';
 @plugin 'tailwindcss-animate';
+@plugin '@tailwindcss/typography';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';

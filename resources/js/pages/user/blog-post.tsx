@@ -147,7 +147,7 @@ export default function BlogPost({ blog }: Props) {
                     {/* Article Header */}
                     <article>
                         {/* Hero Section */}
-                        <header className="container mx-auto px-4 py-8 md:py-12">
+                        <header className={`container mx-auto px-4 py-8 md:py-12 ${hasAds ? 'max-w-7xl' : 'max-w-4xl'}`}>
                             {/* Back Link */}
                             <Link
                                 href="/blog"
@@ -200,7 +200,7 @@ export default function BlogPost({ blog }: Props) {
 
                         {/* Featured Image */}
                         {blog.display_image && (
-                            <div className="container mx-auto px-4">
+                            <div className={`container mx-auto px-4 ${hasAds ? 'max-w-7xl' : 'max-w-4xl'}`}>
                                 <div className="aspect-[21/9] overflow-hidden rounded-3xl">
                                     <img src={blog.display_image} alt={blog.title} className="h-full w-full object-cover" />
                                 </div>

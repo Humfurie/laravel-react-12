@@ -69,7 +69,16 @@ class UpdateBlog extends Tool
             return Response::error('Validation failed: '.json_encode($validator->errors()->toArray()));
         }
 
-        $blog->update($validator->validated());
+        $validated = $validator->validated();
+
+        // Set published_at if changing to published status and no date is provided
+        if (($validated['status'] ?? null) === Blog::STATUS_PUBLISHED &&
+            $blog->status !== Blog::STATUS_PUBLISHED &&
+            empty($validated['published_at'])) {
+            $validated['published_at'] = now();
+        }
+
+        $blog->update($validated);
 
         return Response::json([
             'message' => "Blog '{$blog->title}' updated successfully.",
