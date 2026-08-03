@@ -233,10 +233,7 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
             {/* Structured Data for SEO */}
             <StructuredData data={[schemas.person(), schemas.website(), schemas.organization()]} />
 
-            <HomeBanner />
-            <HomeAboutMe profileUser={profileUser} />
-
-            {/* Blog Section — leads the page */}
+            {/* Blog Section — first thing on the page */}
             <section className="bg-[#F3F1EC] py-[clamp(80px,12vw,160px)] dark:bg-[#0F1A15]">
                 <div className="primary-container">
                     {/* Header row: title left, view all right */}
@@ -271,6 +268,9 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
                     )}
                 </div>
             </section>
+
+            <HomeBanner />
+            <HomeAboutMe profileUser={profileUser} />
 
             <ExperienceSection experiences={transformedExperiences} />
 
