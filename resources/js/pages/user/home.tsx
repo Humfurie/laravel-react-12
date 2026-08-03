@@ -111,7 +111,7 @@ interface Props {
     };
 }
 
-// Blog Card — matches project card pattern: white card, border, thumb + body
+// Blog Card — single-column feed row: large thumbnail beside generous text, not a cramped grid tile
 function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }) {
     const handleCardClick = () => {
         router.visit(`/blog/${blog.slug}`);
@@ -120,14 +120,10 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
     return (
         <article
             onClick={handleCardClick}
-            className={`group cursor-pointer overflow-hidden rounded-xl border border-[#E5E4E0] bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#F5C89E] hover:shadow-lg dark:border-[#2A4A3A] dark:bg-[#162820] dark:hover:border-[#5AAF7E] ${
-                featured ? 'md:col-span-2 md:grid md:grid-cols-2' : ''
-            }`}
+            className="group grid cursor-pointer gap-6 overflow-hidden rounded-xl border border-[#E5E4E0] bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#F5C89E] hover:shadow-lg sm:grid-cols-[minmax(0,40%)_1fr] sm:gap-8 dark:border-[#2A4A3A] dark:bg-[#162820] dark:hover:border-[#5AAF7E]"
         >
             {/* Thumbnail */}
-            <div
-                className={`relative overflow-hidden bg-[#F3F1EC] dark:bg-[#0F1A15] ${featured ? 'aspect-[16/10] md:aspect-auto md:min-h-[300px]' : 'aspect-[16/10]'}`}
-            >
+            <div className="relative aspect-[16/9] overflow-hidden bg-[#F3F1EC] sm:aspect-auto sm:min-h-[260px] dark:bg-[#0F1A15]">
                 {blog.featured_image ? (
                     <img
                         src={blog.featured_image}
@@ -150,7 +146,7 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
             </div>
 
             {/* Content */}
-            <div className={`p-7 ${featured ? 'flex flex-col justify-center md:p-10' : ''}`}>
+            <div className={`flex flex-col justify-center p-7 sm:pl-0 ${featured ? 'sm:py-10' : 'sm:py-8'}`}>
                 {/* Date */}
                 {blog.published_at && (
                     <span className="text-[0.78rem] text-[#9E9E95]">{formatDistanceToNow(new Date(blog.published_at), { addSuffix: true })}</span>
@@ -159,7 +155,7 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
                 {/* Title */}
                 <h3
                     className={`font-display mt-2 leading-tight font-normal text-[#1A1A1A] transition-colors group-hover:text-[#1B3D2F] dark:text-[#E8E6E1] dark:group-hover:text-[#5AAF7E] ${
-                        featured ? 'text-[2rem]' : 'line-clamp-2 text-[1.5rem]'
+                        featured ? 'text-[2rem]' : 'text-[1.7rem]'
                     }`}
                 >
                     {blog.title}
@@ -167,15 +163,11 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
 
                 {/* Excerpt */}
                 {blog.excerpt && (
-                    <p
-                        className={`mt-2.5 text-[0.9rem] leading-[1.7] text-[#6B6B63] dark:text-[#9E9E95] ${featured ? 'line-clamp-3' : 'line-clamp-2'}`}
-                    >
-                        {blog.excerpt}
-                    </p>
+                    <p className="mt-3 line-clamp-3 text-[0.95rem] leading-[1.7] text-[#6B6B63] dark:text-[#9E9E95]">{blog.excerpt}</p>
                 )}
 
                 {/* Read more link */}
-                <div className="mt-5 inline-flex items-center gap-1.5 text-[0.85rem] font-medium text-[#1B3D2F] transition-all group-hover:gap-3 group-hover:text-[#E8945A] dark:text-[#5AAF7E] dark:group-hover:text-[#E8945A]">
+                <div className="mt-5 inline-flex w-fit items-center gap-1.5 text-[0.85rem] font-medium text-[#1B3D2F] transition-all group-hover:gap-3 group-hover:text-[#E8945A] dark:text-[#5AAF7E] dark:group-hover:text-[#E8945A]">
                     Read article
                     <ArrowRight className="h-4 w-4" />
                 </div>
@@ -241,7 +233,7 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
             {/* Structured Data for SEO */}
             <StructuredData data={[schemas.person(), schemas.website(), schemas.organization()]} />
 
-            <HomeBanner stats={profileUser?.profile_stats} />
+            <HomeBanner />
             <HomeAboutMe profileUser={profileUser} />
 
             {/* Blog Section — leads the page */}
@@ -259,10 +251,10 @@ export default function Home({ primary = [], latest = [], experiences = [], expe
                         </Link>
                     </MotionDiv>
 
-                    {/* Blog Grid */}
+                    {/* Blog feed — single column, stacked */}
                     {allBlogs.length > 0 && (
-                        <MotionStagger staggerDelay={0.1} className="grid gap-6 md:grid-cols-2">
-                            {/* Featured post - spans 2 columns */}
+                        <MotionStagger staggerDelay={0.1} className="flex flex-col gap-8">
+                            {/* Featured post */}
                             {featuredBlog && (
                                 <MotionItem variant="fadeUp">
                                     <BlogCard blog={featuredBlog} featured />

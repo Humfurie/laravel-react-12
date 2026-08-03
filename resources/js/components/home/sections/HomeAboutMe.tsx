@@ -23,7 +23,7 @@ const DEFAULT_STATS = [
 ];
 
 const DEFAULT_BIO =
-    "I'm passionate about building elegant, performant web applications with modern technologies. With a strong focus on Laravel and React, I create full-stack solutions that solve real problems and deliver exceptional user experiences.";
+    "I write about life, travel, and motorcycles — with the occasional post on whatever I've been building. By day I work with Laravel and React, but this space is for everything else.";
 
 const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
     const bio = profileUser?.about || DEFAULT_BIO;
@@ -40,7 +40,7 @@ const HomeAboutMe: React.FC<HomeAboutMeProps> = ({ profileUser }) => {
             <div className="primary-container grid items-center gap-12 md:grid-cols-2 md:gap-16">
                 {/* Left: Text content */}
                 <MotionDiv>
-                    <SectionTitle title="About" heading="A developer who cares about the craft" />
+                    <SectionTitle title="About" heading="A bit about me" />
                     <p className="mt-4 text-base leading-relaxed text-[#6B6B63] dark:text-[#9E9E95]">{bio}</p>
                 </MotionDiv>
 
