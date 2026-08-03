@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DeploymentController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\GuestbookController;
 use App\Http\Controllers\McpOAuthController;
@@ -12,6 +14,7 @@ use App\Http\Controllers\ResumeController;
 use App\Http\Controllers\RssFeedController;
 use App\Http\Controllers\SitemapController;
 use App\Services\HomepageCacheService;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -79,8 +82,8 @@ Route::get('/projects', [ProjectController::class, 'index'])->name('projects.ind
 Route::get('/api/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 
 // Deployments API for frontend
-Route::get('/api/deployments', [App\Http\Controllers\DeploymentController::class, 'index'])->name('deployments.index');
-Route::get('/api/deployments/{slug}', [App\Http\Controllers\DeploymentController::class, 'show'])->name('deployments.show');
+Route::get('/api/deployments', [DeploymentController::class, 'index'])->name('deployments.index');
+Route::get('/api/deployments/{slug}', [DeploymentController::class, 'show'])->name('deployments.show');
 
 // Public API for experiences
 Route::get('/api/experiences', [ExperienceController::class, 'public'])->name('experiences.public');
@@ -117,17 +120,17 @@ Route::middleware('auth')->group(function () {
 // Comment routes (authenticated users only)
 Route::middleware('auth')->group(function () {
     // Create comments (with rate limiting)
-    Route::post('/blogs/{blog}/comments', [App\Http\Controllers\CommentController::class, 'store'])
+    Route::post('/blogs/{blog}/comments', [CommentController::class, 'store'])
         ->middleware('throttle:10,1'); // 10 per minute
     // Route::post('/giveaways/{giveaway}/comments', [App\Http\Controllers\CommentController::class, 'storeOnGiveaway'])
     //     ->middleware('throttle:10,1');
 
     // Update/delete own comments
-    Route::put('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'update']);
-    Route::delete('/comments/{comment}', [App\Http\Controllers\CommentController::class, 'destroy']);
+    Route::put('/comments/{comment}', [CommentController::class, 'update']);
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 
     // Report comments
-    Route::post('/comments/{comment}/report', [App\Http\Controllers\CommentController::class, 'report'])
+    Route::post('/comments/{comment}/report', [CommentController::class, 'report'])
         ->middleware('throttle:5,1'); // 5 reports per minute
 });
 
@@ -137,11 +140,11 @@ Route::get('/.well-known/oauth-authorization-server', [McpOAuthController::class
 
 // MCP OAuth2 endpoints
 Route::post('/oauth/register', [McpOAuthController::class, 'register'])
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+    ->withoutMiddleware([PreventRequestForgery::class]);
 Route::get('/oauth/authorize', [McpOAuthController::class, 'showAuthorization'])->middleware('auth');
 Route::post('/oauth/authorize', [McpOAuthController::class, 'approveAuthorization'])->middleware('auth');
 Route::post('/oauth/token', [McpOAuthController::class, 'token'])
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+    ->withoutMiddleware([PreventRequestForgery::class]);
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
