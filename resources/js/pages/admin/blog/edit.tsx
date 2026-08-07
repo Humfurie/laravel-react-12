@@ -9,12 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/AdminLayout';
-import { cn } from '@/lib/utils';
 import { slugify } from '@/lib/slugify';
+import { MAX_FILE_SIZE } from '@/lib/tiptap-utils';
+import { cn } from '@/lib/utils';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
 import { ArrowLeft, CalendarIcon, Link2, Link2Off, Plus, Upload, X } from 'lucide-react';
 import React, { useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 interface Blog {
     id: number;
@@ -51,7 +53,7 @@ export default function EditBlog({ blog }: Props) {
     // Start locked (manual mode) if slug was manually edited, otherwise auto mode
     const [isSlugLocked, setIsSlugLocked] = useState(() => blog.slug !== slugify(blog.title));
 
-    const { data, setData, post, processing, errors, transform } = useForm({
+    const { data, setData, post, processing, errors, setError, clearErrors, transform } = useForm({
         title: blog.title,
         slug: blog.slug,
         content: blog.content,
@@ -92,6 +94,11 @@ export default function EditBlog({ blog }: Props) {
         setIsSlugLocked(!isSlugLocked);
     };
 
+    const handleSubmitError = (formErrors: Record<string, string>) => {
+        const messages = Object.values(formErrors);
+        toast.error(messages[0] ?? 'Failed to save post. Please check the form for errors.');
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -109,7 +116,9 @@ export default function EditBlog({ blog }: Props) {
                 if (imagePreview && imagePreview.startsWith('blob:')) {
                     URL.revokeObjectURL(imagePreview);
                 }
+                toast.success('Post saved successfully.');
             },
+            onError: handleSubmitError,
         });
     };
 
@@ -130,7 +139,9 @@ export default function EditBlog({ blog }: Props) {
                 if (imagePreview && imagePreview.startsWith('blob:')) {
                     URL.revokeObjectURL(imagePreview);
                 }
+                toast.success('Post saved successfully.');
             },
+            onError: handleSubmitError,
         });
     };
 
@@ -158,7 +169,9 @@ export default function EditBlog({ blog }: Props) {
                 if (imagePreview && imagePreview.startsWith('blob:')) {
                     URL.revokeObjectURL(imagePreview);
                 }
+                toast.success('Post saved successfully.');
             },
+            onError: handleSubmitError,
         });
     };
 
@@ -179,13 +192,23 @@ export default function EditBlog({ blog }: Props) {
                 if (imagePreview && imagePreview.startsWith('blob:')) {
                     URL.revokeObjectURL(imagePreview);
                 }
+                toast.success('Post saved successfully.');
             },
+            onError: handleSubmitError,
         });
     };
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        if (file.size > MAX_FILE_SIZE) {
+            toast.error(`Image is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Max size is ${MAX_FILE_SIZE / (1024 * 1024)}MB.`);
+            setError('featured_image_file', 'Image exceeds 5MB size limit.');
+            e.target.value = '';
+            return;
+        }
+        clearErrors('featured_image_file');
 
         // Clean up old blob URL if exists
         if (imagePreview && imagePreview.startsWith('blob:')) {
@@ -309,7 +332,9 @@ export default function EditBlog({ blog }: Props) {
                                         disabled={!isSlugLocked}
                                     />
                                     <p className="text-muted-foreground text-xs">
-                                        {isSlugLocked ? 'Editing manually. Click "Auto" to sync with title.' : 'Auto-generated from title. Click "Manual" to edit.'}
+                                        {isSlugLocked
+                                            ? 'Editing manually. Click "Auto" to sync with title.'
+                                            : 'Auto-generated from title. Click "Manual" to edit.'}
                                     </p>
                                     <p className="text-muted-foreground text-xs">
                                         URL: {typeof window !== 'undefined' ? window.location.origin : ''}/blog/{data.slug || 'post-slug'}
@@ -419,7 +444,9 @@ export default function EditBlog({ blog }: Props) {
                                         className={errors['meta_data.meta_description'] ? 'border-red-500' : ''}
                                     />
                                     <p className="text-muted-foreground text-xs">{data.meta_data.meta_description.length}/160 characters</p>
-                                    {errors['meta_data.meta_description'] && <p className="text-sm text-red-500">{errors['meta_data.meta_description']}</p>}
+                                    {errors['meta_data.meta_description'] && (
+                                        <p className="text-sm text-red-500">{errors['meta_data.meta_description']}</p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -619,6 +646,7 @@ export default function EditBlog({ blog }: Props) {
                                                 className="w-full rounded-lg border border-gray-300 px-4 py-3 transition-colors focus:ring-2 focus:ring-orange-500 focus:outline-none"
                                             />
                                             <p className="mt-2 text-xs text-gray-500">Supports: JPG, PNG, GIF, SVG, WEBP (max 5MB)</p>
+                                            {errors.featured_image_file && <p className="mt-1 text-sm text-red-600">{errors.featured_image_file}</p>}
                                             {data.featured_image_file && (
                                                 <div className="mt-3 rounded-md border border-[#E4EDE8] bg-[#E4EDE8]/30 p-3 dark:border-[#2A4A3A] dark:bg-[#162820]">
                                                     <div className="flex items-center text-[#1B3D2F] dark:text-[#5AAF7E]">

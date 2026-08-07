@@ -88,8 +88,8 @@ class Blog extends Model
     /**
      * Generate a unique slug from the given title.
      *
-     * @param string $title The title to generate slug from
-     * @param int|null $excludeId ID to exclude from uniqueness check (for updates)
+     * @param  string  $title  The title to generate slug from
+     * @param  int|null  $excludeId  ID to exclude from uniqueness check (for updates)
      */
     protected static function generateUniqueSlug(string $title, ?int $excludeId = null): string
     {
@@ -98,7 +98,7 @@ class Blog extends Model
         $counter = 1;
 
         while (static::slugExists($slug, $excludeId)) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 
@@ -108,8 +108,8 @@ class Blog extends Model
     /**
      * Check if a slug already exists in the database.
      *
-     * @param string $slug The slug to check
-     * @param int|null $excludeId ID to exclude from the check (for updates)
+     * @param  string  $slug  The slug to check
+     * @param  int|null  $excludeId  ID to exclude from the check (for updates)
      */
     protected static function slugExists(string $slug, ?int $excludeId = null): bool
     {
@@ -140,7 +140,7 @@ class Blog extends Model
      */
     public function getImageUrlAttribute(): ?string
     {
-        return $this->image?->url;
+        return $this->display_image;
     }
 
     /**
@@ -219,6 +219,7 @@ class Blog extends Model
             if (str_starts_with($this->featured_image, '/storage/')) {
                 return Storage::url(Str::after($this->featured_image, '/storage/'));
             }
+
             return $this->featured_image;
         }
 
@@ -232,7 +233,7 @@ class Blog extends Model
             ];
 
             foreach ($patterns as $pattern) {
-                if (preg_match($pattern, $this->content, $matches) && !empty($matches[1])) {
+                if (preg_match($pattern, $this->content, $matches) && ! empty($matches[1])) {
                     return $matches[1];
                 }
             }
@@ -264,7 +265,7 @@ class Blog extends Model
      */
     public function isManuallyFeatured(): bool
     {
-        if (!$this->isPrimary) {
+        if (! $this->isPrimary) {
             return false;
         }
 

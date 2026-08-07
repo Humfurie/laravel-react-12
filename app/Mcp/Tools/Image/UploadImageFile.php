@@ -25,7 +25,7 @@ class UploadImageFile extends Tool
 
     public function description(): string
     {
-        return 'Upload an image to storage from raw base64-encoded bytes. Use this when you have image data directly (e.g. a local file) rather than a remote URL. Optionally attach it to a blog post (via blog_id or blog_slug), an expertise item (via expertise_id), or a project (via project_id). Returns the hosted path.';
+        return 'Upload an image to storage from raw base64-encoded bytes. Use this when you have image data directly (e.g. a local file) rather than a remote URL. Optionally attach it to a blog post (via blog_id or blog_slug), an expertise item (via expertise_id), or a project (via project_id). Returns the hosted path. Will not overwrite an existing image unless overwrite is true — returns "skipped" if one already exists.';
     }
 
     public function schema(JsonSchema $schema): array
@@ -37,6 +37,7 @@ class UploadImageFile extends Tool
             'blog_slug' => $schema->string()->description('Blog slug to attach the image to as featured image (mutually exclusive with expertise_id and project_id)'),
             'expertise_id' => $schema->integer()->description('Expertise ID to attach the image to (mutually exclusive with blog_id/blog_slug and project_id, stores in images/techstack/)'),
             'project_id' => $schema->integer()->description('Project ID to attach the image to as primary thumbnail (mutually exclusive with blog_id/blog_slug and expertise_id)'),
+            'overwrite' => $schema->boolean()->description('Replace an existing image instead of skipping. Defaults to false.'),
         ];
     }
 
@@ -74,6 +75,7 @@ class UploadImageFile extends Tool
         $expertiseId = $request->get('expertise_id');
         $projectId = $request->get('project_id');
         $hasBlogTarget = $blogId || $blogSlug;
+        $overwrite = (bool) $request->get('overwrite', false);
 
         $exclusiveCount = (int) $hasBlogTarget + (int) (bool) $expertiseId + (int) (bool) $projectId;
         if ($exclusiveCount > 1) {
@@ -90,7 +92,7 @@ class UploadImageFile extends Tool
                 return Response::error('Blog not found.');
             }
 
-            if ($blog->featured_image) {
+            if ($blog->featured_image && ! $overwrite) {
                 return Response::json([
                     'path' => null, 'size' => null, 'mime_type' => null,
                     'blog_updated' => 'skipped', 'expertise_updated' => 'none', 'project_updated' => 'none',
@@ -106,7 +108,7 @@ class UploadImageFile extends Tool
                 return Response::error('Expertise not found.');
             }
 
-            if ($expertise->image) {
+            if ($expertise->image && ! $overwrite) {
                 return Response::json([
                     'path' => null, 'size' => null, 'mime_type' => null,
                     'blog_updated' => 'none', 'expertise_updated' => 'skipped', 'project_updated' => 'none',
@@ -122,7 +124,7 @@ class UploadImageFile extends Tool
                 return Response::error('Project not found.');
             }
 
-            if ($project->primaryImage()->exists()) {
+            if ($project->primaryImage()->exists() && ! $overwrite) {
                 return Response::json([
                     'path' => null, 'size' => null, 'mime_type' => null,
                     'blog_updated' => 'none', 'expertise_updated' => 'none', 'project_updated' => 'skipped',
@@ -134,8 +136,8 @@ class UploadImageFile extends Tool
         $filename = time().'_'.Str::random(10).'.'.$extension;
         $directory = match (true) {
             $expertise !== null => 'images/techstack',
-            $project !== null   => 'project-images',
-            default             => 'blog-images',
+            $project !== null => 'project-images',
+            default => 'blog-images',
         };
         $storagePath = $directory.'/'.$filename;
 
@@ -161,6 +163,7 @@ class UploadImageFile extends Tool
 
         $projectUpdated = 'none';
         if ($project) {
+            $project->images()->where('is_primary', true)->update(['is_primary' => false]);
             $project->images()->create([
                 'name' => $request->get('filename', $filename),
                 'path' => $storagePath,

@@ -25,14 +25,14 @@ test('it has correct fillable attributes', function () {
         'published_at',
     ];
 
-    expect((new Blog())->getFillable())->toBe($fillable);
+    expect((new Blog)->getFillable())->toBe($fillable);
 });
 
 test('it casts attributes correctly', function () {
     $blog = Blog::factory()->create([
         'meta_data' => ['title' => 'Test'],
         'isPrimary' => true,
-        'published_at' => '2023-01-01 12:00:00'
+        'published_at' => '2023-01-01 12:00:00',
     ]);
 
     expect($blog->meta_data)->toBeArray()
@@ -41,7 +41,7 @@ test('it casts attributes correctly', function () {
 });
 
 test('it uses slug as route key', function () {
-    $blog = new Blog();
+    $blog = new Blog;
     expect($blog->getRouteKeyName())->toBe('slug');
 });
 
@@ -49,18 +49,18 @@ test('published scope returns only published blogs', function () {
     // Create published blog
     $publishedBlog = Blog::factory()->create([
         'status' => Blog::STATUS_PUBLISHED,
-        'published_at' => now()->subHour()
+        'published_at' => now()->subHour(),
     ]);
 
     // Create draft blog
     $draftBlog = Blog::factory()->create([
-        'status' => Blog::STATUS_DRAFT
+        'status' => Blog::STATUS_DRAFT,
     ]);
 
     // Create future published blog
     $futureBlog = Blog::factory()->create([
         'status' => Blog::STATUS_PUBLISHED,
-        'published_at' => now()->addHour()
+        'published_at' => now()->addHour(),
     ]);
 
     $publishedBlogs = Blog::published()->get();
@@ -85,7 +85,7 @@ test('draft scope returns only draft blogs', function () {
 test('is published returns true for published past blogs', function () {
     $blog = Blog::factory()->create([
         'status' => Blog::STATUS_PUBLISHED,
-        'published_at' => now()->subHour()
+        'published_at' => now()->subHour(),
     ]);
 
     expect($blog->isPublished())->toBeTrue();
@@ -94,7 +94,7 @@ test('is published returns true for published past blogs', function () {
 test('is published returns false for future published blogs', function () {
     $blog = Blog::factory()->create([
         'status' => Blog::STATUS_PUBLISHED,
-        'published_at' => now()->addHour()
+        'published_at' => now()->addHour(),
     ]);
 
     expect($blog->isPublished())->toBeFalse();
@@ -122,7 +122,7 @@ test('excerpt attribute generates from content when null', function () {
     $longContent = str_repeat('This is a long content. ', 20);
     $blog = Blog::factory()->create([
         'excerpt' => null,
-        'content' => $longContent
+        'content' => $longContent,
     ]);
 
     expect($blog->excerpt)->not->toBeNull()
@@ -155,7 +155,7 @@ test('display image returns absolute URL in featured_image unchanged', function 
 test('display image returns featured image when available', function () {
     $blog = Blog::factory()->create([
         'featured_image' => '/storage/featured.jpg',
-        'content' => '<p>Some content with <img src="/storage/content.jpg"></p>'
+        'content' => '<p>Some content with <img src="/storage/content.jpg"></p>',
     ]);
     $expected = Storage::disk(config('filesystems.default'))->url('featured.jpg');
 
@@ -165,7 +165,7 @@ test('display image returns featured image when available', function () {
 test('display image extracts first image from content', function () {
     $blog = Blog::factory()->create([
         'featured_image' => null,
-        'content' => '<p>Some content</p><img src="/storage/first.jpg" alt="First"><img src="/storage/second.jpg" alt="Second">'
+        'content' => '<p>Some content</p><img src="/storage/first.jpg" alt="First"><img src="/storage/second.jpg" alt="Second">',
     ]);
 
     expect($blog->display_image)->toBe('/storage/first.jpg');
@@ -174,7 +174,7 @@ test('display image extracts first image from content', function () {
 test('display image returns null when no images', function () {
     $blog = Blog::factory()->create([
         'featured_image' => null,
-        'content' => '<p>Just text content without images</p>'
+        'content' => '<p>Just text content without images</p>',
     ]);
 
     expect($blog->display_image)->toBeNull();
@@ -183,10 +183,19 @@ test('display image returns null when no images', function () {
 test('display image handles malformed html', function () {
     $blog = Blog::factory()->create([
         'featured_image' => null,
-        'content' => '<p>Content with <img src="/test.jpg" broken tag'
+        'content' => '<p>Content with <img src="/test.jpg" broken tag',
     ]);
 
     expect($blog->display_image)->toBe('/test.jpg');
+});
+
+test('image url falls back to featured_image when no polymorphic image exists', function () {
+    // Regression: image_url used to only check the polymorphic image relation
+    // (never populated for blogs), so it returned null even when featured_image
+    // was set to a valid, working URL.
+    $blog = Blog::factory()->create(['featured_image' => 'https://r2.humfurie.org/blog-images/foo.jpg']);
+
+    expect($blog->image_url)->toBe('https://r2.humfurie.org/blog-images/foo.jpg');
 });
 
 test('it soft deletes', function () {

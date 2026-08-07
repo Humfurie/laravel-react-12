@@ -37,6 +37,7 @@ class UploadImageFromUrl extends Tool
             'blog_slug' => $schema->string()->description('Blog slug to attach image to (mutually exclusive with expertise_id and project_id)'),
             'expertise_id' => $schema->integer()->description('Expertise ID to attach image to (mutually exclusive with blog_id/blog_slug and project_id, stores in images/techstack/)'),
             'project_id' => $schema->integer()->description('Project ID to attach image to as primary thumbnail (mutually exclusive with blog_id/blog_slug and expertise_id)'),
+            'overwrite' => $schema->boolean()->description('Replace an existing image instead of skipping. Defaults to false.'),
         ];
     }
 
@@ -54,6 +55,7 @@ class UploadImageFromUrl extends Tool
         $expertiseId = $request->get('expertise_id');
         $projectId = $request->get('project_id');
         $hasBlogTarget = $blogId || $blogSlug;
+        $overwrite = (bool) $request->get('overwrite', false);
 
         $exclusiveCount = (int) $hasBlogTarget + (int) (bool) $expertiseId + (int) (bool) $projectId;
         if ($exclusiveCount > 1) {
@@ -70,7 +72,7 @@ class UploadImageFromUrl extends Tool
                 return Response::error('Blog not found.');
             }
 
-            if ($blog->featured_image) {
+            if ($blog->featured_image && ! $overwrite) {
                 return Response::json([
                     'path' => null, 'size' => null, 'mime_type' => null,
                     'blog_updated' => 'skipped', 'expertise_updated' => 'none', 'project_updated' => 'none',
@@ -86,7 +88,7 @@ class UploadImageFromUrl extends Tool
                 return Response::error('Expertise not found.');
             }
 
-            if ($expertise->image) {
+            if ($expertise->image && ! $overwrite) {
                 return Response::json([
                     'path' => null, 'size' => null, 'mime_type' => null,
                     'blog_updated' => 'none', 'expertise_updated' => 'skipped', 'project_updated' => 'none',
@@ -102,7 +104,7 @@ class UploadImageFromUrl extends Tool
                 return Response::error('Project not found.');
             }
 
-            if ($project->primaryImage()->exists()) {
+            if ($project->primaryImage()->exists() && ! $overwrite) {
                 return Response::json([
                     'path' => null, 'size' => null, 'mime_type' => null,
                     'blog_updated' => 'none', 'expertise_updated' => 'none', 'project_updated' => 'skipped',
@@ -137,8 +139,8 @@ class UploadImageFromUrl extends Tool
         $filename = time().'_'.Str::random(10).'.'.$extension;
         $directory = match (true) {
             $expertise !== null => 'images/techstack',
-            $project !== null   => 'project-images',
-            default             => 'blog-images',
+            $project !== null => 'project-images',
+            default => 'blog-images',
         };
         $storagePath = $directory.'/'.$filename;
 
@@ -165,6 +167,7 @@ class UploadImageFromUrl extends Tool
 
         $projectUpdated = 'none';
         if ($project) {
+            $project->images()->where('is_primary', true)->update(['is_primary' => false]);
             $project->images()->create([
                 'name' => $filename,
                 'path' => $storagePath,

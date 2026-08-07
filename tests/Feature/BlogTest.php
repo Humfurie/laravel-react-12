@@ -221,8 +221,8 @@ test('unpublished blog post returns 404 for public access', function () {
 });
 
 test('published blog posts appear in public listing', function () {
-    $publishedBlog = Blog::factory()->published()->create(['tags' => ['portfolio']]);
-    $draftBlog = Blog::factory()->create(['status' => 'draft', 'tags' => ['portfolio']]);
+    $publishedBlog = Blog::factory()->published()->create();
+    Blog::factory()->create(['status' => 'draft']);
 
     $response = $this->get(route('blog.index'))
         ->assertOk();
@@ -230,61 +230,7 @@ test('published blog posts appear in public listing', function () {
     $response->assertInertia(fn ($page) => $page->component('user/blog')
         ->has('blogs.data', 1)
         ->where('blogs.data.0.id', $publishedBlog->id)
-        ->where('category', 'portfolio')
     );
-});
-
-test('blog index defaults to portfolio category', function () {
-    Blog::factory()->published()->create(['tags' => ['portfolio']]);
-    Blog::factory()->published()->create(['tags' => ['personal']]);
-
-    $this->get(route('blog.index'))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('user/blog')
-            ->has('blogs.data', 1)
-            ->where('category', 'portfolio')
-        );
-});
-
-test('blog index filters by personal category', function () {
-    Blog::factory()->published()->create(['tags' => ['portfolio']]);
-    $personalBlog = Blog::factory()->published()->create(['tags' => ['personal']]);
-
-    $this->get(route('blog.index', ['category' => 'personal']))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('user/blog')
-            ->has('blogs.data', 1)
-            ->where('blogs.data.0.id', $personalBlog->id)
-            ->where('category', 'personal')
-        );
-});
-
-test('blog with both tags appears in both categories', function () {
-    $bothBlog = Blog::factory()->published()->create(['tags' => ['portfolio', 'personal']]);
-
-    $this->get(route('blog.index', ['category' => 'portfolio']))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->has('blogs.data', 1)
-            ->where('blogs.data.0.id', $bothBlog->id)
-        );
-
-    $this->get(route('blog.index', ['category' => 'personal']))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->has('blogs.data', 1)
-            ->where('blogs.data.0.id', $bothBlog->id)
-        );
-});
-
-test('blog without matching category tag does not appear', function () {
-    Blog::factory()->published()->create(['tags' => ['personal']]);
-
-    $this->get(route('blog.index', ['category' => 'portfolio']))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->has('blogs.data', 0)
-        );
 });
 
 test('home page shows primary and latest blogs with stats', function () {
