@@ -34,7 +34,7 @@ declare global {
     }
 }
 
-// Track page views on Inertia navigation
+// Track page views on Inertia navigation (SPA transitions)
 router.on('navigate', () => {
     if (window.gtag) {
         window.gtag('event', 'page_view', {

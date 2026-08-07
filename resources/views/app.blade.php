@@ -107,9 +107,7 @@
             }
 
             gtag('js', new Date());
-            gtag('config', '{{ config('services.google_analytics.measurement_id') }}', {
-                'send_page_view': false  // We'll handle page views manually for Inertia
-            });
+            gtag('config', '{{ config('services.google_analytics.measurement_id') }}');
         </script>
     @endif
 
