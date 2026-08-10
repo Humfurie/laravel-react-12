@@ -159,7 +159,24 @@ test('meta data is properly stored and retrieved', function () {
         ->and($blog->meta_data['meta_keywords'])->toBe($metaData['meta_keywords']);
 });
 
-test('featured image upload uses storage prefix', function () {
+/**
+ * Storage::fake() drops the disk's real 'url' config and always resolves to
+ * "/storage/..." regardless of driver, which masks the difference between the
+ * legacy hardcoded '/storage/' string and a properly disk-resolved URL. Faking
+ * with an explicit non-local 'url' mirrors how a real remote disk (e.g. R2)
+ * behaves in production, so these tests can actually tell the two apart.
+ */
+function fakeRemoteDisk(): string
+{
+    $url = 'https://cdn.test.example';
+    Storage::fake(config('filesystems.default'), ['url' => $url]);
+
+    return $url;
+}
+
+test('featured image upload stores resolved disk url', function () {
+    $diskUrl = fakeRemoteDisk();
+
     $blogData = [
         'title' => 'Test Blog With Image',
         'content' => '<p>Content</p>',
@@ -172,16 +189,19 @@ test('featured image upload uses storage prefix', function () {
         ->assertRedirect();
 
     $blog = Blog::first();
+
     expect($blog->featured_image)
-        ->toStartWith('/storage/')
-        ->not->toContain('minio.humfurie.org')
+        ->toStartWith($diskUrl.'/')
+        ->not->toStartWith('/storage/')
         ->toContain('blog-images/');
 
     // Verify file was stored
-    Storage::assertExists(str_replace('/storage/', '', $blog->featured_image));
+    Storage::assertExists(Str::after($blog->featured_image, $diskUrl.'/'));
 });
 
 test('featured image update replaces old image', function () {
+    $diskUrl = fakeRemoteDisk();
+
     $blog = Blog::factory()->create([
         'featured_image' => '/storage/blog-images/old-image.jpg',
         'isPrimary' => false,
@@ -202,8 +222,10 @@ test('featured image update replaces old image', function () {
         ->assertRedirect();
 
     $blog->refresh();
+
     expect($blog->featured_image)
-        ->toStartWith('/storage/')
+        ->toStartWith($diskUrl.'/')
+        ->not->toStartWith('/storage/')
         ->toContain('blog-images/')
         ->not->toBe('/storage/blog-images/old-image.jpg');
 
@@ -211,7 +233,34 @@ test('featured image update replaces old image', function () {
     Storage::assertMissing('blog-images/old-image.jpg');
 });
 
-test('inline image upload returns storage prefix url', function () {
+test('featured image update replaces old image stored as resolved disk url', function () {
+    $diskUrl = fakeRemoteDisk();
+
+    Storage::put('blog-images/old-image.jpg', 'old content');
+
+    $blog = Blog::factory()->create([
+        'featured_image' => $diskUrl.'/blog-images/old-image.jpg',
+        'isPrimary' => false,
+    ]);
+
+    $updateData = [
+        'title' => $blog->title,
+        'content' => $blog->content,
+        'status' => $blog->status,
+        'featured_image_file' => UploadedFile::fake()->image('new-image.jpg'),
+    ];
+
+    $this->actingAs($this->user)
+        ->put(route('blogs.update', $blog->slug), $updateData)
+        ->assertRedirect();
+
+    // Old image should be deleted even though it was stored as a resolved disk url
+    Storage::assertMissing('blog-images/old-image.jpg');
+});
+
+test('inline image upload returns resolved disk url', function () {
+    $diskUrl = fakeRemoteDisk();
+
     $response = $this->actingAs($this->user)
         ->post(route('blogs.upload-image'), [
             'image' => UploadedFile::fake()->image('inline.jpg'),
@@ -220,10 +269,57 @@ test('inline image upload returns storage prefix url', function () {
         ->assertJson(['success' => true]);
 
     $url = $response->json('url');
+
     expect($url)
-        ->toStartWith('/storage/')
-        ->not->toContain('minio.humfurie.org')
+        ->toStartWith($diskUrl.'/')
+        ->not->toStartWith('/storage/')
         ->toContain('blog-images/');
+});
+
+test('normalize command rewrites legacy storage prefixed featured image to resolved disk url', function () {
+    $diskUrl = fakeRemoteDisk();
+
+    $blog = Blog::factory()->create([
+        'featured_image' => '/storage/blog-images/legacy.jpg',
+        'isPrimary' => false,
+    ]);
+
+    $this->artisan('blogs:normalize-image-urls')
+        ->assertSuccessful();
+
+    $blog->refresh();
+    expect($blog->featured_image)->toBe($diskUrl.'/blog-images/legacy.jpg');
+});
+
+test('normalize command dry run does not modify database', function () {
+    fakeRemoteDisk();
+
+    $blog = Blog::factory()->create([
+        'featured_image' => '/storage/blog-images/legacy.jpg',
+        'isPrimary' => false,
+    ]);
+
+    $this->artisan('blogs:normalize-image-urls', ['--dry-run' => true])
+        ->assertSuccessful();
+
+    $blog->refresh();
+    expect($blog->featured_image)->toBe('/storage/blog-images/legacy.jpg');
+});
+
+test('normalize command rewrites legacy storage prefixed images embedded in content', function () {
+    $diskUrl = fakeRemoteDisk();
+
+    $blog = Blog::factory()->create([
+        'content' => '<p>intro</p><img src="/storage/blog-images/inline-legacy.jpg" alt="">',
+        'isPrimary' => false,
+    ]);
+
+    $this->artisan('blogs:normalize-image-urls')
+        ->assertSuccessful();
+
+    $blog->refresh();
+    expect($blog->content)->toContain($diskUrl.'/blog-images/inline-legacy.jpg')
+        ->not->toContain('/storage/blog-images/inline-legacy.jpg');
 });
 
 test('migration command converts minio urls to storage paths', function () {

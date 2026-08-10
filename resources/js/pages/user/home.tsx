@@ -23,6 +23,7 @@ interface Blog {
     excerpt: string | null;
     status: 'draft' | 'published' | 'private';
     featured_image: string | null;
+    display_image: string | null;
     meta_data: {
         meta_title?: string;
         meta_description?: string;
@@ -124,9 +125,9 @@ function BlogCard({ blog, featured = false }: { blog: Blog; featured?: boolean }
         >
             {/* Thumbnail */}
             <div className="relative aspect-[16/9] overflow-hidden bg-[#F3F1EC] sm:aspect-auto sm:min-h-[260px] dark:bg-[#0F1A15]">
-                {blog.featured_image ? (
+                {blog.display_image ? (
                     <img
-                        src={blog.featured_image}
+                        src={blog.display_image}
                         alt={blog.title}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                         loading="lazy"

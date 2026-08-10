@@ -85,7 +85,7 @@ class BlogController extends Controller
                 return back()->withErrors(['featured_image_file' => 'Failed to upload image. Please try again.']);
             }
 
-            $validated['featured_image'] = '/storage/'.$path;
+            $validated['featured_image'] = Storage::disk(config('filesystems.default'))->url($path);
         }
 
         // Generate slug if not provided
@@ -146,7 +146,7 @@ class BlogController extends Controller
      */
     private function deleteOldImage(string $imageUrl): void
     {
-        // Handle /storage/ proxy path format
+        // Handle /storage/ proxy path format (legacy)
         if (str_starts_with($imageUrl, '/storage/blog-images/')) {
             $path = str_replace('/storage/', '', $imageUrl);
 
@@ -174,6 +174,23 @@ class BlogController extends Controller
             }
 
             Storage::disk(config('filesystems.default'))->delete($extractedPath);
+
+            return;
+        }
+
+        // Handle the current disk's resolved public URL (e.g. R2)
+        $diskUrl = rtrim(Storage::disk(config('filesystems.default'))->url(''), '/');
+        if ($diskUrl !== '' && str_starts_with($imageUrl, $diskUrl.'/blog-images/')) {
+            $path = Str::after($imageUrl, $diskUrl.'/');
+
+            // Prevent path traversal attacks
+            if (str_contains($path, '..') || ! str_starts_with($path, 'blog-images/')) {
+                Log::warning('Potential path traversal attempt blocked', ['url' => $imageUrl]);
+
+                return;
+            }
+
+            Storage::disk(config('filesystems.default'))->delete($path);
 
             return;
         }
@@ -213,7 +230,7 @@ class BlogController extends Controller
 
             // Store old image path to delete after successful transaction
             $oldImage = $blog->featured_image;
-            $validated['featured_image'] = '/storage/'.$path;
+            $validated['featured_image'] = Storage::disk(config('filesystems.default'))->url($path);
         }
 
         // Generate slug if not provided
@@ -299,7 +316,7 @@ class BlogController extends Controller
 
             return response()->json([
                 'success' => true,
-                'url' => '/storage/'.$path,
+                'url' => Storage::disk(config('filesystems.default'))->url($path),
                 'path' => $path,
             ]);
         }
