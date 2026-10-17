@@ -34,7 +34,7 @@ services:
       - 'traefik.enable=true'
       - 'traefik.docker.network=proxy'
       - 'traefik.http.services.humphrey-portfolio.loadbalancer.server.port=80'
-      - 'traefik.http.routers.humphrey-portfolio.rule=Host(`humphrey.humfurie.org`)'
+      - 'traefik.http.routers.humphrey-portfolio.rule=Host(`${APP_DOMAIN:-humfurie.org}`)'
       - 'traefik.http.routers.humphrey-portfolio.entrypoints=websecure'
       - 'traefik.http.routers.humphrey-portfolio.tls=true'
       - 'traefik.http.routers.humphrey-portfolio.tls.certresolver=letsencrypt'
